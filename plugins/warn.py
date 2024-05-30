@@ -1,32 +1,17 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-"""
-✘ Commands Available
 
-•`{i}warn <reply to user> <reason>`
-    Gives Warn.
+from . import get_help
 
-•`{i}resetwarn <reply to user>`
-    To reset All Warns.
-
-•`{i}warns <reply to user>`
-   To Get List of Warnings of a user.
-
-•`{i}setwarn <warn count> | <ban/mute/kick>`
-   Set Number in warn count for warnings
-   After putting " | " mark put action like ban/mute/kick
-   Its Default 3 kick
-   Example : `setwarn 5 | mute`
-
-"""
+__doc__ = get_help("help_warn")
 
 from pyUltroid.dB.warn_db import add_warn, reset_warn, warns
 
-from . import eor, get_string, inline_mention, udB, ultroid_cmd
+from . import eor, inline_mention, udB, ultroid_cmd
 
 
 @ultroid_cmd(
@@ -166,15 +151,21 @@ async def twarns(e):
 async def warnset(e):
     ok = e.pattern_match.group(1).strip()
     if not ok:
-        return await e.eor("stuff")
+        return await e.eor("Invalid format. Correct usage: .setwarns <number>|<action>")
     if "|" in ok:
         try:
-            number, action = int(ok.split()[0]), ok.split()[1]
-        except BaseException:
-            return await e.eor(get_string("schdl_2"), time=5)
-        if ("ban" or "kick" or "mute") not in action:
-            return await e.eor("`Only mute / ban / kick option suported`", time=5)
+            number, action = ok.split("|")
+            number = int(number.strip())
+            action = action.strip()
+        except ValueError:
+            return await e.eor(
+                "Invalid format. Correct usage: .setwarns <number>|<action>", time=5
+            )
+        if action not in ["ban", "mute", "kick"]:
+            return await e.eor("Only mute / ban / kick options are supported", time=5)
         udB.set_key("SETWARN", f"{number} {action}")
-        await e.eor(f"Done Your Warn Count is now {number} and Action is {action}")
+        await e.eor(f"Done. Your Warn Count is now {number} and Action is {action}")
     else:
-        await e.eor(get_string("schdl_2"), time=5)
+        await e.eor(
+            "Invalid format. Correct usage: .setwarns <number>|<action>", time=5
+        )

@@ -1,33 +1,13 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-"""
-✘ Commands Available -
 
-At Night it will turn off everyone permission to send message in  an all groups which you added via `{i}addnight`
-And Turn On auto at morning
+from . import get_help
 
-• `{i}addnm`
-   Add NightMode
-   To Add Group To Auto Night Mode.
-
-• `{i}remnm`
-   Remove NightMode
-   To remove Group From Auto Night Mode
-
-• `{i}listnm`
-   List NightMode
-   To Get All List of Groups where NightMode Active.
-
-• `{i}nmtime <close hour> <close min> <open hour> <open min>`
-   NightMode Time
-   By Default Its close 00:00 , open 07:00
-   Use 24hr format
-   Ex- `nmtime 01 00 06 30`
-"""
+__doc__ = get_help("help_nightmode")
 
 from . import LOGS
 
@@ -117,7 +97,9 @@ async def open_grp():
                     ),
                 )
             )
-            await ultroid_bot.send_message(chat, "**NightMode Off**\n\nGroup Opened 🥳.")
+            await ultroid_bot.send_message(
+                chat, "**NightMode Off**\n\nGroup Opened 🥳."
+            )
         except Exception as er:
             LOGS.info(er)
 

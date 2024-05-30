@@ -1,19 +1,13 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-"""
-✘ Commands Available -
 
-•`{i}addprofanity`
-   If someone sends bad word in a chat, Then bot will delete that message.
+from . import get_help
 
-•`{i}remprofanity`
-   From chat from Profanity list.
-
-"""
+__doc__ = get_help("help_profanityfilter")
 
 from pyUltroid.dB.nsfw_db import profan_chat, rem_profan
 

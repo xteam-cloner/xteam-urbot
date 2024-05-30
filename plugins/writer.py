@@ -1,19 +1,13 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 
-"""
-✘ Commands Available -
+from . import get_help
 
-• `{i}write <text or reply to text>`
-   It will write on a paper.
-
-• `{i}image <text or reply to html or any doc file>`
-   Write a image from html or any text.
-"""
+__doc__ = get_help("help_writer")
 
 import os
 

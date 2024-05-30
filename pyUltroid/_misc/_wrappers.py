@@ -1,5 +1,5 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -52,7 +52,7 @@ async def eod(event, text=None, **kwargs):
 async def _try_delete(event):
     try:
         return await event.delete()
-    except (MessageDeleteForbiddenError):
+    except MessageDeleteForbiddenError:
         pass
     except BaseException as er:
         from . import LOGS

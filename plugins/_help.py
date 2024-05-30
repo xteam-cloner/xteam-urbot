@@ -1,5 +1,5 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -108,6 +108,7 @@ async def _help(ult):
             await ult.eor("Error 🤔 occured.")
     else:
         try:
+            load = await ult.eor("✨")
             results = await ult.client.inline_query(asst.me.username, "ultd")
         except BotMethodInvalidError:
             z = []
@@ -132,5 +133,5 @@ async def _help(ult):
             )
         except BotInlineDisabledError:
             return await ult.eor(get_string("help_3"))
+        await load.delete()
         await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
-        await ult.delete()

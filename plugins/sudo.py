@@ -1,21 +1,13 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-"""
-✘ Commands Available -
 
-• `{i}addsudo`
-    Add Sudo Users by replying to user or using <space> separated userid(s)
+from . import get_help
 
-• `{i}delsudo`
-    Remove Sudo Users by replying to user or using <space> separated userid(s)
-
-• `{i}listsudo`
-    List all sudo users.
-"""
+__doc__ = get_help("help_sudo")
 
 from telethon.tl.types import User
 

@@ -1,5 +1,5 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -7,6 +7,7 @@
 
 import os
 import sys
+
 import telethonpatch
 from .version import __version__
 
@@ -41,6 +42,10 @@ if run_as_module:
 
     udB = UltroidDB()
     update_envs()
+
+    from .dB.base import Keys as Keyz
+
+    Keys = Keyz(udB)
 
     LOGS.info(f"Connecting to {udB.name}...")
     if udB.ping():
@@ -99,7 +104,7 @@ if run_as_module:
     DUAL_HNDLR = udB.get_key("DUAL_HNDLR") or "/"
     SUDO_HNDLR = udB.get_key("SUDO_HNDLR") or HNDLR
 else:
-    print("pyUltroid 2022 © TeamUltroid")
+    print("pyUltroid 2021-2024 © TeamUltroid")
 
     from logging import getLogger
 

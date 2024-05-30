@@ -1,5 +1,5 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -127,7 +127,7 @@ async def google_search(query):
         "Connection": "keep-alive",
         "User-Agent": choice(some_random_headers),
     }
-    con = await async_searcher(_base + "/search?q=" + query, headers=headers)
+    con = await async_searcher(f"{_base}/search?q={query}", headers=headers)
     soup = BeautifulSoup(con, "html.parser")
     result = []
     pdata = soup.find_all("a", href=re.compile("url="))
@@ -135,14 +135,21 @@ async def google_search(query):
         if not data.find("div"):
             continue
         try:
-            result.append(
-                {
-                    "title": data.find("div").text,
-                    "link": data["href"].split("&url=")[1].split("&ved=")[0],
-                    "description": data.find_all("div")[-1].text,
-                }
-            )
-        except BaseException as er:
+            href = data["href"]
+            url_start_index = href.find("&url=")
+            if url_start_index != -1:
+                url_start_index += len("&url=")
+                url_end_index = href.find("&ved=", url_start_index)
+                if url_end_index != -1:
+                    link = href[url_start_index:url_end_index]
+                    result.append(
+                        {
+                            "title": data.find("div").text,
+                            "link": link,
+                            "description": data.find_all("div")[-1].text,
+                        }
+                    )
+        except Exception as er:
             LOGS.exception(er)
     return result
 
@@ -193,7 +200,7 @@ async def unsplashsearch(query, limit=None, shuf=True):
     all_ = res.find_all("img", srcset=re.compile("images.unsplash.com/photo"))
     if shuf:
         shuffle(all_)
-    return list(map(lambda e: e['src'], all_[:limit]))
+    return list(map(lambda e: e["src"], all_[:limit]))
 
 
 # ---------------- Random User Gen ----------------
@@ -293,7 +300,7 @@ class Quotly:
 
     async def _format_quote(self, event, reply=None, sender=None, type_="private"):
         async def telegraph(file_):
-            file = file_ + ".png"
+            file = f"{file_}.png"
             Image.open(file_).save(file, "PNG")
             files = {"file": open(file, "rb").read()}
             uri = (
@@ -335,6 +342,9 @@ class Quotly:
                     pass
         if sender:
             name = get_display_name(sender)
+            if hasattr(sender, "photo"):
+                file_ = await event.client.download_profile_photo(sender)
+                uri = await telegraph(file_)
             if hasattr(sender, "last_name"):
                 last_name = sender.last_name
         entities = []
@@ -354,7 +364,7 @@ class Quotly:
                     text += f" in {rep.game.title}"
             elif isinstance(event.action, types.MessageActionPinMessage):
                 text = "pinned a message."
-            # TODO: Are there any more events with sender?
+
         message = {
             "entities": entities,
             "chatId": id_,
@@ -369,12 +379,14 @@ class Quotly:
                 "title": name,
                 "name": name or "Deleted Account",
                 "type": type_,
+                "photo": {"url": uri},
             },
             "text": text,
             "replyMessage": reply,
         }
         if event.document and event.document.thumbs:
             file_ = await event.download_media(thumb=-1)
+            # file_ = await event.client.download_profile_photo(sender)
             uri = await telegraph(file_)
             message["media"] = {"url": uri}
 

@@ -1,24 +1,14 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-"""
-✘ Commands Available -
 
-• `{i}meaning <word>`
-    Get the meaning of the word.
+from . import get_help
 
-• `{i}synonym <word>`
-    Get all synonyms.
+__doc__ = get_help("help_words")
 
-• `{i}antonym <word>`
-    Get all antonyms.
-
-• `{i}ud <word>`
-    Fetch word defenition from urbandictionary.
-"""
 import io
 
 from pyUltroid.fns.misc import get_synonyms_or_antonyms

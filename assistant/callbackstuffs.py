@@ -1,5 +1,5 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -174,14 +174,21 @@ _buttons = {
     "apiset": {
         "text": get_string("ast_1"),
         "buttons": [
-            [Button.inline("Remove.bg API", data="abs_rmbg")],
-            [Button.inline("DEEP API", data="abs_dapi")],
-            [Button.inline("OCR API", data="abs_oapi")],
+            [
+                Button.inline("RMBG API", data="abs_rmbg"),
+                Button.inline("DEEP API", data="abs_dapi"),
+                Button.inline("OCR API", data="abs_oapi"),
+            ],
+            [
+                Button.inline("OᴘᴇɴAI API", data="abs_openapi"),
+                Button.inline("🌀ʊʄ⊕ք🌀", data="abs_uapi"),
+                Button.inline("Google API", data="abs_gapi"),
+            ],
+            [Button.inline("OpenWeather API", data="abs_openwapi")],
             [Button.inline("« Back", data="setter")],
         ],
     },
 }
-
 _convo = {
     "rmbg": {
         "var": "RMBG_API",
@@ -192,13 +199,31 @@ _convo = {
     "dapi": {
         "var": "DEEP_AI",
         "name": "Deep AI Api Key",
-        "text": "Get Your Deep Api from deepai.org and send here.",
+        "text": "Get Your Deep Api from deepai.org and send here.\n\n /cancel to cancel",
         "back": "cbs_apiset",
     },
     "oapi": {
         "var": "OCR_API",
         "name": "Ocr Api Key",
-        "text": "Get Your OCR api from ocr.space and send that Here.",
+        "text": "Get Your OCR api from ocr.space and send that Here.\n\n /cancel to cancel",
+        "back": "cbs_apiset",
+    },
+    "openapi": {
+        "var": "OPENAI_API",
+        "name": "OPENAI API Key",
+        "text": "Visit openai.com for an OPENAI Api key!\n\n /cancel to cancel",
+        "back": "cbs_apiset",
+    },
+    "uapi": {
+        "var": "UFOPAPI",
+        "name": "UFoP API Key",
+        "text": "Contact 🌀ʊʄ⊕ք🌀 or Visit @PerthUnity_Bot/@UFoPInfo Support Group\n\n /cancel to cancel",
+        "back": "cbs_apiset",
+    },
+    "gapi": {
+        "var": "GOOGLEAPI",
+        "name": "Google Api Key",
+        "text": "Get Your GOOGLE API from https://makersuite.google.com/app/apikey \n\n /cancel to cancel",
         "back": "cbs_apiset",
     },
     "pmlgg": {
@@ -556,7 +581,9 @@ async def emoji(event):
     var = "EMOJI_IN_HELP"
     name = f"Emoji in `{HNDLR}help` menu"
     async with event.client.conversation(pru) as conv:
-        await conv.send_message("Send emoji u want to set 🙃.\n\nUse /cancel to cancel.")
+        await conv.send_message(
+            "Send emoji u want to set 🙃.\n\nUse /cancel to cancel."
+        )
         response = conv.wait_event(events.NewMessage(chats=pru))
         response = await response
         themssg = response.message.message

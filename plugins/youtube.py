@@ -1,24 +1,14 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-"""
-✘ Commands Available -
 
-• `{i}yta <(youtube/any) link>`
-   Download audio from the link.
+from . import get_help
 
-• `{i}ytv <(youtube/any) link>`
-   Download video  from the link.
+__doc__ = get_help("help_youtube")
 
-• `{i}ytsa <(youtube) search query>`
-   Search and download audio from youtube.
-
-• `{i}ytsv <(youtube) search query>`
-   Search and download video from youtube.
-"""
 from pyUltroid.fns.ytdl import download_yt, get_yt_link
 
 from . import get_string, requests, ultroid_cmd
@@ -80,6 +70,16 @@ async def download_from_youtube_(event):
         if not url:
             return await xx.edit(get_string("unspl_1"))
         await xx.eor(get_string("youtube_8"))
+    elif opt == "sc":
+        ytd["format"] = "bestaudio"
+        ytd["outtmpl"] = "%(id)s.mp3"
+        url = event.pattern_match.group(2)
+        if not url:
+            return await xx.eor("Please provide a SoundCloud link.")
+        try:
+            requests.get(url)
+        except BaseException:
+            return await xx.eor("Invalid SoundCloud link.")
     else:
         return
     await download_yt(xx, url, ytd)

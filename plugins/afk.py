@@ -1,5 +1,5 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -17,6 +17,7 @@ from telethon import events
 
 from pyUltroid.dB.afk_db import add_afk, del_afk, is_afk
 from pyUltroid.dB.base import KeyManager
+from pyUltroid.fns.custom_markdown import CustomMarkdown
 
 from . import (
     LOG_CHANNEL,
@@ -55,6 +56,7 @@ async def set_afk(event):
             else:
                 media = reply.file.id
     await event.eor("`Done`", time=2)
+    ultroid_bot.parse_mode = CustomMarkdown()
     add_afk(text, media_type, media)
     ultroid_bot.add_handler(remove_afk, events.NewMessage(outgoing=True))
     ultroid_bot.add_handler(
@@ -157,6 +159,7 @@ async def on_afk(event):
 
 
 if udB.get_key("AFK_DB"):
+    ultroid_bot.parse_mode = CustomMarkdown()
     ultroid_bot.add_handler(remove_afk, events.NewMessage(outgoing=True))
     ultroid_bot.add_handler(
         on_afk,

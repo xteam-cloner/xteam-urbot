@@ -1,5 +1,5 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -118,6 +118,11 @@ class Config((object)):
         PM_DATA = os.environ.get("PM_DATA", "ENABLE")
         DEEP_AI = os.environ.get("DEEP_AI", None)
         TAG_LOG = os.environ.get("TAG_LOG", None)
+        UFOPAPI = os.environ.get(
+            "UFOPAPI", "h32dfKsl8pQUxsNftkogIuDF32pYTwKluIY8emI1Hs"
+        )
+        GOOGLEAPI = os.environ.get("GOOGLEAPI", None)
+        BARDAPI = os.environ.get("BARDAPI", None)
 
     else:
         DB_URI = None

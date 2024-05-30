@@ -1,6 +1,16 @@
-# Important Requirements here.
+# Important Requirements here
 
-https://github.com/TeamUltroid/Telethon/archive/ultroid.zip
+
+
+
+
+
+
+
+
 https://github.com/New-dev0/Telethon-Patch/archive/main.zip
 python-decouple
 python-dotenv
+pymongo
+pyshorteners
+openai==0.28.0

@@ -1,41 +1,14 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2024 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-"""
-✘ Commands Available -
 
-• `{i}gban <reply user/ username>`
-• `{i}ungban`
-    Ban/Unban Globally.
+from . import get_help
 
-• `{i}gstat <reply to user/userid/username>`
-   Check if user is GBanned.
+__doc__ = get_help("help_globaltools")
 
-• `{i}listgban` : List all GBanned users.
-
-• `{i}gmute` | `{i}ungmute` <reply user/ username>
-    Mute/UnMute Globally.
-
-• `{i}gkick <reply/username>` `Globally Kick User`
-• `{i}gcast <text/reply>` `Globally Send msg in all grps`
-
-• `{i}gadmincast <text/reply>` `Globally broadcast in your admin chats`
-• `{i}gucast <text/reply>` `Globally send msg in all pm users`
-
-• `{i}gblacklist <chat id/username/nothing (for current chat)`
-   Add chat to blacklist and ignores global broadcast.
-• `{i}ungblacklist` `Remove the chat from blacklist.`
-
-• `{i}gpromote <reply to user> <channel/group/all> <rank>`
-    globally promote user where you are admin
-    - Set whether To promote only in groups/channels/all.
-    Eg- `gpromote group boss` ~ promotes user in all grps.
-        `gpromote @username all sar` ~ promote the user in all group & channel
-• `{i}gdemote` - `demote user globally`
-"""
 import asyncio
 import os
 
@@ -55,6 +28,7 @@ from pyUltroid.dB.gban_mute_db import (
     ungban,
     ungmute,
 )
+from pyUltroid.fns.custom_markdown import CustomMarkdown
 from pyUltroid.fns.tools import create_tl_btn, format_btn, get_msg_button
 
 from . import (
@@ -344,9 +318,11 @@ async def _(e):
     ungban(userid)
     if isinstance(peer, User):
         await e.client(UnblockRequest(userid))
-    await xx.edit(
-        f"`Ungbaned` {name} in {chats} `chats.\nRemoved from gbanwatch.`",
+    ungb_msg = (
+        f"#UNGBAN\n`Ungbanned` {name} in {chats} `chats.\nRemoved from gbanwatch.`"
     )
+    await xx.edit(ungb_msg)
+    await asst.send_message(LOG_CHANNEL, ungb_msg)
 
 
 @ultroid_cmd(pattern="gban( (.*)|$)", fullsudo=True)
@@ -424,10 +400,11 @@ async def _(e):
     gban(userid, reason)
     if isinstance(user, User):
         await e.client(BlockRequest(userid))
-    gb_msg = f"**#Gbanned** {name} `in {chats} chats and added to gbanwatch!`"
+    gb_msg = f"#GBAN\n**Gbanned** {name} `in {chats} chats and added to gbanwatch!`"
     if reason:
         gb_msg += f"\n**Reason** : {reason}"
     await xx.edit(gb_msg)
+    await asst.send_message(LOG_CHANNEL, gb_msg)
 
 
 @ultroid_cmd(pattern="g(admin|)cast( (.*)|$)", fullsudo=True)
@@ -481,7 +458,8 @@ async def gcast(event):
                             reply=False,
                         )
                     else:
-                        await event.client.send_message(
+                        ultroid_bot.parse_mode = CustomMarkdown()
+                        await ultroid_bot.send_message(
                             chat, msg, file=reply.media if reply else None
                         )
                     done += 1
@@ -499,7 +477,8 @@ async def gcast(event):
                                 reply=False,
                             )
                         else:
-                            await event.client.send_message(
+                            ultroid_bot.parse_mode = CustomMarkdown()
+                            await ultroid_bot.send_message(
                                 chat, msg, file=reply.media if reply else None
                             )
                         done += 1
@@ -556,7 +535,8 @@ async def gucast(event):
                             reply=False,
                         )
                     else:
-                        await event.client.send_message(
+                        ultroid_bot.parse_mode = CustomMarkdown()
+                        await ultroid_bot.send_message(
                             chat, msg, file=reply.media if reply else None
                         )
                     done += 1
