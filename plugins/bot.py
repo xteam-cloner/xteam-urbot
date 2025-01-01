@@ -23,8 +23,7 @@ from telethon.errors.rpcerrorlist import (
 
 from pyUltroid.version import __version__ as UltVer
 
-from . import HOSTED_ON, LOGS
-
+from . import HOSTED_ON, LOGS, QUOTES
 try:
     from git import Repo
 except ImportError:
@@ -38,6 +37,8 @@ from . import (
     LOGS,
     OWNER_NAME,
     ULTROID_IMAGES,
+    ALIVE_TEXT,
+    ALIVE_NAME,
     Button,
     Carbon,
     Telegraph,
@@ -112,7 +113,8 @@ async def lol(ult):
     if isinstance(pic, list):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    header = udB.get_key("ALIVE_TEXT") or get_string("bot_1")
+    an=choice(ALIVE_NAME)
+    header=choice(QUOTES)
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
@@ -121,6 +123,7 @@ async def lol(ult):
         kk = f"<a href={rep}>{y}</a>"
         parse = "html"
         als = in_alive.format(
+            an,
             header,
             f"{ultroid_version} [{HOSTED_ON}]",
             UltVer,
@@ -134,6 +137,7 @@ async def lol(ult):
     else:
         parse = "md"
         als = (get_string("alive_1")).format(
+            an,
             header,
             OWNER_NAME,
             f"{ultroid_version} [{HOSTED_ON}]",
@@ -178,17 +182,7 @@ async def lol(ult):
         link_preview=False,
         buttons=buttons if inline else None,
     )
-
-
-@ultroid_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
-async def _(event):
-    start = time.time()
-    x = await event.eor("Pong !")
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    await x.edit(get_string("ping").format(end, uptime))
-
-
+    
 @ultroid_cmd(
     pattern="cmds$",
 )
@@ -231,7 +225,7 @@ async def shutdownbot(ult):
 )
 async def _(event):
     opt = event.pattern_match.group(1).strip()
-    file = f"ultroid{sys.argv[-1]}.log" if len(sys.argv) > 1 else "ultroid.log"
+    file = f"ultroid{sys.argv[-1]}.log" if len(sys.argv) > 1 else "userbot.log"
     if opt == "heroku":
         await heroku_logs(event)
     elif opt == "carbon" and Carbon:
@@ -239,16 +233,16 @@ async def _(event):
         with open(file, "r") as f:
             code = f.read()[-2500:]
         file = await Carbon(
-            file_name="ultroid-logs",
+            file_name="userbot-logs",
             code=code,
             backgroundColor=choice(ATRA_COL),
         )
         if isinstance(file, dict):
             await event.eor(f"`{file}`")
             return
-        await event.reply("**Ultroid Logs.**", file=file)
+        await event.reply("**userbot Logs.**", file=file)
     elif opt == "open":
-        with open("ultroid.log", "r") as f:
+        with open("userbot.log", "r") as f:
             file = f.read()[-4000:]
         return await event.eor(f"`{file}`")
     else:
@@ -262,7 +256,7 @@ async def inline_alive(ult):
     if isinstance(pic, list):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    header = udB.get_key("ALIVE_TEXT") or get_string("bot_1")
+    header=choice(ALIVE_TEXT)
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
@@ -292,7 +286,7 @@ async def inline_alive(ult):
                     await builder.document(
                         pic,
                         title="Inline Alive",
-                        description="@TeamUltroid",
+                        description="@xteam-cloner",
                         parse_mode="html",
                         buttons=buttons,
                     )
@@ -353,4 +347,4 @@ async def updava(event):
         caption="• **Update Available** •",
         force_document=False,
         buttons=Button.inline("Changelogs", data="changes"),
-    )
+            )

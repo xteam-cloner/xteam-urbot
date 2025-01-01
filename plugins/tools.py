@@ -81,7 +81,7 @@ from . import humanbytes as hb
 from . import inline_mention, is_url_ok, json_parser, mediainfo, ultroid_cmd
 
 
-@ultroid_cmd(pattern="tr( (.*)|$)", manager=True)
+"""@ultroid_cmd(pattern="tr( (.*)|$)", manager=True)
 async def _(event):
     input = event.pattern_match.group(1).strip().split(maxsplit=1)
     txt = input[1] if len(input) > 1 else None
@@ -104,7 +104,7 @@ async def _(event):
     except Exception as exc:
         LOGS.exception(exc)
         await event.eor(str(exc), time=5)
-
+"""
 
 @ultroid_cmd(
     pattern="id( (.*)|$)",
@@ -338,7 +338,7 @@ async def _(e):
         await e.delete()
 
 
-@ultroid_cmd(
+"""@ultroid_cmd(
     pattern="sg( (.*)|$)",
 )
 async def lastname(steal):
@@ -387,7 +387,7 @@ async def lastname(steal):
             )
     except AsyncTimeout:
         await lol.edit("Error: @SangMataInfo_bot is not responding!.")
-
+"""
 
 @ultroid_cmd(pattern="webshot( (.*)|$)")
 async def webss(event):

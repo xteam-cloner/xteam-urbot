@@ -9,7 +9,7 @@ import re
 import time
 from datetime import datetime
 from os import remove
-
+import resources
 from git import Repo
 from telethon import Button
 from telethon.tl.types import InputWebDocument, Message
@@ -50,20 +50,19 @@ upage = 0
 
 SUP_BUTTONS = [
     [
-        Button.url("• Repo •", url="https://github.com/TeamUltroid/Ultroid"),
-        Button.url("• Support •", url="t.me/UltroidSupportChat"),
+        Button.url("• Repo •", url="https://github.com/xteam-cloner/Userbot"),
     ],
 ]
 
 # --------------------BUTTONS--------------------#
 
 
-@in_pattern(owner=True, func=lambda x: not x.text)
+@in_pattern(owner=False, func=lambda x: not x.text)
 async def inline_alive(o):
-    TLINK = inline_pic() or "https://graph.org/file/74d6259983e0642923fdb.jpg"
-    MSG = "• **Ultroid Userbot •**"
+    TLINK = inline_pic()
+    MSG = "**What are you looking for?**"
     WEB0 = InputWebDocument(
-        "https://graph.org/file/acd4f5d61369f74c5e7a7.jpg", 0, "image/jpg", []
+        "https://telegra.ph/file/cad7038fe82e47f79c609.jpg", 0, "image/jpg", []
     )
     RES = [
         await o.builder.article(
@@ -71,8 +70,8 @@ async def inline_alive(o):
             text=MSG,
             include_media=True,
             buttons=SUP_BUTTONS,
-            title="Ultroid Userbot",
-            description="Userbot | Telethon",
+            title="Userbot",
+            description="Userbot",
             url=TLINK,
             thumb=WEB0,
             content=InputWebDocument(TLINK, 0, "image/jpg", []),
@@ -82,7 +81,7 @@ async def inline_alive(o):
         RES,
         private=True,
         cache_time=300,
-        switch_pm="👥 ULTROID PORTAL",
+        switch_pm="xteam-userbot",
         switch_pm_param="start",
     )
 
@@ -319,10 +318,10 @@ async def on_plug_in_callback_query_handler(event):
 
 
 def page_num(index, key):
-    rows = udB.get_key("HELP_ROWS") or 5
+    rows = udB.get_key("HELP_ROWS") or 10
     cols = udB.get_key("HELP_COLUMNS") or 2
     loaded = HELP.get(key, [])
-    emoji = udB.get_key("EMOJI_IN_HELP") or "✘"
+    emoji = udB.get_key("EMOJI_IN_HELP") or "💢"
     List = [
         Button.inline(f"{emoji} {x} {emoji}", data=f"uplugin_{key}_{x}|{index}")
         for x in sorted(loaded)

@@ -7,10 +7,16 @@
 """
 ✘ Commands Available -
 
-• `{i}songs <(youtube) search query>`
+• `{i}yta <(youtube/any) link>`
+   Download audio from the link.
+
+• `{i}ytv <(youtube/any) link>`
+   Download video  from the link.
+
+• `{i}ytsa <(youtube) search query>`
    Search and download audio from youtube.
 
-• `{i}songv <(youtube) search query>`
+• `{i}ytsv <(youtube) search query>`
    Search and download video from youtube.
 """
 from pyUltroid.fns.ytdl import download_yt, get_yt_link
@@ -19,7 +25,7 @@ from . import get_string, requests, ultroid_cmd
 
 
 @ultroid_cmd(
-    pattern="song(s|v|ss|vv) ?(.*)",
+    pattern="yt(a|v|sa|sv) ?(.*)",
 )
 async def download_from_youtube_(event):
     ytd = {
@@ -31,7 +37,7 @@ async def download_from_youtube_(event):
     }
     opt = event.pattern_match.group(1).strip()
     xx = await event.eor(get_string("com_1"))
-    if opt == "ss":
+    if opt == "a":
         ytd["format"] = "bestaudio"
         ytd["outtmpl"] = "%(id)s.m4a"
         url = event.pattern_match.group(2)
@@ -41,7 +47,7 @@ async def download_from_youtube_(event):
             requests.get(url)
         except BaseException:
             return await xx.eor(get_string("youtube_2"))
-    elif opt == "vv":
+    elif opt == "v":
         ytd["format"] = "best"
         ytd["outtmpl"] = "%(id)s.mp4"
         ytd["postprocessors"] = [{"key": "FFmpegMetadata"}]
@@ -52,7 +58,7 @@ async def download_from_youtube_(event):
             requests.get(url)
         except BaseException:
             return await xx.eor(get_string("youtube_4"))
-    elif opt == "s":
+    elif opt == "sa":
         ytd["format"] = "bestaudio"
         ytd["outtmpl"] = "%(id)s.m4a"
         try:
@@ -63,7 +69,7 @@ async def download_from_youtube_(event):
         if not url:
             return await xx.edit(get_string("unspl_1"))
         await xx.eor(get_string("youtube_6"))
-    elif opt == "v":
+    elif opt == "sv":
         ytd["format"] = "best"
         ytd["outtmpl"] = "%(id)s.mp4"
         ytd["postprocessors"] = [{"key": "FFmpegMetadata"}]
@@ -78,4 +84,3 @@ async def download_from_youtube_(event):
     else:
         return
     await download_yt(xx, url, ytd)
-   
