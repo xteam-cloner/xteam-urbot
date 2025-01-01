@@ -16,7 +16,7 @@ from .fns.tools import get_all_files
 
 
 class Loader:
-    def __init__(self, path="plugins", key="Official", logger: Logger = LOGS):
+    def __init__(self, path="modules", key="Official", logger: Logger = LOGS):
         self.path = path
         self.key = key
         self._logger = logger
