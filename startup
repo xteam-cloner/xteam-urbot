@@ -7,12 +7,15 @@
 
 
 echo "
-            ┏┳┓╋┏┓╋╋╋╋┏┓┏┓
-            ┃┃┣┓┃┗┳┳┳━╋╋┛┃
-            ┃┃┃┗┫┏┫┏┫╋┃┃╋┃
-            ┗━┻━┻━┻┛┗━┻┻━┛
+            
+╭╮╱╭╮╱╱╱╱╱╱╱╭╮╱╱╱╱╭╮
+┃┃╱┃┃╱╱╱╱╱╱╱┃┃╱╱╱╭╯╰╮
+┃┃╱┃┣━━┳━━┳━┫╰━┳━┻╮╭╯
+┃┃╱┃┃━━┫┃━┫╭┫╭╮┃╭╮┃┃
+┃╰━╯┣━━┃┃━┫┃┃╰╯┃╰╯┃╰╮
+╰━━━┻━━┻━━┻╯╰━━┻━━┻━╯
 
-      Visit @TheUltroid for updates!!
+      Visit @xteam_cloner for updates!!
 
 "
 if [ -f .env ] ; then  set -o allexport; source .env; set +o allexport ; fi
