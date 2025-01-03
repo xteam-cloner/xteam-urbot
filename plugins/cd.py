@@ -32,7 +32,7 @@ async def get_paste(data: str, extension: str = "txt"):
 
 
 def send(fn):
-    lst = ["modules", "addons"]
+    lst = ["plugins", "addons"]
     if not fn.endswith(".py"):
         fn += ".py"
     for i in lst:
@@ -66,17 +66,17 @@ async def pastee(path):
 
 @ultroid_cmd(pattern="cd ?(.*)")
 async def semd_plugin(ult):
-    repo = "https://github.com/JIYOXC/Userbot"
+    repo = "https://github.com/xteam-clone r/Userbotx"
     args = ult.pattern_match.group(1)
     if not args:
-        return await ult.eod("`Give a plugin name too`")
+        return await ult.eod("`Give a modules name too`")
 
     eris = await ult.eor("`...`")
     path = send(args)
     if not path:
         path = alt_send(args)
     if not path:
-        return await eris.edit(f"No plugins were found for: `{args}`")
+        return await eris.edit(f"No modules were found for: `{args}`")
 
     paste = await pastee(path)
     caption = f"<b>>> </b><code>{path}</code> \n{paste} \n" \
