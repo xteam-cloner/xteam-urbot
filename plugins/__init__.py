@@ -10,7 +10,7 @@ import os
 import time
 import datetime
 from random import choice
-from ApiNyaEr.teks import ISLAMIC as QUOTES
+#from ApiNyaEr.teks import ISLAMIC as QUOTES
 import requests
 from telethon import Button, events
 from telethon.tl import functions, types  # pylint:ignore
@@ -19,7 +19,7 @@ from pyUltroid import *
 from pyUltroid._misc._assistant import asst_cmd, callback, in_pattern
 from pyUltroid._misc._decorators import ultroid_cmd
 from pyUltroid._misc._wrappers import eod, eor
-from pyUltroid.dB import DEVLIST, ULTROID_IMAGES, ALIVE_TEXT, ALIVE_NAME
+from pyUltroid.dB import DEVLIST, ULTROID_IMAGES, ALIVE_TEXT, ALIVE_NAME, QUOTES
 from pyUltroid.fns.helper import *
 from pyUltroid.fns.misc import *
 from pyUltroid.fns.tools import *
