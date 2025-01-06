@@ -96,3 +96,16 @@ async def asupan(event):
         await xx.delete()
     except Exception:
         await xx.edit("**Tidak bisa menemukan video asupan.**")
+
+QUOTES = [
+"Nothing is impossible",
+"Anyone can be anything",
+"Take the risk or lose the chance",
+"When there is a will, there is way",
+"Do the best and let God do the rest",
+"Good things take time",
+"Don’t stop when you’re tired,stop when you’re done",
+"Our life is very difficult,but there are millions of more difficult life out there",
+"In life, there will be things that come up by itself, \nbut there will be things that also need to struggle to get it",
+"Love comfort like sunshine after rain",
+]
