@@ -13,6 +13,16 @@ COPY installer.sh .
 
 RUN bash installer.sh
 
+# the basic requirements.
+RUN apt-get install -y ffmpeg python3-pip curl
+RUN python3 -m pip install -U pip
+
+# install nodejs.
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt-get install -y nodejs
+
+COPY . .
+
 # changing workdir
 WORKDIR "/root/TeamUltroid"
 
