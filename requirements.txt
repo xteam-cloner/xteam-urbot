@@ -7,6 +7,6 @@ python-dotenv
 ApiNyaEr
 py-tgcalls-wrapper
 youtube-dl
-pyrogram==1.2.9
 tgcrypto
 youtube-search==2.1.0
+pyrogram
