@@ -10,3 +10,5 @@ youtube-dl
 tgcrypto
 youtube-search==2.1.0
 pyrogram
+ffmpeg
+nodejs
