@@ -120,7 +120,7 @@ async def google_gemini(e):
         LOGS.debug(f'Tokens used for query "{query}": {response["usage"]["completion_tokens"]}')
 
     # Check if the response length is manageable for a single message
-    if len(str(assistant_reply + query) < 4050:
+    if len(json.dumps(assistant_reply + query) < 4050:
         formatted_reply = f"**Query:**\n~ __{query}__\n\n**Gemini:**\n~ {assistant_reply}"
         return await eris.edit(formatted_reply)
 
