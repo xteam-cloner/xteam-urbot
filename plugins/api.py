@@ -5,7 +5,6 @@
 #
 
 
-from pyUltroid.configs import CHANNEL
 from . import CMD_HANDLER as cmd
 from . import CMD_HELP, HELP as ICON_HELP, ch
 from . import eod as edit_delete, eor as edit_or_reply, ultroid_cmd as man_cmd
@@ -30,8 +29,7 @@ async def help(event):
             f"**✦ Daftar Perintah Untuk [Userbot](https://github.com/mrismanaziz/Man-Userbot):**\n"
             f"**✦ Jumlah** `{len(CMD_HELP)}` **Modules**\n"
             f"**✦ Owner:** [{user.first_name}](tg://user?id={user.id})\n\n"
-            f"{ICON_HELP}   {string}"
-            f"\n\nSupport @{CHANNEL}",
+            f"🥀   {string}",
         )
         await event.reply(
             f"\n**Contoh Ketik** `{cmd}help afk` **Untuk Melihat Informasi Module**"
