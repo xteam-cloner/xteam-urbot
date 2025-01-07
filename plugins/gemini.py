@@ -105,21 +105,22 @@ async def google_gemini(e):
         return await eris.edit(
             f"**HTTP Error while requesting data from Gemini:** \n> `{http_err}`"
         )
-    """except Exception as exc:
+    except Exception as exc:
         # Log any other exceptions and notify the user
         LOGS.warning(f"Unexpected error: {exc}", exc_info=True)
         GEMINI_CHAT_HISTORY.pop()  # Remove the last user message if there was an error
         return await eris.edit(
             f"**Error while requesting data from Gemini:** \n> `{exc}`"
         )
-"""
+
+    
     # Optionally log token usage if available in the response
     # Adjust this section based on the actual response structure
     if "usage" in response and "completion_tokens" in response["usage"]:
         LOGS.debug(f'Tokens used for query "{query}": {response["usage"]["completion_tokens"]}')
 
     # Check if the response length is manageable for a single message
-    if len(assistant_reply + query) < 4050:
+    if len(" ".join(assistant_reply.values()) + query) < 4050:
         formatted_reply = f"**Query:**\n~ __{query}__\n\n**Gemini:**\n~ {assistant_reply}"
         return await eris.edit(formatted_reply)
 
