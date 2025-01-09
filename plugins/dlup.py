@@ -7,7 +7,7 @@
 
 from . import get_help
 
-__doc__ = get_help("help_downloadupload")
+__doc__ = get_help("help_dlup")
 
 import asyncio
 import glob
