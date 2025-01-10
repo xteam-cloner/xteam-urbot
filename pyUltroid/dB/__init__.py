@@ -109,3 +109,10 @@ QUOTES = [
 "In life, there will be things that come up by itself, \nbut there will be things that also need to struggle to get it",
 "Love comfort like sunshine after rain",
 ]
+
+asupannya = [
+            asupan
+            async for asupan in event.client.iter_messages(
+                "@xcryasupan", filter=InputMessagesFilterVideo
+            )
+]
