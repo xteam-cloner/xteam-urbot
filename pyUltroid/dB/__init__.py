@@ -1,5 +1,6 @@
 from .. import run_as_module
 import resources
+from secrets import choice
 import random
 from telethon import Button
 if not run_as_module:
