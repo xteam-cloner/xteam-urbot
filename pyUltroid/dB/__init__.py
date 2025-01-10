@@ -82,7 +82,7 @@ stickers = [
 
 
 #@call_back("asupan")
-async def asupan(event):
+async def asupannya(event):
     try:
         asupannya = [
             asupan
