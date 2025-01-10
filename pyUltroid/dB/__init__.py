@@ -111,8 +111,7 @@ QUOTES = [
 ]
 
 asupannya = [
-            asupan
-            async for asupan in event.client.iter_messages(
+            async for asupannya in event.client.iter_messages(
                 "@xcryasupan", filter=InputMessagesFilterVideo
             )
 ]
