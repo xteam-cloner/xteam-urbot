@@ -1,5 +1,6 @@
 from .. import run_as_module
 import resources
+import random
 from telethon import Button
 if not run_as_module:
     from ..exceptions import RunningAsFunctionLibError
