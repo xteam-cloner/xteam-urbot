@@ -1,7 +1,7 @@
-from . import eor, SUDO_HNDLR, ultroid_cmd
+from . import eor, SUDO_HNDLR as PREFIX, ultroid_cmd
 from os import mkdir, listdir as ls
 from pyUltroid.fns.helper import inline_mention
-from . import HNDLR, get_string, inline_mention, udB, ultroid_bot, ultroid_cmd, eor, SUDO_HNDLR
+from . import HNDLR as PREFIX, get_string, inline_mention, udB, ultroid_bot, ultroid_cmd, eor, SUDO_HNDLR
 
 @ultroid_cmd(pattern="sur")
 async def szudo(e):
@@ -52,23 +52,23 @@ async def _(ult):
 My <code>SUDO_HNDLR : {SUDO_HNDLR}</code>
 </pre>
 <b>List of some commands<b>
-<pre>1. ping = p
-2. alive = a
-3. eval = e
-4. bash = b
-5. sysinfo = sys
-6. rename = r
-7. web = wb
-8. writer = aw
-9. uninstall plugins/addons = un
-10. load = lo
-11. semd = sd
-12. added -- sgb, high
-13. help = h
-14. restart = rs
-15. open = op
-16. speedtest = sp
-17. del = d 
+<pre>1. ping
+2. alive
+3. eval
+4. bash
+5. sysinfo
+6. rename
+7. web
+8. writer
+9. upscale 
+10. load
+11. send = cd
+12. sg
+13. help
+14. restart
+15. open
+16. speedtest
+17. del
 </pre>
 """,parse_mode="html")
   
