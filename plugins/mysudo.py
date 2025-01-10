@@ -21,8 +21,8 @@ First name : {fn}
 Last name : {ln}
 id : {ii}
 username : {una}
-HNDLR : {HNDLR}
-SUDO_HNDLR : {SUDO_HNDLR}
+HNDLR : {PREFIX}
+SUDO_HNDLR : {PREFIX}
 """)
 
 
@@ -48,8 +48,8 @@ async def _(ult):
 <pre>1. All members in this group</pre>
 
 <b>Info</b>
-<pre>My <code>HNDLR : {HNDLR}</code>
-My <code>SUDO_HNDLR : {SUDO_HNDLR}</code>
+<pre>My <code>HNDLR : {PREFIX}</code>
+My <code>SUDO_HNDLR : {PREFIX}</code>
 </pre>
 <b>List of some commands<b>
 <pre>1. ping
