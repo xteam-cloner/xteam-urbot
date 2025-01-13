@@ -329,7 +329,7 @@ async def bluedevilwelcome(welcome):
 async def bluedevilsnake(snake):
     await eor(snake, L) 
 
-@ultroid_cmd(pattern=r"cat")
+@ultroid_cmd(pattern=r"sed")
 async def bluedevilded(cat):
     await eor(cat, M)
 
