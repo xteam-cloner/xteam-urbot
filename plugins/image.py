@@ -2,11 +2,11 @@ import telethon
 from PIL import Image
 import torch  # Asumsikan menggunakan PyTorch untuk model
 from torchvision import transforms
-
+from . import *
 # ... (inisialisasi klien Telethon dan model FluxAI/Vision Transformer)
 
-@client.on(events.NewMessage(pattern='^.image'))
-async def handler(event):
+@ultroid_cmd(pattern=r"imagen")
+async def imagen(event):
     # Dapatkan gambar
     file = await event.client.download_media(event.message.media)
     image = Image.open(file)
