@@ -121,7 +121,7 @@ async def lol(ult):
         inline = True
     pic = udB.get_key("ALIVE_PIC")
     if isinstance(pic, list):
-        pic = choice(pic)
+        pic = choice(asupannya)
     uptime = time_formatter((time.time() - start_time) * 1000)
     an=choice(ALIVE_NAME)
     header=choice(asupannya)
