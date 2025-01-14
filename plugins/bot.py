@@ -104,7 +104,7 @@ async def alive(event):
 async def lol(ult):
     asupannya = [
         asupan
-        async for asupan in event.client.iter_messages(
+        async for asupan in ult.client.iter_messages(
             "@xcryasupan", filter=InputMessagesFilterVideo
         )
     ]
