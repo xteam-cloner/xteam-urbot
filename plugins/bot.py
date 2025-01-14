@@ -14,7 +14,11 @@ import sys
 import time
 from platform import python_version as pyver
 from random import choice
-
+import asyncio
+from .  import ultroid_cmd, eor, time_formatter, start_time, OWNER_NAME
+from secrets import choice
+from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
+from telethon.tl.types import InputMessagesFilterPhotos
 from telethon import __version__
 from telethon.errors.rpcerrorlist import (
     BotMethodInvalidError,
@@ -98,6 +102,12 @@ async def alive(event):
     pattern="alive( (.*)|$)",
 )
 async def lol(ult):
+    asupannya = [
+        asupan
+        async for asupan in e.client.iter_messages(
+            "@xcryasupan", filter=InputMessagesFilterVideo
+        )
+    ]
     match = ult.pattern_match.group(1).strip()
     inline = None
     if match in ["inline", "i"]:
@@ -114,7 +124,7 @@ async def lol(ult):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
     an=choice(ALIVE_NAME)
-    header=choice(QUOTES)
+    header=choice(asupannya)
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
