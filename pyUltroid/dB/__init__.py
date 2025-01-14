@@ -5,7 +5,7 @@ import random
 from secrets import choice
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
 from telethon.tl.types import InputMessagesFilterPhotos
-from . import eor, ultroid_cmd, get_string, OWNER_NAME
+#from . import eor, ultroid_cmd, get_string, OWNER_NAME
 from telethon import Button
 if not run_as_module:
     from ..exceptions import RunningAsFunctionLibError
