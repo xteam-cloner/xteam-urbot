@@ -1,0 +1,21 @@
+name: Notif Telekram
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: kirim
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.loh_anjg }}
+          token: ${{ secrets.token_tel }}
+          format: html
+          message: |
+            <blockquote><b>🤭New Commits Userbot</b></blockquote>
+            <b><blockquote>😱${{ github.event.commits[0].message }}</blockquote></b>
+            <blockquote><b>me web: <a href="https://ernewdev0.github.io">Click Me</a></b></blockquote>
+          disable_web_page_preview: True
+          disable_notification: True
+          
