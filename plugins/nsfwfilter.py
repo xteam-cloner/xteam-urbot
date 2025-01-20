@@ -150,7 +150,7 @@ async def nsfw_check(e):
 if udB.get_key("NSFW"):
     ultroid_bot.add_handler(nsfw_check, events.NewMessage(incoming=True))
 
-@ultroid_cmd(pattern="detect$", outgoing=True)
+"""@ultroid_cmd(pattern="detect$", outgoing=True)
 async def detect(event):
     if not udB.get_key("DEEP_API"):
         return await eor(
@@ -192,3 +192,4 @@ async def detect(event):
     await eor(
         snku, result
     )
+"""
