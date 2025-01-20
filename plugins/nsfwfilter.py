@@ -153,31 +153,31 @@ if udB.get_key("NSFW"):
 @ultroid_cmd(pattern="detect$", outgoing=True)
 async def detect(event):
     if not udB.get_key("DEEP_API"):
-        return await edit_delete(
+        return await eor(
             event, "Add VAR DEEP_AI get Api Key from https://deepai.org/", time=5
         )
     reply = await event.get_reply_message()
     if not reply:
-        return await edit_delete(
+        return await eod(
             event, "Reply to any image or non animated sticker !", time=5
         )
-    snku = await edit_or_reply(event, "Downloading the file to check...")
+    snku = await eor(event, "Downloading the file to check...")
     media = await event.client.download_media(reply)
     if not media.endswith(("png", "jpg", "webp")):
-        return await edit_delete(
+        return await eod(
             event, "Reply to any image or non animated sticker !", time=5
         )
-    snku = await edit_or_reply(event, "Detecting NSFW limit...")
+    snku = await eor(event, "Detecting NSFW limit...")
     r = requests.post(
         "https://api.deepai.org/api/nsfw-detector",
         files={
             "image": open(media, "rb"),
         },
-        headers={"api-key": Redis("DEEP_AI")},
+        headers={"api-key": udB.get_key("DEEP_AI")},
     )
     os.remove(media)
     if "status" in r.json():
-        return await edit_delete(snku, r.json()["status"])
+        return await eod(snku, r.json()["status"])
     r_json = r.json()["output"]
     pic_id = r.json()["id"]
     percentage = r_json["nsfw_score"] * 100
@@ -189,6 +189,6 @@ async def detect(event):
             name = parts["name"]
             confidence = int(float(parts["confidence"]) * 100)
             result += f"<b>• {name}:</b>\n   <code>{confidence} %</code>\n"
-    await edit_or_reply(
+    await eor(
         snku, result
     )
