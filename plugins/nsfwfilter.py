@@ -173,7 +173,7 @@ async def detect(event):
         files={
             "image": open(media, "rb"),
         },
-        headers={"api-key": udB.get_key("DEEP_AI")},
+        headers={"api-key": udB.get_key("DEEP_API")},
     )
     os.remove(media)
     if "status" in r.json():
