@@ -158,13 +158,13 @@ async def detect(event):
         )
     reply = await event.get_reply_message()
     if not reply:
-        return await eod(
+        return await eor(
             event, "Reply to any image or non animated sticker !", time=5
         )
     snku = await eor(event, "Downloading the file to check...")
     media = await event.client.download_media(reply)
     if not media.endswith(("png", "jpg", "webp")):
-        return await eod(
+        return await eor(
             event, "Reply to any image or non animated sticker !", time=5
         )
     snku = await eor(event, "Detecting NSFW limit...")
@@ -177,7 +177,7 @@ async def detect(event):
     )
     os.remove(media)
     if "status" in r.json():
-        return await eod(snku, r.json()["status"])
+        return await eor(snku, r.json()["status"])
     r_json = r.json()["output"]
     pic_id = r.json()["id"]
     percentage = r_json["nsfw_score"] * 100
