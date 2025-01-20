@@ -152,7 +152,7 @@ if udB.get_key("NSFW"):
 
 @ultroid_cmd(pattern="detect$", outgoing=True)
 async def detect(event):
-    if Redis("DEEP_AI") is None:
+    if not udB.get_key("DEEP_API"):
         return await edit_delete(
             event, "Add VAR DEEP_AI get Api Key from https://deepai.org/", time=5
         )
