@@ -1,7 +1,7 @@
 import requests
 import base64
 import os
-
+from . import *
 url = 'https://texttospeech.googleapis.com/v1/text:synthesize'
 api_key = 'AIzaSyBrHRq1560psTF4pnWChWGV4G1mgymWb8g'
 headers = {
