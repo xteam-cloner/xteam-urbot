@@ -44,7 +44,7 @@ ayiincakep = [
 
 @ultroid_cmd(pattern="cping$", devs=True)
 async def _(ping):
-    uptime = await get_readable_time((time.time() - startTime))
+    uptime = await get_readable_time((time.time() - StartTime))
     start = datetime.now()
     end = datetime.now()
     duration = (end - start).microseconds / 1000
