@@ -29,7 +29,7 @@ async def snap(e):
     if e.fwd_from:
         return
     here = await ultroid_bot.get_entity(e.chat_id)
-    eris = bot.me.id
+    eris = ultroid_bot.uid
     immune = [eris]
     count = 0
     to_ban = []
