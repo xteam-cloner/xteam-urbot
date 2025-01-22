@@ -50,7 +50,8 @@ class UltroidClient(TelegramClient):
         super().__init__(session, **kwargs)
         self.run_in_loop(self.start_client(bot_token=bot_token))
         self.dc_id = self.session.dc_id
-    call_py = PyTgCalls(UltroidClient)
+    
+    """call_py = PyTgCalls(UltroidClient)
 except Exception as e:
     print(f"STRING_SESSION - {e}")
     sys.exit()
@@ -66,7 +67,7 @@ if STRING_2:
         connection_retries=None,
     )
     call_py2 = PyTgCalls(MAN2)
-    
+    """
     def __repr__(self):
         return f"<Ultroid.Client :\n self: {self.full_name}\n bot: {self._bot}\n>"
 
