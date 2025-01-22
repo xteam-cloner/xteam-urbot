@@ -20,7 +20,6 @@ from telethon.tl.types import ChannelParticipantsAdmins as peru
 
 from . import *
 
-
 @ultroid_cmd(
     pattern="thanos",
     groups_only=True,
@@ -54,9 +53,9 @@ async def snap(e):
         return
 
     if here.creator or (here.admin_rights and here.admin_rights.ban_users):
-        for perus in await bot.get_participants(here.id, filter=peru):
+        for perus in await ultroid_bot.get_participants(here.id, filter=peru):
             immune.append(perus.id)
-        for members in await bot.get_participants(here.id, limit=2000):
+        for members in await ultroid_bot.get_participants(here.id, limit=2000):
             if members.id not in immune:
                 to_ban.append(members.id)
     else:
