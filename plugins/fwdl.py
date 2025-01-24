@@ -16,7 +16,7 @@ import os
 import re
 import time
 import asyncio
-import datetime
+from datetime import datetime as dt
 
 from telethon.errors.rpcerrorlist import MessageNotModifiedError
 
@@ -66,7 +66,7 @@ async def fwd_dl(e):
     except Exception as ex:
         return await ghomst.edit(f"**Error:**  `{ex}`")
 
-    start_ = datetime.now()
+    start_ = dt.now()
     if (msg and msg.media) and hasattr(msg.media, "photo"):
         dls = await e.client.download_media(msg, DL_DIR)
     elif (msg and msg.media) and hasattr(msg.media, "document"):
@@ -87,7 +87,7 @@ async def fwd_dl(e):
     else:
         return await ghomst.edit("`Message doesn't contain any media to download.`")
 
-    end_ = datetime.now()
+    end_ = dt.now()
     ts = time_formatter(((end_ - start_).seconds) * 1000)
     await ghomst.edit(f"**Downloaded in {ts} !!**\n » `{dls}`")
   
