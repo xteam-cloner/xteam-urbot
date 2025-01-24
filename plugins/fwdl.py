@@ -20,7 +20,8 @@ from datetime import datetime
 
 from telethon.errors.rpcerrorlist import MessageNotModifiedError
 
-from . import LOGS, time_formatter, downloader, random_string
+from . import LOGS, time_formatter, downloader, random_string, ultroid_cmd
+from . import *
 
 
 # Source: https://github.com/UsergeTeam/Userge/blob/7eef3d2bec25caa53e88144522101819cb6cb649/userge/plugins/misc/download.py#L76
