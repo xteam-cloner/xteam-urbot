@@ -8,7 +8,7 @@ import asyncio
 import aiohttp
 from telethon import events
 
-from . import ultroid_bot as client
+from . import asst as client
 
 # <=======================================================================================================>
 
