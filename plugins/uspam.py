@@ -14,7 +14,7 @@
 
 from asyncio import sleep
 from telethon.errors import FloodWaitError
-
+from . import *
 from . import udB, NOSPAM_CHAT as noU
 
 
