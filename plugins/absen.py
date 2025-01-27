@@ -46,9 +46,8 @@ ayiincakep = [
 # Absen by : mrismanaziz <https://github.com/mrismanaziz/man-userbot>
 
 @ultroid_cmd(pattern="absen$", devs=True)
-async def ayiinabsen(sudos):
-    sudos = sudoers()
-    await sudos.reply(choice(absen))
+async def absen(sudoers):
+    await sudoers.reply(choice(absen))
 
 
 @ultroid_cmd(pattern="Aku ganteng kan$", devs=True)
