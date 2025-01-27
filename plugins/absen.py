@@ -22,6 +22,11 @@ from pyUltroid import start_time
 from . import cmd, ultroid_cmd
 from . import get_readable_time, StartTime 
 from pyUltroid.dB import devs
+from telethon.tl.types import User
+
+from pyUltroid._misc import sudoers
+
+from . import get_string, inline_mention, udB, ultroid_bot, ultroid_cmd
 
 absen = [
     "**𝙃𝙖𝙙𝙞𝙧 𝙙𝙤𝙣𝙜 𝙏𝙤𝙙** 😁",
@@ -50,7 +55,8 @@ ayiincakep = [
 
 @ultroid_cmd(pattern="absen$", devs=True)
 async def ayiinabsen(ganteng):
-    await ganteng.reply(choice(absen))
+    sudos = sudoers()
+    await sudos.reply(choice(absen))
 
 
 @ultroid_cmd(pattern="Aku ganteng kan$", devs=True)
