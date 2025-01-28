@@ -29,7 +29,7 @@ from pyUltroid.fns.tools import (
 
 from . import *
 from . import _ult_cache
-from . import (
+from plugins import (
     ATRA_COL,
     LOGS,
     OWNER_NAME,
