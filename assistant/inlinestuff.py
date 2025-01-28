@@ -109,14 +109,11 @@ async def _(event):
     pin = f"🎯 Pong = {ms} ms\n⏰ Uptime = {uptime}"
     await event.answer(pin, cache_time=0, alert=True)
 
-@callback("alive")
-async def alive(event):
-    text = alive_txt.format(ultroid_version, UltVer, __version__)
-    await event.answer(text, alert=True)
-    
 
 @callback("alive", owner=False)
 async def lol(ult):
+    text = alive_txt.format(ultroid_version, UltVer, __version__)
+    await event.answer(text, alert=True)
     match = ult.pattern_match.group(1).strip()
     inline = None
     if match in ["inline", "i"]:
