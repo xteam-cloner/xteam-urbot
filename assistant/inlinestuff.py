@@ -68,8 +68,7 @@ async def ping(e):
     ]
     await e.answer(res, switch_pm="Userbot Repo.", switch_pm_param="start")
 
-@callback(
-    re.compile("pingx", owner=False)
+@in_pattern("pingx", owner=False)
 async def _(event):
     start = datetime.now()
     end = datetime.now()
