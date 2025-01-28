@@ -62,6 +62,7 @@ async def ping(e):
             description="PING",
             thumb=wb(ultpic, 0, "image/jpeg", []),
             text=OWNER_NAME,
+            data=ping,
             buttons=PING_ALIVE,
         ),
     ]
