@@ -29,6 +29,38 @@ from pyUltroid.fns.tools import (
 
 from . import *
 from . import _ult_cache
+from . import (
+    ATRA_COL,
+    LOGS,
+    OWNER_NAME,
+    ULTROID_IMAGES,
+    ALIVE_TEXT,
+    ALIVE_NAME,
+    stickers,
+    Button,
+    Carbon,
+    Telegraph,
+    Var,
+    allcmds,
+    asst,
+    bash,
+    call_back,
+    callback,
+    def_logs,
+    eor,
+    get_string,
+    heroku_logs,
+    in_pattern,
+    inline_pic,
+    restart,
+    shutdown,
+    start_time,
+    time_formatter,
+    udB,
+    ultroid_cmd,
+    ultroid_version,
+    updater,
+)
 
 SUP_BUTTONS = [
     [
@@ -76,6 +108,12 @@ async def _(event):
     ms = (end - start).microseconds
     pin = f"🎯 Pong = {ms} ms\n⏰ Uptime = {uptime}"
     await event.answer(pin, cache_time=0, alert=True)
+
+@callback("alive")
+async def alive(event):
+    text = alive_txt.format(ultroid_version, UltVer, __version__)
+    await event.answer(text, alert=True)
+    
 
 @callback("alive", owner=False)
 async def lol(ult):
