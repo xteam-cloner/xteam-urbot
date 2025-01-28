@@ -62,13 +62,14 @@ async def ping(e):
             description="PING",
             thumb=wb(ultpic, 0, "image/jpeg", []),
             text=OWNER_NAME,
-            data=ping,
+            data=pingx,
             buttons=PING_ALIVE,
         ),
     ]
     await e.answer(res, switch_pm="Userbot Repo.", switch_pm_param="start")
 
-@callback(data="ping", owner=False)
+@callback(
+    re.compile("pingx", owner=False)
 async def _(event):
     start = datetime.now()
     end = datetime.now()
