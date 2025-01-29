@@ -146,7 +146,7 @@ in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅ�
 
 @callback("alive", owner=False)
 async def lol(ult):
-    text = alive_txt.format(ultroid_version, UltVer, __version__)
+    text = alive_txt.format(OWNER_NAME, f"{ultroid_version} [{HOSTED_ON}]", UltVer, uptime, pyver(), __version__,)
     await event.answer(text, alert=True)
     match = ult.pattern_match.group(1).strip()
     inline = None
