@@ -28,13 +28,7 @@ from assistant.inlinestuff import ping, alive
 from pyUltroid.dB._core import HELP, LIST
 from pyUltroid.fns.tools import cmd_regex_replace
 
-from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroid_cmd, call_back,
-    callback,
-    def_logs,
-    eor,
-    get_string,
-    heroku_logs,
-    in_pattern
+from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroid_cmd, call_back, callback, def_logs, eor, get_string, heroku_logs, in_pattern
 
 _main_help_menu = [
     [
