@@ -84,17 +84,21 @@ buttons = [
 # Will move to strings
 alive_txt = """
 ━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
-
+  ❍ ᴏᴡɴᴇʀ - ⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣⁫⁣{}
   ❍ ᴜꜱᴇʀʙᴏᴛ - {}
   ❍ ᴅᴀᴛᴀʙᴀꜱᴇ - {}
+  ❍ ᴜᴘᴛɪᴍᴇ - {}
+  ❍ ᴘʏᴛʜᴏɴ - {}
   ❍ ᴛᴇʟᴇᴛʜᴏɴ - {}
+  
+━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
 """
 
 in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅᴀᴛᴀʙᴀꜱᴇ -></b> <code>{}</code>\n❍ <b>ᴘʏᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ᴛᴇʟᴇᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ʙʀᴀɴᴄʜ -></b>[ {} ]\n\n• <b>Join @TeamUltroid</b>"
 
 @callback("alive")
 async def alive(event):
-    text = alive_txt.format(ultroid_version, UltVer, __version__)
+    text = alive_txt.format(OWNER_NAME, f"{ultroid_version} [{HOSTED_ON}]", UltVer, uptime, pyver(), __version__,)
     await event.answer(text, alert=True)
 
 
