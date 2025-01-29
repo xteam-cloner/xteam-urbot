@@ -33,7 +33,7 @@ devs = [
 ULTROID_IMAGES = [
     f"https://graph.org/file/{_}.jpg"
     for _ in [
-        "cad7038fe82e47f79c609"
+        "8d7b534e34e13316a7dd2"
         #"ec250c66268b62ee4ade6",
         #"3c25230ae30d246194eba",
         #"b01715a61b9e876c0d45d",
