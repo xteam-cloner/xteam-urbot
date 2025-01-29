@@ -96,7 +96,7 @@ async def ping(e):
         await e.builder.article(
             title="Userbot",
             description="PING",
-            thumb=wb(ultpic, 0, "image/jpeg", []),
+            thumb=ultpic, 0, "image/jpeg", []),
             text=OWNER_NAME,
             buttons=PING_ALIVE,
         )
