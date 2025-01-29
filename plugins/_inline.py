@@ -57,7 +57,7 @@ SUP_BUTTONS = [
 # --------------------BUTTONS--------------------#
 
 
-@in_pattern(owner=False, func=lambda x: not x.text)
+@in_pattern("repo",owner=False)
 async def inline_alive(o):
     TLINK = inline_pic()
     MSG = "**What are you looking for?**"
