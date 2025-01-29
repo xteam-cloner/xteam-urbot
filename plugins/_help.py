@@ -37,15 +37,15 @@ _main_help_menu = [
         #Button.inline(get_string("help_5"), data="uh_Addons_"),
     ],
     [
-        Button.inline("ᴍᴏᴅᴜʟᴇꜱ"), data="uh_Official_"),
+        Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_"),
         #Button.inline(get_string("help_7"), data="inlone"),
     ],
     [
         #Button.url(get_string("help_source"), url=f"https://github.com/JIYOXC/Userbot"),
-        Button.url("ꜱᴇᴛᴛɪɴɢꜱ"), url=f"https://t.me/{asst.me.username}?start=set"
+        Button.url("ꜱᴇᴛᴛɪɴɢꜱ", url=f"https://t.me/{asst.me.username}?start=set"
         ),
     ],
-    [Button.inline("ᴄʟᴏꜱᴇ"), data="close")],
+    [Button.inline("ᴄʟᴏꜱᴇ", data="close")],
 ]
 
 
