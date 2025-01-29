@@ -32,8 +32,8 @@ from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroi
 
 _main_help_menu = [
     [
-        Button.inline("PING", data="ping"),
-        Button.inline("ALIVE", data="alive"),
+        Button.inline("ᴘɪɴɢ", data="ping"),
+        Button.inline("ᴀʟɪᴠᴇ", data="alive"),
         #Button.inline(get_string("help_5"), data="uh_Addons_"),
     ],
     [
