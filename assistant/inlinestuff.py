@@ -92,7 +92,7 @@ apis = [
 
 
 
-@in_pattern("help", owner=False)
+@in_pattern(owner=False, func=lambda x: not x.text)
 async def ping(e):
     TLINK = inline_pic()
     MSG = "**━━━━✿ ᴜꜱᴇʀʙᴏᴛ ✿━━━**"
