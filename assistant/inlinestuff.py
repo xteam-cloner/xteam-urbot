@@ -212,7 +212,7 @@ async def lol(ult):
         buttons=buttons if inline else None,
     )
 
-@callback("close", owner=True)
+@callback("close", owner=False)
 async def on_plug_in_callback_query_handler(event):
     await event.edit(
         get_string("inline_5"),
