@@ -94,9 +94,9 @@ apis = [
 async def ping(e):
     res = [
         await e.builder.article(
-            title="Userbot",
+            title="Inline",
             description="PING",
-            thumb=ultpic, 0, "image/jpeg", []),
+            thumb=wb(ultpic, 0, "image/jpeg", []),
             text=OWNER_NAME,
             buttons=PING_ALIVE,
         )
@@ -119,6 +119,7 @@ alive_txt = """
   ❍ ᴜꜱᴇʀʙᴏᴛ - {}
   ❍ ᴅᴀᴛᴀʙᴀꜱᴇ - {}
   ❍ ᴛᴇʟᴇᴛʜᴏɴ - {}
+━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
 """
 
 in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅᴀᴛᴀʙᴀꜱᴇ -></b> <code>{}</code>\n❍ <b>ᴘʏᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ᴛᴇʟᴇᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ʙʀᴀɴᴄʜ -></b>[ {} ]\n\n• <b>Join @TeamUltroid</b>"
