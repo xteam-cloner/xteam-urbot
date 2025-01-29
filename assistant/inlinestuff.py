@@ -96,7 +96,7 @@ apis = [
 async def ping(e):
     TLINK = inline_pic()
     MSG = "**inline**"
-    WEB0 = InputWebDocument(
+    WEB0 = wb(
         "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []),
     res = [
         await e.builder.article(
@@ -108,7 +108,7 @@ async def ping(e):
             description="Userbot",
             url=TLINK,
             thumb=WEB0,
-            content=InputWebDocument(TLINK, 0, "image/jpg", []),
+            content=wb(TLINK, 0, "image/jpg", []),
         )
     ]
     await e.answer(res, switch_pm="Userbot Repo.", switch_pm_param="start")
