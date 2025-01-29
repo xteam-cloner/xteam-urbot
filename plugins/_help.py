@@ -5,6 +5,19 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 
+import base64
+import inspect
+from datetime import datetime
+from html import unescape
+from random import choice
+from re import compile as re_compile
+
+from bs4 import BeautifulSoup as bs
+from telethon import Button
+from telethon.tl.alltlobjects import LAYER, tlobjects
+from telethon.tl.types import DocumentAttributeAudio as Audio
+from telethon.tl.types import InputWebDocument as wb
+
 from telethon.errors.rpcerrorlist import (
     BotInlineDisabledError,
     BotMethodInvalidError,
@@ -15,7 +28,13 @@ from assistant.inlinestuff import ping, alive
 from pyUltroid.dB._core import HELP, LIST
 from pyUltroid.fns.tools import cmd_regex_replace
 
-from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroid_cmd
+from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroid_cmd, call_back,
+    callback,
+    def_logs,
+    eor,
+    get_string,
+    heroku_logs,
+    in_pattern
 
 _main_help_menu = [
     [
