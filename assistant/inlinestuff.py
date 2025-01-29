@@ -120,7 +120,7 @@ async def ping(e):
         switch_pm_param="start",
     )
 
-@callback("piing", owner=False)
+@callback("ping", owner=False)
 async def _(event):
     start = datetime.now()
     end = datetime.now()
