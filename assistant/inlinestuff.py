@@ -97,7 +97,8 @@ async def ping(e):
     TLINK = inline_pic()
     MSG = "**inline**"
     WEB0 = wb(
-        "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []),
+        "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []
+    )
     res = [
         await e.builder.article(
             type="photo",
@@ -111,7 +112,13 @@ async def ping(e):
             content=wb(TLINK, 0, "image/jpg", []),
         )
     ]
-    await e.answer(res, switch_pm="Userbot Repo.", switch_pm_param="start")
+    await e.answer(
+        res,
+        private=True,
+        cache_time=300,
+        switch_pm="xteam-userbot",
+        switch_pm_param="start",
+    )
 
 @callback("piing", owner=False)
 async def _(event):
