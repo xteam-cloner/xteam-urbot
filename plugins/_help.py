@@ -39,7 +39,7 @@ _main_help_menu = [
     [
         Button.inline("ᴍᴏᴅᴜʟᴇꜱ"), data="uh_Official_"),
         #Button.inline(get_string("help_7"), data="inlone"),
-    ],ᴍᴏᴅᴜʟᴇꜱ ꜱᴇᴛᴛɪɴɢꜱ ᴄʟᴏꜱᴇ
+    ],
     [
         #Button.url(get_string("help_source"), url=f"https://github.com/JIYOXC/Userbot"),
         Button.url("ꜱᴇᴛᴛɪɴɢꜱ"), url=f"https://t.me/{asst.me.username}?start=set"
