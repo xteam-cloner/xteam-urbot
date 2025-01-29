@@ -109,6 +109,16 @@ async def _(event):
     pin = f"🎯 Pong = {ms} ms\n⏰ Uptime = {uptime}"
     await event.answer(pin, cache_time=0, alert=True)
 
+# Will move to strings
+alive_txt = """
+━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
+
+  ❍ ᴜꜱᴇʀʙᴏᴛ - {}
+  ❍ ᴅᴀᴛᴀʙᴀꜱᴇ - {}
+  ❍ ᴛᴇʟᴇᴛʜᴏɴ - {}
+"""
+
+in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅᴀᴛᴀʙᴀꜱᴇ -></b> <code>{}</code>\n❍ <b>ᴘʏᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ᴛᴇʟᴇᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ʙʀᴀɴᴄʜ -></b>[ {} ]\n\n• <b>Join @TeamUltroid</b>"
 
 @callback("alive", owner=False)
 async def lol(ult):
