@@ -74,6 +74,9 @@ PING_ALIVE = [
         Button.inline("PING", data="ping"),
         Button.inline("ALIVE", data="alive"),
     ],
+    [
+        Button.inline("CLOSE", data="close"),
+    ],
 ]
 
 
@@ -207,6 +210,13 @@ async def lol(ult):
         parse_mode=parse,
         link_preview=False,
         buttons=buttons if inline else None,
+    )
+
+@callback("close", owner=True)
+async def on_plug_in_callback_query_handler(event):
+    await event.edit(
+        get_string("inline_5"),
+        buttons=Button.inline("Oᴘᴇɴ Aɢᴀɪɴ", data="open"),
     )
 
 @in_pattern("ofox", owner=True)
