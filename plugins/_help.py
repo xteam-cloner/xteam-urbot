@@ -24,7 +24,7 @@ from telethon.errors.rpcerrorlist import (
     BotResponseTimeoutError,
 )
 from telethon.tl.custom import Button
-from assistant.inlinestuff import ping, alive
+from assistant import *
 from pyUltroid.dB._core import HELP, LIST
 from pyUltroid.fns.tools import cmd_regex_replace
 
