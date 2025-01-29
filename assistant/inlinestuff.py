@@ -90,20 +90,30 @@ apis = [
     "QUl6YVN5RGRPS253blB3VklRX2xiSDVzWUU0Rm9YakFLSVFWMERR",
 ]
 
+
+
 @in_pattern("ping", owner=False)
 async def ping(e):
-    res = [
+    TLINK = inline_pic()
+    MSG = "**inline**"
+    WEB0 = InputWebDocument(
+        "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []
+    )res = [
         await e.builder.article(
-            title="Inline",
-            description="PING",
-            file="https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg",
-            text=OWNER_NAME,
+            type="photo",
+            text=MSG,
+            include_media=True,
             buttons=PING_ALIVE,
+            title="Inline",
+            description="Userbot",
+            url=TLINK,
+            thumb=WEB0,
+            content=InputWebDocument(TLINK, 0, "image/jpg", []),
         )
     ]
     await e.answer(res, switch_pm="Userbot Repo.", switch_pm_param="start")
 
-@callback("ping", owner=False)
+@callback("piing", owner=False)
 async def _(event):
     start = datetime.now()
     end = datetime.now()
