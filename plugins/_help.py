@@ -11,7 +11,7 @@ from telethon.errors.rpcerrorlist import (
     BotResponseTimeoutError,
 )
 from telethon.tl.custom import Button
-
+from assistant.inlinestuff import ping, alive
 from pyUltroid.dB._core import HELP, LIST
 from pyUltroid.fns.tools import cmd_regex_replace
 
@@ -19,11 +19,12 @@ from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroi
 
 _main_help_menu = [
     [
-        Button.inline(get_string("help_4"), data="uh_Official_"),
+        Button.inline("PING", data="ping"),
+        Button.inline("ALIVE", data="alive"),
         #Button.inline(get_string("help_5"), data="uh_Addons_"),
     ],
     [
-        #Button.inline(get_string("help_6"), data="uh_VCBot_"),
+        Button.inline(get_string("help_4"), data="uh_Official_"),
         #Button.inline(get_string("help_7"), data="inlone"),
     ],
     [
