@@ -140,55 +140,97 @@ async def _(event):
 in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅᴀᴛᴀʙᴀꜱᴇ -></b> <code>{}</code>\n❍ <b>ᴘʏᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ᴛᴇʟᴇᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ʙʀᴀɴᴄʜ -></b>[ {} ]\n"
 
 @callback("alive", owner=False)
-async def inline_alive(ult):
-pic = udB.get_key("ALIVE_PIC")
+async def lol(ult):
+    asupannya = [
+        asupan
+        async for asupan in ult.client.iter_messages(
+            "@xcryasupan", filter=InputMessagesFilterVideo
+        )
+    ]
+    match = ult.pattern_match.group(1).strip()
+    inline = None
+    if match in ["inline", "i"]:
+        try:
+            res = await ult.client.inline_query(asst.me.username, "alive")
+            return await res[0].click(ult.chat_id)
+        except BotMethodInvalidError:
+            pass
+        except BaseException as er:
+            LOGS.exception(er)
+        inline = True
+    pic = udB.get_key("ALIVE_PIC")
     if isinstance(pic, list):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    header=choice(ALIVE_TEXT)
+    an=choice(ALIVE_NAME)
+    header=choice(stickers)
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
-    kk = f"<a href={rep}>{y}</a>"
-    als = in_alive.format(
-        header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk
-    )
+    kk = f" `[{y}]({rep})` "
+    if inline:
+        kk = f"<a href={rep}>{y}</a>"
+        parse = "html"
+        als = in_alive.format(
+            an,
+            header,
+            f"{ultroid_version} [{HOSTED_ON}]",
+            UltVer,
+            pyver(),
+            uptime,
+            kk,
+        )
 
-    if _e := udB.get_key("ALIVE_EMOJI"):
-        als = als.replace("🌀", _e)
-    builder = ult.builder
+        if _e := udB.get_key("ALIVE_EMOJI"):
+            als = als.replace("🌀", _e)
+    else:
+        parse = "md"
+        als = (get_string("alive_1")).format(
+            an,
+            header,
+            OWNER_NAME,
+            f"{ultroid_version} [{HOSTED_ON}]",
+            UltVer,
+            uptime,
+            pyver(),
+            __version__,
+            kk,
+        )
+
+        if a := udB.get_key("ALIVE_EMOJI"):
+            als = als.replace("✵", a)
     if pic:
         try:
-            if ".jpg" in pic:
-                results = [
-                    await builder.photo(
-                        pic, text=als, parse_mode="html", buttons=buttons
-                    )
-                ]
-            else:
-                if _pic := resolve_bot_file_id(pic):
-                    pic = _pic
-                    buttons.insert(
-                        0, [Button.inline(get_string("bot_2"), data="alive")]
-                    )
-                results = [
-                    await builder.document(
-                        pic,
-                        title="Inline Alive",
-                        description="@xteam-cloner",
-                        parse_mode="html",
-                        buttons=buttons,
-                    )
-                ]
-            return await ult.answer(results)
+            await ult.reply(
+                als,
+                file=pic,
+                parse_mode=parse,
+                link_preview=False,
+                buttons=buttons if inline else None,
+            )
+            return await ult.try_delete()
+        except ChatSendMediaForbiddenError:
+            pass
         except BaseException as er:
             LOGS.exception(er)
-    result = [
-        await builder.article(
-            "Alive", text=als, parse_mode="html", link_preview=False, buttons=buttons
-        )
-    ]
-    await ult.answer(result)
+            try:
+                await ult.reply(file=pic)
+                await ult.reply(
+                    als,
+                    parse_mode=parse,
+                    buttons=buttons if inline else None,
+                    link_preview=False,
+                )
+                return await ult.try_delete()
+            except BaseException as er:
+                LOGS.exception(er)
+    await eor(
+        ult,
+        als,
+        parse_mode=parse,
+        link_preview=False,
+        buttons=buttons if inline else None,
+    )
 
 @callback("close", owner=False)
 async def on_plug_in_callback_query_handler(event):
