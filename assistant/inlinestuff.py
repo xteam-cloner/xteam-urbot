@@ -139,7 +139,7 @@ async def _(event):
 
 @in_pattern("asupan", owner=True)
 async def _(event):
-    xx = await event.eor(get_string("asupan_1"))
+    xx = await event.answer(get_string("asupan_1"))
     try:
         asupannya = [
             asupan
