@@ -135,6 +135,15 @@ async def _(event):
     pin = f"🎯 Pong = {ms} ms\n⏰ Uptime = {uptime}"
     await event.answer(pin, cache_time=0, alert=True)
 
+@in_pattern("Ping$", chats=[], type=["official", "assistant"])
+async def _(event):
+    start = time.time()
+    x = await event.reply("Ping")
+    end = round((time.time() - start) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 1000)
+    await asyncio.sleep(1)
+    await x.edit(get_string("kping").format(end))
+
 alive_txt = """
 ━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
 
