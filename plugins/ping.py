@@ -36,7 +36,7 @@ async def mention_user(user_id):
     except Exception as e:
         print(f"Failed to mention user: {e}")
 
-@xteam_cmd(pattern="p(|x|s)$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     ultroid_bot.parse_mode = CustomMarkdown()
     user_id = OWNER_ID
@@ -52,7 +52,7 @@ async def _(event):
         await x.reply(get_string("iping").format(end))
     else:
         pic = udB.get_key("PING_PIC")
-        await asyncio.sleep(1)
+        await asyncio.sleep(3)
         await x.edit(get_string("ping").format(end, uptime, f"{OWNER_NAME}"), file=pic)
 
 
