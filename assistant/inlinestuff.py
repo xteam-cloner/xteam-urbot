@@ -137,18 +137,7 @@ async def _(event):
     pin = f"🎯 Pong = {ms} ms\n⏰ Uptime = {uptime}"
     await event.answer(pin, cache_time=0, alert=True)
 
-@in_pattern("asupan", owner=True)
-async def _(event):
-  asupannya = [
-            asupan
-            async for asupan in event.client.iter_messages(
-                "@xcryasupan", filter=InputMessagesFilterVideo
-            )
-            await event.client.send_file(
-            event.chat_id, file=choice(asupannya), caption=f"Asupan BY 🥀{OWNER_NAME}🥀", reply_to=event.reply_to_msg_id)
-    ]
-            await event.answer(asupannya, cache_time=0, alert=True)
-        
+
 
 alive_txt = """
 ━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
