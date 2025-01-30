@@ -43,7 +43,7 @@ async def _(event):
     ment = await mention_user(user_id)
     prem = event.pattern_match.group(1)
     start = time.time()
-    x = await event.reply("ping")
+    x = await event.reply("⚡️")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     if prem == "x":
