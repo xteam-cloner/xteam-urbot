@@ -101,7 +101,7 @@ apis = [
 
 
 @in_pattern(owner=False, func=lambda x: not x.text)
-async def ping(e):
+async def help(e):
     TLINK = inline_pic()
     MSG = "═════════════♢.✰.♢═════════════"
     WEB0 = wb(
@@ -141,7 +141,6 @@ async def _(event):
 
 alive_txt = """
 ━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
-
   ❍ ᴜꜱᴇʀʙᴏᴛ - {}
   ❍ ᴅᴀᴛᴀʙᴀꜱᴇ - {}
   ❍ ᴛᴇʟᴇᴛʜᴏɴ - {}  
