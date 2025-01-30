@@ -154,7 +154,7 @@ async def alive(event):
 
 in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅᴀᴛᴀʙᴀꜱᴇ -></b> <code>{}</code>\n❍ <b>ᴘʏᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ᴛᴇʟᴇᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ʙʀᴀɴᴄʜ -></b>[ {} ]\n"
 
-@callback("alive", owner=False)
+"""@callback("alive", owner=False)
 async def lol(ult):
     match = ult.pattern_match.group(1).strip()
     inline = None
@@ -239,7 +239,7 @@ async def lol(ult):
         parse_mode=parse,
         link_preview=False,
         buttons=buttons if inline else None,
-    )
+    ) """
 
 @callback("close", owner=False)
 async def on_plug_in_callback_query_handler(event):
