@@ -141,7 +141,7 @@ in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅ�
 
 @callback("alive", owner=False)
 async def inline_alive(ult):
-    pic = udB.get_key("ALIVE_PIC")
+pic = udB.get_key("ALIVE_PIC")
     if isinstance(pic, list):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
@@ -189,7 +189,6 @@ async def inline_alive(ult):
         )
     ]
     await ult.answer(result)
-    
 
 @callback("close", owner=False)
 async def on_plug_in_callback_query_handler(event):
