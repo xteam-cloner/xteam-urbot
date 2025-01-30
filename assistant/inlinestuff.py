@@ -23,7 +23,9 @@ from telethon import Button
 from telethon.tl.alltlobjects import LAYER, tlobjects
 from telethon.tl.types import DocumentAttributeAudio as Audio
 from telethon.tl.types import InputWebDocument as wb
-
+from secrets import choice
+from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
+from telethon.tl.types import InputMessagesFilterPhotos
 from pyUltroid.fns.misc import google_search
 from pyUltroid.fns.tools import (
     _webupload_cache,
@@ -135,14 +137,23 @@ async def _(event):
     pin = f"🎯 Pong = {ms} ms\n⏰ Uptime = {uptime}"
     await event.answer(pin, cache_time=0, alert=True)
 
-@in_pattern("Ping$", chats=[], type=["official", "assistant"])
+@in_pattern("asupan", owner=True)
 async def _(event):
-    start = time.time()
-    x = await event.reply("Ping")
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    await asyncio.sleep(1)
-    await x.edit(get_string("kping").format(end))
+    xx = await event.eor(get_string("asupan_1"))
+    try:
+        asupannya = [
+            asupan
+            async for asupan in event.client.iter_messages(
+                "@xcryasupan", filter=InputMessagesFilterVideo
+            )
+        ]
+        await event.client.send_file(
+            event.chat_id, file=choice(asupannya), caption=f"Asupan BY 🥀{OWNER_NAME}🥀", reply_to=event.reply_to_msg_id
+        )
+        await xx.delete()
+    except Exception:
+        await xx.edit("**Tidak bisa menemukan video asupan.**")
+        
 
 alive_txt = """
 ━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
