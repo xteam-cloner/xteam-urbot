@@ -11,7 +11,9 @@ from datetime import datetime
 from html import unescape
 from random import choice
 from re import compile as re_compile
-
+from platform import python_version as pyver
+from telethon import __version__
+from pyUltroid.version import __version__ as UltVer
 from bs4 import BeautifulSoup as bs
 from telethon import Button
 from telethon.tl.alltlobjects import LAYER, tlobjects
@@ -146,7 +148,14 @@ in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅ�
 
 @callback("alive", owner=False)
 async def lol(ult):
-    text = alive_txt.format(OWNER_NAME, f"{ultroid_version} [{HOSTED_ON}]", UltVer, uptime, pyver(), __version__,)
+    text = alive_txt.format(
+        OWNER_NAME,
+        ultroid_version,
+        UltVer,
+        uptime,
+        pyver(),
+        __version__,
+    )
     await event.answer(text, alert=True)
     match = ult.pattern_match.group(1).strip()
     inline = None
