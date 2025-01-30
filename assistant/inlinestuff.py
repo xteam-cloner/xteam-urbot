@@ -139,14 +139,8 @@ async def _(event):
 
 in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅᴀᴛᴀʙᴀꜱᴇ -></b> <code>{}</code>\n❍ <b>ᴘʏᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ᴛᴇʟᴇᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ʙʀᴀɴᴄʜ -></b>[ {} ]\n"
 
-@callback("alive", owner=False)
+@callback("alive( (.*)|$)", owner=False)
 async def lol(ult):
-    asupannya = [
-        asupan
-        async for asupan in ult.client.iter_messages(
-            "@xcryasupan", filter=InputMessagesFilterVideo
-        )
-    ]
     match = ult.pattern_match.group(1).strip()
     inline = None
     if match in ["inline", "i"]:
