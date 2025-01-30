@@ -98,7 +98,7 @@ in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅ�
 
 @callback("alive")
 async def alive(event):
-    text = alive_txt.format(OWNER_NAME, f"{ultroid_version} [{HOSTED_ON}]", UltVer, uptime, pyver(), __version__)
+    text = alive_txt.format(ultroid_version, UltVer, __version__)
     await event.answer(text, alert=True)
 
 
