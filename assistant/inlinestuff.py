@@ -7,6 +7,10 @@
 
 import base64
 import inspect
+import asyncio
+import os
+import sys
+import time
 from datetime import datetime
 from html import unescape
 from random import choice
