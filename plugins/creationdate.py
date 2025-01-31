@@ -3,7 +3,7 @@ import time
 import numpy as np
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
-from . import ultroid_cmd
+from . import ultroid_cmd, eor
 from . import get_help
 
 __doc__ = get_help("help_creationdate")
@@ -105,3 +105,19 @@ async def acc_create_date(event):
     else:
         await event.eor("Provide a username, user ID, or reply to a user's message to get the account creation time.")
         
+@ultroid_cmd("dc")
+async def _(event):
+    "To get dc of your bot"
+    result = await event.client(functions.help.GetNearestDcRequest())
+    result = f"**Dc details of your account:**\
+              \n**Country :** {result.country}\
+              \n**Current Dc :** {result.this_dc}\
+              \n**Nearest Dc :** {result.nearest_dc}\
+              \n\n**List Of Telegram Data Centres:**\
+              \n**DC1 : **Miami FL, USA\
+              \n**DC2 :** Amsterdam, NL\
+              \n**DC3 :** Miami FL, USA\
+              \n**DC4 :** Amsterdam, NL\
+              \n**DC5 : **Singapore, SG\
+                "
+    await eor(event, result)
