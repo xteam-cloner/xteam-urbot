@@ -3,6 +3,7 @@ import time
 import numpy as np
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+from telethon import functions
 from . import ultroid_cmd, eor
 from . import get_help
 
