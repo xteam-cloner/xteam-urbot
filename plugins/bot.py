@@ -47,7 +47,7 @@ from . import (
     ULTROID_IMAGES,
     ALIVE_TEXT,
     ALIVE_NAME,
-    stickers,
+    QUOTES,
     Button,
     Carbon,
     Telegraph,
@@ -154,7 +154,7 @@ async def lol(ult):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
     an=choice(ALIVE_NAME)
-    header=choice(asupannya)
+    header=choice(QUOTES)
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
