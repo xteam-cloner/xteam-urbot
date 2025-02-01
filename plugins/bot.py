@@ -134,7 +134,7 @@ desahcewe = [
 async def lol(ult):
     asupannya = [
         asupan
-        async for asupan in e.client.iter_messages(
+        async for asupan in ult.client.iter_messages(
             "@xcryasupan", filter=InputMessagesFilterVideo
         )
     ]
