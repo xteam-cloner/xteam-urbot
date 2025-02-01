@@ -16,7 +16,11 @@ from platform import python_version as pyver
 from random import choice
 import asyncio
 from .  import ultroid_cmd, eor, time_formatter, start_time, OWNER_NAME
+import time
 from secrets import choice
+from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
+from telethon.tl.types import InputMessagesFilterPhotos
+from .  import ultroid_cmd, eor, time_formatter, start_time, OWNER_NAME
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
 from telethon.tl.types import InputMessagesFilterPhotos
 from telethon import __version__
@@ -101,6 +105,28 @@ async def alive(event):
     text = alive_txt.format(ultroid_version, UltVer, __version__)
     await event.answer(text, alert=True)
 
+"""
+papnya = [
+        pap
+        async for pap in e.client.iter_messages(
+            "@CeweLogoPack", filter=InputMessagesFilterPhotos
+        )
+    ]
+
+ppcpnya = [
+        ppcp
+        async for ppcp in event.client.iter_messages(
+            "@ppcpcilik", filter=InputMessagesFilterPhotos
+        )
+    ]
+
+desahcewe = [
+        desah
+        async for desah in event.client.iter_messages(
+            "@desahancewesangesange", filter=InputMessagesFilterVoice
+        )
+    ]
+"""
 
 @ultroid_cmd(
     pattern="alive( (.*)|$)",
