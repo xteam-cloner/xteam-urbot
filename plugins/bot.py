@@ -108,7 +108,7 @@ async def alive(event):
 async def lol(ult):
     asupannya = [
         asupan
-        async for asupan in ult.client.iter_messages(
+        async for asupan in e.client.iter_messages(
             "@xcryasupan", filter=InputMessagesFilterVideo
         )
     ]
@@ -128,7 +128,7 @@ async def lol(ult):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
     an=choice(ALIVE_NAME)
-    header=choice(ALIVE_PIC)
+    header=choice(asupannya)
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
@@ -137,8 +137,8 @@ async def lol(ult):
         kk = f"<a href={rep}>{y}</a>"
         parse = "html"
         als = in_alive.format(
-            an,
             header,
+            an,
             f"{ultroid_version} [{HOSTED_ON}]",
             UltVer,
             pyver(),
@@ -151,8 +151,8 @@ async def lol(ult):
     else:
         parse = "md"
         als = (get_string("alive_1")).format(
-            an,
             header,
+            an,
             OWNER_NAME,
             f"{ultroid_version} [{HOSTED_ON}]",
             UltVer,
