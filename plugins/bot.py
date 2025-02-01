@@ -127,8 +127,7 @@ async def lol(ult):
     if isinstance(pic, list):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    an=choice(ALIVE_NAME)
-    header=choice(ULTROID_IMAGES)
+    header=choice(ALIVE_NAME)
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
@@ -138,7 +137,6 @@ async def lol(ult):
         parse = "html"
         als = in_alive.format(
             header,
-            an,
             f"{ultroid_version} [{HOSTED_ON}]",
             UltVer,
             pyver(),
@@ -152,7 +150,6 @@ async def lol(ult):
         parse = "md"
         als = (get_string("alive_1")).format(
             header,
-            an,
             OWNER_NAME,
             f"{ultroid_version} [{HOSTED_ON}]",
             UltVer,
