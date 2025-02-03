@@ -98,7 +98,7 @@ alive_txt = """
 ━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
 """
 
-in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅᴀᴛᴀʙᴀꜱᴇ -></b> <code>{}</code>\n❍ <b>ᴘʏᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ᴛᴇʟᴇᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ʙʀᴀɴᴄʜ -></b>[ {} ]\n\n• <b>Join @TeamUltroid</b>"
+in_alive = "{}\n\n❍ <b>ᴜꜱᴇʀʙᴏᴛ -><b> <code>{}</code>\n❍ <b>ᴅᴀᴛᴀʙᴀꜱᴇ -></b> <code>{}</code>\n❍ <b>ᴘʏᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ᴛᴇʟᴇᴛʜᴏɴ -></b> <code>{}</code>\n❍ <b>ʙʀᴀɴᴄʜ -></b>[ {} ]\n\n• <b>❍❍❍❍❍❍❍❍❍❍❍❍❍❍❍❍</b>"
 
 @callback("alive")
 async def alive(event):
@@ -313,22 +313,18 @@ async def inline_alive(ult):
             if ".jpg" in pic:
                 results = [
                     await builder.photo(
-                        pic, text=als, parse_mode="html", buttons=buttons
+                        pic, text=als, parse_mode="html"
                     )
                 ]
             else:
                 if _pic := resolve_bot_file_id(pic):
                     pic = _pic
-                    buttons.insert(
-                        0, [Button.inline(get_string("bot_2"), data="alive")]
-                    )
                 results = [
                     await builder.document(
                         pic,
                         title="Inline Alive",
                         description="@xteam-cloner",
                         parse_mode="html",
-                        buttons=buttons,
                     )
                 ]
             return await ult.answer(results)
@@ -336,7 +332,7 @@ async def inline_alive(ult):
             LOGS.exception(er)
     result = [
         await builder.article(
-            "Alive", text=als, parse_mode="html", link_preview=False, buttons=buttons
+            "Alive", text=als, parse_mode="html", link_preview=False
         )
     ]
     await ult.answer(result)
