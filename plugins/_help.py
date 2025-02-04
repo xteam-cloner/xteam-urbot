@@ -41,9 +41,8 @@ _main_help_menu = [
         #Button.inline("BOT MUSIC"), data="inlone"),
     ],
     [
-        Button.url("BOT MUSIC"), url=f"https://t.me/xteam_musicbot?start=set"),
-        Button.url("ꜱᴇᴛᴛɪɴɢꜱ", url=f"https://t.me/{asst.me.username}?start=set"
-        ),
+        Button.url("BOT MUSIC", url=f"https://t.me/xteam_musicbot?start=set"),
+        Button.url("ꜱᴇᴛᴛɪɴɢꜱ", url=f"https://t.me/{asst.me.username}?start=set"),
     ],
     [Button.inline("ᴄʟᴏꜱᴇ", data="close")],
 ]
