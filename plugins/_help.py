@@ -38,10 +38,10 @@ _main_help_menu = [
     ],
     [
         Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_"),
-        #Button.inline(get_string("help_7"), data="inlone"),
+        #Button.inline("BOT MUSIC"), data="inlone"),
     ],
     [
-        #Button.url(get_string("help_source"), url=f"https://github.com/JIYOXC/Userbot"),
+        Button.url("BOT MUSIC"), url=f"https://t.me/xteam_musicbot?start=set"),
         Button.url("ꜱᴇᴛᴛɪɴɢꜱ", url=f"https://t.me/{asst.me.username}?start=set"
         ),
     ],
