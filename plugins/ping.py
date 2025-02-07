@@ -64,7 +64,7 @@ async def _(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     await asyncio.sleep(1)
-    await x.edit(f"""<blockquote><code>pingpong : {end}</code></blockquote>""")
+    await x.edit(f"""<blockquote>pingpong : {end}</blockquote>""")
 
 import asyncio
 from .  import ultroid_cmd, eor, time_formatter, start_time, OWNER_NAME
