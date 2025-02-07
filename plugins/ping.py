@@ -14,6 +14,7 @@ import os
 import sys
 import time
 from telethon.tl.functions import PingRequest
+from telethon.tl.types import MessageEntityBlockquote
 from pyUltroid.fns.custom_markdown import CustomMarkdown
 from . import (
 OWNER_NAME,
