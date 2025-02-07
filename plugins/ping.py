@@ -56,14 +56,14 @@ async def _(event):
         await x.edit(get_string("ping").format(end, uptime, f"{OWNER_NAME}"), file=pic)
 
 
-@xteam_cmd(pattern="Ping$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="p$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
-    x = await event.reply("Ping")
+    x = await event.reply("ping")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     await asyncio.sleep(1)
-    await x.edit(get_string("kping").format(end))
+    await x.edit(f"""<blockquote><code>pingpong : {end}</code></blockquote>""")
 
 import asyncio
 from .  import ultroid_cmd, eor, time_formatter, start_time, OWNER_NAME
