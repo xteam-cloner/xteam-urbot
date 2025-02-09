@@ -40,14 +40,10 @@ async def mention_user(user_id):
 
 @xteam_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
-    ultroid_bot.parse_mode = CustomMarkdown()
-    message = event.message
-    user_id = OWNER_ID
-    ment = await mention_user(user_id)
     prem = event.pattern_match.group(1)
     start = time.time()
-    x = await event.reply("Pong!")
-    x = await message.react('🕊')
+        await event.reply("Pong!")
+    return await message.react('🕊')
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
         await event.reply(f"""Pong!\n`{end}ms`""")
