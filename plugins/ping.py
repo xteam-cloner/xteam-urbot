@@ -13,6 +13,7 @@ import asyncio
 import os
 import sys
 import time
+from telethon import events
 from telethon.tl.functions import PingRequest
 from telethon.tl.types import MessageEntityBlockquote
 from pyUltroid.fns.custom_markdown import CustomMarkdown
@@ -45,6 +46,7 @@ async def _(event):
     prem = event.pattern_match.group(1)
     start = time.time()
     x = await event.reply("Pong!")
+    await x.react(['🥱', '🤪', '🙉', '😍', '🦄', '🐳', '😘', '💘', '😈', '❤️‍🔥', '🌭', '❤️', '🤔', '🎄', '🥴', '💩', '😁', '👾', '👨‍💻', '🕊', '😐', '👌', '👍', '🔥', '🙈', '🤬', '💋', '😴', '🤷', '🆒', '🤓', '🍌', '😡', '🤡', '👀', '💔', '🤗', '☃️', '🙊', '😭', '🤮', '✍️', '🎃', '😇', '👻', '🏆', '🤝', '💯', '😢', '😱', '🤯', '🤨', '🌚', '😨', '⚡️', '🎉', '🫡', '🤩', '🥰', '🍾', '👏', '🙏', '🎅', '😎', '💊', '👎', '🤣', '🗿', '💅', '🍓', '🖕', '🤷‍♂️', '🤷', '🤷‍♀️'])
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     if prem == "x":
