@@ -50,13 +50,7 @@ async def _(event):
     x = await message.react('🕊')
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    if prem == "x":
-        await x.reply(get_string("pping").format(end, uptime))
-    elif prem == "s":
-        await x.reply(get_string("iping").format(end))
-    else:
-        pic = udB.get_key("PING_PIC")
-        await x.reply(f"""Pong!\n`{end}ms`""")
+        await event.reply(f"""Pong!\n`{end}ms`""")
 
 
 @xteam_cmd(pattern="p$", chats=[], type=["official", "assistant"])
