@@ -40,14 +40,13 @@ async def mention_user(user_id):
 
 @xteam_cmd(pattern="ping", chats=[], type=["official", "assistant"])
 async def _(event):
-    message = event.message
     start = time.time()
-        await event.reply("Pong!")
+message = event.message
+    x = await event.reply("Pong!")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-     try:
-         await message.react("🕊")
-    return await event.reply(f"""Pong!\n`{end}ms`""")
+await message.react('😘')
+return await event.reply(f"""Pong!\n`{end}ms`""")
 
 
 @xteam_cmd(pattern="p$", chats=[], type=["official", "assistant"])
