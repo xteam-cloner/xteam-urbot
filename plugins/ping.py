@@ -22,6 +22,7 @@ from pyUltroid.fns.custom_markdown import CustomMarkdown
 from . import (
 OWNER_NAME,
 OWNER_ID,
+BOT_NAME,
 start_time,
 time_formatter,
 udB,
@@ -86,7 +87,7 @@ async def wping(e):
     uptime = time_formatter((time.time() - start_time) * 1000)
     #await asyncio.sleep(1)
     try:
-        await x.edit(get_string("ping").format(end, uptime, f"{OWNER_NAME}"), file=choice(asupannya))
+        await x.edit(get_string("ping").format(f"{BOT_NAME}", end, uptime, f"{OWNER_NAME}"), file=choice(asupannya))
         #await x.edit(f"**Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`", file=choice(asupannya))
     except Exception as e:
         await x.edit(f"**Ping Error:** {e}")
