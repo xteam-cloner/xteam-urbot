@@ -38,15 +38,16 @@ async def mention_user(user_id):
     except Exception as e:
         print(f"Failed to mention user: {e}")
 
-@xteam_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="ping", chats=[], type=["official", "assistant"])
 async def _(event):
-    prem = event.pattern_match.group(1)
+    message = event.message
     start = time.time()
         await event.reply("Pong!")
-        await event.react("🕊")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-        await event.reply(f"""Pong!\n`{end}ms`""")
+     try:
+         await message.react("🕊")
+    return await event.reply(f"""Pong!\n`{end}ms`""")
 
 
 @xteam_cmd(pattern="p$", chats=[], type=["official", "assistant"])
