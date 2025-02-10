@@ -73,7 +73,7 @@ desahcewe = [
         )
     ]
 """
-@ultroid_cmd(pattern="Cping")
+@xteam_cmd(pattern="Cping")
 async def wping(e):
     asupannya = [
         asupan
