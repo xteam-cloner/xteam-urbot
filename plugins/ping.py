@@ -43,7 +43,7 @@ async def _(event):
     prem = event.pattern_match.group(1)
     start = time.time()
         await event.reply("Pong!")
-    return await message.react('🕊')
+        await event.react("🕊")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
         await event.reply(f"""Pong!\n`{end}ms`""")
