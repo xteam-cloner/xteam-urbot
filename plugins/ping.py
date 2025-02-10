@@ -27,6 +27,7 @@ ultroid_cmd as xteam_cmd,
 get_string,
 ultroid_bot,
 eor,
+asst,
 )
 
 async def mention_user(user_id):
@@ -38,15 +39,14 @@ async def mention_user(user_id):
     except Exception as e:
         print(f"Failed to mention user: {e}")
 
-@xteam_cmd(pattern="ping", chats=[], type=["official", "assistant"])
+@xtem_cmd(pattern="ping", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
-    x = await event.reply("Pong!")
+    asst = await event.reply("Pong!")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-await x.react('😘')
 await asyncio.sleep(1)
-await x.edit(f"""Pong!\n`{end}ms`""")
+await asst.edit(f"""Pong!\n`{end}ms`""")
 
 
 @xteam_cmd(pattern="p$", chats=[], type=["official", "assistant"])
