@@ -24,7 +24,6 @@ from . import (
 OWNER_NAME,
 OWNER_ID,
 BOT_NAME,
-asst.full_name,
 start_time,
 time_formatter,
 udB,
