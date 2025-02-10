@@ -15,7 +15,9 @@ import sys
 import time
 from telethon import events
 from telethon.tl.functions import PingRequest
-from telethon.tl.types import MessageEntityBlockquote
+from secrets import choice
+from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
+from telethon.tl.types import InputMessagesFilterPhotos
 from pyUltroid.fns.custom_markdown import CustomMarkdown
 from . import (
 OWNER_NAME,
@@ -38,31 +40,16 @@ async def mention_user(user_id):
     except Exception as e:
         print(f"Failed to mention user: {e}")
 
-@xtem_cmd(pattern="ping", chats=[], type=["official", "assistant"])
+
+@xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
-    x = await event.reply("Pong!")
+    x = await event.reply("Ping!")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-await asyncio.sleep(1)
-await x.edit(f"""Pong!\n`{end}ms`""")
+    await x.edit(f"**Pong!\n{end}ms**")
 
 
-@xteam_cmd(pattern="p$", chats=[], type=["official", "assistant"])
-async def _(event):
-    start = time.time()
-    x = await event.reply("ping")
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    await asyncio.sleep(1)
-    await x.edit(f"""```{end}```""")
-
-import asyncio
-from .  import ultroid_cmd, eor, time_formatter, start_time, OWNER_NAME
-import time
-from secrets import choice
-from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
-from telethon.tl.types import InputMessagesFilterPhotos
 """
 papnya = [
         pap
