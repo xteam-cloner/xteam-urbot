@@ -104,14 +104,14 @@ async def wping(e):
         )
     ]
     start = time.time()
-    x = await e.edit("Pong!")
+    x = await e.eor("Pong!")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     #await asyncio.sleep(1)
     try:
-       await client.send_message(
+       await x.edit(
     e.chat.id,
-    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :[{OWNER_NAME}](https://t.me/{ultroid_bot.username})"</blockquote>",
+    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
     parse_mode="html",
     file=choice(asupannya)
 )
