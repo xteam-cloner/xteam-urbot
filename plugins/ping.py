@@ -110,7 +110,7 @@ async def wping(e):
     try:
        await client.send_message(
     e.chat.id,
-    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :[{OWNER_NAME}](https://t.me/{asst.username})"</blockquote>",
+    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :[{OWNER_NAME}](https://t.me/{ultroid_bot.username})"</blockquote>",
     parse_mode="html",
     file=choice(asupannya)
 )
