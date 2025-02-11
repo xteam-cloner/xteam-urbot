@@ -34,6 +34,7 @@ ultroid_cmd as xteam_cmd,
 get_string,
 ultroid_bot as client,
 eor,
+ultroid_bot,
 call_back,
 callback,
 Button,
@@ -109,7 +110,7 @@ async def wping(e):
     try:
        await client.send_message(
     e.chat.id,
-    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{inline_mention(client.me)}</blockquote>",
+    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{inline_mention(ultroid_bot.me)}</blockquote>",
     parse_mode="html",
     file=choice(asupannya)
 )
