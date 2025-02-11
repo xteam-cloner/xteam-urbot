@@ -107,9 +107,9 @@ async def wping(e):
     uptime = time_formatter((time.time() - start_time) * 1000)
     #await asyncio.sleep(1)
     try:
-        await client.send_message(
+    x = await client.send_message(
     e.chat.id,
-    f"<blockquote> Ping : `{end}ms`\nUptime : `{uptime}`\nOwner :`{OWNER_NAME}`</blockquote>",
+    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
     parse_mode="html",
     file=choice(asupannya)
         )
