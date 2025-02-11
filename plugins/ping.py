@@ -107,7 +107,9 @@ async def wping(e):
     uptime = time_formatter((time.time() - start_time) * 1000)
     #await asyncio.sleep(1)
     try:
-        await x.edit(get_string("ping").format(f"[{BOT_NAME}](https://t.me/{asst.username})", end, uptime, f"{inline_mention(ultroid_bot.me)}"), file=choice(asupannya), buttons=PING)
+        await client.send_message(e.chat_id, "<blockquote> f"**Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`", file=choice(asupannya))
+</blockquote>", parse_mode="html")
+        #await x.edit(get_string("ping").format(f"[{BOT_NAME}](https://t.me/{asst.username})", end, uptime, f"{inline_mention(ultroid_bot.me)}"), file=choice(asupannya), buttons=PING)
         #await x.edit(f"**Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`", file=choice(asupannya))
     except Exception as e:
         await x.edit(f"**Ping Error:** {e}")
