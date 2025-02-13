@@ -17,6 +17,7 @@ if not run_as_module:
 from .. import *
 from . import *
 DEVLIST = [
+    1434595544, # @xteam_clone
     719195224,  # @xditya
     1322549723,  # @danish_00
     1903729401,  # @its_buddhhu
@@ -26,9 +27,6 @@ DEVLIST = [
     803243487,  # @hellboi_atul
 ]
 
-devs = [
-    1434595544,
-       ]
 
 ULTROID_IMAGES = [
     f"https://graph.org/file/{_}.jpg"
