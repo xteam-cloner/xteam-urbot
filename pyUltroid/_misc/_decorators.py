@@ -76,16 +76,6 @@ def ultroid_cmd(
     only_devs = kwargs.get("only_devs", False)
     func = kwargs.get("func", lambda e: not e.via_bot_id)
 
-def xteam_cmd(
-    pattern=None, manager=False, ultroid_bot=ultroid_bot, asst=asst, **kwargs
-):
-    owner_only = kwargs.get("owner_only", False)
-    groups_only = kwargs.get("groups_only", False)
-    admins_only = kwargs.get("admins_only", False)
-    fullsudo = kwargs.get("fullsudo", False)
-    only_devs = kwargs.get("only_devs", False)
-    func = kwargs.get("func", lambda e: not e.via_bot_id)
-    
     def decor(dec):
         async def wrapp(ult):
             if not ult.out:
