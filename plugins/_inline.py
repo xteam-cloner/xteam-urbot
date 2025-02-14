@@ -59,7 +59,7 @@ SUP_BUTTONS = [
 
 @in_pattern("repo",owner=False)
 async def inline_alive(o):
-    TLINK = inline_pic()
+    TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
     MSG = "**What are you looking for?**"
     WEB0 = InputWebDocument(
         "https://telegra.ph/file/cad7038fe82e47f79c609.jpg", 0, "image/jpg", []
