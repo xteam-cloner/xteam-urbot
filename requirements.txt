@@ -13,3 +13,4 @@ pyrogram
 ffmpeg
 nodejs
 deep-translator
+speedtest-cli
