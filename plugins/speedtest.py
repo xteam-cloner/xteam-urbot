@@ -19,7 +19,7 @@ def testspeed(m):
         return
     return result
 
-@ultroid_bot.on(events.NewMessage(pattern="speedtest"))
+@ultroid_cmd(pattern="speedtest")
 async def speedtest_function(message):
     m = await message.reply("Running Speed test")
     loop = asyncio.get_event_loop()
