@@ -38,3 +38,23 @@ async def speedtest_function(message):
 **__Ping:__** {result['ping']}"""
     await ultroid_bot.send_file(message.chat.id, result["share"], caption=output)
     await m.delete()
+
+
+@ultroid_cmd(pattern="spt")
+async def speedtest_function(ult):
+    # ... your existing code ...
+    try:
+        result = speedtest.speedtest()  # Assuming 'speedtest' is your speedtest object
+        if result and result.get('client') and result['client'].get('isp'): # Improved checking
+            await ult.edit(
+                f"**Speedtest Results:**\n"
+                f"Download: {result['download'] / 1000 / 1000:.2f} Mbps\n"
+                f"Upload: {result['upload'] / 1000 / 1000:.2f} Mbps\n"
+                f"Ping: {result['ping']:.2f} ms\n"
+                f"ISP: {result['client']['isp']}"
+            )
+        else:
+            await ult.edit("**Error:** Could not retrieve speed test results or ISP information.") # Informative error message
+    except Exception as e: # Catch potential exceptions during the speedtest
+        await ult.edit(f"**Error:** An error occurred during the speed test: {e}") # More detailed error message
+    # ... rest of your code ...
