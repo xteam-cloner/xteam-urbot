@@ -24,7 +24,7 @@ async def speedtest_function(message):
     m = await message.reply("Running Speed test")
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(None, testspeed, m)
-    output = f"""**Speedtest Results**
+    output = f"""**<blockquote>Speedtest Results**
     
 **Client:**
 **__ISP:__** {result['client']['isp']}
@@ -35,7 +35,7 @@ async def speedtest_function(message):
 **__Country:__** {result['server']['country']}, {result['server']['cc']}
 **__Sponsor:__** {result['server']['sponsor']}
 **__Latency:__** {result['server']['latency']}  
-**__Ping:__** {result['ping']}"""
+**__Ping:__** {result['ping']}</blockquote>"""
     await ultroid_bot.send_file(message.chat.id, result["share"], caption=output)
     await m.delete()
 
