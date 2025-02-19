@@ -36,7 +36,7 @@ async def speedtest_function(message):
 **__Sponsor:__** {result['server']['sponsor']}
 **__Latency:__** {result['server']['latency']}  
 **__Ping:__** {result['ping']}</blockquote>"""
-    await ultroid_bot.send_file(message.chat.id, result["share"], caption=output)
+    await ultroid_bot.send_file(message.chat.id, result["share"], caption=output, parse_mode="html")
     await m.delete()
 
 
