@@ -79,7 +79,7 @@ async def alive(event):
     owner=await ultroid_bot.get_users(OWNER_ID)
     await event.reply(
         file=choice(PHOTO),
-        caption=f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {app.mention}
+        caption=f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {ultroid_bot.mention}
    ━━━━━━━━━━━━━━━━━━━
   » ᴍʏ ᴏᴡɴᴇʀ : {owner.mention()}
   
