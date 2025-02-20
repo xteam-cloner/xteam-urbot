@@ -16,7 +16,7 @@ from pyrogram.types import Message
 from telethon import TelegramClient, events
 from . import *
 import resources
-
+from ..helpers import inline_mention
 async def member_permissions(chat_id: int, user_id: int):
     perms = []
     member = (await ultroid_bot.get_chat_member(chat_id, user_id)).privileges
