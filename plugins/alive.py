@@ -1,12 +1,24 @@
 import asyncio
 import platform
 import subprocess
+from datetime import datetime
+import asyncio
+from platform import python_version as pyver
+from pyrogram.enums import ChatType
+from pyrogram import __version__ as pver
+from pyrogram import filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from telegram import __version__ as lver
+from telethon import __version__ as tver
+from pytgcalls import __version__ as pytver
+from pyrogram import filters
+from pyrogram.types import Message
 from telethon import TelegramClient, events
 from . import *
 
 async def member_permissions(chat_id: int, user_id: int):
     perms = []
-    member = (await app.get_chat_member(chat_id, user_id)).privileges
+    member = (await ultroid_bot.get_chat_member(chat_id, user_id)).privileges
     if not member:
         return []
     if member.can_post_messages:
@@ -65,9 +77,9 @@ async def alive(event):
     )
     await asyncio.sleep(1)
     await umm.delete()
-    owner=await app.get_users(OWNER_ID)
+    owner=await ultroid_bot.get_users(OWNER_ID)
     await m.reply_photo(
-        PING_IMG_URL,
+        PHOTO,
         caption=f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {app.mention}
    ━━━━━━━━━━━━━━━━━━━
   » ᴍʏ ᴏᴡɴᴇʀ : {owner.mention()}
