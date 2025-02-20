@@ -77,7 +77,7 @@ async def alive(event):
     await asyncio.sleep(1)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await m.reply_photo(
+    await event.reply_photo(
         PHOTO,
         caption=f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {app.mention}
    ━━━━━━━━━━━━━━━━━━━
