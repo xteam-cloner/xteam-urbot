@@ -81,7 +81,7 @@ async def alive(event):
         file=choice(PHOTO),
         caption=f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME}
    ━━━━━━━━━━━━━━━━━━━
-  » ᴍʏ ᴏᴡɴᴇʀ : {owner.mention()}
+  » ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}
   
   » ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}
   
@@ -92,6 +92,6 @@ async def alive(event):
   » ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}
   
   » ᴘʏ-ᴛɢᴄᴀʟʟꜱ ᴠᴇʀꜱɪᴏɴ : {pytver}
-   ━━━━━━━━━━━━━━━━━━━</blockquote>""",
+   ━━━━━━━━━━━━━━━━━━━</blockquote>""", parse_mode="html",
         reply_markup=InlineKeyboardMarkup(Xteam)
     )
