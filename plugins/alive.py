@@ -15,6 +15,7 @@ from pyrogram import filters
 from pyrogram.types import Message
 from telethon import TelegramClient, events
 from . import *
+import resources
 
 async def member_permissions(chat_id: int, user_id: int):
     perms = []
@@ -72,7 +73,7 @@ async def alive(event):
     await accha.edit("ᴅɪɴɢ ᴅᴏɴɢ ꨄ︎ ᴀʟɪᴠɪɴɢ..")
     await asyncio.sleep(1)
     await accha.delete()
-    umm = await event.reply(file="CAACAgUAAxkDAAJHbmLuy2NEfrfh6lZSohacEGrVjd5wAAIOBAACl42QVKnra4sdzC_uKQQ")
+    umm = await event.reply(file="resources/extras/ping_pic.mp4")
     await asyncio.sleep(1)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
