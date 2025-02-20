@@ -72,9 +72,7 @@ async def alive(event):
     await accha.edit("ᴅɪɴɢ ᴅᴏɴɢ ꨄ︎ ᴀʟɪᴠɪɴɢ..")
     await asyncio.sleep(1)
     await accha.delete()
-    umm = await event.reply_sticker(
-        "CAACAgUAAxkDAAJHbmLuy2NEfrfh6lZSohacEGrVjd5wAAIOBAACl42QVKnra4sdzC_uKQQ"
-    )
+    umm = await event.reply(file="CAACAgUAAxkDAAJHbmLuy2NEfrfh6lZSohacEGrVjd5wAAIOBAACl42QVKnra4sdzC_uKQQ")
     await asyncio.sleep(1)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
