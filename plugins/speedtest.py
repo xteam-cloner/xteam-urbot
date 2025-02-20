@@ -40,7 +40,7 @@ async def speedtest_function(message):
     await m.delete()
 
 
-@ultroid.on(commands="spt")
+@ultroid_cmd(pattern="spt")
 async def speedtest_function(ult):
     # ... your existing code ...
     try:
