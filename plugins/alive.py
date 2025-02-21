@@ -77,17 +77,18 @@ async def alive(event):
     await asyncio.sleep(1)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await client.send_message(e.chat.id,
-                              f"<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME},
-                              ━━━━━━━━━━━━━━━━━━━
-                              » ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n
-                              » ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}
-                              » ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}
-                              » ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}
-                              » ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}
-                              » ᴘʏ-ᴛɢᴄᴀʟʟꜱ ᴠᴇʀꜱɪᴏɴ : {pytver}
-                              ━━━━━━━━━━━━━━━━━━━</blockquote>",
-                              parse_mode="html",
-                              file=choice(PHOTO),
-                              buttons=Xteam,
-                             )
+    await client.send_message(
+        e.chat.id,
+        f"<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME},
+        ━━━━━━━━━━━━━━━━━━━
+        » ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n
+       » ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}
+       » ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}
+       » ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}
+       » ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}
+       » ᴘʏ-ᴛɢᴄᴀʟʟꜱ ᴠᴇʀꜱɪᴏɴ : {pytver}
+       ━━━━━━━━━━━━━━━━━━━</blockquote>",
+        parse_mode="html",
+        file=choice(PHOTO),
+        buttons=Xteam,
+    )
