@@ -8,6 +8,7 @@ from pyrogram.enums import ChatType
 from pyrogram import __version__ as pver
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from telethon.tl.types import KeyboardButton
 from telegram import __version__ as lver
 from telethon import __version__ as tver
 from pytgcalls import __version__ as pytver
@@ -79,7 +80,7 @@ async def alive(event):
     owner=await ultroid_bot.get_users(OWNER_ID)
     await client.send_message(
         e.chat.id,
-        f"<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME},
+        f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME},
         ━━━━━━━━━━━━━━━━━━━
         » ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n
        » ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}
@@ -87,7 +88,7 @@ async def alive(event):
        » ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}
        » ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}
        » ᴘʏ-ᴛɢᴄᴀʟʟꜱ ᴠᴇʀꜱɪᴏɴ : {pytver}
-       ━━━━━━━━━━━━━━━━━━━</blockquote>",
+       ━━━━━━━━━━━━━━━━━━━</blockquote>""",
         parse_mode="html",
         file=choice(PHOTO),
         buttons=Xteam,
