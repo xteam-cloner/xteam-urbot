@@ -17,6 +17,7 @@ from telethon import events, TelegramClient
 from telethon.tl.functions import PingRequest
 from secrets import choice
 from telethon import Button
+from pyUltroid._misc import sudoers
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
 from telethon.tl.types import InputMessagesFilterPhotos
 from pyUltroid.fns.custom_markdown import CustomMarkdown
@@ -127,8 +128,7 @@ async def _(e):
     x = await e.eor("Pong!")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-   
-    user = await ping.client.get_me()
+    user = await ping.client.get_sudoers()
     message = "**✧ ᴀʏɪɪɴ-ᴜsᴇʀʙᴏᴛ ✧**\n\n✧ **ᴘɪɴɢᴇʀ :** `{} ms`\n✧ **ᴜᴘᴛɪᴍᴇ :** `{}`\n✧ **ᴏᴡɴᴇʀ :** `{}`\n✧ **ɪᴅ :** `{}`"
     await ping.reply(
         message.format(
