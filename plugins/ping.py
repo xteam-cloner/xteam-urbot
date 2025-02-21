@@ -120,3 +120,21 @@ async def wping(e):
         #await x.edit(f"**Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`", file=choice(asupannya))
     except Exception as e:
         await x.edit(f"**Ping Error:** {e}")
+
+@xteam_cmd("cping$", devs=True)
+async def _(e):
+    start = time.time()
+    x = await e.eor("Pong!")
+    end = round((time.time() - start) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 1000)
+   
+    user = await ping.client.get_me()
+    message = "**✧ ᴀʏɪɪɴ-ᴜsᴇʀʙᴏᴛ ✧**\n\n✧ **ᴘɪɴɢᴇʀ :** `{} ms`\n✧ **ᴜᴘᴛɪᴍᴇ :** `{}`\n✧ **ᴏᴡɴᴇʀ :** `{}`\n✧ **ɪᴅ :** `{}`"
+    await ping.reply(
+        message.format(
+            duration,
+            uptime,
+            user.first_name,
+            user.id
+        )
+)
