@@ -16,6 +16,7 @@ from pyrogram import filters
 from pyrogram.types import Message
 from telethon import TelegramClient, events
 from . import *
+from . import ultroid_bot as client
 import resources
 from pyUltroid.fns.helper import inline_mention
 async def member_permissions(chat_id: int, user_id: int):
@@ -78,7 +79,8 @@ async def alive(event):
     await asyncio.sleep(1)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await event.send_message(
+    try:
+        await client.send_message(
         e.chat.id,
         f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME},
         ━━━━━━━━━━━━━━━━━━━
