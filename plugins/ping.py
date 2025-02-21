@@ -18,7 +18,6 @@ from telethon.tl.functions import PingRequest
 from secrets import choice
 from telethon import Button
 from pyUltroid._misc import sudoers
-#from telethon.utils import InlineKeyboardButton, ReplyInlineMarkup
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
 from telethon.tl.types import InputMessagesFilterPhotos
 from pyUltroid.fns.custom_markdown import CustomMarkdown
@@ -51,7 +50,7 @@ PING = [
         ]
 ]
 
-markup = ReplyInlineMarkup(PING)
+#markup = ReplyInlineMarkup(PING)
 
 
 @callback(data="close", owner=True)
