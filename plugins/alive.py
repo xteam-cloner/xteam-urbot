@@ -93,5 +93,5 @@ async def alive(event):
        ━━━━━━━━━━━━━━━━━━━</blockquote>""",
         parse_mode="html",
         file=choice(PHOTO),
-        buttons=Xteam,
+        buttons=Xteam
     )
