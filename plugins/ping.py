@@ -46,7 +46,7 @@ Button,
 PING = [
     [  # First row of buttons (you can have multiple rows)
             #InlineKeyboardButton("Button 1 Text", url="https://example.com/1"),  # Example URL button
-            InlineKeyboardButton("CLOSE", callback_data="close"), # Example callback button
+            InlineKeyboardButton("CLOSE", callback_data="close") # Example callback button
         ]
 ]
 
@@ -114,6 +114,7 @@ async def wping(e):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     #await asyncio.sleep(1)
+    markup = ReplyInlineMarkup(PING)
     try:
        await client.send_message(
     e.chat.id,
@@ -121,7 +122,7 @@ async def wping(e):
     parse_mode="html",
     file=choice(asupannya),
            buttons=markup,
-)
+       )
    #x = await client.send_message(e.chat.id, "<blockquote> **Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`</blockquote>", parse_mode="html", file=choice(asupannya))")
         #await x.edit(get_string("ping").format(f"[{BOT_NAME}](https://t.me/{asst.username})", end, uptime, f"{inline_mention(ultroid_bot.me)}"), file=choice(asupannya), buttons=PING)
         #await x.edit(f"**Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`", file=choice(asupannya))
