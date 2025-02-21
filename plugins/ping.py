@@ -44,9 +44,10 @@ Button,
 )
 
 PING = [
-    [
-        Button.inline("CLOSE", data="close"),
-    ],
+    [  # First row of buttons (you can have multiple rows)
+            #InlineKeyboardButton("Button 1 Text", url="https://example.com/1"),  # Example URL button
+            InlineKeyboardButton("CLOSE", callback_data="close"), # Example callback button
+        ]
 ]
 
 markup = ReplyInlineMarkup(PING)
