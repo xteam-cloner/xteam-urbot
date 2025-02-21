@@ -46,7 +46,8 @@ Button,
 PING = [
     [  # First row of buttons (you can have multiple rows)
             #InlineKeyboardButton("Button 1 Text", url="https://example.com/1"),  # Example URL button
-            InlineKeyboardButton("CLOSE", callback_data="close") # Example callback button
+            Button.inline("CLOSE", data="close"),
+        #InlineKeyboardButton("ᴘɪɴɢ", callback_data="close") # Example callback button
         ]
 ]
 
@@ -120,7 +121,7 @@ async def wping(e):
     e.chat.id,
     f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
     parse_mode="html",
-    buttons=markup,
+    buttons=PING,
     file=choice(asupannya),
        )
    #x = await client.send_message(e.chat.id, "<blockquote> **Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`</blockquote>", parse_mode="html", file=choice(asupannya))")
