@@ -114,7 +114,8 @@ async def wping(e):
     e.chat.id,
     f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
     parse_mode="html",
-    file=choice(asupannya)
+    file=choice(asupannya),
+           buttons=PING,
 )
    #x = await client.send_message(e.chat.id, "<blockquote> **Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`</blockquote>", parse_mode="html", file=choice(asupannya))")
         #await x.edit(get_string("ping").format(f"[{BOT_NAME}](https://t.me/{asst.username})", end, uptime, f"{inline_mention(ultroid_bot.me)}"), file=choice(asupannya), buttons=PING)
@@ -128,9 +129,9 @@ async def _(e):
     x = await e.eor("Pong!")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    user = await ping.client.get_sudoers()
+    user = await e.client.get_sudoers()
     message = "**✧ ᴀʏɪɪɴ-ᴜsᴇʀʙᴏᴛ ✧**\n\n✧ **ᴘɪɴɢᴇʀ :** `{} ms`\n✧ **ᴜᴘᴛɪᴍᴇ :** `{}`\n✧ **ᴏᴡɴᴇʀ :** `{}`\n✧ **ɪᴅ :** `{}`"
-    await ping.reply(
+    await e.reply(
         message.format(
             duration,
             uptime,
