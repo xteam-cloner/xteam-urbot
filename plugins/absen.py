@@ -21,7 +21,7 @@ from pyUltroid._misc import sudoers
 from . import cmd, ultroid_cmd, get_string, inline_mention, udB, ultroid_bot
 
 absen = [
-    "**𝙃𝙖𝙙𝙞𝙧 𝙙𝙤𝙣𝙜 𝙏𝙤𝙙** 😁",
+    "**Hadir mas Ganteng** 😁",
     "**𝙃𝙖𝙙𝙞𝙧 𝙆𝙖𝙠𝙖 𝙂𝙖𝙣𝙩𝙚𝙣𝙜** 😉",
     "**𝙂𝙪𝙖 𝙃𝙖𝙙𝙞𝙧 𝘾𝙤𝙣𝙩𝙤𝙡** 😁",
     "**𝙂𝙪𝙖 𝙃𝙖𝙙𝙞𝙧 𝙂𝙖𝙣𝙩𝙚𝙣𝙜** 🥵",
@@ -30,7 +30,7 @@ absen = [
     "**𝙎𝙞 𝘾𝙖𝙠𝙚𝙥 𝙃𝙖𝙙𝙞𝙧 𝘽𝙖𝙣𝙜** 😎",
 ]
 
-ayiincakep = [
+xteamcakep = [
     "**𝙄𝙮𝙖 𝙂𝙖𝙣𝙩𝙚𝙣𝙜 𝘽𝙖𝙣𝙜𝙚𝙩** 😍",
     "**𝙂𝙖𝙣𝙩𝙚𝙣𝙜𝙣𝙮𝙖 𝙂𝙖𝙠 𝘼𝙙𝙖 𝙇𝙖𝙬𝙖𝙣** 😚",
     "**𝙠𝙖𝙢𝙪 𝙂𝙖𝙣𝙩𝙚𝙣𝙜𝙣𝙮𝙖 𝘼𝙠𝙪 𝙆𝙖𝙣** 😍",
@@ -46,13 +46,13 @@ ayiincakep = [
 # Absen by : mrismanaziz <https://github.com/mrismanaziz/man-userbot>
 
 @ultroid_cmd(pattern="absen$", devs=True)
-async def absen(sudoers):
-    await sudoers.reply(choice(absen))
+async def absen(xteam):
+    await xteam.reply(choice(absen))
 
 
 @ultroid_cmd(pattern="Aku ganteng kan$", devs=True)
-async def ayiin(ganteng):
-    await ganteng.reply(choice(ayiincakep))
+async def xteam(ganteng):
+    await ganteng.reply(choice(xteamcakep))
 
 
 # ========================×========================
