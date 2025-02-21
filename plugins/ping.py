@@ -114,7 +114,6 @@ async def wping(e):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     #await asyncio.sleep(1)
-    markup = ReplyInlineMarkup(PING)
     try:
        await client.send_message(
     e.chat.id,
