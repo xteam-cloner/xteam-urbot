@@ -46,8 +46,8 @@ xteamcakep = [
 # Absen by : mrismanaziz <https://github.com/mrismanaziz/man-userbot>
 
 @ultroid_cmd(pattern="absen$", devs=True)
-async def absen(xteam):
-    await xteam.reply(choice(absen))
+async def absen(ganteng):
+    await ganteng.reply(choice(absen))
 
 
 @ultroid_cmd(pattern="Aku ganteng kan$", devs=True)
