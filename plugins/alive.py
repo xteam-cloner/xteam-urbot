@@ -78,7 +78,7 @@ async def alive(event):
     await asyncio.sleep(1)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await client.send_message(
+    await event.send_message(
         e.chat.id,
         f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME},
         ━━━━━━━━━━━━━━━━━━━
