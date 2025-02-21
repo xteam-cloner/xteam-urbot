@@ -93,5 +93,7 @@ async def alive(event):
        ━━━━━━━━━━━━━━━━━━━</blockquote>""",
         parse_mode="html",
         file=choice(PHOTO),
-        buttons=Xteam
+        buttons=Xteam,
     )
+except Exception as e:
+        await x.edit(f"**Alive Error:** {e}")
