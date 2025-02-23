@@ -96,16 +96,3 @@ async def alive(event):
    ━━━━━━━━━━━━━━━━━━━""",
         reply_markup=InlineKeyboardMarkup(Mukesh)
     )
-
-@ultroid_bot.on_message(group=1)
-async def save_statss(_, m):
-    try:
-        if m.chat.type == ChatType.PRIVATE:
-            save_id(m.from_user.id)
-        elif m.chat.type==ChatType.SUPERGROUP:
-            add_served_chat(m.chat.id)
-        else:
-            add_served_chat(m.chat.id)        
-
-    except Exception as e:
-        pass
