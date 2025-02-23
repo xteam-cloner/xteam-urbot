@@ -67,8 +67,8 @@ Mukesh = [
     ],
 ]
 
-message_text = f"
-ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』
+message_text = [
+"ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』
    ━━━━━━━━━━━━━━━━━━━
   » ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}
   
@@ -79,8 +79,8 @@ message_text = f"
   » ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}
   
   » ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}
-   ━━━━━━━━━━━━━━━━━━━
-   "
+   ━━━━━━━━━━━━━━━━━━━"
+]
 
 
 @ultroid_cmd(pattern="Alive$")
