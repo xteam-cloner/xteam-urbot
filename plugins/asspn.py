@@ -2,6 +2,10 @@ from telethon import events, types, functions
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterPhotos
 from random import choice
 from . import *
+from secrets import choice
+from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
+from telethon.tl.types import InputMessagesFilterPhotos
+from . import eor, ultroid_cmd, get_string, OWNER_NAME
 
 
 # ... (kode inisialisasi client) ...
