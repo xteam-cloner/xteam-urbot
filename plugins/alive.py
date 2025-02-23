@@ -67,10 +67,23 @@ Mukesh = [
     ],
 ]
 
+message_text = """
+ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』
+   ━━━━━━━━━━━━━━━━━━━
+  » ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}
+  
+  » ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}
+  
+  » ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}
+  
+  » ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}
+  
+  » ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}
+   ━━━━━━━━━━━━━━━━━━━
+   """
 
 
-
-@ultroid_cmd(pattern="calive$")
+@ultroid_cmd(pattern="Alive$")
 async def alive(event):
     await event.delete()
     accha = await event.reply("⚡")
@@ -82,19 +95,5 @@ async def alive(event):
     await asyncio.sleep(1)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await client.send_message(
-        f"""**ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』**
-   ━━━━━━━━━━━━━━━━━━━
-  » **ᴍʏ ᴏᴡɴᴇʀ :** {inline_mention(ultroid_bot.me)}
-  
-  » **ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ :** `{lver}`
-  
-  » **ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ :** `{tver}`
-  
-  » **ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ :** `{pver}`
-  
-  » **ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ :** `{pyver()}`
-   ━━━━━━━━━━━━━━━━━━━",
-   buttons=Mukesh,
-    """)
+    await client.send_message(event.chat.id, message_text, buttons=Mukesh)
     
