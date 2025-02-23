@@ -16,6 +16,7 @@ from pytgcalls import __version__ as pytver
 from pyrogram import filters
 from pyrogram.types import Message
 from telethon import TelegramClient, events
+from telethon.tl.custom import Button
 from . import *
 from . import ultroid_bot as client
 import resources
@@ -56,12 +57,11 @@ PHOTO = [
 
 Mukesh = [
     [
-        KeyboardButton(text="ɴᴏᴏʙ", user_id=OWNER_ID),
-        KeyboardButton(text="ꜱᴜᴘᴘᴏʀᴛ", url=f"https://t.me/xteam_cloner"),
+        Button.inline("ɴᴏᴏʙ", user_id=OWNER_ID),
+        Button.url("ꜱᴜᴘᴘᴏʀᴛ", url=f"https://t.me/xteam_cloner"),
     ],
     [
-        KeyboardButton(
-            text="➕ᴀᴅᴅ ᴍᴇ ᴇʟsᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘ➕",
+        Button.url("➕ᴀᴅᴅ ᴍᴇ ᴇʟsᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘ➕",
             url=f"https://t.me/{BOT_USERNAME}?startgroup=true",
         ),
     ],
@@ -94,6 +94,6 @@ async def alive(event):
   » **ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ :** `{pver}`
   
   » **ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ :** `{pyver()}`
-   ━━━━━━━━━━━━━━━━━━━""",
-        reply_markup=ReplyKeyboardMarkup(Mukesh)
+   ━━━━━━━━━━━━━━━━━━━",
+   buttons=Mukesh,
     )
