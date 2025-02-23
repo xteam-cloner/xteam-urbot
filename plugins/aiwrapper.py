@@ -233,7 +233,7 @@ async def get_ai_response(provider, prompt, api_key, stream=False):
         yield f"Error: {str(e)}"
 
 
-@ultroid_cmd(pattern="Gemini( (.*)|$)")
+@ultroid_cmd(pattern="gemini( (.*)|$)")
 async def gemini_ai(event):
     """Use Google Gemini"""
     prompt = event.pattern_match.group(1).strip()
@@ -248,8 +248,8 @@ async def gemini_ai(event):
     model = get_model("gemini")
     
     header = (
-        f"<blockquote>🔍 Prompt:\n{prompt}\n\n"
-        "💡 Response:\n</blockquote>"
+        f"🔍 Prompt:\n{prompt}\n\n"
+        "💡 Response:\n"
     )
     
     if event.client.me.bot:
@@ -258,7 +258,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
             try:
-                await msg.edit(header + response, parse_mode="html")
+                await msg.edit(header + response)
             except Exception:
                 pass
     else:
@@ -266,7 +266,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
         try:
-                await msg.edit(header + response, parse_mode="html")
+                await msg.edit(header + response)
         except Exception:
                 pass
 
