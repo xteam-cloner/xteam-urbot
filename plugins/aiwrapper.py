@@ -372,7 +372,7 @@ async def deepseek_ai(event):
         f"**Model:** `{model}`\n"
         "➖➖➖➖➖➖➖➖➖➖\n\n"
         f"**🔍 Prompt:**\n{prompt}\n\n"
-        f"**💡 Response:**\n{response}\n"
+        f"**💡 Response:**\n"
     )
     
     if event.client.me.bot:
