@@ -98,4 +98,4 @@ async def alive(event):
    buttons=Mukesh,
     """)
 except Exception as e:
-        await x.edit(f"**Ping Error:** {e}")
+        await event.edit(f"**Alive Error:** {e}")
