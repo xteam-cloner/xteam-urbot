@@ -84,7 +84,7 @@ async def alive(event):
     await client.send_message(
         caption=f"""**ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』**
    ━━━━━━━━━━━━━━━━━━━
-  » **ᴍʏ ᴏᴡɴᴇʀ :** {owner.mention()}
+  » **ᴍʏ ᴏᴡɴᴇʀ :** {inline_mention(ultroid_bot.me)}
   
   » **ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ :** `{lver}`
   
