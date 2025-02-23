@@ -19,6 +19,7 @@ from . import *
 from . import ultroid_bot as client
 import resources
 from pyUltroid.fns.helper import inline_mention
+
 async def member_permissions(chat_id: int, user_id: int):
     perms = []
     member = (await ultroid_bot.get_chat_member(chat_id, user_id)).privileges
@@ -81,7 +82,6 @@ async def alive(event):
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
     await client.send_message(
-        START_IMG,
         caption=f"""**ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』**
    ━━━━━━━━━━━━━━━━━━━
   » **ᴍʏ ᴏᴡɴᴇʀ :** {owner.mention()}
