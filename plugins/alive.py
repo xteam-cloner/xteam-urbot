@@ -97,5 +97,4 @@ async def alive(event):
    ━━━━━━━━━━━━━━━━━━━",
    buttons=Mukesh,
     """)
-except Exception as e:
-        await event.edit(f"**Alive Error:** {e}")
+    
