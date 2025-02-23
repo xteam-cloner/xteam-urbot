@@ -8,7 +8,7 @@ from pyrogram.enums import ChatType
 from pyrogram import __version__ as pver
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from telethon.tl.types import KeyboardButton
+#from telethon.tl.types import KeyboardButton
 from telegram import __version__ as lver
 from telethon import __version__ as tver
 from pytgcalls import __version__ as pytver
@@ -52,10 +52,10 @@ PHOTO = [
     "https://telegra.ph/file/bdfd86195221e979e6b20.jpg",
 ]
 
-Xteam = [
+Mukesh = [
     [
         InlineKeyboardButton(text="ɴᴏᴏʙ", user_id=OWNER_ID),
-        InlineKeyboardButton(text="ꜱᴜᴘᴘᴏʀᴛ", url=f"https://t.me/xteam_cloner"),
+        InlineKeyboardButton(text="ꜱᴜᴘᴘᴏʀᴛ", url=f"https://t.me/{SUPPORT_CHAT}"),
     ],
     [
         InlineKeyboardButton(
@@ -64,6 +64,7 @@ Xteam = [
         ),
     ],
 ]
+
 
 
 
@@ -79,21 +80,32 @@ async def alive(event):
     await asyncio.sleep(1)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    try:
-        await client.send_message(
-        e.chat.id,
-        f"""<blockquote>» ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME},
-        ━━━━━━━━━━━━━━━━━━━
-        » ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n
-       » ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}
-       » ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}
-       » ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}
-       » ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}
-       » ᴘʏ-ᴛɢᴄᴀʟʟꜱ ᴠᴇʀꜱɪᴏɴ : {pytver}
-       ━━━━━━━━━━━━━━━━━━━</blockquote>""",
-        parse_mode="html",
-        file=choice(PHOTO),
-        buttons=Xteam,
+    await client.send_message(
+        START_IMG,
+        caption=f"""**ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』**
+   ━━━━━━━━━━━━━━━━━━━
+  » **ᴍʏ ᴏᴡɴᴇʀ :** {owner.mention()}
+  
+  » **ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ :** `{lver}`
+  
+  » **ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ :** `{tver}`
+  
+  » **ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ :** `{pver}`
+  
+  » **ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ :** `{pyver()}`
+   ━━━━━━━━━━━━━━━━━━━""",
+        reply_markup=InlineKeyboardMarkup(Mukesh)
     )
-except Exception as e:
-        await x.edit(f"**Alive Error:** {e}")
+
+@ultroid_bot.on_message(group=1)
+async def save_statss(_, m):
+    try:
+        if m.chat.type == ChatType.PRIVATE:
+            save_id(m.from_user.id)
+        elif m.chat.type==ChatType.SUPERGROUP:
+            add_served_chat(m.chat.id)
+        else:
+            add_served_chat(m.chat.id)        
+
+    except Exception as e:
+        pass
