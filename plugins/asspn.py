@@ -2,6 +2,12 @@ from telethon import events, types, functions
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterPhotos
 from random import choice
 from . import *
+
+
+# ... (kode inisialisasi client) ...
+
+client.add_event_handler(inline_asupan)
+client.add_event_handler(inline_pap)
 @events.InlineQuery
 async def inline_asupan(event):
     builder = event.builder
