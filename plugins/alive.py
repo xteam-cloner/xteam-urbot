@@ -82,7 +82,7 @@ async def alive(event):
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
     await client.send_message(
-        caption=f"""**ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』**
+        f"""**ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』**
    ━━━━━━━━━━━━━━━━━━━
   » **ᴍʏ ᴏᴡɴᴇʀ :** {inline_mention(ultroid_bot.me)}
   
