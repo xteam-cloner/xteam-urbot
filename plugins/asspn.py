@@ -6,7 +6,7 @@ from secrets import choice
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
 from telethon.tl.types import InputMessagesFilterPhotos
 from . import eor, ultroid_cmd, get_string, OWNER_NAME
-
+from . import ultroid_cmd as client
 
 # ... (kode inisialisasi client) ...
 
