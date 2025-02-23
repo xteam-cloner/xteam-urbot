@@ -68,7 +68,7 @@ Mukesh = [
 ]
 
 message_text = [
-"ʜᴇʏ, ɪ ᴀᴍ 『[{BOT_NAME}](f"t.me/{BOT_USERNAME}")』
+"ʜᴇʏ, ɪ ᴀᴍ 『 {BOT_NAME} 🥀』
    ━━━━━━━━━━━━━━━━━━━
   » ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}
   
