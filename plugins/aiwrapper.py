@@ -8,16 +8,16 @@
 """
 ✘ Commands Available -
 
-• `{i}gemini <prompt>`
+• `{i}Gemini <prompt>`
     Get response from Google Gemini.
 
-• `{i}antr <prompt>`
+• `{i}Antr <prompt>`
     Get response from Anthropic Claude.
 
-• `{i}gpt <prompt>`
+• `{i}Gpt <prompt>`
     Get response from OpenAI GPT.
 
-• `{i}deepseek <prompt>`
+• `{i}Deepseek <prompt>`
     Get response from DeepSeek AI.
 
 Set custom models using:
@@ -233,7 +233,7 @@ async def get_ai_response(provider, prompt, api_key, stream=False):
         yield f"Error: {str(e)}"
 
 
-@ultroid_cmd(pattern="gemini( (.*)|$)")
+@ultroid_cmd(pattern="Gemini( (.*)|$)")
 async def gemini_ai(event):
     """Use Google Gemini"""
     prompt = event.pattern_match.group(1).strip()
@@ -244,15 +244,12 @@ async def gemini_ai(event):
     if not api_key:
         return await event.eor("⚠️ Please set Gemini API key using `setdb GEMINI_API_KEY your_api_key`")
 
-    msg = await event.eor("🤔 Thinking...")
+    msg = await event.eor("```🤔 Thinking ...```")
     model = get_model("gemini")
     
     header = (
-        "🤖 **Google Gemini**\n"
-        f"**Model:** `{model}`\n"
-        "➖➖➖➖➖➖➖➖➖➖\n\n"
-        f"**🔍 Prompt:**\n{prompt}\n\n"
-        "**💡 Response:**\n"
+        f"<blockquote>🔍 Prompt:**\n{prompt}\n\n"
+        "**💡 Response:\n</blockquote>"
     )
     
     if event.client.me.bot:
@@ -261,7 +258,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=True):
             response += chunk
             try:
-                await msg.edit(header + response)
+                await msg.edit(header + response, parse_mode="html")
             except Exception:
                 pass
     else:
@@ -269,7 +266,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=True):
             response += chunk
         try:
-                await msg.edit(header + response)
+                await msg.edit(header + response, parse_mode="html")
         except Exception:
                 pass
 
