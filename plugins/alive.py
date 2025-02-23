@@ -96,4 +96,6 @@ async def alive(event):
   » **ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ :** `{pyver()}`
    ━━━━━━━━━━━━━━━━━━━",
    buttons=Mukesh,
-    )
+    """)
+except Exception as e:
+        await x.edit(f"**Ping Error:** {e}")
