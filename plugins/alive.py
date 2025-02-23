@@ -8,6 +8,7 @@ from pyrogram.enums import ChatType
 from pyrogram import __version__ as pver
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from telethon.tl.types import ReplyKeyboardMarkup, KeyboardButton
 #from telethon.tl.types import KeyboardButton
 from telegram import __version__ as lver
 from telethon import __version__ as tver
@@ -55,11 +56,11 @@ PHOTO = [
 
 Mukesh = [
     [
-        InlineKeyboardButton(text="ɴᴏᴏʙ", user_id=OWNER_ID),
-        InlineKeyboardButton(text="ꜱᴜᴘᴘᴏʀᴛ", url=f"https://t.me/xteam_cloner"),
+        KeyboardButton(text="ɴᴏᴏʙ", user_id=OWNER_ID),
+        KeyboardButton(text="ꜱᴜᴘᴘᴏʀᴛ", url=f"https://t.me/xteam_cloner"),
     ],
     [
-        InlineKeyboardButton(
+        KeyboardButton(
             text="➕ᴀᴅᴅ ᴍᴇ ᴇʟsᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘ➕",
             url=f"https://t.me/{BOT_USERNAME}?startgroup=true",
         ),
@@ -94,5 +95,5 @@ async def alive(event):
   
   » **ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ :** `{pyver()}`
    ━━━━━━━━━━━━━━━━━━━""",
-        reply_markup=InlineKeyboardMarkup(Mukesh)
+        reply_markup=ReplyKeyboardMarkup(Mukesh)
     )
