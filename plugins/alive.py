@@ -57,7 +57,7 @@ PHOTO = [
 
 Mukesh = [
     [
-        Button.inline("ɴᴏᴏʙ", data={inline_mention(ultroid_bot.me)}),
+        Button.url("ɴᴏᴏʙ", url=f"https://t.me/{OWNER_USERNAME}"),
         Button.url("ꜱᴜᴘᴘᴏʀᴛ", url=f"https://t.me/xteam_cloner"),
     ],
     [
