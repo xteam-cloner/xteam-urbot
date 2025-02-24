@@ -32,7 +32,7 @@ async def self_react(e):
             return await eris.edit("AutoReact is Already Enabled..")
         ultroid_bot.add_event_handler(
             autoreact,
-            NewMessage(
+            e.chat.id(
                 outgoing=True,
                 func=lambda e: not (e.fwd_from or e.via_bot),
             )
