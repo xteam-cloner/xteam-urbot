@@ -134,13 +134,29 @@ async def _(e):
     x = await e.eor("Pong!")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    user = await e.client.get_sudoers()
+    sudos = sudoers()
+    m = udB.get_key("SUDO") or True
+    #user = await e.client.get_sudoers()
     message = "**✧ ᴀʏɪɪɴ-ᴜsᴇʀʙᴏᴛ ✧**\n\n✧ **ᴘɪɴɢᴇʀ :** `{} ms`\n✧ **ᴜᴘᴛɪᴍᴇ :** `{}`\n✧ **ᴏᴡɴᴇʀ :** `{}`\n✧ **ɪᴅ :** `{}`"
     await e.reply(
         message.format(
             duration,
             uptime,
-            user.first_name,
-            user.id
+            sudos.first_name,
+            sudos
         )
 )
+sudos = sudoers()
+    if not sudos:
+        return await ult.eor(get_string("sudo_3"), time=5)
+    msg = ""
+    for i in sudos:
+        try:
+            name = await ult.client.get_entity(int(i))
+        except BaseException:
+            name = None
+        if name:
+            msg += f"• {inline_mention(name)} ( `{i}` )\n"
+        else:
+            msg += f"• `{i}` -> Invalid User\n"
+    m = udB.get_key("SUDO") or True
