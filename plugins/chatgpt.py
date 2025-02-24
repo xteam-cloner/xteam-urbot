@@ -258,7 +258,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
             try:
-                await msg.edit(f"<blockquote>{header + response}</blockquote>", parse_mode="html")
+                await msg.edit(header + response, parse_mode="html")
             except Exception:
                 pass
     else:
@@ -266,7 +266,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
         try:
-                await msg.edit(f"<blockquote>{header + response}</blockquote>", parse_mode="html")
+                await msg.edit(header + response, parse_mode="html")
         except Exception:
                 pass
 
