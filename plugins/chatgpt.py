@@ -255,7 +255,7 @@ async def gemini_ai(event):
     if event.client.me.bot:
         await msg.edit(header)
         response = ""
-        async for chunk in get_ai_response("gemini", prompt, api_key, stream=True):
+        async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
             try:
                 await msg.edit(header + response)
@@ -263,7 +263,7 @@ async def gemini_ai(event):
                 pass
     else:
         response = ""
-        async for chunk in get_ai_response("gemini", prompt, api_key, stream=True):
+        async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
         try:
                 await msg.edit(header + response)
