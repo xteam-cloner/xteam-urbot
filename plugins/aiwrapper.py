@@ -248,7 +248,7 @@ async def gemini_ai(event):
     model = get_model("gemini")
     
     header = (
-        f"<blockquote>🔍 Prompt:\n{prompt}\n\n"
+        f"<blockquote>🔍 Prompt:\n{prompt}\n\n"
         "💡 Response:\n{header + response}</blockquote>"
         )
 
@@ -258,7 +258,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
             try:
-                await msg.edit(header + response)
+                await msg.edit(f"<blockquote>header + response</blockquote>")
             except Exception:
                 pass
     else:
@@ -266,7 +266,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
         try:
-                await msg.edit(f"<blockquote>header + response</blockquote>)
+                await msg.edit(f"<blockquote>header + response</blockquote>")
         except Exception:
                 pass
 
