@@ -9,13 +9,8 @@
 import os
 from time import sleep
 
-ULTROID = r"""
-  _    _ _ _             _     _
- | |  | | | |           (_)   | |
- | |  | | | |_ _ __ ___  _  __| |
- | |  | | | __| '__/ _ \| |/ _  |
- | |__| | | |_| | | (_) | | (_| |
-  \____/|_|\__|_|  \___/|_|\__,_|
+XTEAM USERBOT = r"""
+XTEAM USERBOT
 """
 
 
@@ -63,7 +58,7 @@ def telethon_session():
 
         x = "\bDone. Installed and imported Telethon."
     clear_screen()
-    print(ULTROID)
+    print(XTEAM USERBOT)
     print(x)
 
     # the imports
@@ -81,11 +76,11 @@ def telethon_session():
     # logging in
     try:
         with TelegramClient(StringSession(), API_ID, API_HASH) as ultroid:
-            print("Generating a string session for •ULTROID•")
+            print("Generating a string session for •XTEAM USERBOT•")
             try:
                 ultroid.send_message(
                     "me",
-                    f"**ULTROID** `SESSION`:\n\n`{ultroid.session.save()}`\n\n**Do not share this anywhere!**",
+                    f"**XTEAM** `SESSION`:\n\n`{ultroid.session.save()}`\n\n**Do not share this anywhere!**",
                 )
                 print(
                     "Your SESSION has been generated. Check your Telegram saved messages!"
@@ -125,7 +120,7 @@ def pyro_session():
         from pyrogram import Client
         
     clear_screen()
-    print(ULTROID)
+    print(XTEAM USERBOT)
     print(x)
 
     # generate a session
@@ -147,11 +142,11 @@ def pyro_session():
 
 def main():
     clear_screen()
-    print(ULTROID)
+    print(XTEAM USERBOT)
     try:
         type_of_ss = int(
             input(
-                "\nUltroid supports both telethon as well as pyrogram sessions.\n\nWhich session do you want to generate?\n1. Telethon Session.\n2. Pyrogram Session.\n\nEnter choice:  "
+                "\nUserbot supports both telethon as well as pyrogram sessions.\n\nWhich session do you want to generate?\n1. Telethon Session.\n2. Pyrogram Session.\n\nEnter choice:  "
             )
         )
     except Exception as e:
