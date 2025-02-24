@@ -6,13 +6,7 @@
 # PLease read the GNU Affero General Public License in <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 
 clear
-echo -e "\e[1m"
-echo "  _    _ _ _             _     _ "
-echo " | |  | | | |           (_)   | |"
-echo " | |  | | | |_ _ __ ___  _  __| |"
-echo " | |  | | | __| '__/ _ \| |/ _  |"
-echo " | |__| | | |_| | | (_) | | (_| |"
-echo "  \____/|_|\__|_|  \___/|_|\__,_|"
+echo -e "\e[1m"XTEAM USERBOT
 echo -e "\e[0m"
 sec=5
 spinner=(⣻ ⢿ ⡿ ⣟ ⣯ ⣷)
@@ -26,7 +20,7 @@ apt-get update
 apt-get upgrade -y
 pkg upgrade -y
 pkg install python wget -y
-wget https://raw.githubusercontent.com/TeamUltroid/ultroid/main/resources/session/ssgen.py
+wget https://raw.githubusercontent.com/xteam-cloner/Userbotx/dev/resources/session/ssgen.py
 pip uninstall telethon -y && install telethon
 clear
 python3 ssgen.py
