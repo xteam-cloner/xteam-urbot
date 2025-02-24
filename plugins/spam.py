@@ -3,8 +3,7 @@
 
 """
 ✘ Commands Available -
-• `{i}spam <no of msgs> <your msg>`
-  `{i}spam <no of msgs> <reply message>`
+• `{i}spam <no of msgs> <your msg or reply message>`
     spams chat, the current limit for this is from 1 to 99.
 
 • `{i}bigspam <no of msgs> <your msg>`
@@ -16,15 +15,15 @@
 
 • `{i}tspam <text>`
     Spam Chat with One-One Character..
-✘ Unlimited SPAM!
-
-•  **your account might get limited or banned!**
-•  **use on your own risk !**
 
 • **CMD:**
 >  `{i}uspam <text>`
 >  `{i}stopuspam`  ->  To stop spam.
+
+•  **your account might get limited or banned!**
+•  **use on your own risk !**
 """
+
 import asyncio
 
 from . import *
@@ -32,15 +31,7 @@ from asyncio import sleep
 from telethon.errors import FloodWaitError
 from . import udB, NOSPAM_CHAT as noU
 
-yyyyyyy
 udB.del_key("USPAM")
-
-
-
-import asyncio
-
-from . import *
-
 
 @ultroid_cmd(pattern="tspam", fullsudo=True)
 async def tmeme(e):
