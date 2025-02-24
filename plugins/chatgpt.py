@@ -244,7 +244,7 @@ async def gemini_ai(event):
     if not api_key:
         return await event.eor("⚠️ Please set Gemini API key using `setdb GEMINI_API_KEY your_api_key`")
 
-    msg = await event.eor(f"<blockquote>🤔 Thinking...</blockquote>")
+    msg = await event.eor(f"<blockquote>🤔 Thinking...</blockquote>", parse_mode="html")
     model = get_model("gemini")
     
     header = (
