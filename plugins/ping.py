@@ -134,5 +134,5 @@ async def _(event):
     x = await event.edit("Pong !")
     end = round((time.time() - start) * 10000)
     uptime = time_formatter((time.time() - start_time) * 10000)
-    await x.edit(f"**🏓 Ping : {end}ms\n\n⏰ Uptime : {uptime}**")
+    await x.reply(f"<blockquote>🏓 Ping : {end}ms\n⏰ Uptime : {uptime}</blockquote>", parse_mode="html")
     
