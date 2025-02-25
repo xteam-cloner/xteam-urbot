@@ -128,11 +128,11 @@ async def wping(e):
     except Exception as e:
         await x.edit(f"**Ping Error:** {e}")
 
-@ultroid_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
     x = await event.edit("Pong !")
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
+    end = round((time.time() - start) * 10000)
+    uptime = time_formatter((time.time() - start_time) * 10000)
     await x.edit(f"**🏓 Ping : {end}ms\n\n⏰ Uptime : {uptime}**")
     
