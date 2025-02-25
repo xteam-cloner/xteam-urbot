@@ -134,5 +134,5 @@ async def _(event):
     x = await event.eor("Pong !")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    await x.reply(f"🏓 Ping : {end}ms\n\n⏰ Uptime : {uptime}")
+    await x.edit(f"🏓 Ping : {end}ms\n\n⏰ Uptime : {uptime}")
     
