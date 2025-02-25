@@ -131,8 +131,8 @@ async def wping(e):
 @ultroid_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
-    x = await event.eor("Pong !")
+    x = await event.edit("Pong !")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    await x.edit(f"🏓 Ping : {end}ms\n\n⏰ Uptime : {uptime}")
+    await x.edit(f"**🏓 Ping : {end}ms\n\n⏰ Uptime : {uptime}**")
     
