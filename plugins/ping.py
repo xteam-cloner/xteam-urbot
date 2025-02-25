@@ -39,7 +39,6 @@ eor,
 ultroid_bot,
 call_back,
 callback,
-Button,
 )
 
 PING = [
@@ -120,7 +119,7 @@ async def wping(e):
     f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
     parse_mode="html",
     file=choice(asupannya),
-           [[Button.inline("• x •", "PING")]],
+           buttons=[[Button.inline("• x •", "PING")]],
        )
    #x = await client.send_message(e.chat.id, "<blockquote> **Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`</blockquote>", parse_mode="html", file=choice(asupannya))")
         #await x.edit(get_string("ping").format(f"[{BOT_NAME}](https://t.me/{asst.username})", end, uptime, f"{inline_mention(ultroid_bot.me)}"), file=choice(asupannya), buttons=PING)
@@ -136,3 +135,46 @@ async def _(event):
     uptime = time_formatter((time.time() - start_time) * 1000)
     await x.edit(f"<blockquote>🏓 Ping : {end}ms\n⏰ Uptime : {uptime}</blockquote>", parse_mode="html")
     
+import time
+import asyncio
+from telethon import Button
+from telethon.tl.types import InputMessagesFilterVideo
+import random
+
+# Assuming you have these defined elsewhere in your code:
+# @xteam_cmd, e, client, start_time, time_formatter, OWNER_NAME
+
+@xteam_cmd(pattern="kping")
+async def wping(e):
+    try:
+        asupannya = [
+            asupan
+            async for asupan in e.client.iter_messages(
+                "@xcryasupan", filter=InputMessagesFilterVideo
+            )
+        ]
+
+        if not asupannya:
+            await e.respond("No video found in @xcryasupan.")
+            return
+
+        start = time.time()
+        x = await e.respond("Pong!")  # Use respond instead of eor for initial message
+        end = round((time.time() - start) * 1000)
+        uptime = time_formatter((time.time() - start_time) * 1000)
+
+        await e.client.send_file( # send_file is used for sending files with caption and buttons.
+            e.chat.id,
+            file=random.choice(asupannya),
+            caption=f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
+            parse_mode="html",
+            buttons=[[Button.inline("• x •", "PING")]],
+        )
+
+        await x.delete() # delete the "pong" message after sending the video with caption.
+
+    except Exception as ex:
+        try:
+            await x.edit(f"**Ping Error:** {ex}")
+        except:
+             await e.respond(f"**Ping Error:** {ex}") #in case x was not defined.
