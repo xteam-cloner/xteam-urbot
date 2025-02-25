@@ -131,8 +131,8 @@ async def wping(e):
 @xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
-    x = await event.edit("ping")
+    x = await event.reply("Ping")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    await x.reply(f"<blockquote>🏓 Ping : {end}ms\n⏰ Uptime : {uptime}</blockquote>", parse_mode="html")
+    await x.edit(f"<blockquote>🏓 Ping : {end}ms\n⏰ Uptime : {uptime}</blockquote>", parse_mode="html")
     
