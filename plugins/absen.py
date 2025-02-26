@@ -18,10 +18,10 @@ from secrets import choice
 from pyUltroid.dB import devs
 from telethon.tl.types import User
 from pyUltroid._misc import sudoers
-from . import cmd, ultroid_cmd, get_string, inline_mention, udB, ultroid_bot
-
+from . import cmd, get_string, inline_mention, udB, ultroid_bot
+from . import ultroid_cmd as admin 
 absen = [
-    "**Hadir mas Ganteng** 😁",
+    "**𝙃𝙖𝙙𝙞𝙧 𝙙𝙤𝙣𝙜 𝙏𝙤𝙙** 😁",
     "**𝙃𝙖𝙙𝙞𝙧 𝙆𝙖𝙠𝙖 𝙂𝙖𝙣𝙩𝙚𝙣𝙜** 😉",
     "**𝙂𝙪𝙖 𝙃𝙖𝙙𝙞𝙧 𝘾𝙤𝙣𝙩𝙤𝙡** 😁",
     "**𝙂𝙪𝙖 𝙃𝙖𝙙𝙞𝙧 𝙂𝙖𝙣𝙩𝙚𝙣𝙜** 🥵",
@@ -30,7 +30,7 @@ absen = [
     "**𝙎𝙞 𝘾𝙖𝙠𝙚𝙥 𝙃𝙖𝙙𝙞𝙧 𝘽𝙖𝙣𝙜** 😎",
 ]
 
-xteamcakep = [
+ayiincakep = [
     "**𝙄𝙮𝙖 𝙂𝙖𝙣𝙩𝙚𝙣𝙜 𝘽𝙖𝙣𝙜𝙚𝙩** 😍",
     "**𝙂𝙖𝙣𝙩𝙚𝙣𝙜𝙣𝙮𝙖 𝙂𝙖𝙠 𝘼𝙙𝙖 𝙇𝙖𝙬𝙖𝙣** 😚",
     "**𝙠𝙖𝙢𝙪 𝙂𝙖𝙣𝙩𝙚𝙣𝙜𝙣𝙮𝙖 𝘼𝙠𝙪 𝙆𝙖𝙣** 😍",
@@ -39,20 +39,38 @@ xteamcakep = [
 ]
 
 
+@ayiinCmd("cping$", devs=True)
+async def _(ping):
+    start = time.time()
+    x = await event.eor("Pong !")
+    end = round((time.time() - start) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 1000)
+    user = await ping.client.get_me()
+    message = "**✧ ᴀʏɪɪɴ-ᴜsᴇʀʙᴏᴛ ✧**\n\n✧ **ᴘɪɴɢᴇʀ :** `{} ms`\n✧ **ᴜᴘᴛɪᴍᴇ :** `{}`\n✧ **ᴏᴡɴᴇʀ :** `{}`\n✧ **ɪᴅ :** `{}`"
+    await ping.reply(
+        message.format(
+            duration,
+            uptime,
+            user.first_name,
+            user.id
+        )
+    )
+
+
 # KALO NGEFORK absen ini GA USAH DI HAPUS YA GOBLOK 😡
 # JANGAN DI HAPUS GOBLOK 😡 LU COPY AJA TINGGAL TAMBAHIN
 # DI HAPUS GUA GBAN YA 🥴 GUA TANDAIN LU AKUN TELENYA 😡
 
 # Absen by : mrismanaziz <https://github.com/mrismanaziz/man-userbot>
 
-@ultroid_cmd(pattern="absen$", devs=True)
-async def absen(ganteng):
+@ayiinCmd("absen$", devs=True)
+async def ayiinabsen(ganteng):
     await ganteng.reply(choice(absen))
 
 
-@ultroid_cmd(pattern="Aku ganteng kan$", devs=True)
-async def xteam(ganteng):
-    await ganteng.reply(choice(xteamcakep))
+@ayiinCmd("Aku ganteng kan$", devs=True)
+async def ayiin(ganteng):
+    await ganteng.reply(choice(ayiincakep))
 
 
 # ========================×========================
