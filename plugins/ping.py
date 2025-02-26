@@ -118,9 +118,13 @@ async def wping(e):
        await client.send_message(
     e.chat.id,
     f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
-    parse_mode="html",
-    file=choice(asupannya),
-           buttons=[[Button.inline("• x🥰x •", data="PING")]],
+           file=choice(asupannya),
+           buttons=[
+               [
+                   Button.inline("• x🥰x •", data="close")
+               ]
+           ],
+           parse_mode="html",
        )
    #x = await client.send_message(e.chat.id, "<blockquote> **Ping :** `{end}ms`\n**Uptime :** `{uptime}`\n**Owner** :`{OWNER_NAME}`</blockquote>", parse_mode="html", file=choice(asupannya))")
         #await x.edit(get_string("ping").format(f"[{BOT_NAME}](https://t.me/{asst.username})", end, uptime, f"{inline_mention(ultroid_bot.me)}"), file=choice(asupannya), buttons=PING)
