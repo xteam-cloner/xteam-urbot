@@ -19,7 +19,9 @@ from pyUltroid.dB import devs
 from telethon.tl.types import User
 from pyUltroid._misc import sudoers
 from . import cmd, get_string, inline_mention, udB, ultroid_bot
-from . import ultroid_cmd as admin 
+from . import ultroid_cmd as ayiinCmd 
+
+
 absen = [
     "**𝙃𝙖𝙙𝙞𝙧 𝙙𝙤𝙣𝙜 𝙏𝙤𝙙** 😁",
     "**𝙃𝙖𝙙𝙞𝙧 𝙆𝙖𝙠𝙖 𝙂𝙖𝙣𝙩𝙚𝙣𝙜** 😉",
