@@ -23,6 +23,7 @@ from telethon.tl.types import InputMessagesFilterPhotos
 from pyUltroid.fns.custom_markdown import CustomMarkdown
 from pyUltroid.fns.helper import download_file, inline_mention
 from ._inline import *
+from pyUltroid.fns.helper import inline_mention
 from . import (
 OWNER_NAME,
 OWNER_ID,
@@ -111,7 +112,7 @@ async def wping(e):
     try:
        await client.send_message(
     e.chat.id,
-    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
+    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{inline_mention(ultroid_bot.me)}</blockquote>",
            file=choice(asupannya),
            buttons=[
                [
