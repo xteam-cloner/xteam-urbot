@@ -95,7 +95,7 @@ desahcewe = [
         )
     ]
 """
-@xteam_cmd(pattern="Cping")
+"""@xteam_cmd(pattern="Cping")
 async def wping(e):
     asupannya = [
         asupan
@@ -123,7 +123,7 @@ async def wping(e):
    
 except Exception as e:
       await x.edit(f"**Ping Error:** {e}")
-
+"""
 @xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
