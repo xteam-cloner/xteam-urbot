@@ -44,7 +44,7 @@ ayiincakep = [
 @ayiinCmd("cping$", devs=True)
 async def _(ping):
     start = time.time()
-    x = await event.eor("Pong !")
+    x = await ping.eor("Pong !")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     user = await ping.client.get_me()
