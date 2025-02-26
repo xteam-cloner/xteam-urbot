@@ -138,7 +138,7 @@ async def _(event):
     x = await event.reply("Ping")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    await x.edit(f"<blockquote>🏓 Ping : {end}ms\n⏰ Uptime : {uptime}</blockquote>", parse_mode="html")
+    await x.edit(f"<blockquote>Pong !! {end}ms\nUptime - {uptime}</blockquote>", parse_mode="html")
     
 import time
 import asyncio
