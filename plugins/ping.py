@@ -52,12 +52,6 @@ PING = [
 #markup = ReplyInlineMarkup(PING)
 
 
-@callback(data="close", owner=True)
-async def on_plug_in_callback_query_handler(event):
-    await event.edit(
-        get_string("inline_5"),
-        buttons=Button.inline("OPEN", data="open"),
-    )
 
 async def mention_user(user_id):
     try:
@@ -173,7 +167,7 @@ async def wping(e):
             file=random.choice(asupannya),
             caption=f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
             parse_mode="html",
-            buttons=[[Button.inline("• x •", "PING")]],
+            buttons=Button.inline("• x •", "close"),
         )
 
         await x.delete() # delete the "pong" message after sending the video with caption.
@@ -183,3 +177,10 @@ async def wping(e):
             await x.edit(f"**Ping Error:** {ex}")
         except:
              await e.respond(f"**Ping Error:** {ex}") #in case x was not defined.
+
+@callback(data="close", owner=True)
+async def on_plug_in_callback_query_handler(event):
+    await event.edit(
+        get_string("inline_5"),
+        buttons=Button.inline("OPEN", data="open"),
+    )
