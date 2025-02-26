@@ -18,9 +18,35 @@ from secrets import choice
 from pyUltroid.dB import devs
 from telethon.tl.types import User
 from pyUltroid._misc import sudoers
-from . import cmd, get_string, inline_mention, udB, ultroid_bot
 from . import ultroid_cmd as ayiinCmd 
-
+from . import (
+    ATRA_COL,
+    LOGS,
+    OWNER_NAME,
+    ULTROID_IMAGES,
+    Button,
+    Carbon,
+    Telegraph,
+    Var,
+    allcmds,
+    asst,
+    bash,
+    call_back,
+    callback,
+    def_logs,
+    eor,
+    get_string,
+    heroku_logs,
+    in_pattern,
+    inline_pic,
+    restart,
+    shutdown,
+    start_time,
+    time_formatter,
+    udB,
+    ultroid_version,
+    updater,
+)
 
 absen = [
     "**𝙃𝙖𝙙𝙞𝙧 𝙙𝙤𝙣𝙜 𝙏𝙤𝙙** 😁",
