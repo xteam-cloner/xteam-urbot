@@ -110,7 +110,7 @@ async def wping(e):
     #await asyncio.sleep(1)
     x = await e.delete()
     try:
-       await client.send_message(
+       await ultroid_bot.send_message(
     e.chat.id,
     f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner : `{inline_mention(ultroid_bot.me)}`</blockquote>",
            file=choice(asupannya),
