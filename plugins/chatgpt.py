@@ -248,8 +248,8 @@ async def gemini_ai(event):
     model = get_model("gemini")
     
     header = (
-        f"<blockquote>🔍 Prompt:\n{prompt}\n\n"
-        "💡 Response:\n</blockquote>"
+        f"<blockquote>🔍 Prompt:\n{prompt}</blockquote>\n"
+        "<blockquote>💡 Response:</blockquote>\n"
     )
     
     if event.client.me.bot:
@@ -258,7 +258,7 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
             try:
-                await msg.edit(header + response, parse_mode="html")
+                await msg.edit(header + f"<blockquote>{response}</blockquote>", parse_mode="html")
             except Exception:
                 pass
     else:
@@ -266,9 +266,9 @@ async def gemini_ai(event):
         async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
             response += chunk
         try:
-                await msg.edit(header + response, parse_mode="html")
+            await msg.edit(header + f"<blockquote>{response}</blockquote>", parse_mode="html")
         except Exception:
-                pass
+            pass
 
 @ultroid_cmd(pattern="antr( (.*)|$)")
 async def anthropic_ai(event):
