@@ -166,3 +166,48 @@ async def do_zip(event):
     await bash("rm -rf zip")
     os.remove("ultroid.zip")
     await xx.delete()
+
+
+# ... (kode lain seperti bash, downloader, uploader, get_all_files, get_string, ULTConfig)
+
+@ultroid_cmd(pattern="unziip( (.*)|$)")
+async def unzipp(event):
+    reply = await event.get_reply_message()
+    file = event.pattern_match.group(1).strip()
+    t = time.time()
+    if not ((reply and reply.media) or file):
+        await event.eor(get_string("zip_1"))
+        return
+    xx = await event.eor(get_string("com_1"))
+    if reply.media:
+        if not hasattr(reply.media, "document"):
+            return await xx.edit(get_string("zip_3"))
+        file = reply.media.document
+        if not reply.file.name.endswith(("zip", "rar", "exe")):
+            return await xx.edit(get_string("zip_3"))
+        image = await downloader(
+            reply.file.name, reply.media.document, xx, t, get_string("com_5")
+        )
+        file = image.name
+
+    output_folder = "downloads"  # Ganti "unzip" dengan "downloads"
+
+    if os.path.isdir(output_folder):
+        await bash(f"rm -rf {output_folder}")
+    os.makedirs(output_folder, exist_ok=True) #gunakan makedirs agar jika folder tidak ada, akan dibuat.
+
+    await bash(f"7z x {file} -aoa -o{output_folder}")
+    await asyncio.sleep(4)
+    ok = get_all_files(output_folder)
+    for x in ok:
+        k = time.time()
+        xxx = await uploader(x, x, k, xx, get_string("com_6"))
+        await event.client.send_file(
+            event.chat_id,
+            xxx,
+            force_document=True,
+            thumb=ULTConfig.thumb,
+            caption=f"`{xxx.name}`",
+        )
+    await xx.delete()
+    
