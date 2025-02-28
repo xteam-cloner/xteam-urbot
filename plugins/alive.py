@@ -67,7 +67,7 @@ Mukesh = [
     ],
 ]
 
-message_text = f"ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀\n\n━━━━━━━━━━━━━━━━━━━\n» ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n━━━━━━━━━━━━━━━━━━━\n"
+message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n\n<blockquote>━━━━━━━━━━━━━━━━━━━\n» ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n━━━━━━━━━━━━━━━━━━━\n</blockquote>"
 
 
 @ultroid_cmd(pattern="Alive$")
@@ -80,5 +80,5 @@ async def alive(event):
     await asyncio.sleep(5)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await client.send_message(event.chat.id, message_text, file=choice(PHOTO))
+    await client.send_message(event.chat.id, message_text, file=choice(PHOTO), parse_mode="html")
     
