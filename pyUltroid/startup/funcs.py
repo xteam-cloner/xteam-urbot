@@ -493,11 +493,11 @@ async def ready():
             BTTS = Button.inline("Update Available", "updtavail")
 
     try:
-        spam_sent = await asst.send_message(chat_id, MSG, file=PHOTO, buttons=BTTS)
+        spam_sent = await asst.send_message(chat_id, MSG, file=PHOTO, buttons=BTTS, parse_mode="html")
     except ValueError as e:
         try:
             await (await ultroid_bot.send_message(chat_id, str(e))).delete()
-            spam_sent = await asst.send_message(chat_id, MSG, file=PHOTO, buttons=BTTS)
+            spam_sent = await asst.send_message(chat_id, MSG, file=PHOTO, buttons=BTTS, parse_mode="html")
         except Exception as g:
             LOGS.info(g)
     except Exception as el:
