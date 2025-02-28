@@ -17,7 +17,7 @@ import pyrogram
 from platform import python_version
 from pyUltroid.version import __version__ as UltVer
 from ..configs import Var
-from plugins.__init__ import OWNER_NAME
+from .. import OWNER_NAME
 try:
     from pytz import timezone
 except ImportError:
