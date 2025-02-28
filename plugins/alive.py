@@ -68,14 +68,7 @@ Mukesh = [
 ]
 
 message_text = [
-f"ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀\n
-━━━━━━━━━━━━━━━━━━━\n
-» ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n\n
-» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n
-» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n
-» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n
-» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n
-━━━━━━━━━━━━━━━━━━━\n"
+f"ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀\n\n━━━━━━━━━━━━━━━━━━━\n» ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n━━━━━━━━━━━━━━━━━━━\n"
 ]
 
 
