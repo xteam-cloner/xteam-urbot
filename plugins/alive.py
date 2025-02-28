@@ -66,11 +66,11 @@ Mukesh = [
 message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n\n<blockquote>━━━━━━━━━━━━━━━━━━━\n» ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n━━━━━━━━━━━━━━━━━━━\n</blockquote>"
 
 
-@ultroid_cmd(pattern="Alive$")
+@ultroid_cmd(pattern="alive$")
 async def alive(event):
     await event.delete()
     accha = await event.reply("⚡")
-    await asyncio.sleep(3)
+    await asyncio.sleep(5)
     await accha.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
     await client.send_message(event.chat.id, message_text, file=choice(PHOTO), parse_mode="html")
