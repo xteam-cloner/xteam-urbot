@@ -293,7 +293,7 @@ async def _(event):
     tmt = tima * 1000
     timef = time_formatter(tmt)
     timeform = timef if not timef == "0s" else f"{tmt:.3f}µs"
-    final_output = "<blockquote>{}\nOutput: {}\n\n{}</blockquote>".format(
+    final_output = "<blockquote>Python\n{}\nOutput: {}\n\n{}</blockquote>".format(
         cmd,
         evaluation,
         timeform,
