@@ -74,13 +74,11 @@ message_text = f"ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀\n\n━━━━━━━━�
 async def alive(event):
     await event.delete()
     accha = await event.reply("⚡")
-    await asyncio.sleep(1)
-    await accha.edit("ᴅɪɴɢ ᴅᴏɴɢ ꨄ︎ ᴀʟɪᴠɪɴɢ..")
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     await accha.delete()
     umm = await event.reply(file="resources/extras/ping_pic.mp4")
-    await asyncio.sleep(1)
+    await asyncio.sleep(5)
     await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await client.send_message(event.chat.id, message_text, buttons=Mukesh)
+    await client.send_message(event.chat.id, message_text, file=choice(PHOTO))
     
