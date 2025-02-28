@@ -293,13 +293,11 @@ async def _(event):
     tmt = tima * 1000
     timef = time_formatter(tmt)
     timeform = timef if not timef == "0s" else f"{tmt:.3f}µs"
-    final_output = f"<blockquote>__►__\nEVAL\n(__in {cmd}__)\n{evaluation}\n\n __►__ OUTPUT:\n{timeform}\n</blockquote>", parse_mode="html"
-    
-    """*.format(
+    final_output = "<blockquote>__►__\nEVAL\n(__in {cmd}__)\n{evaluation}\n\n __►__ OUTPUT:\n{timeform}\n</blockquote>".format(
         cmd,
         evaluation,
         timeform,
-    )"""
+    )
     if len(final_output) > 4096:
         final_output = evaluation
         with BytesIO(str.encode(final_output)) as out_file:
@@ -312,6 +310,7 @@ async def _(event):
                 allow_cache=False,
                 caption=f"```{cmd}```" if len(cmd) < 998 else None,
                 reply_to=reply_to_id,
+                parse_mode="html",
             )
         return await xx.delete()
     await xx.edit(final_output)
