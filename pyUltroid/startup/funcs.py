@@ -386,6 +386,7 @@ async def customize():
         await ultroid_bot.send_message(
             "botfather",
             f"🥀 Powerful Userbot Assistant Bot 🥀\n🥀 Master ~ {sir} 🥀\n\n🥀 Powered By ~ @xteam_cloner 🥀",
+        )
         await asyncio.sleep(2)
         await msg.edit("Completed **Auto Customisation** at @BotFather.")
         if rem:
