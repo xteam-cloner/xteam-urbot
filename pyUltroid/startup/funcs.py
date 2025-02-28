@@ -385,8 +385,7 @@ async def customize():
         await asyncio.sleep(1)
         await ultroid_bot.send_message(
             "botfather",
-            f"🥀 Powerful Userbot Assistant Bot 🥀\n🥀 Master ~ {sir} 🥀\n\n🥀 Powered By ~ @Devikachan 🥀",
-        )
+            f"🥀 Powerful Userbot Assistant Bot 🥀\n🥀 Master ~ {sir} 🥀\n\n🥀 Powered By ~ @xteam_cloner 🥀",
         await asyncio.sleep(2)
         await msg.edit("Completed **Auto Customisation** at @BotFather.")
         if rem:
@@ -481,7 +480,7 @@ async def ready():
         BTTS = Button.inline("• Click to Start •", "initft_2")
         udB.set_key("INIT_DEPLOY", "Done")
     else:
-        MSG = f"🔥ᴜꜱᴇʀʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴀᴄᴛɪᴠᴀᴛᴇᴅ🔥\n➖➖➖➖➖➖➖➖➖➖\n🥀 Owner : {inline_mention(ultroid_bot.me)}\n🥀 Telethon : {__version__}\n🥀 Python : {platform.python_version()}\n🥀 Pyrogram : {pyrogram.__version__}\n➖➖➖➖➖➖➖➖➖➖\n🥀 Support : @xteam_cloner\n➖➖➖➖➖➖➖➖➖➖"        
+        MSG = f"<blockquote>🔥ᴜꜱᴇʀʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴀᴄᴛɪᴠᴀᴛᴇᴅ🔥</blockquote>\n<blockquote>➖➖➖➖➖➖➖➖➖➖\n🥀 Owner : {inline_mention(ultroid_bot.me)}\n🥀 Telethon : {__version__}\n🥀 Python : {platform.python_version()}\n🥀 Pyrogram : {pyrogram.__version__}\n➖➖➖➖➖➖➖➖➖➖\n</blockquote><blockquote>🥀 Support : @xteam_cloner\n➖➖➖➖➖➖➖➖➖➖</blockquote>"        
         BTTS, PHOTO = None, None
         prev_spam = udB.get_key("LAST_UPDATE_LOG_SPAM")
         if prev_spam:
@@ -503,7 +502,7 @@ async def ready():
     except Exception as el:
         LOGS.info(el)
         try:
-            spam_sent = await ultroid_bot.send_message(chat_id, MSG)
+            spam_sent = await ultroid_bot.send_message(chat_id, MSG, parse_mode="html")
         except Exception as ef:
             LOGS.exception(ef)
     if spam_sent and not spam_sent.media:
