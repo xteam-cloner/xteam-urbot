@@ -48,11 +48,7 @@ async def member_permissions(chat_id: int, user_id: int):
     return perms
 
 PHOTO = [
-    "https://telegra.ph/file/d2a23fbe48129a7957887.jpg",
-    "https://telegra.ph/file/ddf30888de58d77911ee1.jpg",
-    "https://telegra.ph/file/268d66cad42dc92ec65ca.jpg",
-    "https://telegra.ph/file/13a0cbbff8f429e2c59ee.jpg",
-    "https://telegra.ph/file/bdfd86195221e979e6b20.jpg",
+    "https://files.catbox.moe/hen0og.jpg"
 ]
 
 Mukesh = [
@@ -67,18 +63,15 @@ Mukesh = [
     ],
 ]
 
-message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n\n<blockquote>━━━━━━━━━━━━━━━━━━━\n» ᴍʏ ᴏᴡɴᴇʀ : {inline_mention(ultroid_bot.me)}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n━━━━━━━━━━━━━━━━━━━\n</blockquote>"
+message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n\n<blockquote>━━━━━━━━━━━━━━━━━━━\n» ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAM}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n━━━━━━━━━━━━━━━━━━━\n</blockquote>"
 
 
 @ultroid_cmd(pattern="Alive$")
 async def alive(event):
     await event.delete()
     accha = await event.reply("⚡")
-    await asyncio.sleep(2)
+    await asyncio.sleep(3)
     await accha.delete()
-    umm = await event.reply(file="resources/extras/ping_pic.mp4")
-    await asyncio.sleep(5)
-    await umm.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
     await client.send_message(event.chat.id, message_text, file=choice(PHOTO), parse_mode="html")
     
