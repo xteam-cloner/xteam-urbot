@@ -17,7 +17,7 @@ import pyrogram
 from platform import python_version
 from pyUltroid.version import __version__ as UltVer
 from ..configs import Var
-from .. import OWNER_NAME
+from .. import ultroid_bot.full_name
 try:
     from pytz import timezone
 except ImportError:
