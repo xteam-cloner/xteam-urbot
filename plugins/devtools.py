@@ -293,12 +293,7 @@ async def _(event):
     tmt = tima * 1000
     timef = time_formatter(tmt)
     timeform = timef if not timef == "0s" else f"{tmt:.3f}µs"
-    final_output = f"<blockquote>Python\n{}\n\nOutput: {}\n\nTimesec\n{}</blockquote>".format(
-        cmd,
-        evaluation,
-        timeform,
-        parse_mode="html",
-    )
+    final_output = (f"<blockquote>Python\n{cmd}\n\nOutput: {evaluation}\n\nTimesec\n{timeform}</blockquote>", parse_mode="html")
     if len(final_output) > 4096:
         final_output = evaluation
         with BytesIO(str.encode(final_output)) as out_file:
