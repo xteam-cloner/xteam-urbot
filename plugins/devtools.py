@@ -293,7 +293,7 @@ async def _(event):
     tmt = tima * 1000
     timef = time_formatter(tmt)
     timeform = timef if not timef == "0s" else f"{tmt:.3f}µs"
-    final_output = "Python\n\n{}\nOutput\n{}\n\nTimsec:\n{}\n".format(
+    final_output = "<blockquote>Python\n\n{}</blockquote>\n\n<blockquote>Output\n{}</blockquote>\n\n<blockquote>Timsec:\n{}\n</blockquote>".format(
         cmd,
         evaluation,
         timeform,
@@ -313,7 +313,7 @@ async def _(event):
                 parse_mode="html",
             )
         return await xx.delete()
-    await xx.edit(f"<blockquote>{final_output}</blockquote>", parse_mode="html")
+    await xx.edit(final_output, parse_mode="html")
 
 
 def _stringify(text=None, *args, **kwargs):
