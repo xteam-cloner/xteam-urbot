@@ -17,7 +17,7 @@ import pyrogram
 from platform import python_version
 from pyUltroid.version import __version__ as UltVer
 from ..configs import Var
-
+from plugins import OWNER_NAME
 try:
     from pytz import timezone
 except ImportError:
@@ -481,7 +481,7 @@ async def ready():
         BTTS = Button.inline("• Click to Start •", "initft_2")
         udB.set_key("INIT_DEPLOY", "Done")
     else:
-        MSG = f"<blockquote>🔥ᴜꜱᴇʀʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴀᴄᴛɪᴠᴀᴛᴇᴅ🔥</blockquote>\n<blockquote>➖➖➖➖➖➖➖➖➖➖\n🥀 Owner : {inline_mention(ultroid_bot.me)}\n🥀 Telethon : {__version__}\n🥀 Python : {platform.python_version()}\n🥀 Pyrogram : {pyrogram.__version__}\n➖➖➖➖➖➖➖➖➖➖\n</blockquote>\n<blockquote>🥀 Support : @xteam_cloner\n➖➖➖➖➖➖➖➖➖➖</blockquote>"        
+        MSG = f"<blockquote>🔥ᴜꜱᴇʀʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴀᴄᴛɪᴠᴀᴛᴇᴅ🔥</blockquote>\n<blockquote>➖➖➖➖➖➖➖➖➖➖\n🥀 Owner : {OWNER_NAME}\n🥀 Telethon : {__version__}\n🥀 Python : {platform.python_version()}\n🥀 Pyrogram : {pyrogram.__version__}\n➖➖➖➖➖➖➖➖➖➖</blockquote>\n<blockquote>🥀 Support : @xteam_cloner\n➖➖➖➖➖➖➖➖➖➖</blockquote>"        
         BTTS, PHOTO = None, None
         prev_spam = udB.get_key("LAST_UPDATE_LOG_SPAM")
         if prev_spam:
