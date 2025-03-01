@@ -36,7 +36,7 @@ import asyncio
 ENDPOINTS = {
     "gpt": "https://api.openai.com/v1/chat/completions",
     "antr": "https://api.anthropic.com/v1/messages",
-    "gemini": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=GEMINI_API_KEY",
+    "gemini": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash",
     "deepseek": "https://api.deepseek.com/chat/completions"
 }
 
@@ -47,7 +47,7 @@ DEFAULT_MODELS = {
     "deepseek": "deepseek-chat"
 }
 
-https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=GEMINI_API_KEY
+
 
 def get_model(provider):
     """Get model name from database or use default"""
