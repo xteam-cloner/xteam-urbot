@@ -36,7 +36,7 @@ import asyncio
 ENDPOINTS = {
     "gpt": "https://api.openai.com/v1/chat/completions",
     "antr": "https://api.anthropic.com/v1/messages",
-    "gemini": "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent",
+    "gemini": "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent",
     "deepseek": "https://api.deepseek.com/chat/completions"
 }
 
