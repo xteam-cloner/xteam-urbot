@@ -36,14 +36,14 @@ import asyncio
 ENDPOINTS = {
     "gpt": "https://api.openai.com/v1/chat/completions",
     "antr": "https://api.anthropic.com/v1/messages",
-    "gemini": "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-latest:generateContent",
+    "gemini": "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
     "deepseek": "https://api.deepseek.com/chat/completions"
 }
 
 DEFAULT_MODELS = {
     "gpt": "gpt-3.5-turbo",
     "antr": "claude-3-opus-20240229",
-    "gemini": "gemini-1.5-pro-latest",
+    "gemini": "gemini-1.5-flash",
     "deepseek": "deepseek-chat"
 }
 
