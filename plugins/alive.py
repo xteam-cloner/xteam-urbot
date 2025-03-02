@@ -104,9 +104,9 @@ async def alive(event):
             await event.respond("No video found in @xcryasupan.")
             return
 
-        await event.reply("⚡")
-        await asyncio.sleep(5)
-        await event.delete()
+        pro = await event.reply("⚡")
+        await asyncio.sleep(2)
+        await pro.delete()
 
         owner=await ultroid_bot.get_users(OWNER_ID)
         await event.client.send_file(
