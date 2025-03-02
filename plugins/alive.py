@@ -65,6 +65,12 @@ Mukesh = [
 
 message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n<blockquote>» ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n</blockquote>"
 
+asupannya = [
+        asupan
+        async for asupan in e.client.iter_messages(
+            "@xcryasupan", filter=InputMessagesFilterVideo
+        )
+]
 
 @ultroid_cmd(pattern="alive$")
 async def alive(event):
