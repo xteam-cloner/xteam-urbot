@@ -82,7 +82,7 @@ async def alive(event):
         if not asupannya:
             await event.respond("No video found in @xcryasupan.")
             return 
-    await event.delete()
+
     accha = await event.reply("⚡")
     await asyncio.sleep(5)
     await accha.delete()
