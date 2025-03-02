@@ -89,3 +89,44 @@ async def alive(event):
     owner=await ultroid_bot.get_users(OWNER_ID)
     await event.client.send_file(event.chat.id, message_text, file=random.choice(asupannya), parse_mode="html")
     
+import asyncio
+import random
+from telethon.tl.functions.users import GetFullUserRequest
+from telethon.tl.types import InputMessagesFilterVideo
+
+# Assuming you have ultroid_cmd, ultroid_bot, OWNER_ID, and message_text defined elsewhere
+
+@ultroid_cmd(pattern="Alive$")
+async def alive(event):
+    try:
+        asupannya = [
+            asupan
+            async for asupan in event.client.iter_messages(
+                "@xcryasupan", filter=InputMessagesFilterVideo
+            )
+        ]
+
+        if not asupannya:
+            await event.respond("No video found in @xcryasupan.")
+            return
+
+        await event.reply("⚡")
+        await asyncio.sleep(5)
+        await event.delete()
+
+        owner = await event.client(GetFullUserRequest(OWNER_ID)) # Get full user using GetFullUserRequest
+        if owner and owner.user:
+            owner_username = owner.user.username if owner.user.username else owner.user.first_name #Get username or first name
+        else:
+            owner_username = "Owner" # If user not found set owner name to Owner
+
+        await event.client.send_file(
+            event.chat.id,
+            file=random.choice(asupannya),
+            caption=message_text.format(owner_username=owner_username), # format the message_text
+            parse_mode="html",
+        )
+
+    except Exception as e:
+        await event.respond(f"An error occurred: {e}")
+        
