@@ -69,7 +69,7 @@ Mukesh = [
 message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n<blockquote>» ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n</blockquote>"
 
 
-@ultroid_cmd(pattern="alive$")
+"""@ultroid_cmd(pattern="alive$")
 async def alive(event):
    try:
         asupannya = [
@@ -88,7 +88,7 @@ async def alive(event):
     await event.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
     await event.client.send_file(event.chat.id, message_text, file=random.choice(asupannya), parse_mode="html")
-    
+    """
 import asyncio
 import random
 from telethon.tl.functions.users import GetFullUserRequest
