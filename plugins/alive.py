@@ -3,6 +3,9 @@ import platform
 import subprocess
 from datetime import datetime
 import asyncio
+from secrets import choice
+from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
+from telethon.tl.types import InputMessagesFilterPhotos
 from platform import python_version as pyver
 from pyrogram.enums import ChatType
 from pyrogram import __version__ as pver
@@ -79,5 +82,5 @@ async def alive(event):
     await asyncio.sleep(5)
     await accha.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await client.send_message(event.chat.id, message_text, file=choice(PHOTO), parse_mode="html")
+    await client.send_message(event.chat.id, message_text, file=choice(asupannya), parse_mode="html")
     
