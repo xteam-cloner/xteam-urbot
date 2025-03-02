@@ -2,6 +2,8 @@ import asyncio
 from telethon import TelegramClient, events
 import requests
 from . import*
+
+
 async def search_public_github(query):
     headers = {
         'Accept': 'application/vnd.github.v3+json',
@@ -35,3 +37,7 @@ async def handle_github_search(event):
         await event.respond(results, parse_mode='md')
     else:
         await event.respond("Usage: repo <search query>")
+
+except Exception as e:
+        await event.respond(f"An error occurred: {e}")
+        
