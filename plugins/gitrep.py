@@ -36,10 +36,10 @@ async def handle_github_search(event):
     query = event.message.message.split(' ', 1)
     if len(query) > 1:
         query = query[1]
-        await event.eor("Mencari repositori GitHub publik...")
+        await event.eor("Repo")
         try:
             results = await search_public_github(query)
-            await event.respond(results, parse_mode='md')
+            await event.reply(results, parse_mode='md')
         except Exception as e:
             await event.respond(f"Terjadi kesalahan saat mencari: {e}")
     else:
