@@ -75,7 +75,7 @@ async def alive(event):
     await asyncio.sleep(3)
     await pro.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await event.client.send_file(event.chat.id, message_text, parse_mode="html")
+    await event.client.send_message(event.chat.id, message_text, parse_mode="html")
     
 
 @ultroid_cmd(pattern="Alive$")
