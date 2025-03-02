@@ -68,12 +68,17 @@ Mukesh = [
 
 message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n<blockquote>» ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n</blockquote>"
 
-asupannya = [
-        asupan
-        async for asupan in e.client.iter_messages(
-            "@xcryasupan", filter=InputMessagesFilterVideo
-        )
-]
+try:
+        asupannya = [
+            asupan
+            async for asupan in e.client.iter_messages(
+                "@xcryasupan", filter=InputMessagesFilterVideo
+            )
+        ]
+
+        if not asupannya:
+            await e.respond("No video found in @xcryasupan.")
+            return
 
 @ultroid_cmd(pattern="alive$")
 async def alive(event):
@@ -82,5 +87,5 @@ async def alive(event):
     await asyncio.sleep(5)
     await accha.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
-    await client.send_message(event.chat.id, message_text, file=choice(asupannya), parse_mode="html")
+    await client.send_message(event.chat.id, message_text, file=random.choice(asupannya), parse_mode="html")
     
