@@ -108,12 +108,7 @@ async def alive(event):
         await asyncio.sleep(5)
         await event.delete()
 
-        owner = await event.client(GetFullUserRequest(OWNER_ID)) # Get full user using GetFullUserRequest
-        if owner and owner.user:
-            owner_username = owner.user.username if owner.user.username else owner.user.first_name #Get username or first name
-        else:
-            owner_username = "Owner" # If user not found set owner name to Owner
-
+        owner=await ultroid_bot.get_users(OWNER_ID)
         await event.client.send_file(
             event.chat.id,
             file=random.choice(asupannya),
