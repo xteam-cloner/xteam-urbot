@@ -89,12 +89,6 @@ async def alive(event):
     owner=await ultroid_bot.get_users(OWNER_ID)
     await event.client.send_file(event.chat.id, message_text, file=random.choice(asupannya), parse_mode="html")
     """
-import asyncio
-import random
-from telethon.tl.functions.users import GetFullUserRequest
-from telethon.tl.types import InputMessagesFilterVideo
-
-# Assuming you have ultroid_cmd, ultroid_bot, OWNER_ID, and message_text defined elsewhere
 
 @ultroid_cmd(pattern="Alive$")
 async def alive(event):
@@ -123,7 +117,7 @@ async def alive(event):
         await event.client.send_file(
             event.chat.id,
             file=random.choice(asupannya),
-            caption=message_text.format(owner_username=owner_username), # format the message_text
+            caption=message_text, # format the message_text
             parse_mode="html",
         )
 
