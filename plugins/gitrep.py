@@ -36,7 +36,7 @@ async def handle_github_search(event):
     query = event.message.message.split(' ', 1)
     if len(query) > 1:
         query = query[1]
-        await event.respond("Mencari repositori GitHub publik...")
+        await event.eor("Mencari repositori GitHub publik...")
         try:
             results = await search_public_github(query)
             await event.respond(results, parse_mode='md')
