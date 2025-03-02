@@ -13,31 +13,34 @@ async def search_public_github(query):
         'per_page': 5,
         'type': 'public',
     }
-    response = requests.get('https://api.github.com/search/repositories', headers=headers, params=params)
-    if response.status_code == 200:
+    try:
+        response = requests.get('https://api.github.com/search/repositories', headers=headers, params=params)
+        response.raise_for_status()  # Menimbulkan HTTPError untuk respons buruk (4xx atau 5xx)
         data = response.json()
         repositories = data.get('items', [])
         if not repositories:
-            return "No public repositories found matching your query."
+            return "Tidak ada repositori publik yang ditemukan sesuai dengan kueri Anda."
         results = []
         for repo in repositories:
-            results.append(f"[{repo['full_name']}]({repo['html_url']}) - {repo['description'] or 'No description'}")
+            results.append(f"[{repo['full_name']}]({repo['html_url']}) - {repo['description'] or 'Tidak ada deskripsi'}")
         return "\n\n".join(results)
-    else:
-        return f"Error: {response.status_code} - {response.text}"
-
+    except requests.exceptions.RequestException as e:
+        return f"Kesalahan: {e}"
+    except ValueError:
+        return "Kesalahan: Respons JSON tidak valid dari API GitHub."
+    except KeyError:
+        return "Kesalahan: Format data tidak terduga dari API GitHub."
 
 @ultroid_cmd(pattern="repo")
 async def handle_github_search(event):
     query = event.message.message.split(' ', 1)
     if len(query) > 1:
         query = query[1]
-        await event.respond("Searching public GitHub repositories...")
-        results = await search_public_github(query)
-        await event.respond(results, parse_mode='md')
+        await event.respond("Mencari repositori GitHub publik...")
+        try:
+            results = await search_public_github(query)
+            await event.respond(results, parse_mode='md')
+        except Exception as e:
+            await event.respond(f"Terjadi kesalahan saat mencari: {e}")
     else:
-        await event.respond("Usage: repo <search query>")
-
-except Exception as e:
-        await event.respond(f"An error occurred: {e}")
-        
+        await event.respond("Penggunaan: repo <kueri pencarian>")
