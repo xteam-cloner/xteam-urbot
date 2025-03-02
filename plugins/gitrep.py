@@ -10,7 +10,7 @@ async def search_public_github(query):
     }
     params = {
         'q': query,
-        'per_page': 5,
+        'per_page': 10,
         'type': 'public',
     }
     try:
