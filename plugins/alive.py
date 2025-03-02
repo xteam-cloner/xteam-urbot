@@ -104,7 +104,7 @@ async def alive(event):
             await event.respond("No video found in @xcryasupan.")
             return
 
-        pro = await event.reply("⚡")
+        pro = await event.eor("⚡")
         await asyncio.sleep(2)
         await pro.delete()
 
