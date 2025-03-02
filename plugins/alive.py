@@ -83,9 +83,9 @@ async def alive(event):
             await event.respond("No video found in @xcryasupan.")
             return 
 
-    accha = await event.reply("⚡")
+    await event.reply("⚡")
     await asyncio.sleep(5)
-    await accha.delete()
+    await event.delete()
     owner=await ultroid_bot.get_users(OWNER_ID)
     await event.client.send_file(event.chat.id, message_text, file=random.choice(asupannya), parse_mode="html")
     
