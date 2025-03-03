@@ -10,7 +10,7 @@ async def search_public_github(query):
     }
     params = {
         'q': query,
-        'per_page': 10,
+        'per_page': 20,
         'type': 'public',
     }
     try:
@@ -39,7 +39,7 @@ async def handle_github_search(event):
         await event.eor("Repo")
         try:
             results = await search_public_github(query)
-            await event.reply(results, parse_mode='md')
+            await event.reply(f"<blockquote>{results}</blockquote>", parse_mode="html")
         except Exception as e:
             await event.respond(f"Terjadi kesalahan saat mencari: {e}")
     else:
