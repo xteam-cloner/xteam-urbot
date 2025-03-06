@@ -46,6 +46,6 @@ async def handle_report(event):
         message_id = reply_to.id
         reported_message_text = reply_to.text or reply_to.media  # Menyertakan media jika ada.
         group_id = event.chat_id #mendapatkan group id dari event.
-        await send_report(user_id, message_id, reported_message_text, group_id)
+        await send_report(client, user_id, message_id, reported_message_text, group_id)
     else:
         await event.respond("Silakan balas pesan yang ingin Anda laporkan.")
