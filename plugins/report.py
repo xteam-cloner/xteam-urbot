@@ -2,7 +2,7 @@ from telethon import TelegramClient, events
 import asyncio
 import logging
 from . import *
-
+from . import ultroid_bot as client
 
 moderator_id : 460000
 
@@ -36,7 +36,7 @@ async def send_report(client, user_id, message_id, reported_message_text, group_
 async def handle_report(event):
     """Menangani perintah /report."""
     if event.is_private:
-        await event.respond("Perintah ini hanya dapat digunakan di grup.")
+        await event.reply("Perintah ini hanya dapat digunakan di grup.")
         return
 
     reply_to = await event.get_reply_message()
@@ -48,4 +48,4 @@ async def handle_report(event):
         group_id = event.chat_id #mendapatkan group id dari event.
         await send_report(client, user_id, message_id, reported_message_text, group_id)
     else:
-        await event.respond("Silakan balas pesan yang ingin Anda laporkan.")
+        await event.reply("Silakan balas pesan yang ingin Anda laporkan.")
