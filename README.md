@@ -8,7 +8,7 @@ Clone the repository:
 
 Go to the cloned folder:
 
-• cd AIU-USERBOT
+• cd Userbotx
 
 Create a virtual env:
 
