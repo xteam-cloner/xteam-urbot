@@ -4,7 +4,7 @@ Get your Necessary Variables
 
 Clone the repository:
 
-• git clone https://github.com/JIYOXC/AIU-USERBOT
+• git clone https://github.com/xteam-cloner/Userbotx
 
 Go to the cloned folder:
 
@@ -28,7 +28,7 @@ If you have finished edit, CTRL S + CTRL X.
 
 • Install screen to keep running your bot when you close the terminal by
 
-• screen -S AIU-USERBOT
+• screen -S Userbot
 
 • Finally Run the bot:
 
@@ -39,4 +39,4 @@ If you have finished edit, CTRL S + CTRL X.
 
 💠 Termux Session Gen
 
-apt update && apt upgrade -y && apt install python wget -y && pip install Telethon && wget https://raw.githubusercontent.com/TeamUltroid/Ultroid/dev/resources/session/ssgen.py && python ssgen.py
+apt update && apt upgrade -y && apt install python wget -y && pip install Telethon && wget https://raw.githubusercontent.com/xteam-cloner/Userbotx/dev/resources/session/ssgen.py && python ssgen.py
