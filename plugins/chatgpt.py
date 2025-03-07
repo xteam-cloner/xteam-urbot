@@ -44,7 +44,7 @@ DEFAULT_MODELS = {
     "gpt": "gpt-3.5-turbo",
     "antr": "claude-3-opus-20240229",
     "gemini": "gemini-1.5-flash",
-    "deepseek": "deepseek-chat"
+    "deepseek": "DeepSeek-V3"
 }
 
 
