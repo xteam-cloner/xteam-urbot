@@ -42,7 +42,7 @@ ENDPOINTS = {
 
 DEFAULT_MODELS = {
     "gpt": "gpt-3.5-turbo",
-    "antr": "claude-3-7-sonnet-20250219",
+    "antr": "claude-3-family",
     "gemini": "gemini-1.5-flash",
     "deepseek": "DeepSeek-V3"
 }
