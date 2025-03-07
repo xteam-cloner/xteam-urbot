@@ -12,7 +12,8 @@ Go to the cloned folder:
 
 Create a virtual env:
 
-• virtualenv -p /usr/bin/python3 venv . ./venv/bin/activate
+• virtualenv -p /usr/bin/python3 venv 
+. ./venv/bin/activate
 
 Install the requirements:
 
