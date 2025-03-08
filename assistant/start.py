@@ -10,9 +10,9 @@ import os
 import sys
 from datetime import datetime
 
-from Ayra._misc import SUDO_M, owner_and_sudos
-from Ayra.dB.asst_fns import *
-from Ayra.fns.helper import inline_mention
+from pyUltroid._misc import SUDO_M, owner_and_sudos
+from pyUltroid.dB.asst_fns import *
+from pyUltroid.fns.helper import inline_mention
 from dotenv import load_dotenv, set_key, unset_key
 from pytz import timezone as tz
 from telethon import Button, events
@@ -36,7 +36,7 @@ if Owner_info_msg is None:
 
 **Message Forwards** - {udB.get_key("PMBOT")}
 
-**By Kynan Join @KynanSupport**
+**By  Join @xteam-cloner**
 """
 
 _settings = [
