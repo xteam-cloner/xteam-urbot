@@ -43,7 +43,7 @@ async def ytdl_progress(k, start_time, event):
 
 
 def get_yt_link(query):
-    search = VideosSearch(query, limit=1).result()
+    search = VideosSearch(query, limit=5).result()
     try:
         return search["result"][0]["link"]
     except IndexError:
