@@ -53,19 +53,19 @@ _settings = [
 
 _start = [
     [
-        Button.url("(OWNER_NAME)", url="https://t.me/xteam_clone"),
+        Button.url("OWNER", url="https://t.me/xteam_clone"),
         #Button.inline("Restart ♻️️", data="restart"),
     ],
     [
-        Button.inline("Pengaturan ⚙️", data="setter"),
-        Button.inline("Restart ♻️️", data="restart"),
+        Button.inline("⚙️ Pengaturan ⚙️", data="setter"),
+        Button.inline("♻️️ Restart ♻️️", data="restart"),
     ],
     [
-        Button.inline("Stats ✨", data="stat"),
-        Button.inline("Broadcast 📻", data="bcast"),
+        Button.inline("✨ Stats ✨", data="stat"),
+        Button.inline("📻 Broadcast 📻", data="bcast"),
     ],
     [
-        Button.inline("Bahasa 🌐", data="lang"),
+        Button.inline("🌐 Bahasa 🌐", data="lang"),
     ],
 ]
 
