@@ -180,7 +180,7 @@ async def ayra(event):
             if udB.get_key("PMBOT"):
                 ok = "Anda dapat menghubungi Owner saya menggunakan bot ini!!\n\nKirim Pesan Anda, saya akan Kirim ke Owner."
             await event.reply(
-                f"Hey {mention}, Aku Adalah Ayra Asissten {me}!\n\n{ok}",
+                f"Hey {mention}, Aku Adalah Xteam Asissten {me}!\n\n{ok}",
                 file=udB.get_key("STARTMEDIA"),
                 buttons=(
                     [Button.inline("Info.", data="ownerinfo")]
@@ -211,7 +211,6 @@ async def ayra(event):
             await event.reply(
                 get_string("ast_3").format(name),
                 buttons=_start,
-                ReactionEmoji("❤️"),
             )
 
 
