@@ -211,7 +211,7 @@ async def ayra(event):
             await event.reply(
                 get_string("ast_3").format(name),
                 buttons=_start,
-                ReactionEmoji('❤️'),
+                ReactionEmoji("❤️"),
             )
 
 
