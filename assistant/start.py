@@ -86,7 +86,7 @@ async def restart_callback(e):
         restart_counter += 1
     #        return await restart_callback(e)
     await bash("git pull && pip3 install -r requirements.txt")
-    os.execl(sys.executable, sys.executable, "-m", "pyultroid")
+    os.execl(sys.executable, sys.executable, "-m", "pyUltroid")
 
 
 @asst_cmd(pattern=r"setvar (\S+)\s+(\S+)", owner=True)
