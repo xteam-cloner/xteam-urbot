@@ -57,7 +57,7 @@ _start = [
         #Button.inline("Restart ♻️️", data="restart"),
     ],
     [
-        Button.inline("⚙️ Pengaturan ⚙️", data="setter"),
+        Button.inline("⚙️ Settings ⚙️", data="setter"),
         Button.inline("♻️️ Restart ♻️️", data="restart"),
     ],
     [
@@ -179,7 +179,7 @@ async def ultroid(event):
         if not udB.get_key("STARTMSG"):
             if udB.get_key("PMBOT"):
                 ok = "You can contact my master using this bot!!\n\nSend your Message, I will Deliver it To Master."
-            message = await event.reply(
+            await event.reply(
                 f"Hey there {mention}, this is Ultroid Assistant of {me}!\n\n{ok}",
                 file=udB.get_key("STARTMEDIA"),
                 buttons=[Button.inline("Info.", data="ownerinfo")]
@@ -187,30 +187,27 @@ async def ultroid(event):
                 else None,
             )
         else:
-            message = await event.reply(
+            await event.reply(
                 udB.get_key("STARTMSG").format(me=me, mention=mention),
                 file=udB.get_key("STARTMEDIA"),
                 buttons=[Button.inline("Info.", data="ownerinfo")]
                 if Owner_info_msg
                 else None,
             )
-        await message.react("🤪") # menambahkan emoji lambaian tangan
-        await message.react("♥️") # menambahkan emoji robot
     else:
         name = get_display_name(event.sender)
         if args == "set":
-            message = await event.reply(
+            await event.reply(
                 "Choose from the below options -",
                 buttons=_settings,
             )
         elif args:
             await get_stored_file(event, args)
         else:
-            message = await event.reply(
+            await event.reply(
                 get_string("ast_3").format(name),
                 buttons=_start,
             )
-        await message.react("🥰") # menambahkan emoji roda gigi
         await message.react("♥️") # menambahkan emoji roket
             
 
