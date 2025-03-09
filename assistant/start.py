@@ -9,7 +9,7 @@
 import os
 import sys
 from datetime import datetime
-
+from telethon.tl.types import ReactionEmoji
 from pyUltroid._misc import SUDO_M, owner_and_sudos
 from pyUltroid.dB.asst_fns import *
 from pyUltroid.fns.helper import inline_mention
@@ -211,6 +211,7 @@ async def ayra(event):
             await event.reply(
                 get_string("ast_3").format(name),
                 buttons=_start,
+                ReactionEmoji('❤️'),
             )
 
 
