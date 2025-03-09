@@ -29,7 +29,7 @@ if Owner_info_msg is None:
 
 **Message Forwards** - {udB.get_key("PMBOT")}
 
-**Ultroid [v{ultroid_version}](https://github.com/TeamUltroid/Ultroid), powered by @TeamUltroid**
+**Xteam [v{ultroid_version}](https://github.com/TeamUltroid/Ultroid), powered by @TeamUltroid**
 """
 
 
@@ -51,15 +51,34 @@ _settings = [
 
 _start = [
     [
-        Button.inline("Lᴀɴɢᴜᴀɢᴇ 🌐", data="lang"),
-        Button.inline("Sᴇᴛᴛɪɴɢs ⚙️", data="setter"),
+        Button.url("🥰 OWNER 🥰", url="https://t.me/xteam_clone"),
+        #Button.inline("Restart ♻️️", data="restart"),
     ],
     [
-        Button.inline("Sᴛᴀᴛs ✨", data="stat"),
-        Button.inline("Bʀᴏᴀᴅᴄᴀsᴛ 📻", data="bcast"),
+        Button.inline("⚙️ Settings ⚙️", data="setter"),
+        Button.inline("♻️️ Restart ♻️️", data="restart"),
     ],
-    [Button.inline("TɪᴍᴇZᴏɴᴇ 🌎", data="tz")],
+    [
+        Button.inline("✨ Stats ✨", data="stat"),
+        Button.inline("📻 Broadcast 📻", data="bcast"),
+    ],
+    [
+        Button.inline("🌐 Bahasa 🌐", data="lang"),
+    ],
 ]
+
+@callback("restart", owner=True)
+async def restart_callback(e):
+    global restart_counter
+    ok = await e.reply("`Processing...`")
+    who = "bot" if e.client._bot else "user"
+    udB.set_key("_RESTART", f"{who}_{e.chat_id}_{ok.id}")
+    if heroku_api and restart_counter < 10:
+        restart_counter += 1
+    #        return await restart_callback(e)
+    await bash("git pull && pip3 install -r requirements.txt")
+    os.execl(sys.executable, sys.executable, "-m", "pyUltroid")
+    
 
 
 @callback("ownerinfo")
@@ -68,7 +87,7 @@ async def own(event):
         mention=event.sender.mention, me=inline_mention(ultroid_bot.me)
     )
     if custom_info:
-        msg += "\n\n• Powered by **@TeamUltroid**"
+        msg += "\n\n• Powered by **@xteam-cloner**"
     await event.edit(
         msg,
         buttons=[Button.inline("Close", data="closeit")],
@@ -113,7 +132,7 @@ async def ultroid(event):
             if udB.get_key("PMBOT"):
                 ok = "You can contact my master using this bot!!\n\nSend your Message, I will Deliver it To Master."
             await event.reply(
-                f"Hey there {mention}, this is Ultroid Assistant of {me}!\n\n{ok}",
+                f"Hey there {mention}, this is Assistant of {me}!\n\n{ok}",
                 file=udB.get_key("STARTMEDIA"),
                 buttons=[Button.inline("Info.", data="ownerinfo")]
                 if Owner_info_msg
@@ -141,7 +160,7 @@ async def ultroid(event):
                 get_string("ast_3").format(name),
                 buttons=_start,
             )
-            await event.react("♥️")
+            
 
 @callback("itkkstyo", owner=True)
 async def ekekdhdb(e):
@@ -160,7 +179,7 @@ async def ultroid(event):
 @callback("stat", owner=True)
 async def botstat(event):
     ok = len(udB.get_key("BOT_USERS") or [])
-    msg = """Ultroid Assistant - Stats
+    msg = """Xteam Assistant - Stats
 Total Users - {}""".format(
         ok,
     )
