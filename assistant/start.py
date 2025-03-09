@@ -141,7 +141,7 @@ async def ultroid(event):
                 get_string("ast_3").format(name),
                 buttons=_start,
             )
-            await message.react("♥️")
+            await event.react("♥️")
 
 @callback("itkkstyo", owner=True)
 async def ekekdhdb(e):
