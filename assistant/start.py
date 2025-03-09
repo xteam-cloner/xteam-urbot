@@ -36,7 +36,7 @@ if Owner_info_msg is None:
 
 **Message Forwards** - {udB.get_key("PMBOT")}
 
-**By  Join @xteam-cloner**
+**By {OWNER_NAME} Join @xteam-cloner**
 """
 
 _settings = [
@@ -52,6 +52,10 @@ _settings = [
 ]
 
 _start = [
+    [
+        Button.url("(OWNER_NAME)", url="https://t.me/xteam_clone"),
+        #Button.inline("Restart ♻️️", data="restart"),
+    ],
     [
         Button.inline("Pengaturan ⚙️", data="setter"),
         Button.inline("Restart ♻️️", data="restart"),
@@ -82,7 +86,7 @@ async def restart_callback(e):
         restart_counter += 1
     #        return await restart_callback(e)
     await bash("git pull && pip3 install -r requirements.txt")
-    os.execl(sys.executable, sys.executable, "-m", "Ayra")
+    os.execl(sys.executable, sys.executable, "-m", "pyultroid")
 
 
 @asst_cmd(pattern=r"setvar (\S+)\s+(\S+)", owner=True)
@@ -129,10 +133,10 @@ async def del_env(event):
 @callback("ownerinfo")
 async def own(event):
     msg = Owner_info_msg.format(
-        mention=event.sender.mention, me=inline_mention(ayra_bot.me)
+        mention=event.sender.mention, me=inline_mention(ultroid_bot.me)
     )
     if custom_info:
-        msg += "\n\n• Powered by **@kynansupport**"
+        msg += "\n\n• Powered by **@xteam-cloner**"
     await event.edit(
         msg,
         buttons=[Button.inline("Tutup", data="closeit")],
@@ -227,7 +231,7 @@ async def ayra(event):
 @callback("stat", owner=True)
 async def botstat(event):
     ok = len(get_all_users("BOT_USERS"))
-    msg = """Naya-Userbot Assistant - Stats
+    msg = """Xteam-Userbot Assistant - Stats
 Total Users - {}""".format(
         ok,
     )
