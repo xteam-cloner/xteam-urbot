@@ -31,17 +31,17 @@ from pyUltroid.fns.tools import cmd_regex_replace
 from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroid_cmd, call_back, callback, def_logs, eor, get_string, heroku_logs, in_pattern
 
 _main_help_menu = [
-    [
+    """[
         Button.inline("ᴘɪɴɢ", data="ping"),
         Button.inline("ᴀʟɪᴠᴇ", data="alive"),
         #Button.inline(get_string("help_5"), data="uh_Addons_"),
-    ],
+    ],"""
     [
         Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_"),
         #Button.inline("BOT MUSIC"), data="inlone"),
     ],
     [
-        Button.url("BOT MUSIC", url=f"https://t.me/xteam_musicbot?start=set"),
+        Button.url("xᴛᴇᴀᴍ ᴍᴜsɪᴄ", url=f"https://t.me/xteam_musicbot?start=set"),
         Button.url("ꜱᴇᴛᴛɪɴɢꜱ", url=f"https://t.me/{asst.me.username}?start=set"),
     ],
     [Button.inline("ᴄʟᴏꜱᴇ", data="close")],
