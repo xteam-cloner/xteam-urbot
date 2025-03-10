@@ -21,9 +21,9 @@ from . import ultroid_cmd
 langi = "en"
 
 #kanged from Blank-x ;---;
-@ultroid_cmd(pattern="imdb ?(.*)")) 
+@ultroid_cmd(pattern="imdb( (.*)|$)",)
 async def imdb(e):
- sticktext = e.pattern_match.group(1)
+ sticktext = e.pattern_match.group(1).strip()
  
  if not sticktext:
     	get = await e.get_reply_message()
