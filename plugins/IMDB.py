@@ -1,109 +1,41 @@
-
-# For UniBorg
-# Copyright (c) JeepBot | 2019 
-# (c) JeepBot is not occur to all modules in here
-"""
-Imdb Module
-.imdb
-"""
-
-import bs4
+from telethon import TelegramClient, events
+from bs4 import BeautifulSoup
 import requests
-import asyncio
-import os
 import re
-import subprocess
-import time
-from telethon import events
-from datetime import datetime
-from . import ultroid_cmd
+from . import *
 
-langi = "en"
+async def get_imdb_info(movie_title):
+    """Mengambil informasi film dari IMDb."""
+    try:
+        # Mencari film di IMDb
+        search_url = f"https://www.imdb.com/find?q={movie_title}&s=tt&ttype=ft"
+        search_response = requests.get(search_url)
+        search_response.raise_for_status()  # Memunculkan HTTPError untuk respons yang buruk (4xx atau 5xx)
 
-#kanged from Blank-x ;---;
-@ultroid_cmd(pattern="imdb( (.*)|$)",)
-async def imdb(e):
- sticktext = e.pattern_match.group(1).strip()
- 
- if not sticktext:
-    	get = await e.get_reply_message()
-    	sticktext = get.text
+        search_soup = BeautifulSoup(search_response.content, 'html.parser')
+        movie_link = search_soup.find('a', href=re.compile(r'/title/tt\d+'))['href']
+        movie_url = f"https://www.imdb.com{movie_link}"
 
- try:
-    movie_name = sticktext
-    remove_space = movie_name.split(' ')
-    final_name = '+'.join(remove_space)
-    page = requests.get("https://www.imdb.com/find?ref_=nv_sr_fn&q="+final_name+"&s=all")
-    lnk = str(page.status_code)
-    soup = bs4.BeautifulSoup(page.content,'lxml')
-    odds = soup.findAll("tr","odd")
-    mov_title = odds[0].findNext('td').findNext('td').text
-    mov_link = "http://www.imdb.com/"+odds[0].findNext('td').findNext('td').a['href']
-    page1 = requests.get(mov_link)
-    soup = bs4.BeautifulSoup(page1.content,'lxml')
-    if soup.find('div','poster'):
-    	poster = soup.find('div','poster').img['src']
+        # Mengambil informasi film
+        movie_response = requests.get(movie_url)
+        movie_response.raise_for_status()
 
-    else:
-    	poster = ''
-    if soup.find('div','title_wrapper'):
-    	pg = soup.find('div','title_wrapper').findNext('div').text
-    	mov_details = re.sub(r'\s+',' ',pg)
-    else:
-    	mov_details = ''
-    credits = soup.findAll('div', 'credit_summary_item')
-    if len(credits)==1:
-    	director = credits[0].a.text
-    	writer = 'Not available'
-    	stars = 'Not available'
-    elif len(credits)>2:
-    	director = credits[0].a.text
-    	writer = credits[1].a.text
-    	actors = []
-    	for x in credits[2].findAll('a'):
-    		actors.append(x.text)
-    	actors.pop()
-    	stars = actors[0]+','+actors[1]+','+actors[2]
-    else:
-    	director = credits[0].a.text
-    	writer = 'Not available'
-    	actors = []
-    	for x in credits[1].findAll('a'):
-    		actors.append(x.text)
-    	actors.pop()
-    	stars = actors[0]+','+actors[1]+','+actors[2]
-    if soup.find('div', "inline canwrap"):
-    	story_line = soup.find('div', "inline canwrap").findAll('p')[0].text
-    else:
-    	story_line = 'Not available'
-    info = soup.findAll('div', "txt-block")
-    if info:
-    	mov_country = []
-    	mov_language = []
-    	for node in info:
-    		a = node.findAll('a')
-    		for i in a:
-    			if "country_of_origin" in i['href']:
-    				mov_country.append(i.text)
-    			elif "primary_language" in i['href']:
-    				mov_language.append(i.text)
-    if soup.findAll('div',"ratingValue"):
-    	for r in soup.findAll('div',"ratingValue"):
-    		mov_rating = r.strong['title']
-    else:
-    	mov_rating = 'Not available'
-    await e.edit('<a href='+poster+'>&#8203;</a>'
-    			'<b>Title : </b><code>'+mov_title+
-    			'</code>\n<b>Details : </b><code>'+mov_details+
-    			'</code>\n<b>Rating : </b><code>'+mov_rating+
-    			'</code>\n<b>Country : </b><code>'+mov_country[0]+
-    			'</code>\n<b>Language : </b><code>'+mov_language[0]+
-    			'</code>\n<b>Director : </b><code>'+director+
-    			'</code>\n<b>Writer : </b><code>'+writer+
-    			'</code>\n<b>Stars : </b><code>'+stars+
-    			'</code>\n<b>IMDB Url : </b>'+mov_link+
-    			'\n<b>Story Line : </b>'+story_line,
-    			link_preview = True , parse_mode = 'HTML'
-    			)
- except IndexError:
-     await e.edit("Plox Enter **Valid movie name** KthxBye")
+        movie_soup = BeautifulSoup(movie_response.content, 'html.parser')
+
+        title = movie_soup.find('h1').text.strip()
+        rating = movie_soup.find('span', class_='AggregateRatingButton__RatingScore-sc-1ll29k4-1 fgmrzC').text.strip()
+        plot = movie_soup.find('span', class_='GenresAndPlot__Plot-cum89p-6 bUyrFc').text.strip()
+
+        return f"**{title}**\nRating: {rating}\n\n{plot}"
+
+    except requests.exceptions.RequestException as e:
+        return f"Terjadi kesalahan saat mengambil informasi film: {e}"
+    except AttributeError:
+        return "Film tidak ditemukan."
+
+@ultroid_cmd(pattern="imdb (.*)"),)
+async def imdb_handler(event):
+    """Menangani perintah /imdb."""
+    movie_title = event.pattern_match.group(1)
+    await event.respond(await get_imdb_info(movie_title))
+
