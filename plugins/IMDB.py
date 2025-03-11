@@ -33,7 +33,7 @@ async def get_imdb_info(movie_title):
     except AttributeError:
         return "Film tidak ditemukan."
 
-@ultroid_cmd(pattern="imdb (.*)"),)
+@ultroid_cmd(pattern="imdb (.*)")
 async def imdb_handler(event):
     """Menangani perintah /imdb."""
     movie_title = event.pattern_match.group(1)
