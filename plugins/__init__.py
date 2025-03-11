@@ -14,7 +14,7 @@ from random import choice
 import requests
 from telethon import Button, events
 from telethon.tl import functions, types  # pylint:ignore
-
+from assistant.start import _start, _settings
 from pyUltroid import *
 from pyUltroid._misc._assistant import asst_cmd, callback, in_pattern
 from pyUltroid._misc._decorators import ultroid_cmd
