@@ -114,7 +114,7 @@ async def alive(event):
     except Exception as e:
         await event.respond(f"An error occurred: {e}")
         
-@asst_cmd(pattern="start( (.*)|$)", forwards=False)
+@ultroid_cmd(pattern="start( (.*)|$)", forwards=True)
 async def ultroid(event):
     args = event.pattern_match.group(1).strip()
     keym = KeyManager("BOT_USERS", cast=list)
