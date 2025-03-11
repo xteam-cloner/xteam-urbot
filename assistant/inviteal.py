@@ -2,7 +2,7 @@ import asyncio
 from telethon import TelegramClient, events, functions
 from telethon.tl.functions.messages import GetFullChatRequest
 from telethon.tl.types import InputPeerChannel, InputPeerChat
-from pyUltroid._misc._assistant asst, ultroid_bot as client
+from pyUltroid._misc._assistant import asst, ultroid_bot as client
 
 async def get_chatinfo(event):
     chat = await event.get_chat()
