@@ -53,4 +53,4 @@ class Var:
     DATABASE_URL = config("DATABASE_URL", default=None)
     # for MONGODB users
     MONGO_URI = config("MONGO_URI", default=None)
-    DOWNLOAD_PFP_URL_CLOCK = contig("DOWNLOAD_PFP_URL_CLOCK", default=None)
+    DOWNLOAD_PFP_URL_CLOCK = config("DOWNLOAD_PFP_URL_CLOCK", default=None)
