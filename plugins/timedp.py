@@ -13,10 +13,10 @@ FONT_FILE_TO_USE = "resources/extras/digital.ttf"
 @ultroid_cmd(pattern="sdp", outgoing=True)
 #@borg.on(admin_cmd(pattern=r"seconddp"))
 async def seconddp(event):
-    downloaded_file_name = "resources/extras/original_pic.png"
+    downloaded_file_name = "pyUltroid/configs/original_pic.png"
     downloader = SmartDL(Var.DOWNLOAD_PFP_URL_CLOCK, downloaded_file_name, progress_bar=False)
     downloader.start(blocking=False)
-    photo = "resources/extras/photo_pfp.png"
+    photo = "pyUltroid/configs/photo_pfp.png"
     while not downloader.isFinished():
         place_holder = None
     counter = -30
