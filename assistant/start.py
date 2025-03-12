@@ -103,7 +103,7 @@ async def closet(lol):
         await lol.answer("MESSAGE_TOO_OLD", alert=True)
 
 
-@asst_cmd(pattern="startt( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
+@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
 async def ultroid(event):
     args = event.pattern_match.group(1).strip()
     keym = KeyManager("BOT_USERS", cast=list)
@@ -156,14 +156,15 @@ async def ultroid(event):
         elif args:
             await get_stored_file(event, args)
         else:
-            sent_message = await event.reply(
-    get_string("ast_3").format(name),
-    buttons=_start,
-)
-await sent_message.react("🔥")  # Add a thumbs-up emoji reaction
+            await event.reply(
+                f"<blockquote>Hey {name}. Please browse through the options</blockquote>",
+                buttons=_start,
+                parse_mode="html",
+            )
+await event.react("🔥")  # Add a thumbs-up emoji reaction
             
 
-@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
+"""@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
 async def ultroid(event):
     args = event.pattern_match.group(1).strip()
     keym = KeyManager("BOT_USERS", cast=list)
@@ -221,7 +222,7 @@ async def ultroid(event):
                 buttons=_start,
             )
             await event.react("🔥")
-
+"""
 @callback("itkkstyo", owner=True)
 async def ekekdhdb(e):
     text = f"When New Visitor will visit your Assistant Bot. You will get this log message!\n\nTo Disable : {HNDLR}setdb OFF_START_LOG True"
