@@ -103,7 +103,7 @@ async def closet(lol):
         await lol.answer("MESSAGE_TOO_OLD", alert=True)
 
 
-@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
+"""@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
 async def ultroid(event):
     args = event.pattern_match.group(1).strip()
     keym = KeyManager("BOT_USERS", cast=list)
@@ -151,6 +151,65 @@ async def ultroid(event):
         if args == "set":
             await event.reply(
                 "Choose from the below options -",
+                buttons=_settings,
+            )
+        elif args:
+            await get_stored_file(event, args)
+        else:
+            await event.reply(
+                get_string("ast_3").format(name),
+                buttons=_start,
+            )
+   """         
+
+@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
+async def ultroid(event):
+    args = event.pattern_match.group(1).strip()
+    keym = KeyManager("BOT_USERS", cast=list)
+    if not keym.contains(event.sender_id) and event.sender_id not in owner_and_sudos():
+        keym.add(event.sender_id)
+        kak_uiw = udB.get_key("OFF_START_LOG")
+        if not kak_uiw or kak_uiw != True:
+            msg = f"{inline_mention(event.sender)} `[{event.sender_id}]` started your [Assistant bot](@{asst.me.username})."
+            buttons = [[Button.inline("Info", "itkkstyo")]]
+            if event.sender.username:
+                buttons[0].append(
+                    Button.mention(
+                        "User", await event.client.get_input_entity(event.sender_id)
+                    )
+                )
+            await event.client.send_message(
+                udB.get_key("LOG_CHANNEL"), msg, buttons=buttons
+            )
+    if event.sender_id not in SUDO_M.fullsudos:
+        ok = ""
+        me = inline_mention(ultroid_bot.me)
+        mention = inline_mention(event.sender)
+        if args and args != "set":
+            await get_stored_file(event, args)
+        if not udB.get_key("STARTMSG"):
+            if udB.get_key("PMBOT"):
+                ok = "You can contact my master using this bot!!\n\nSend your Message, I will Deliver it To Master. ✉️"
+            await event.reply(
+                f"Hey there {mention}, this is Ultroid Assistant of {me}! 👋\n\n{ok}",
+                file=udB.get_key("STARTMEDIA"),
+                buttons=[Button.inline("Info.", data="ownerinfo")]
+                if Owner_info_msg
+                else None,
+            )
+        else:
+            await event.reply(
+                udB.get_key("STARTMSG").format(me=me, mention=mention),
+                file=udB.get_key("STARTMEDIA"),
+                buttons=[Button.inline("Info.", data="ownerinfo")]
+                if Owner_info_msg
+                else None,
+            )
+    else:
+        name = get_display_name(event.sender)
+        if args == "set":
+            await event.reply(
+                "Choose from the below options - ⚙️",
                 buttons=_settings,
             )
         elif args:
