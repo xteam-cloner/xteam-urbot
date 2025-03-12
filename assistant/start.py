@@ -103,7 +103,7 @@ async def closet(lol):
         await lol.answer("MESSAGE_TOO_OLD", alert=True)
 
 
-"""@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
+@asst_cmd(pattern="startt( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
 async def ultroid(event):
     args = event.pattern_match.group(1).strip()
     keym = KeyManager("BOT_USERS", cast=list)
@@ -156,11 +156,12 @@ async def ultroid(event):
         elif args:
             await get_stored_file(event, args)
         else:
-            await event.reply(
-                get_string("ast_3").format(name),
-                buttons=_start,
-            )
-   """         
+            sent_message = await event.reply(
+    get_string("ast_3").format(name),
+    buttons=_start,
+)
+await sent_message.react("🔥")  # Add a thumbs-up emoji reaction
+            
 
 @asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
 async def ultroid(event):
