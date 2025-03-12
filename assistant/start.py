@@ -156,12 +156,12 @@ async def ultroid(event):
         elif args:
             await get_stored_file(event, args)
         else:
-            await event.reply(
+            await event.respond(
                 f"<blockquote>Hey {name}. Please browse through the options</blockquote>",
                 buttons=_start,
                 parse_mode="html",
             )
-await event.react("🔥")  # Add a thumbs-up emoji reaction
+            await event.react("🔥")  # Add a thumbs-up emoji reaction
             
 
 """@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
