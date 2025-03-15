@@ -1,3 +1,6 @@
+import os
+from telethon.tl.functions import PingRequest
+import sys
 import asyncio
 import platform
 import subprocess
