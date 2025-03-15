@@ -97,17 +97,17 @@ Mukesh = [
 def format_message_text(uptime):
     return f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n" \
            f"<blockquote>» ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n" \
-           f"» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n" \
-           f"» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n" \
-           f"» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n" \
-           f"» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n" \
-           f"Uptime : {uptime}\n</blockquote>"
+           f"❍ ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n" \
+           f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n\n" \
+           f"❍ ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n" \
+           f"❍ ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n" \
+           f"❍ ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n</blockquote>"
 
 @xteam_cmd(pattern="aalive$")
 async def alive(event):
     start = time.time()
     pro = await event.eor("⚡")
-    await asyncio.sleep(3)
+    await asyncio.sleep(2)
     await pro.delete()
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
