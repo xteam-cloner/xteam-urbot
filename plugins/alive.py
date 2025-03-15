@@ -7,12 +7,9 @@ import subprocess
 import time
 from datetime import datetime
 from secrets import choice
-from pytz import timezone as tz
 from telethon import Button, events
 from telethon.errors.rpcerrorlist import MessageDeleteForbiddenError
 from telethon.utils import get_display_name
-from datetime import datetime
-from telethon import Button, events
 from telethon.errors.rpcerrorlist import MessageDeleteForbiddenError
 from telethon.utils import get_display_name
 
@@ -27,9 +24,9 @@ from pyUltroid.fns.helper import inline_mention
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
 from telethon.tl.types import InputMessagesFilterPhotos
 from platform import python_version as pyver
-from pyrogram.enums import ChatType
+
 from pyrogram import __version__ as pver
-from pyrogram import filters
+
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telethon.tl.types import ReplyKeyboardMarkup, KeyboardButton
 #from telethon.tl.types import KeyboardButton
@@ -110,10 +107,10 @@ message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n<b
 async def alive(event):
     start = time.time()
     pro = await event.eor("⚡")
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
     await asyncio.sleep(3)
     await pro.delete()
+    end = round((time.time() - start) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 1000)
     owner=await ultroid_bot.get_users(OWNER_ID)
     await event.client.send_message(event.chat.id, message_text, parse_mode="html")
     
