@@ -97,11 +97,11 @@ Mukesh = [
 def format_message_text(uptime):
     return f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n" \
            f"<blockquote>❍ ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
-           f"❍ ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n" \
+           f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
            f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
-           f"❍ ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n" \
-           f"❍ ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n" \
-           f"❍ ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n</blockquote>"
+           f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
+           f"❍ ᴘʏʀᴏɢʀᴀᴍ : {pver}\n" \
+           f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n</blockquote>"
 
 @xteam_cmd(pattern="alive$")
 async def alive(event):
