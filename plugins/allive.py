@@ -96,14 +96,14 @@ Mukesh = [
 
 def format_message_text(uptime):
     return f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n" \
-           f"<blockquote>» ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n" \
-           f"❍ ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n" \
-           f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n\n" \
-           f"❍ ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n" \
-           f"❍ ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n" \
+           f"<blockquote>❍ ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
+           f"❍ ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n" \
+           f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
+           f"❍ ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n" \
+           f"❍ ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n" \
            f"❍ ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n</blockquote>"
 
-@xteam_cmd(pattern="aalive$")
+@xteam_cmd(pattern="alive$")
 async def alive(event):
     start = time.time()
     pro = await event.eor("⚡")
@@ -114,7 +114,7 @@ async def alive(event):
     message_text = format_message_text(uptime)
     await event.client.send_message(event.chat.id, message_text, parse_mode="html")
 
-@xteam_cmd(pattern="AAlive$")
+@xteam_cmd(pattern="Alive$")
 async def alive_video(event):
     try:
         asupannya = [
