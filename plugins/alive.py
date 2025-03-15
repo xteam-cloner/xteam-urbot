@@ -44,6 +44,23 @@ from . import *
 from . import ultroid_bot as client
 import resources
 from pyUltroid.fns.helper import inline_mention
+from . import (
+OWNER_NAME,
+OWNER_ID,
+BOT_NAME,
+OWNER_USERNAME,
+asst,
+start_time,
+time_formatter,
+udB,
+ultroid_cmd as xteam_cmd,
+get_string,
+ultroid_bot as client,
+eor,
+ultroid_bot,
+call_back,
+callback,
+)
 
 async def member_permissions(chat_id: int, user_id: int):
     perms = []
@@ -89,7 +106,7 @@ Mukesh = [
 message_text = f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n<blockquote>» ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n» ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ : {lver}\n\n» ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {tver}\n\n» ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : {pver}\n\n» ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : {pyver()}\n\n Uptime : {uptime}\n</blockquote>"
 
 
-@ultroid_cmd(pattern="alive$")
+@xteam_cmd(pattern="alive$")
 async def alive(event):
     start = time.time()
     pro = await event.eor("⚡")
@@ -101,7 +118,7 @@ async def alive(event):
     await event.client.send_message(event.chat.id, message_text, parse_mode="html")
     
 
-@ultroid_cmd(pattern="Alive$")
+@xteam_cmd(pattern="Alive$")
 async def alive(event):
     try:
         asupannya = [
