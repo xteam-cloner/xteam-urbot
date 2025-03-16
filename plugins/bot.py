@@ -93,7 +93,7 @@ async def alive(event):
     await event.answer(text, alert=True)
 
 
-@ultroid_cmd(
+"""@ultroid_cmd(
     pattern="alive( (.*)|$)",
 )
 async def lol(ult):
@@ -187,7 +187,7 @@ async def _(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     await x.edit(get_string("ping").format(end, uptime))
-
+"""
 
 @ultroid_cmd(
     pattern="cmds$",
