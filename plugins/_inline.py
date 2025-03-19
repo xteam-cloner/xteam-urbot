@@ -311,15 +311,12 @@ async def opner(event):
 
 @callback(data="close", owner=True)
 async def on_plug_in_callback_query_handler(event):
-    await event.edit(
-        get_string("inline_5"),
-        buttons=Button.inline("Oᴘᴇɴ Aɢᴀɪɴ", data="open"),
-    )
+    await event.delete():
 
 
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
-    cols = udB.get_key("HELP_COLUMNS") or 3
+    cols = udB.get_key("HELP_COLUMNS") or 2
     loaded = HELP.get(key, [])
     emoji = udB.get_key("EMOJI_IN_HELP") or "❍"
     List = [
