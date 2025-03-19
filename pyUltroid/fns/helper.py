@@ -204,21 +204,21 @@ if run_as_module:
             )
         await xx.edit("`Downloading Logs...`")
         ok = app.get_log()
-        with open("ultroid-heroku.log", "w") as log:
+        with open("userbot-heroku.log", "w") as log:
             log.write(ok)
         await event.client.send_file(
             event.chat_id,
-            file="ultroid-heroku.log",
+            file="userbot-heroku.log",
             thumb=ULTConfig.thumb,
-            caption="**Ultroid Heroku Logs.**",
+            caption="**Userbot Heroku Logs.**",
         )
 
-        os.remove("ultroid-heroku.log")
+        os.remove("usebot-heroku.log")
         await xx.delete()
 
     async def def_logs(ult, file):
         await ult.respond(
-            "**Ultroid Logs.**",
+            "**Userbot Logs.**",
             file=file,
             thumb=ULTConfig.thumb,
         )
