@@ -1,16 +1,15 @@
 # Important Requirements here.
 telethon
-# https://github.com/TeamUltroid/Telethon/archive/ultroid.zip
-https://github.com/New-dev0/Telethon-Patch/archive/main.zip
 python-decouple
 python-dotenv 
 ApiNyaEr
-py-tgcalls-wrapper
 youtube-dl
 tgcrypto
 youtube-search==2.1.0
 pyrogram
 ffmpeg
-nodejs
 deep-translator
 speedtest-cli
+python-telegram-bot
+emoji
+tqdm
