@@ -1,7 +1,9 @@
 # Important Requirements here.
 telethon
+# https://github.com/TeamUltroid/Telethon/archive/ultroid.zip
+https://github.com/New-dev0/Telethon-Patch/archive/main.zip
 python-decouple
-python-dotenv 
+python-dotenv
 ApiNyaEr
 youtube-dl
 tgcrypto
@@ -13,6 +15,7 @@ speedtest-cli
 python-telegram-bot
 emoji
 tqdm
+
 # Required only for Local Deploys
 # ------------------------------------------------------ #
 
