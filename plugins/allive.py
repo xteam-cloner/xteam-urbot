@@ -101,6 +101,7 @@ def format_message_text(uptime):
            f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
            f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
            f"❍ ᴘʏʀᴏɢʀᴀᴍ : {pver}\n" \
+           f"❍ ᴘʏ-ᴛɢᴄᴀʟʟꜱ : {pytver}\n" \
            f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n</blockquote>"
 
 @xteam_cmd(pattern="alive$")
