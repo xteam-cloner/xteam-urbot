@@ -25,7 +25,7 @@ async def start_radio(event):
             audio_chunk = radio_process.stdout.read(1920)
             if not audio_chunk:
                 break
-            await client.send_voice(chat_username, audio_chunk)
+            await ultroid_bot.send_voice(chat_username, audio_chunk)
         await event.respond('Siaran radio berakhir.')
     except Exception as e:
         await event.respond(f'Terjadi kesalahan: {e}')
