@@ -3,7 +3,7 @@ import os
 import subprocess
 import asyncio
 from . import *
-from . import ultroid_cmd as client 
+
 radio_url = 'http://stream.zenolive.com/8wv4d8g4344tv'  # Ganti dengan URL siaran radio Anda
 
 # Nama grup atau channel tempat siaran radio akan diputar
@@ -44,7 +44,7 @@ async def handle_start(event):
     """Menangani perintah /startradio."""
     await start_radio(event)
 
-@client.on(events.NewMessage(pattern='/stopradio'))
+@ultroid_cmd(pattern="stopradio")
 async def handle_stop(event):
     """Menangani perintah /stopradio."""
     await stop_radio(event)
