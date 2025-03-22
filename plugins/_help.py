@@ -82,6 +82,7 @@ async def _help(ult):
                                 file = file_name
                                 break
                     if not file:
+                        # the entered command/plugin name is not found
                         text = f"`{plug}` is not a valid plugin!"
                         best_match = None
                         for _ in compare_strings:
@@ -95,6 +96,12 @@ async def _help(ult):
                     if file in HELP["Official"]:
                         for i in HELP["Official"][file]:
                             output += i
+                    elif HELP.get("Addons") and file in HELP["Addons"]:
+                        for i in HELP["Addons"][file]:
+                            output += i
+                    elif HELP.get("VCBot") and file in HELP["VCBot"]:
+                        for i in HELP["VCBot"][file]:
+                            output += i
                     output += "\n© @xteam_cloner"
                     await ult.eor(output)
         except BaseException as er:
@@ -103,78 +110,15 @@ async def _help(ult):
     else:
         try:
             results = await ult.client.inline_query(asst.me.username, "ultd")
-            await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
-            await ult.delete()
-        except Exception as e:
-            LOGS.info(e)
-            # Count total commands
-            cmd_count = sum(len(cmds) for cmds in LIST.values())
-            
-            # Create the help menu with clean buttons
-            text = "**Help Modules**\n"
-            text += f"**Prefixes:** {HNDLR}\n"
-            text += f"**Commands:** {cmd_count}"
-            
-            buttons = [
-                [
-                    Button.inline("Admin", data="hlp_admin"),
-                    Button.inline("Asupan", data="hlp_asupan")
-                ],
-                [
-                    Button.inline("Auto Broadcast", data="hlp_autobc"),
-                    Button.inline("Blacklist", data="hlp_blacklist")
-                ],
-                [
-                    Button.inline("Convert", data="hlp_convert"),
-                    Button.inline("Copy", data="hlp_copy")
-                ],
-                [
-                    Button.inline("«", data="hlp_prev"),
-                    Button.inline("»", data="hlp_next")
-                ]
-            ]
-            await ult.eor(text, buttons=buttons)
-
-@callback(pattern="hlp_(.*)")
-async def help_callback(event):
-    data = event.data_match.group(1).decode("utf-8")
-    if data == "prev":
-        await event.answer("Previous page")
-    elif data == "next":
-        await event.answer("Next page")
-    elif data == "back":
-        cmd_count = sum(len(cmds) for cmds in LIST.values())
-        text = "**Help Modules**\n"
-        text += f"**Prefixes:** {HNDLR}\n"
-        text += f"**Commands:** {cmd_count}"
-        
-        buttons = [
-            [
-                Button.inline("Admin", data="hlp_admin"),
-                Button.inline("Asupan", data="hlp_asupan")
-            ],
-            [
-                Button.inline("Auto Broadcast", data="hlp_autobc"),
-                Button.inline("Blacklist", data="hlp_blacklist")
-            ],
-            [
-                Button.inline("Convert", data="hlp_convert"),
-                Button.inline("Copy", data="hlp_copy")
-            ],
-            [
-                Button.inline("«", data="hlp_prev"),
-                Button.inline("»", data="hlp_next")
-            ]
-        ]
-        await event.edit(text, buttons=buttons)
-    else:
-        # Show help for specific plugin
-        try:
-            output = f"**Plugin** - `{data}`\n"
-            if data in HELP["Official"]:
-                for i in HELP["Official"][data]:
-                    output += i
-            output += "\n© @xteam_cloner"
-            await event.edit(output, buttons=[[Button.inline("« Back", data="hlp_back")]])
-        except Exception as e:
-            await event.edit(f"No help available for {data}")
+        except BotMethodInvalidError:
+            return await ult.reply(
+                "Inline mode is disabled. Please enable it in bot settings or contact support.",
+            )
+        except BotResponseTimeoutError:
+            return await ult.eor(
+                "The bot did not respond in time. Please try again later.",
+            )
+        except BotInlineDisabledError:
+            return await ult.eor("The bot's inline mode is currently disabled.")
+        await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
+        await ult.delete()
