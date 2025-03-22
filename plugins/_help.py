@@ -108,17 +108,39 @@ async def _help(ult):
             LOGS.exception(er)
             await ult.eor("Error 🤔 occurred.")
     else:
-        try:
-            results = await ult.client.inline_query(asst.me.username, "ultd")
-        except BotMethodInvalidError:
-            return await ult.reply(
-                "Inline mode is disabled. Please enable it in bot settings or contact support.",
-            )
-        except BotResponseTimeoutError:
-            return await ult.eor(
-                "The bot did not respond in time. Please try again later.",
-            )
-        except BotInlineDisabledError:
-            return await ult.eor("The bot's inline mode is currently disabled.")
-        await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
-        await ult.delete()
+        # Create buttons grid layout
+        buttons = []
+        # Get all module names from LIST
+        modules = sorted(LIST.keys())
+        # Create buttons in rows of 2
+        for i in range(0, len(modules), 2):
+            row = []
+            # Add first button in row
+            row.append(Button.inline(modules[i], data=f"help_{modules[i]}"))
+            # Add second button if available
+            if i + 1 < len(modules):
+                row.append(Button.inline(modules[i + 1], data=f"help_{modules[i + 1]}"))
+            buttons.append(row)
+        
+        # Add navigation buttons at bottom
+        nav_row = []
+        nav_row.append(Button.inline("⬅️", data="help_prev"))
+        nav_row.append(Button.inline("➡️", data="help_next"))
+        buttons.append(nav_row)
+        
+        # Send message with buttons grid
+        await ult.eor(
+            f"**JIYO VX | UB**\n**prefix:** `{HNDLR}`", 
+            buttons=buttons
+        )
+
+@callback("help_")
+async def on_help_button(event):
+    # Get the module name from button data
+    module = event.data.decode().split("_")[1]
+    if module in HELP["Official"]:
+        output = f"**Plugin** - `{module}`\n"
+        for i in HELP["Official"][module]:
+            output += i
+        output += "\n© @xteam_cloner"
+        await event.edit(output)
