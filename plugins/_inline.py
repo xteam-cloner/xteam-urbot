@@ -86,7 +86,7 @@ async def inline_alive(o):
     )
 
 
-@in_pattern("ultd", owner=True)
+"""@in_pattern("ultd", owner=True)
 async def inline_handler(event):
     z = []
     for x in LIST.values():
@@ -109,7 +109,7 @@ async def inline_handler(event):
             title="Ultroid Help Menu", text=text, buttons=_main_help_menu
         )
     await event.answer([result], private=True, cache_time=300, gallery=True)
-
+"""
 
 @in_pattern("pasta", owner=True)
 async def _(event):
@@ -160,7 +160,8 @@ async def setting(event):
 _strings = {"Official": helps, "Addons": zhelps, "VCBot": get_string("inline_6")}
 
 
-@callback(re.compile("uh_(.*)"), owner=True)
+#@callback(re.compile("uh_(.*)"), owner=True)
+@in_pattern("ultd(.*)"), owner=True)
 async def help_func(ult):
     key, count = ult.data_match.group(1).decode("utf-8").split("_")
     if key == "VCBot" and HELP.get("VCBot") is None:
