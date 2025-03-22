@@ -45,25 +45,24 @@ from . import OWNER_NAME, ultroid_cmd, get_string
 _main_help_menu = [[Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_")]]
 
 
-@ultroid_cmd(pattern="helper (.*)|$)")
-async def _help(ayra):
-    plug = ayra.pattern_match.group(1).strip()
-    chat = await ayra.get_chat()
+@ultroid_cmd(pattern="helper")
+async def _help(ult):
+    chat = await ult.get_chat()
     if plug:
         try:
             x = get_string("help_11").format(plug)
             for d in LIST[plug]:
                 x += HNDLR + d
                 x += "\n"
-                x += "\n© @KynanSupport"
-                await ayra.eor(x)
+                x += "\n© @xteam-cloner"
+                await ult.eor(x)
         except BaseException as e:
-            await ayra.eor(f"{e}")
+            await ult.eor(f"{e}")
     else:
         try:
-            results = await ayra.client.inline_query(asst.me.username, "help")
+            results = await ult.client.inline_query(asst.me.username, "help")
         except BotInlineDisabledError:
-            return await ayra.eor(get_string("help_3"))
-        await results[0].click(chat.id, reply_to=ayra.reply_to_msg_id)
-        await ayra.delete()
+            return await ult.eor(get_string("help_3"))
+        await results[0].click(chat.id, reply_to=ult.reply_to_msg_id)
+        await ult.delete()
         
