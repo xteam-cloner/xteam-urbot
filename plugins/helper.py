@@ -17,7 +17,7 @@ from . import OWNER_NAME, ultroid_cmd, get_string
 _main_help_menu = [[Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_")]]
 
 
-@ultroid_cmd(pattern="help$")
+@ultroid_cmd(pattern="helper$")
 async def _help(ult):
     try:
         await ult.reply(
