@@ -82,7 +82,6 @@ async def _help(ult):
                                 file = file_name
                                 break
                     if not file:
-                        # the entered command/plugin name is not found
                         text = f"`{plug}` is not a valid plugin!"
                         best_match = None
                         for _ in compare_strings:
@@ -96,38 +95,45 @@ async def _help(ult):
                     if file in HELP["Official"]:
                         for i in HELP["Official"][file]:
                             output += i
-                    elif HELP.get("Addons") and file in HELP["Addons"]:
-                        for i in HELP["Addons"][file]:
-                            output += i
-                    elif HELP.get("VCBot") and file in HELP["VCBot"]:
-                        for i in HELP["VCBot"][file]:
-                            output += i
                     output += "\n© @xteam_cloner"
                     await ult.eor(output)
         except BaseException as er:
             LOGS.exception(er)
             await ult.eor("Error 🤔 occurred.")
     else:
+        help_menu = [
+            [Button.inline("ᴀᴅᴍɪɴ", data="help_admin"),
+             Button.inline("ᴀᴅᴢᴀɴ", data="help_adzan")],
+            [Button.inline("ᴀꜰᴋ", data="help_afk"),
+             Button.inline("ʙʟᴀᴄᴋʟɪꜱᴛ", data="help_blacklist")],
+            [Button.inline("ʙᴜᴛᴛᴏɴ", data="help_button"),
+             Button.inline("ᴄʜᴀᴛʙᴏx", data="help_chatbox")],
+            [Button.inline("ᴄᴏɴᴠᴇʀᴛ", data="help_convert"),
+             Button.inline("ᴄᴏᴘʏ", data="help_copy")],
+            [Button.inline("ꜰᴏɴᴛ", data="help_font"),
+             Button.inline("ɢᴄᴀꜱᴛ", data="help_gcast")],
+            [Button.inline("◀️", data="help_prev"),
+             Button.inline("▶️", data="help_next")]
+        ]
+        await ult.eor("**JIYO VX | UB**", buttons=help_menu)
+
+@callback(pattern="help_(.*)")
+async def help_callback(event):
+    plugin = event.data_match.group(1).decode("utf-8")
+    if plugin == "prev":
+        # Handle previous page
+        await event.edit("Previous page", buttons=help_menu)  # You'll need to define previous page buttons
+    elif plugin == "next":
+        # Handle next page
+        await event.edit("Next page", buttons=help_menu)  # You'll need to define next page buttons
+    else:
+        # Show help for specific plugin
         try:
-            results = await ult.client.inline_query(asst.me.username, "ultd")
-            await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
-            await ult.delete()
+            output = f"**Plugin** - `{plugin}`\n"
+            if plugin in HELP["Official"]:
+                for i in HELP["Official"][plugin]:
+                    output += i
+            output += "\n© @xteam_cloner"
+            await event.edit(output, buttons=[[Button.inline("« Back", data="help_back")]])
         except Exception as e:
-            LOGS.info(e)
-            # Fallback to simple button menu if inline query fails
-            help_menu = [
-                [Button.inline("ᴀᴅᴍɪɴ", data="admin"),
-                 Button.inline("ᴀᴅᴢᴀɴ", data="adzan")],
-                [Button.inline("ᴀꜰᴋ", data="afk"),
-                 Button.inline("ʙʟᴀᴄᴋʟɪꜱᴛ", data="blacklist")],
-                [Button.inline("ʙᴜᴛᴛᴏɴ", data="button"),
-                 Button.inline("ᴄʜᴀᴛʙᴏx", data="chatbox")],
-                [Button.inline("ᴄᴏɴᴠᴇʀᴛ", data="convert"),
-                 Button.inline("ᴄᴏᴘʏ", data="copy")],
-                [Button.inline("ꜰᴏɴᴛ", data="font"),
-                 Button.inline("ɢᴄᴀꜱᴛ", data="gcast")],
-                [Button.inline("◀️", data="prev"),
-                 Button.inline("▶️", data="next")]
-            ]
-            await ult.eor("**JIYO VX | UB**", buttons=help_menu)
-s
+            await event.edit(f"No help available for {plugin}")
