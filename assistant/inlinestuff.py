@@ -102,31 +102,37 @@ apis = [
 
 @in_pattern(owner=False, func=lambda x: not x.text)
 async def help(e):
-    TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
-    MSG = "═════════════♢.✰.♢═════════════"
-    WEB0 = wb(
-        "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []
-    )
+    # Count total commands
+    cmd_count = sum(len(cmds) for cmds in LIST.values())
+    
+    # Create the help menu with clean buttons
+    buttons = [
+        [
+            Button.inline("Admin", data="hlp_admin"),
+            Button.inline("Asupan", data="hlp_asupan")
+        ],
+        [
+            Button.inline("Auto Broadcast", data="hlp_autobc"),
+            Button.inline("Blacklist", data="hlp_blacklist")
+        ],
+        [
+            Button.inline("Convert", data="hlp_convert"),
+            Button.inline("Copy", data="hlp_copy")
+        ],
+        [
+            Button.inline("«", data="hlp_prev"),
+            Button.inline("»", data="hlp_next")
+        ]
+    ]
+    
     res = [
         await e.builder.article(
-            type="photo",
-            text=MSG,
-            include_media=True,
-            buttons=PING_ALIVE,
-            title="Inline",
-            description="Userbot",
-            url=TLINK,
-            thumb=WEB0,
-            content=wb(TLINK, 0, "image/jpg", []),
+            title="Help Menu",
+            text=f"**Help Modules**\nPrefixes: {HNDLR}\nCommands: {cmd_count}",
+            buttons=buttons
         )
     ]
-    await e.answer(
-        res,
-        private=True,
-        cache_time=300,
-        switch_pm="xteam-userbot",
-        switch_pm_param="start",
-    )
+    await e.answer(res, switch_pm="Help Menu", switch_pm_param="start")
 
 @callback("ping", owner=False)
 async def _(event):
