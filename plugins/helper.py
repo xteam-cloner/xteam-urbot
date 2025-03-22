@@ -101,60 +101,86 @@ async def _help(ult):
             LOGS.exception(er)
             await ult.eor("Error 🤔 occurred.")
     else:
-        # Count total modules
-        total_modules = len(LIST)
-        
-        # Create the help menu with the exact style from screenshot
-        help_menu = []
-        modules = sorted(LIST.keys())
-        
-        # Create pairs of modules for two-column layout
-        for i in range(0, len(modules), 2):
-            row = []
-            # First module in pair
-            if i < len(modules):
-                row.append(Button.inline(f"⟜ {modules[i]} ⟝", data=f"help_{modules[i]}"))
-            # Second module in pair (if exists)
-            if i + 1 < len(modules):
-                row.append(Button.inline(f"⟜ {modules[i+1]} ⟝", data=f"help_{modules[i+1]}"))
-            help_menu.append(row)
-        
-        # Add navigation buttons
-        help_menu.append([
-            Button.inline("« Previous", data="help_prev"),
-            Button.inline("« Back »", data="help_back"),
-            Button.inline("Next »", data="help_next")
-        ])
-        
-        # Send with proper header showing module count
-        await ult.eor(
-            f"**JIYO VX | UB**\nᴍᴏᴅᴜʟᴇs ~ {total_modules}",
-            buttons=help_menu
-        )
+        try:
+            results = await ult.client.inline_query(asst.me.username, "ultd")
+            await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
+            await ult.delete()
+        except Exception as e:
+            LOGS.info(e)
+            # Fallback to button menu
+            buttons = [
+                [
+                    Button.inline("⟜ admintools ⟝", data="hlp_admintools"),
+                    Button.inline("⟜ afk ⟝", data="hlp_afk")
+                ],
+                [
+                    Button.inline("⟜ antiflood ⟝", data="hlp_antiflood"),
+                    Button.inline("⟜ asstcmd ⟝", data="hlp_asstcmd")
+                ],
+                [
+                    Button.inline("⟜ asupan ⟝", data="hlp_asupan"),
+                    Button.inline("⟜ audiotools ⟝", data="hlp_audiotools")
+                ],
+                [
+                    Button.inline("⟜ autoban ⟝", data="hlp_autoban"),
+                    Button.inline("⟜ beautify ⟝", data="hlp_beautify")
+                ],
+                [
+                    Button.inline("⟜ blacklist ⟝", data="hlp_blacklist"),
+                    Button.inline("⟜ bot ⟝", data="hlp_bot")
+                ],
+                [
+                    Button.inline("« Previous", data="hlp_prev"),
+                    Button.inline("« Back »", data="hlp_back"),
+                    Button.inline("Next »", data="hlp_next")
+                ]
+            ]
+            await ult.eor(f"**JIYO VX | UB**\nᴍᴏᴅᴜʟᴇs ~ {len(LIST)}", buttons=buttons)
 
-@callback(pattern="help_(.*)")
+@callback(pattern="hlp_(.*)")
 async def help_callback(event):
-    plugin = event.data_match.group(1).decode("utf-8")
-    if plugin == "prev":
-        # Handle previous page
+    data = event.data_match.group(1).decode("utf-8")
+    if data == "prev":
         await event.answer("Previous page")
-    elif plugin == "next":
-        # Handle next page
+    elif data == "next":
         await event.answer("Next page")
-    elif plugin == "back":
-        # Return to main help menu
-        await event.edit(
-            f"**JIYO VX | UB**\nᴍᴏᴅᴜʟᴇs ~ {len(LIST)}",
-            buttons=help_menu
-        )
+    elif data == "back":
+        buttons = [
+            [
+                Button.inline("⟜ admintools ⟝", data="hlp_admintools"),
+                Button.inline("⟜ afk ⟝", data="hlp_afk")
+            ],
+            [
+                Button.inline("⟜ antiflood ⟝", data="hlp_antiflood"),
+                Button.inline("⟜ asstcmd ⟝", data="hlp_asstcmd")
+            ],
+            [
+                Button.inline("⟜ asupan ⟝", data="hlp_asupan"),
+                Button.inline("⟜ audiotools ⟝", data="hlp_audiotools")
+            ],
+            [
+                Button.inline("⟜ autoban ⟝", data="hlp_autoban"),
+                Button.inline("⟜ beautify ⟝", data="hlp_beautify")
+            ],
+            [
+                Button.inline("⟜ blacklist ⟝", data="hlp_blacklist"),
+                Button.inline("⟜ bot ⟝", data="hlp_bot")
+            ],
+            [
+                Button.inline("« Previous", data="hlp_prev"),
+                Button.inline("« Back »", data="hlp_back"),
+                Button.inline("Next »", data="hlp_next")
+            ]
+        ]
+        await event.edit(f"**JIYO VX | UB**\nᴍᴏᴅᴜʟᴇs ~ {len(LIST)}", buttons=buttons)
     else:
         # Show help for specific plugin
         try:
-            output = f"**Plugin** - `{plugin}`\n"
-            if plugin in HELP["Official"]:
-                for i in HELP["Official"][plugin]:
+            output = f"**Plugin** - `{data}`\n"
+            if data in HELP["Official"]:
+                for i in HELP["Official"][data]:
                     output += i
             output += "\n© @xteam_cloner"
-            await event.edit(output, buttons=[[Button.inline("« Back", data="help_back")]])
+            await event.edit(output, buttons=[[Button.inline("« Back", data="hlp_back")]])
         except Exception as e:
-            await event.edit(f"No help available for {plugin}")
+            await event.edit(f"No help available for {data}")
