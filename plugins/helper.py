@@ -45,14 +45,25 @@ from . import OWNER_NAME, ultroid_cmd, get_string
 _main_help_menu = [[Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_")]]
 
 
-@ultroid_cmd(pattern="helper$")
-@in_pattern("helper", owner=False)
-async def inline_handler(event):
-    key = "Official"
-    count = 0
-    text = _strings.get(key, "").format(OWNER_NAME, HNDLR, len(HELP.get(key)))
-
-    result = await event.builder.article(
-        title="alive", text=text, buttons=page_num(count, key)
-    )
-    await event.answer([result], cache_time=0)
+@ultroid_cmd(pattern="helper (.*)|$)")
+async def _help(ayra):
+    plug = ayra.pattern_match.group(1).strip()
+    chat = await ayra.get_chat()
+    if plug:
+        try:
+            x = get_string("help_11").format(plug)
+            for d in LIST[plug]:
+                x += HNDLR + d
+                x += "\n"
+                x += "\n© @KynanSupport"
+                await ayra.eor(x)
+        except BaseException as e:
+            await ayra.eor(f"{e}")
+    else:
+        try:
+            results = await ayra.client.inline_query(asst.me.username, "help")
+        except BotInlineDisabledError:
+            return await ayra.eor(get_string("help_3"))
+        await results[0].click(chat.id, reply_to=ayra.reply_to_msg_id)
+        await ayra.delete()
+        
