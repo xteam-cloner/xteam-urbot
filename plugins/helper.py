@@ -107,35 +107,33 @@ async def _help(ult):
             await ult.delete()
         except Exception as e:
             LOGS.info(e)
-            # Fallback to button menu
+            # Count total commands
+            cmd_count = sum(len(cmds) for cmds in LIST.values())
+            
+            # Create the help menu with clean buttons
+            text = "**Help Modules**\n"
+            text += f"**Prefixes:** {HNDLR}\n"
+            text += f"**Commands:** {cmd_count}"
+            
             buttons = [
                 [
-                    Button.inline("⟜ admintools ⟝", data="hlp_admintools"),
-                    Button.inline("⟜ afk ⟝", data="hlp_afk")
+                    Button.inline("Admin", data="hlp_admin"),
+                    Button.inline("Asupan", data="hlp_asupan")
                 ],
                 [
-                    Button.inline("⟜ antiflood ⟝", data="hlp_antiflood"),
-                    Button.inline("⟜ asstcmd ⟝", data="hlp_asstcmd")
+                    Button.inline("Auto Broadcast", data="hlp_autobc"),
+                    Button.inline("Blacklist", data="hlp_blacklist")
                 ],
                 [
-                    Button.inline("⟜ asupan ⟝", data="hlp_asupan"),
-                    Button.inline("⟜ audiotools ⟝", data="hlp_audiotools")
+                    Button.inline("Convert", data="hlp_convert"),
+                    Button.inline("Copy", data="hlp_copy")
                 ],
                 [
-                    Button.inline("⟜ autoban ⟝", data="hlp_autoban"),
-                    Button.inline("⟜ beautify ⟝", data="hlp_beautify")
-                ],
-                [
-                    Button.inline("⟜ blacklist ⟝", data="hlp_blacklist"),
-                    Button.inline("⟜ bot ⟝", data="hlp_bot")
-                ],
-                [
-                    Button.inline("« Previous", data="hlp_prev"),
-                    Button.inline("« Back »", data="hlp_back"),
-                    Button.inline("Next »", data="hlp_next")
+                    Button.inline("«", data="hlp_prev"),
+                    Button.inline("»", data="hlp_next")
                 ]
             ]
-            await ult.eor(f"**JIYO VX | UB**\nᴍᴏᴅᴜʟᴇs ~ {len(LIST)}", buttons=buttons)
+            await ult.eor(text, buttons=buttons)
 
 @callback(pattern="hlp_(.*)")
 async def help_callback(event):
@@ -145,34 +143,30 @@ async def help_callback(event):
     elif data == "next":
         await event.answer("Next page")
     elif data == "back":
+        cmd_count = sum(len(cmds) for cmds in LIST.values())
+        text = "**Help Modules**\n"
+        text += f"**Prefixes:** {HNDLR}\n"
+        text += f"**Commands:** {cmd_count}"
+        
         buttons = [
             [
-                Button.inline("⟜ admintools ⟝", data="hlp_admintools"),
-                Button.inline("⟜ afk ⟝", data="hlp_afk")
+                Button.inline("Admin", data="hlp_admin"),
+                Button.inline("Asupan", data="hlp_asupan")
             ],
             [
-                Button.inline("⟜ antiflood ⟝", data="hlp_antiflood"),
-                Button.inline("⟜ asstcmd ⟝", data="hlp_asstcmd")
+                Button.inline("Auto Broadcast", data="hlp_autobc"),
+                Button.inline("Blacklist", data="hlp_blacklist")
             ],
             [
-                Button.inline("⟜ asupan ⟝", data="hlp_asupan"),
-                Button.inline("⟜ audiotools ⟝", data="hlp_audiotools")
+                Button.inline("Convert", data="hlp_convert"),
+                Button.inline("Copy", data="hlp_copy")
             ],
             [
-                Button.inline("⟜ autoban ⟝", data="hlp_autoban"),
-                Button.inline("⟜ beautify ⟝", data="hlp_beautify")
-            ],
-            [
-                Button.inline("⟜ blacklist ⟝", data="hlp_blacklist"),
-                Button.inline("⟜ bot ⟝", data="hlp_bot")
-            ],
-            [
-                Button.inline("« Previous", data="hlp_prev"),
-                Button.inline("« Back »", data="hlp_back"),
-                Button.inline("Next »", data="hlp_next")
+                Button.inline("«", data="hlp_prev"),
+                Button.inline("»", data="hlp_next")
             ]
         ]
-        await event.edit(f"**JIYO VX | UB**\nᴍᴏᴅᴜʟᴇs ~ {len(LIST)}", buttons=buttons)
+        await event.edit(text, buttons=buttons)
     else:
         # Show help for specific plugin
         try:
