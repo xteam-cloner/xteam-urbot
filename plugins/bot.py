@@ -77,11 +77,11 @@ buttons = [
 
 # Will move to strings
 alive_txt = """
-The Ultroid Userbot
+ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ
 
-  ◍ Version - {}
-  ◍ Py-Ultroid - {}
-  ◍ Telethon - {}
+  ◍ ᴜꜱᴇʀʙᴏᴛ - {}
+  ◍ ᴅᴀᴛᴀʙᴀꜱᴇ - {}
+  ◍ ᴛᴇʟᴇᴛʜᴏɴ - {}
 """
 
 in_alive = "{}\n\n🌀 <b>Ultroid Version -><b> <code>{}</code>\n🌀 <b>PyUltroid -></b> <code>{}</code>\n🌀 <b>Python -></b> <code>{}</code>\n🌀 <b>Uptime -></b> <code>{}</code>\n🌀 <b>Branch -></b>[ {} ]\n\n• <b>Join @TeamUltroid</b>"
