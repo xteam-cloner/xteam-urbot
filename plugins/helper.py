@@ -46,7 +46,7 @@ _main_help_menu = [[Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_")]]
 
 
 @ultroid_cmd(pattern="helper$")
-@in_pattern("help", owner=False)
+@in_pattern("helper", owner=False)
 async def inline_handler(event):
     key = "Official"
     count = 0
