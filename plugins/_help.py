@@ -110,20 +110,30 @@ async def _help(ult):
     else:
         output = "**🔰 JIYO VX | UB Commands**\n\n"
         if "Official" in HELP:
+            output += "**📚 Official Commands:**\n"
             for plugin in sorted(HELP["Official"]):
-                output += f"⚡️ `{plugin}`\n"
+                output += f"\n**⚡️ {plugin}**\n"
+                if plugin in LIST:
+                    for cmd in sorted(LIST[plugin]):
+                        output += f"  `{HNDLR}{cmd}`\n"
         
         if "Addons" in HELP:
             output += "\n**📦 Addon Commands:**\n"
             for plugin in sorted(HELP["Addons"]):
-                output += f"⚡️ `{plugin}`\n"
+                output += f"\n**⚡️ {plugin}**\n"
+                if plugin in LIST:
+                    for cmd in sorted(LIST[plugin]):
+                        output += f"  `{HNDLR}{cmd}`\n"
         
         if "VCBot" in HELP:
             output += "\n**🎵 VCBot Commands:**\n"
             for plugin in sorted(HELP["VCBot"]):
-                output += f"⚡️ `{plugin}`\n"
+                output += f"\n**⚡️ {plugin}**\n"
+                if plugin in LIST:
+                    for cmd in sorted(LIST[plugin]):
+                        output += f"  `{HNDLR}{cmd}`\n"
         
-        output += "\n📝 Use `.help <command>` for more details on a command"
+        output += "\n📝 Use `.help <command>` for more details on specific commands"
         output += "\n\n© @xteam_cloner"
         
         try:
