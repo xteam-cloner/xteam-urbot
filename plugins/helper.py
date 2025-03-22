@@ -45,8 +45,9 @@ from . import OWNER_NAME, ultroid_cmd, get_string
 _main_help_menu = [[Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_")]]
 
 
-@ultroid_cmd(pattern="helper")
+@ultroid_cmd(pattern="helper( (.*)|$)")
 async def _help(ult):
+    plug = ult.pattern_match.group(1).strip()
     chat = await ult.get_chat()
     if plug:
         try:
