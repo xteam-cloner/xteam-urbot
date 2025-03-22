@@ -108,39 +108,28 @@ async def _help(ult):
             LOGS.exception(er)
             await ult.eor("Error 🤔 occurred.")
     else:
-        # Create buttons grid layout
-        buttons = []
-        # Get all module names from LIST
-        modules = sorted(LIST.keys())
-        # Create buttons in rows of 2
-        for i in range(0, len(modules), 2):
-            row = []
-            # Add first button in row
-            row.append(Button.inline(modules[i], data=f"help_{modules[i]}"))
-            # Add second button if available
-            if i + 1 < len(modules):
-                row.append(Button.inline(modules[i + 1], data=f"help_{modules[i + 1]}"))
-            buttons.append(row)
+        output = "**🔰 JIYO VX | UB Commands**\n\n"
+        if "Official" in HELP:
+            for plugin in sorted(HELP["Official"]):
+                output += f"⚡️ `{plugin}`\n"
         
-        # Add navigation buttons at bottom
-        nav_row = []
-        nav_row.append(Button.inline("⬅️", data="help_prev"))
-        nav_row.append(Button.inline("➡️", data="help_next"))
-        buttons.append(nav_row)
+        if "Addons" in HELP:
+            output += "\n**📦 Addon Commands:**\n"
+            for plugin in sorted(HELP["Addons"]):
+                output += f"⚡️ `{plugin}`\n"
         
-        # Send message with buttons grid
-        await ult.eor(
-            f"**JIYO VX | UB**\n**prefix:** `{HNDLR}`", 
-            buttons=buttons
-        )
-
-@callback("help_")
-async def on_help_button(event):
-    # Get the module name from button data
-    module = event.data.decode().split("_")[1]
-    if module in HELP["Official"]:
-        output = f"**Plugin** - `{module}`\n"
-        for i in HELP["Official"][module]:
-            output += i
-        output += "\n© @xteam_cloner"
-        await event.edit(output)
+        if "VCBot" in HELP:
+            output += "\n**🎵 VCBot Commands:**\n"
+            for plugin in sorted(HELP["VCBot"]):
+                output += f"⚡️ `{plugin}`\n"
+        
+        output += "\n📝 Use `.help <command>` for more details on a command"
+        output += "\n\n© @xteam_cloner"
+        
+        try:
+            results = await ult.client.inline_query(asst.me.username, "ultd")
+            await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
+            await ult.delete()
+        except Exception as e:
+            LOGS.info(e)
+            await ult.eor(output, buttons=_main_help_menu)
