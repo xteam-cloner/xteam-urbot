@@ -32,21 +32,10 @@ from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroi
 
 _main_help_menu = [
     [
-        Button.inline("ᴘɪɴɢ", data="ping"),
-        Button.inline("ᴀʟɪᴠᴇ", data="alive"),
-        #Button.inline(get_string("help_5"), data="uh_Addons_"),
-    ],
-    [
         Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="uh_Official_"),
-        #Button.inline("BOT MUSIC"), data="inlone"),
-    ],
-    [
-        Button.url("xᴛᴇᴀᴍ ᴍᴜsɪᴄ", url=f"https://t.me/xteam_musicbot?start=set"),
-        Button.url("ꜱᴇᴛᴛɪɴɢꜱ", url=f"https://t.me/{asst.me.username}?start=set"),
     ],
     [Button.inline("ᴄʟᴏꜱᴇ", data="close")],
 ]
-
 
 @ultroid_cmd(pattern="help( (.*)|$)")
 async def _help(ult):
@@ -93,7 +82,7 @@ async def _help(ult):
                                 file = file_name
                                 break
                     if not file:
-                        # the enter command/plugin name is not found
+                        # the entered command/plugin name is not found
                         text = f"`{plug}` is not a valid plugin!"
                         best_match = None
                         for _ in compare_strings:
@@ -117,31 +106,19 @@ async def _help(ult):
                     await ult.eor(output)
         except BaseException as er:
             LOGS.exception(er)
-            await ult.eor("Error 🤔 occured.")
+            await ult.eor("Error 🤔 occurred.")
     else:
         try:
             results = await ult.client.inline_query(asst.me.username, "ultd")
         except BotMethodInvalidError:
-            z = []
-            for x in LIST.values():
-                z.extend(x)
-            cmd = len(z) + 10
-            if udB.get_key("MANAGER") and udB.get_key("DUAL_HNDLR") == "/":
-                _main_help_menu[2:3] = [[Button.inline("• Manager Help •", "mngbtn")]]
             return await ult.reply(
-                get_string("inline_4").format(
-                    OWNER_NAME,
-                    len(HELP["Official"]),
-                    len(HELP["Addons"] if "Addons" in HELP else []),
-                    cmd,
-                ),
-                buttons=page_num,
+                "Inline mode is disabled. Please enable it in bot settings or contact support.",
             )
         except BotResponseTimeoutError:
             return await ult.eor(
-                get_string("help_2").format(HNDLR),
+                "The bot did not respond in time. Please try again later.",
             )
         except BotInlineDisabledError:
-            return await ult.eor(get_string("help_3"))
+            return await ult.eor("The bot's inline mode is currently disabled.")
         await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
         await ult.delete()
