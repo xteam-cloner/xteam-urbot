@@ -101,31 +101,52 @@ async def _help(ult):
             LOGS.exception(er)
             await ult.eor("Error 🤔 occurred.")
     else:
-        help_menu = [
-            [Button.inline("ᴀᴅᴍɪɴ", data="help_admin"),
-             Button.inline("ᴀᴅᴢᴀɴ", data="help_adzan")],
-            [Button.inline("ᴀꜰᴋ", data="help_afk"),
-             Button.inline("ʙʟᴀᴄᴋʟɪꜱᴛ", data="help_blacklist")],
-            [Button.inline("ʙᴜᴛᴛᴏɴ", data="help_button"),
-             Button.inline("ᴄʜᴀᴛʙᴏx", data="help_chatbox")],
-            [Button.inline("ᴄᴏɴᴠᴇʀᴛ", data="help_convert"),
-             Button.inline("ᴄᴏᴘʏ", data="help_copy")],
-            [Button.inline("ꜰᴏɴᴛ", data="help_font"),
-             Button.inline("ɢᴄᴀꜱᴛ", data="help_gcast")],
-            [Button.inline("◀️", data="help_prev"),
-             Button.inline("▶️", data="help_next")]
-        ]
-        await ult.eor("**JIYO VX | UB**", buttons=help_menu)
+        # Count total modules
+        total_modules = len(LIST)
+        
+        # Create the help menu with the exact style from screenshot
+        help_menu = []
+        modules = sorted(LIST.keys())
+        
+        # Create pairs of modules for two-column layout
+        for i in range(0, len(modules), 2):
+            row = []
+            # First module in pair
+            if i < len(modules):
+                row.append(Button.inline(f"⟜ {modules[i]} ⟝", data=f"help_{modules[i]}"))
+            # Second module in pair (if exists)
+            if i + 1 < len(modules):
+                row.append(Button.inline(f"⟜ {modules[i+1]} ⟝", data=f"help_{modules[i+1]}"))
+            help_menu.append(row)
+        
+        # Add navigation buttons
+        help_menu.append([
+            Button.inline("« Previous", data="help_prev"),
+            Button.inline("« Back »", data="help_back"),
+            Button.inline("Next »", data="help_next")
+        ])
+        
+        # Send with proper header showing module count
+        await ult.eor(
+            f"**JIYO VX | UB**\nᴍᴏᴅᴜʟᴇs ~ {total_modules}",
+            buttons=help_menu
+        )
 
 @callback(pattern="help_(.*)")
 async def help_callback(event):
     plugin = event.data_match.group(1).decode("utf-8")
     if plugin == "prev":
         # Handle previous page
-        await event.edit("Previous page", buttons=help_menu)  # You'll need to define previous page buttons
+        await event.answer("Previous page")
     elif plugin == "next":
         # Handle next page
-        await event.edit("Next page", buttons=help_menu)  # You'll need to define next page buttons
+        await event.answer("Next page")
+    elif plugin == "back":
+        # Return to main help menu
+        await event.edit(
+            f"**JIYO VX | UB**\nᴍᴏᴅᴜʟᴇs ~ {len(LIST)}",
+            buttons=help_menu
+        )
     else:
         # Show help for specific plugin
         try:
