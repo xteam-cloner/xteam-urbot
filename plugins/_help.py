@@ -135,7 +135,7 @@ async def _help(ult):
                     len(HELP["Addons"] if "Addons" in HELP else []),
                     cmd,
                 ),
-                buttons=_main_help_menu,
+                buttons=page_num,
             )
         except BotResponseTimeoutError:
             return await ult.eor(
