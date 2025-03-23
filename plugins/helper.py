@@ -43,9 +43,8 @@ from telethon import events, Button, custom
 HELP = {}  # Assuming you have a dictionary like this
 
 
-@ultroid_cmd(pattern="helper( (.*)|$)"
+@ultroid_cmd(pattern="helper( (.*)|$)")
 async def help_cmd(event):
-    if event.pattern_match.group(1):
         module = event.pattern_match.group(1).strip()
         if module in HELP:
             await event.respond(HELP[module].__HELP__)
