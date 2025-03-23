@@ -41,7 +41,7 @@ async def help_cmd(event):
     if module in HELP:
         await event.respond(HELP[module].__HELP__, parse_mode='html')
     else:
-        await event.respond(f"<b>No Module Named <code>{module}</code></b>", parse_mode='html')
+        #await event.respond(f"<b>No Module Named <code>{module}</code></b>", parse_mode='html')
     await event.respond(
         "<b>Command & Help</b>",
         buttons=paginate_modules(0, HELP, "help"),
