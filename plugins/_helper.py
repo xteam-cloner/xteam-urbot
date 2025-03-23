@@ -11,7 +11,7 @@ from datetime import datetime
 from html import unescape
 from random import choice
 from re import compile as re_compile
-
+from ._inline import *
 from bs4 import BeautifulSoup as bs
 from telethon import Button
 from telethon.tl.alltlobjects import LAYER, tlobjects
