@@ -1,10 +1,3 @@
-# Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
-#
-# This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
-# PLease read the GNU Affero General Public License in
-# <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-
 import base64
 import inspect
 from datetime import datetime
@@ -42,20 +35,18 @@ from telethon import events, Button, custom
 
 HELP = {}  # Assuming you have a dictionary like this
 
-
 @ultroid_cmd(pattern="helper( (.*)|$)")
 async def help_cmd(event):
     module = event.pattern_match.group(1).strip()
     if module in HELP:
-        await event.respond(HELP[module].__HELP__)
+        await event.respond(HELP[module].__HELP__, parse_mode='html')
     else:
         await event.respond(f"<b>No Module Named <code>{module}</code></b>", parse_mode='html')
-    try:
     await event.respond(
-            "<b>Command & Help</b>",
-            buttons=paginate_modules(0, HELP, "help"),
-            parse_mode='html'
-        )
+        "<b>Command & Help</b>",
+        buttons=paginate_modules(0, HELP, "help"),
+        parse_mode='html'
+    )
 
 def paginate_modules(page_number, module_dict, prefix):
     modules = sorted(list(module_dict.keys()))
@@ -85,7 +76,7 @@ async def menu_callback(event):
 
     if mod_match:
         module = mod_match.group(1).decode().replace(" ", "_")
-        text = HELP_COMMANDS[module].__HELP__
+        text = HELP[module].__HELP__
         await event.edit(text, buttons=Button.inline("Back", data=b"help_back"), parse_mode='html')
     elif prev_match:
         curr_page = int(prev_match.group(1).decode())
@@ -133,10 +124,9 @@ Simple userbot telegram based in telethon.
 
 # Register the handlers
 async def setup_handlers(client):
-    client.add_event_handler(help_cmd, events.NewMessage(pattern=r"(?i)^\.help(?: |$)(.*)"))
+    client.add_event_handler(help_cmd, events.NewMessage(pattern=r"(?i)^\.helper(?: |$)(.*)"))
     client.add_event_handler(menu_callback, events.CallbackQuery(pattern=re.compile(rb"help_")))
     client.add_event_handler(nothing_here, events.InlineQuery(pattern=r"user_help"))
 
 # Example of how to add a help command
-# HELP_COMMANDS["example"] = type('HelpCommand', (), {"__HELP__": "This is an example help command."})
-
+# HELP["example"] = type('HelpCommand', (), {"__HELP__": "This is an example help command."})
