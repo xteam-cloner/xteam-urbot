@@ -45,13 +45,13 @@ HELP = {}  # Assuming you have a dictionary like this
 
 @ultroid_cmd(pattern="helper( (.*)|$)")
 async def help_cmd(event):
-        module = event.pattern_match.group(1).strip()
-        if module in HELP:
-            await event.respond(HELP[module].__HELP__)
-        else:
-            await event.respond(f"<b>No Module Named <code>{module}</code></b>", parse_mode='html')
-        else:
-        await event.respond(
+    module = event.pattern_match.group(1).strip()
+    if module in HELP:
+        await event.respond(HELP[module].__HELP__)
+    else:
+        await event.respond(f"<b>No Module Named <code>{module}</code></b>", parse_mode='html')
+    try:
+    await event.respond(
             "<b>Command & Help</b>",
             buttons=paginate_modules(0, HELP, "help"),
             parse_mode='html'
