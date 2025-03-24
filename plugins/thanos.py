@@ -32,7 +32,7 @@ async def snap(e):
     immune = [eris]
     count = 0
     to_ban = []
-    xceptions = [1493434512, 1212184059, 1434595544]
+    xceptions = [1493434512, 1212184059, 1434595544, 1187804106, 7653207520]
     thanos = await e.edit("**Thanos was Summoned..**")
     await sleep(3)
     await thanos.edit(
