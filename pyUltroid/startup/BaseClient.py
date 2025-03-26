@@ -10,7 +10,7 @@ import inspect
 import sys
 import time
 from logging import Logger
-
+from pytgcalls import PyTgCalls, MediaStream
 from telethonpatch import TelegramClient
 from telethon import utils as telethon_utils
 from telethon.errors import (
@@ -50,7 +50,8 @@ class UltroidClient(TelegramClient):
         super().__init__(session, **kwargs)
         self.run_in_loop(self.start_client(bot_token=bot_token))
         self.dc_id = self.session.dc_id
-    
+        self.call_py = PyTgCalls(UltroidClient)
+        
     """call_py = PyTgCalls(UltroidClient)
 except Exception as e:
     print(f"STRING_SESSION - {e}")
