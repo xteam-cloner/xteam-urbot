@@ -50,25 +50,12 @@ class UltroidClient(TelegramClient):
         super().__init__(session, **kwargs)
         self.run_in_loop(self.start_client(bot_token=bot_token))
         self.dc_id = self.session.dc_id
-        self.call_py = PyTgCalls(self)
-        
-    """call_py = PyTgCalls(UltroidClient)
-except Exception as e:
-    print(f"STRING_SESSION - {e}")
-    sys.exit()
 
-if STRING_2:
-    session2 = StringSession(str(STRING_2))
-    MAN2 = TelegramClient(
-        session=session2,
-        api_id=API_KEY,
-        api_hash=API_HASH,
-        connection=ConnectionTcpAbridged,
-        auto_reconnect=True,
-        connection_retries=None,
-    )
-    call_py2 = PyTgCalls(MAN2)
-    """
+    client = TelegramClient(StringSession(Var.SESSION), Var.API_ID, Var.API_HASH)
+    call_py = PyTgCalls(client)
+    client.start()
+    call_py.start()
+        
     def __repr__(self):
         return f"<Ultroid.Client :\n self: {self.full_name}\n bot: {self._bot}\n>"
 
