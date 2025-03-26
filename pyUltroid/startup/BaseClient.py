@@ -51,14 +51,14 @@ class UltroidClient(TelegramClient):
         self.run_in_loop(self.start_client(bot_token=bot_token))
         self.dc_id = self.session.dc_id
 
-    client = TelegramClient(
+    class Client(TelegramClient):
         self,
         session,
         api_id=None,
         api_hash=None,
         bot_token=None,)
-    call_py = PyTgCalls(client)
-    client.start()
+    call_py = PyTgCalls(Client)
+    Client.start()
     call_py.start()
 
         
