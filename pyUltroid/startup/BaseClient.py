@@ -57,7 +57,8 @@ class UltroidClient(TelegramClient):
         session,
         api_id=None,
         api_hash=None,
-        bot_token=None,)
+        bot_token=None,
+        )
     call_py = PyTgCalls(Client)
     Client.start()
     call_py.start()
