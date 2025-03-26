@@ -50,7 +50,7 @@ class UltroidClient(TelegramClient):
         super().__init__(session, **kwargs)
         self.run_in_loop(self.start_client(bot_token=bot_token))
         self.dc_id = self.session.dc_id
-        self.call_py = PyTgCalls(UltroidClient)
+        self.call_py = PyTgCalls(self)
         
     """call_py = PyTgCalls(UltroidClient)
 except Exception as e:
