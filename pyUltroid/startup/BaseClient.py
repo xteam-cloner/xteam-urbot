@@ -50,19 +50,7 @@ class UltroidClient(TelegramClient):
         super().__init__(session, **kwargs)
         self.run_in_loop(self.start_client(bot_token=bot_token))
         self.dc_id = self.session.dc_id
-
-    """class Client(TelegramClient):
-        def __init__(
-        self,
-        session,
-        api_id=None,
-        api_hash=None,
-        bot_token=None,
-        )"""
-    call_py = PyTgCalls(TelegramClient)
-    call_py.start()
-
-        
+    
     def __repr__(self):
         return f"<Ultroid.Client :\n self: {self.full_name}\n bot: {self._bot}\n>"
 
