@@ -59,7 +59,7 @@ class UltroidClient(TelegramClient):
         api_hash=None,
         bot_token=None,
         )"""
-    call_py = PyTgCalls(UltroidClient)
+    call_py = PyTgCalls(TelegramClient)
     call_py.start()
 
         
