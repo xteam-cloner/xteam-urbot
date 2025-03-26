@@ -52,7 +52,7 @@ class UltroidClient(TelegramClient):
         self.dc_id = self.session.dc_id
 
     class Client(TelegramClient):
-    def __init__(
+        def __init__(
         self,
         session,
         api_id=None,
