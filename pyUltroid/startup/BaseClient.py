@@ -19,7 +19,7 @@ from telethon.errors import (
     ApiIdInvalidError,
     AuthKeyDuplicatedError,
 )
-
+from telethon.sessions import StringSession
 from ..configs import Var
 from . import *
 
