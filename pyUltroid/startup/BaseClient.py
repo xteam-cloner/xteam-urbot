@@ -10,7 +10,7 @@ import inspect
 import sys
 import time
 from logging import Logger
-from pytgcalls import PyTgCalls, MediaStream
+from pytgcalls import PyTgCalls
 from telethonpatch import TelegramClient
 from telethon import utils as telethon_utils
 from telethon.errors import (
