@@ -2,7 +2,7 @@ import os
 
 from pytdbot import Client, types
 
-from ..configs import Var
+from pyUltroid.configs import Var
 from src.database import db
 from src.modules.jobs import InactiveCallManager
 from src.pytgcalls import call, start_clients
