@@ -4,17 +4,17 @@ from pytdbot import Client, types
 
 from src.database import db
 from src.logger import LOGGER
-from src.modules.utils import (
+from plugins.utils import (
     Filter,
     SupportButton,
     get_audio_duration,
     play_button,
     sec_to_min,
 )
-from src.modules.utils.admins import load_admin_cache, is_admin
-from src.modules.utils.buttons import update_progress_bar
-from src.modules.utils.cacher import chat_cache
-from src.modules.utils.play_helpers import (
+from plugins.utils.admins import load_admin_cache, is_admin
+from plugins.utils.buttons import update_progress_bar
+from plugins.utils.cacher import chat_cache
+from plugins.utils.play_helpers import (
     get_url,
     edit_text,
     user_status_cache,
@@ -25,7 +25,7 @@ from src.modules.utils.play_helpers import (
     del_msg,
 )
 
-from src.modules.utils.thumbnails import gen_thumb
+from plugins.utils.thumbnails import gen_thumb
 from src.platforms.dataclass import CachedTrack, MusicTrack, PlatformTracks
 from src.platforms.downloader import MusicServiceWrapper
 from src.platforms.telegram import Telegram
