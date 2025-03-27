@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 import aiofiles
 import httpx
 
-from pyUltroid.configs import API_KEY
+from pyUltroid.configs import Var
 from src.logger import LOGGER
 
 
