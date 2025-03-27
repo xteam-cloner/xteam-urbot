@@ -21,10 +21,10 @@ from pytdbot import types, Client
 from pytgcalls import __version__ as pytgver
 
 from pyUltroid.configs import OWNER_ID
-from src.database import db
+from plugins.utils import db
 from src.logger import LOGGER
-from src.modules.utils import Filter
-from src.modules.utils.play_helpers import del_msg
+from plugins.utils import Filter
+from plugins.utils.play_helpers import del_msg
 
 
 def format_exception(
