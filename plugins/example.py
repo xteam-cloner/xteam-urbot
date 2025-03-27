@@ -6,8 +6,8 @@ import os
 from pyUltroid.configs import Var
 # Replace with your API ID, API hash, and session string
 
-if not API_ID or not API_HASH or not SESSION_STRING:
-    raise ValueError("API_ID, API_HASH, and SESSION_STRING must be set as environment variables.")
+#if not API_ID or not API_HASH or not SESSION_STRING:
+    #raise ValueError("API_ID, API_HASH, and SESSION_STRING must be set as environment variables.")
 
 client = TelegramClient(config.SESSION, config.API_ID, config.API_HASH)
 call_py = PyTgCalls(client)
