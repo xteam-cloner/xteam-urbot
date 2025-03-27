@@ -18,6 +18,4 @@ echo "
       Visit @xteam_cloner for updates!!
 
 "
-python3 -m pyUltroid &&
-python3 -m src &&
-wait
+python3 -m pyUltroid; python3 -m src
