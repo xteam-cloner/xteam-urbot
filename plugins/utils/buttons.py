@@ -3,7 +3,7 @@ import asyncio
 from pytdbot import Client, types
 
 from src.logger import LOGGER
-from src.modules.utils.cacher import chat_cache
+from plugins.utils.cacher import chat_cache
 
 
 def play_button(current_seconds: int, total_seconds: int) -> types.ReplyMarkupInlineKeyboard:
