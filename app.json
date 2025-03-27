@@ -1,56 +1,119 @@
 {
-    "name": "Ultroid UserBot",
-    "description": "Pluggable telegram userbot, made in python using Telethon.",
-    "logo": "https://graph.org/file/031957757a4f6a5191040.jpg",
-    "keywords": [
-        "Telethon",
-        "telegram",
-        "userbot",
-        "python",
-        "ultroid"
-    ],
-    "repository": "https://github.com/TeamUltroid/Ultroid",
-    "website": "https://ultroid.tech",
-    "success_url": "https://t.me/TeamUltroid",
-    "stack": "container",
-    "env": {
-        "API_ID": {
-            "description": "You api id, from my.telegram.org or @ScrapperRoBot.",
-            "value": "", 
-            "required": false
-        },
-        "API_HASH": {
-            "description": "You api hash, from my.telegram.org or @ScrapperRoBot.",
-            "value": "",
-            "required": false
-        },
-        "SESSION": {
-            "description": "Session String (telethon or pyrogram) for your telegram user account. The userbot will NOT work without a session string!!",
-            "value": ""
-        },
-        "REDIS_URI": {
-            "description": "Redis endpoint URL, from redislabs.com",
-            "value": ""
-        },
-        "REDIS_PASSWORD": {
-            "description": "Redis endpoint password, from redislabs.com",
-            "value": ""
-        },
-        "HEROKU_API": {
-            "description": "Heroku API token. Mandatory for Heroku Deploy...",
-            "value": "",
-            "required": false
-        },
-        "HEROKU_APP_NAME": {
-            "description": "Name of your Heroku app, given in the first blank on this page. To be added if deploying to heroku ONLY.",
-            "value": "",
-            "required": false
-        }
+  "name": "TgMusicBot",
+  "description": "A Telegram Music Bot deployed on Heroku.",
+  "keywords": [
+    "telegram",
+    "music",
+    "bot",
+    "python"
+  ],
+  "website": "https://github.com/AshokShau",
+  "repository": "https://github.com/AshokShau/TgMusicBot",
+  "logo": "https://te.legra.ph/file/6f99c49bdb4679acad717.jpg",
+  "stack": "heroku-24",
+  "image": "heroku/python",
+  "env": {
+    "API_ID": {
+      "description": "Your Telegram API ID",
+      "value": "",
+      "required": true
     },
-    "formation": {
-        "ultroid": {
-            "quantity": 1,
-            "size": "eco"
-        }
+    "API_HASH": {
+      "description": "Your Telegram API Hash",
+      "value": "",
+      "required": true
+    },
+    "TOKEN": {
+      "description": "Your Telegram Bot Token",
+      "value": "",
+      "required": true
+    },
+    "STRING": {
+      "description": "Your first session string",
+      "value": "",
+      "required": true
+    },
+    "STRING2": {
+      "description": "Your second session string",
+      "value": "",
+      "required": false
+    },
+    "STRING3": {
+      "description": "Your third session string",
+      "value": "",
+      "required": false
+    },
+    "STRING4": {
+      "description": "Your fourth session string",
+      "value": "",
+      "required": false
+    },
+    "STRING5": {
+      "description": "Your fifth session string",
+      "value": "",
+      "required": false
+    },
+    "STRING6": {
+      "description": "Your sixth session string",
+      "value": "",
+      "required": false
+    },
+    "STRING7": {
+      "description": "Your seventh session string",
+      "value": "",
+      "required": false
+    },
+    "STRING8": {
+      "description": "Your eighth session string",
+      "value": "",
+      "required": false
+    },
+    "STRING9": {
+      "description": "Your ninth session string",
+      "value": "",
+      "required": false
+    },
+    "STRING10": {
+      "description": "Your tenth session string",
+      "value": "",
+      "required": false
+    },
+    "OWNER_ID": {
+      "description": "Your Telegram User ID",
+      "value": "5938660179"
+    },
+    "MONGO_URI": {
+      "description": "Your MongoDB URI",
+      "value": "",
+      "required": true
+    },
+    "DOWNLOADS_DIR": {
+      "description": "Directory to store downloads",
+      "value": "database/music",
+      "required": false
+    },
+    "API_URL": {
+      "description": "API URL for the bot",
+      "value": "",
+      "required": false
+    },
+    "API_KEY": {
+      "description": "API key for the bot",
+      "value": "",
+      "required": false
+    },
+    "PROXY_URL": {
+      "description": "Proxy URL for the bot",
+      "value": "",
+      "required": false
     }
+  },
+  "buildpacks": [
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
+    },
+    {
+      "url": "heroku/python"
+    }
+  ]
 }
