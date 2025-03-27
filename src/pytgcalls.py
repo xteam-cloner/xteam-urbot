@@ -21,10 +21,10 @@ from pytgcalls.types import (
 from pyUltroid import configs
 from src.database import db
 from src.logger import LOGGER
-from src.modules.utils import sec_to_min, get_audio_duration
-from src.modules.utils.buttons import play_button, update_progress_bar
-from src.modules.utils.cacher import chat_cache
-from src.modules.utils.thumbnails import gen_thumb
+from plugins.utils import sec_to_min, get_audio_duration
+from plugins.utils.buttons import play_button, update_progress_bar
+from plugins.utils.cacher import chat_cache
+from plugins.utils.thumbnails import gen_thumb
 from src.platforms.dataclass import CachedTrack
 from src.platforms.downloader import MusicServiceWrapper, YouTubeData, SpotifyData
 
