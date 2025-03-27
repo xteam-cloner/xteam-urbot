@@ -6,10 +6,10 @@ from pytdbot import types, Client
 from src.database import db
 from src.logger import LOGGER
 from src.modules.play import play_music, _get_platform_url
-from src.modules.utils import PauseButton, ResumeButton, sec_to_min, Filter
-from src.modules.utils.admins import is_admin
-from src.modules.utils.cacher import chat_cache
-from src.modules.utils.play_helpers import extract_argument, del_msg, edit_text
+from plugins.utils import PauseButton, ResumeButton, sec_to_min, Filter
+from plugins.utils.admins import is_admin
+from plugins.utils.cacher import chat_cache
+from plugins.utils.play_helpers import extract_argument, del_msg, edit_text
 from src.platforms.downloader import MusicServiceWrapper
 from src.pytgcalls import call
 
