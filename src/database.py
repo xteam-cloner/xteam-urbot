@@ -3,7 +3,7 @@ from typing import Optional
 from cachetools import TTLCache
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from pyUltroid import configs
+from pyUltroid.configs import Var
 from src.logger import LOGGER
 
 
