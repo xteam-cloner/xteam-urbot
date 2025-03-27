@@ -5,7 +5,7 @@ import httpx
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from aiofiles.os import path as aiopath
 
-import config
+from pyUltroid import configs
 from src.logger import LOGGER
 from src.platforms.dataclass import CachedTrack
 
