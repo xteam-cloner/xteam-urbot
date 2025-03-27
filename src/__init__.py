@@ -4,7 +4,7 @@ from pytdbot import Client, types
 
 from pyUltroid.configs import Var
 from src.database import db
-from src.modules.jobs import InactiveCallManager
+from plugins.jobs import InactiveCallManager
 from src.pytgcalls import call, start_clients
 
 __version__ = "1.0.0"
