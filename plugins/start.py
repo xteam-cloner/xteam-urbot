@@ -5,10 +5,10 @@ from cachetools import TTLCache
 from pytdbot import Client, types
 
 from src.database import db
-from src.modules.utils import Filter, sec_to_min
-from src.modules.utils.admins import load_admin_cache
-from src.modules.utils.buttons import AddMeButton
-from src.modules.utils.play_helpers import check_user_status, chat_invite_cache, user_status_cache
+from plugins.utils import Filter, sec_to_min
+from plugins.utils.admins import load_admin_cache
+from plugins.utils.buttons import AddMeButton
+from plugins.utils.play_helpers import check_user_status, chat_invite_cache, user_status_cache
 from src.pytgcalls import call
 
 
