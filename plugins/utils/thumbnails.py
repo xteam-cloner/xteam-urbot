@@ -10,10 +10,10 @@ from src.logger import LOGGER
 from src.platforms.dataclass import CachedTrack
 
 FONTS = {
-    "cfont": ImageFont.truetype("src/modules/utils/cfont.ttf", 15),
-    "dfont": ImageFont.truetype("src/modules/utils/font2.otf", 12),
-    "nfont": ImageFont.truetype("src/modules/utils/font.ttf", 10),
-    "tfont": ImageFont.truetype("src/modules/utils/font.ttf", 20),
+    "cfont": ImageFont.truetype("plugins/utils/cfont.ttf", 15),
+    "dfont": ImageFont.truetype("plugins/utils/font2.otf", 12),
+    "nfont": ImageFont.truetype("plugins/utils/font.ttf", 10),
+    "tfont": ImageFont.truetype("plugins/utils/font.ttf", 20),
 }
 
 
