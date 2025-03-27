@@ -6,7 +6,7 @@
 # <https://github.com/TeamUltroid/pyUltroid/blob/main/LICENSE>.
 
 import sys
-
+from os import getenv
 from decouple import config
 
 try:
@@ -55,3 +55,5 @@ class Var:
     # for MONGODB users
     MONGO_URI = config("MONGO_URI", default=None)
     DOWNLOAD_PFP_URL_CLOCK = config("DOWNLOAD_PFP_URL_CLOCK", default=False)
+    DOWNLOADS_DIR = getenv("DOWNLOADS_DIR", "database/music")
+    YOUTUBE_IMG_URL = "https://te.legra.ph/file/6298d377ad3eb46711644.jpg"
