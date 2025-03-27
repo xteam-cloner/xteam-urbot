@@ -76,8 +76,8 @@ def validate_session(session, logger=LOGS, _exit=True):
 def vc_connection(udB, ultroid_bot):
     from strings import get_string
 
-    VC_SESSION = Var.VC_SESSION or udB.get_key("VC_SESSION")
-    if VC_SESSION and VC_SESSION != Var.SESSION:
+    STRING_SESSION = Var.STRING_SESSION or udB.get_key("STRING_SESSION")
+    if STRING_SESSION and STRING_SESSION != Var.SESSION:
         LOGS.info("Starting up VcClient.")
         try:
             return UltroidClient(
@@ -87,7 +87,7 @@ def vc_connection(udB, ultroid_bot):
             )
         except (AuthKeyDuplicatedError, EOFError):
             LOGS.info(get_string("py_c3"))
-            udB.del_key("VC_SESSION")
+            udB.del_key("STRING_SESSION")
         except Exception as er:
             LOGS.info("While creating Client for VC.")
             LOGS.exception(er)
