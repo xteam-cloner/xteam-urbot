@@ -2,7 +2,7 @@ import os
 
 from pytdbot import Client, types
 
-import config
+from pyUltroid.configs import Var
 from src.database import db
 from src.modules.jobs import InactiveCallManager
 from src.pytgcalls import call, start_clients
@@ -13,7 +13,7 @@ class Telegram(Client):
     def __init__(self) -> None:
         self._check_config()
         super().__init__(
-            token=config.TOKEN,
+            token=config.BOT_TOKEN,
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             default_parse_mode="html",
@@ -47,7 +47,7 @@ class Telegram(Client):
             os.remove("database")
         if not isinstance(config.MONGO_URI, str):
             raise TypeError("MONGO_URI must be a string")
-        session_strings = [s for s in config.SESSION_STRINGS if s]
+        session_strings = [s for s in config.SESSION if s]
         if not session_strings:
             raise ValueError("No STRING session provided\n\nAdd STRING session in .env")
 
