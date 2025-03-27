@@ -1,114 +1,93 @@
-from pyrogram import Client
-from pyrogram import filters
-from pyrogram.types import Message
-from pyUltroid import *
-from pytgcalls import filters as fl
-from pytgcalls import idle
+from telethon import TelegramClient, events
 from pytgcalls import PyTgCalls
-from pytgcalls.types import ChatUpdate
-from pytgcalls.types import GroupCallParticipant
-from pytgcalls.types import StreamEnded
-from pytgcalls.types import Update
-from pytgcalls.types import UpdatedGroupCallParticipant
+from pytgcalls import filters as fl
+from pytgcalls.types import ChatUpdate, GroupCallParticipant, StreamEnded, Update, UpdatedGroupCallParticipant
+import os
+from pyUltroid.configs import Var
+# Replace with your API ID, API hash, and session string
 
-app = Client(
-    'py-tgcalls',
-    api_id=Var.API_ID,
-    api_hash=Var.API_HASH,
-)
-call_py = PyTgCalls(app)
+if not API_ID or not API_HASH or not SESSION_STRING:
+    raise ValueError("API_ID, API_HASH, and SESSION_STRING must be set as environment variables.")
 
+client = TelegramClient(config.SESSION, config.API_ID, config.API_HASH)
+call_py = PyTgCalls(client)
 
-@app.on_message(filters.regex('!play'))
-async def play_handler(_: Client, message: Message):
+async def start_calls():
+    await call_py.start()
+
+@client.on(events.NewMessage(pattern='!play'))
+async def play_handler(event):
     await call_py.play(
-        message.chat.id,
+        event.chat_id,
         'http://docs.evostream.com/sample_content/assets/sintel1m720p.mp4',
     )
 
-
-@app.on_message(filters.regex('!record'))
-async def record_handler(_: Client, message: Message):
+@client.on(events.NewMessage(pattern='!record'))
+async def record_handler(event):
     await call_py.record(
-        message.chat.id,
+        event.chat_id,
         'record.mp3',
     )
 
-
-@app.on_message(filters.regex('!cache'))
-async def cache_handler(_: Client, _m: Message):
+@client.on(events.NewMessage(pattern='!cache'))
+async def cache_handler(event):
     print(call_py.cache_peer)
 
-
-@app.on_message(filters.regex('!ping'))
-async def ping_handler(_: Client, _m: Message):
+@client.on(events.NewMessage(pattern='!ping'))
+async def ping_handler(event):
     print(call_py.ping)
 
-
-@app.on_message(filters.regex('!pause'))
-async def pause_handler(_: Client, message: Message):
+@client.on(events.NewMessage(pattern='!pause'))
+async def pause_handler(event):
     await call_py.pause(
-        message.chat.id,
+        event.chat_id,
     )
 
-
-@app.on_message(filters.regex('!resume'))
-async def resume_handler(_: Client, message: Message):
+@client.on(events.NewMessage(pattern='!resume'))
+async def resume_handler(event):
     await call_py.resume(
-        message.chat.id,
+        event.chat_id,
     )
 
-
-@app.on_message(filters.regex('!stop'))
-async def stop_handler(_: Client, message: Message):
+@client.on(events.NewMessage(pattern='!stop'))
+async def stop_handler(event):
     await call_py.leave_call(
-        message.chat.id,
+        event.chat_id,
     )
 
-
-@app.on_message(filters.regex('!change_volume'))
-async def change_volume_handler(_: Client, message: Message):
+@client.on(events.NewMessage(pattern='!change_volume'))
+async def change_volume_handler(event):
     await call_py.change_volume_call(
-        message.chat.id,
+        event.chat_id,
         50,
     )
 
+@client.on(events.NewMessage(pattern='!status'))
+async def get_play_status(event):
+    await event.respond(f'Current seconds {await call_py.time(event.chat_id)}')
 
-@app.on_message(filters.regex('!status'))
-async def get_play_status(client: Client, message: Message):
-    await client.send_message(
-        message.chat.id,
-        f'Current seconds {await call_py.time(message.chat.id)}',
-    )
-
-
-@call_py.on_update(
-    fl.chat_update(
-        ChatUpdate.Status.KICKED | ChatUpdate.Status.LEFT_GROUP,
-    ),
-)
+@call_py.on_update(fl.chat_update(ChatUpdate.Status.KICKED | ChatUpdate.Status.LEFT_GROUP))
 async def kicked_handler(_: PyTgCalls, update: ChatUpdate):
     print(f'Kicked from {update.chat_id} or left')
-
 
 @call_py.on_update(fl.stream_end())
 async def stream_end_handler(_: PyTgCalls, update: StreamEnded):
     print(f'Stream ended in {update.chat_id}', update)
 
-
-@call_py.on_update(
-    fl.call_participant(GroupCallParticipant.Action.JOINED),
-)
-async def participant_handler(
-    _: PyTgCalls,
-    update: UpdatedGroupCallParticipant,
-):
+@call_py.on_update(fl.call_participant(GroupCallParticipant.Action.JOINED))
+async def participant_handler(_: PyTgCalls, update: UpdatedGroupCallParticipant):
     print(f'Participant joined in {update.chat_id}', update)
-
 
 @call_py.on_update()
 async def all_updates(_: PyTgCalls, update: Update):
     print(update)
 
-call_py.start()
-idle()
+async def main():
+    await client.start()
+    await start_calls()
+    print("Telethon client and PyTgCalls started. Userbot is running...")
+    await client.run_until_disconnected()
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
