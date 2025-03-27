@@ -4,7 +4,7 @@ from typing import Optional, Any
 
 from py_yt import VideosSearch, Playlist
 
-from pyUltroid.configs import Var
+import config
 from src.logger import LOGGER
 from src.platforms._httpx import HttpxClient
 from src.platforms._service import SpotifyDownload, YouTubeDownload
