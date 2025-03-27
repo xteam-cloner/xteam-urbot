@@ -19,8 +19,8 @@ from pyrogram import __version__ as pyrover
 from pytdbot import VERSION as py_td_ver
 from pytdbot import types, Client
 from pytgcalls import __version__ as pytgver
-
-from pyUltroid.configs import OWNER_ID
+from . import *
+#from pyUltroid.configs import OWNER_ID
 from plugins.utils import db
 from src.logger import LOGGER
 from plugins.utils import Filter
