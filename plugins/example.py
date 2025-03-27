@@ -9,7 +9,7 @@ from pyUltroid.configs import Var
 #if not API_ID or not API_HASH or not SESSION_STRING:
     #raise ValueError("API_ID, API_HASH, and SESSION_STRING must be set as environment variables.")
 
-client = TelegramClient(config.SESSION, config.API_ID, config.API_HASH)
+client = TelegramClient(Var.SESSION, Var.API_ID, Var.API_HASH)
 call_py = PyTgCalls(client)
 
 async def start_calls():
