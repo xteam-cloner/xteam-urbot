@@ -3,13 +3,13 @@ from typing import Optional
 from cachetools import TTLCache
 from motor.motor_asyncio import AsyncIOMotorClient
 
-import config
+from pyUltroid import configs
 from src.logger import LOGGER
 
 
 class Database:
     def __init__(self):
-        self.mongo_client = AsyncIOMotorClient(config.MONGO_URI)
+        self.mongo_client = AsyncIOMotorClient(Var.MONGO_URI)
         _db = self.mongo_client["MusicBot"]
         self.chat_db = _db["chats"]
         self.users_db = _db["users"]
