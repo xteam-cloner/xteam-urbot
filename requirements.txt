@@ -28,7 +28,6 @@ psutil~=7.0.0
 #py-yt-search~=0.2
 py_tgcalls~=2.1.0
 pycryptodome~=3.22.0
-pydantic==2.11.0b2
 PyTgCrypto~=1.2.9.2
 python-dotenv~=1.0.1
 pytdbot~=0.9.2.dev2
