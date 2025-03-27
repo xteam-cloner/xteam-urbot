@@ -3,7 +3,7 @@ import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytdbot import Client, types
 
-from src.modules.utils.cacher import chat_cache
+from plugins.utils.cacher import chat_cache
 from src.pytgcalls import call
 
 
