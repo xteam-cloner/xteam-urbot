@@ -2,24 +2,24 @@ import os
 
 from pytdbot import Client, types
 
-from pyUltroid.configs import Var
+import config
 from src.database import db
-from plugins.jobs import InactiveCallManager
+from src.modules.jobs import InactiveCallManager
 from src.pytgcalls import call, start_clients
 
 __version__ = "1.0.0"
 
 class Telegram(Client):
     def __init__(self) -> None:
-        self._check_configs()
+        self._check_config()
         super().__init__(
-            token=Var.BOT_TOKEN,
-            api_id=Var.API_ID,
-            api_hash=Var.API_HASH,
+            token=config.TOKEN,
+            api_id=config.API_ID,
+            api_hash=config.API_HASH,
             default_parse_mode="html",
             td_verbosity=2,
             td_log=types.LogStreamEmpty(),
-            plugins=types.plugins.Plugins(folder="./plugins"),
+            plugins=types.plugins.Plugins(folder="src/modules"),
             files_directory="",
             database_encryption_key="",
             options={"ignore_background_updates": True},
@@ -42,13 +42,13 @@ class Telegram(Client):
         await super().stop()
 
     @staticmethod
-    def _check_configs() -> None:
+    def _check_config() -> None:
         if os.path.exists("database"):
             os.remove("database")
-        if not isinstance(Var.MONGO_URI, str):
+        if not isinstance(config.MONGO_URI, str):
             raise TypeError("MONGO_URI must be a string")
-        session = [s for s in Var.SESSION if s]
-        if not session:
+        session_strings = [s for s in config.SESSION_STRINGS if s]
+        if not session_strings:
             raise ValueError("No STRING session provided\n\nAdd STRING session in .env")
 
 client = Telegram()

@@ -18,20 +18,20 @@ from pytgcalls.types import (
     UpdatedGroupCallParticipant,
 )
 
-from pyUltroid import configs
+import config
 from src.database import db
 from src.logger import LOGGER
-from plugins.utils import sec_to_min, get_audio_duration
-from plugins.utils.buttons import play_button, update_progress_bar
-from plugins.utils.cacher import chat_cache
-from plugins.utils.thumbnails import gen_thumb
+from src.modules.utils import sec_to_min, get_audio_duration
+from src.modules.utils.buttons import play_button, update_progress_bar
+from src.modules.utils.cacher import chat_cache
+from src.modules.utils.thumbnails import gen_thumb
 from src.platforms.dataclass import CachedTrack
 from src.platforms.downloader import MusicServiceWrapper, YouTubeData, SpotifyData
 
 
 async def start_clients() -> None:
     """Start PyTgCalls clients."""
-    session_strings = [s for s in Var.SESSION if s]
+    session_strings = [s for s in config.SESSION_STRINGS if s]
     if not session_strings:
         LOGGER.error("No STRING session provided. Exiting...")
         raise SystemExit(1)
@@ -39,7 +39,7 @@ async def start_clients() -> None:
     try:
         await asyncio.gather(
             *[
-                call.start_client(Var.API_ID, Var.API_HASH, s)
+                call.start_client(config.API_ID, config.API_HASH, s)
                 for s in session_strings
             ]
         )
