@@ -13,9 +13,9 @@ class Telegram(Client):
     def __init__(self) -> None:
         self._check_config()
         super().__init__(
-            token=config.BOT_TOKEN,
-            api_id=config.API_ID,
-            api_hash=config.API_HASH,
+            token=Var.BOT_TOKEN,
+            api_id=Var.API_ID,
+            api_hash=Var.API_HASH,
             default_parse_mode="html",
             td_verbosity=2,
             td_log=types.LogStreamEmpty(),
@@ -45,7 +45,7 @@ class Telegram(Client):
     def _check_config() -> None:
         if os.path.exists("database"):
             os.remove("database")
-        if not isinstance(config.MONGO_URI, str):
+        if not isinstance(Var.MONGO_URI, str):
             raise TypeError("MONGO_URI must be a string")
         session_strings = [s for s in config.SESSION if s]
         if not session_strings:
