@@ -4,7 +4,7 @@ from cachetools import TTLCache
 from pytdbot import types, Client
 
 from src.logger import LOGGER
-
+from plugins import ultroid_cmd
 from typing import Optional, Tuple, List
 
 from telethon import TelegramClient, events, types
@@ -73,7 +73,7 @@ async def is_admin(chat_id: int, user_id: int) -> bool:
     return False
 
 # Example usage within a command handler
-@client.on(events.NewMessage(pattern='/checkadmin'))
+@ultroid_cmd(pattern="checkadmin")
 async def check_admin(event):
     chat_id = event.chat_id
     user_id = event.sender_id
@@ -82,12 +82,3 @@ async def check_admin(event):
     is_owner_result = await is_owner(chat_id, user_id)
 
     await event.respond(f"Admin: {is_admin_result}, Owner: {is_owner_result}")
-
-async def main():
-    await client.start()
-    await client.run_until_disconnected()
-
-if __name__ == '__main__':
-    import asyncio
-    asyncio.run(main())
-    
