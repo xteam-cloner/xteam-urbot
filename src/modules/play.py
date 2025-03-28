@@ -240,10 +240,9 @@ async def play_audio(c: Client, msg: types.Message) -> None:
         return
 
     ub = await call.get_client(chat_id)
-if isinstance(ub, (types.Error, NoneType)):
-    await edit_text(reply_message, "❌ No active assistant available. Please ensure the assistant is added to the chat and try again.")
-    return
-
+    if isinstance(ub, (types.Error, NoneType)):
+        await edit_text(reply_message, "❌ No active assistant available. Please ensure the assistant is added to the chat and try again.")
+        return
 
     if isinstance(ub.me, (types.Error, NoneType)):
         return await edit_text(reply_message, "❌ Assistant not found for this chat.")
