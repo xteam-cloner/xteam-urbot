@@ -46,19 +46,24 @@ class Filter:
             commands = [commands]
 
         async def filter_func(_, event) -> bool:
+            LOGGER.debug(f"Checking command filter for event: {event}")
             if isinstance(event, types.Message) and isinstance(
                     event.content, types.MessageText
             ):
+                text = event.content.text.text
+                LOGGER.debug(f"Checking message text: {text}")
                 return any(
-                    event.content.text.text.startswith(f"/{cmd.lower()}")
+                    text.startswith(f"/{cmd.lower()}")
                     for cmd in commands
                 )
 
             if isinstance(event, types.UpdateNewMessage) and isinstance(
                     event.message, types.MessageText
             ):
+                text = event.message.text.text
+                LOGGER.debug(f"Checking update message text: {text}")
                 return any(
-                    event.message.text.text.startswith(f"/{cmd.lower()}")
+                    text.startswith(f"/{cmd.lower()}")
                     for cmd in commands
                 )
 
