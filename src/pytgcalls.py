@@ -57,25 +57,27 @@ class MusicBot:
         self.bot = c
 
     async def _get_client_name(self, chat_id: int) -> str:
-        """Get the associated client for a specific chat ID."""
-        if chat_id == 1:
-            # if chat_id is 1, return a random available client
-            return (
-                random.choice(self.available_clients)
-                if self.available_clients
-                else None
-            )
-
-        # for groups
-        _ub = await db.get_assistant(chat_id)
-        if _ub and _ub in self.available_clients:
-            return _ub
-
+    """Get the associated client for a specific chat ID."""
+    if chat_id == 1:
+        # if chat_id is 1, return a random available client
         if self.available_clients:
-            new_client = random.choice(self.available_clients)
-            await db.set_assistant(chat_id, assistant=new_client)
-            return new_client
+            return random.choice(self.available_clients)
+        else:
+            LOGGER.error("No available clients to assign for chat_id 1")
+            raise RuntimeError("No available clients to assign!")
 
+    # for groups
+    _ub = await db.get_assistant(chat_id)
+    if _ub and _ub in self.available_clients:
+        return _ub
+
+    if self.available_clients:
+        new_client = random.choice(self.available_clients)
+        await db.set_assistant(chat_id, assistant=new_client)
+        return new_client
+
+    LOGGER.error(f"No available clients to assign for chat_id {chat_id}")
+    
         raise RuntimeError("No available clients to assign!")
 
     async def get_client(self, chat_id: int) -> TelegramClient:
