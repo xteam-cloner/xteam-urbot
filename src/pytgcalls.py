@@ -31,8 +31,8 @@ from src.platforms.downloader import MusicServiceWrapper, YouTubeData, SpotifyDa
 
 async def start_clients() -> None:
     """Start PyTgCalls clients."""
-    session_strings = [s for s in config.SESSION_STRINGS if s]
-    if not session_strings:
+    session = [s for s in config.SESSION if s]
+    if not session:
         LOGGER.error("No STRING session provided. Exiting...")
         raise SystemExit(1)
 
@@ -40,7 +40,7 @@ async def start_clients() -> None:
         await asyncio.gather(
             *[
                 call.start_client(config.API_ID, config.API_HASH, s)
-                for s in session_strings
+                for s in session
             ]
         )
         LOGGER.info("✅ Clients started successfully.")
