@@ -23,7 +23,7 @@ Install the requirements:
 
 Fill your variables in the env by
 
-• nano .env
+• cp sample.env .env && vi .env
 
 If you have finished edit, CTRL S + CTRL X.
 
