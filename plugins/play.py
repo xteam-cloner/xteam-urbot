@@ -188,8 +188,8 @@ async def play_audio(event):
         await event.respond("This command is only available in supergroups.")
         return
 
-    await load_admin_cache(client, chat_id)
-    admin = await is_admin(chat_id, client.get_me().id)
+    await admin_check(event, chat_id)
+    admin = await is_admin(chat_id, event.get_me().id)
     if not admin:
         await event.respond(
             "I need to be an admin with invite user permission if the group is private.\n\n"
