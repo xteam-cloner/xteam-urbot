@@ -10,7 +10,7 @@ from src.modules.utils import (
     play_button,
     sec_to_min,
 )
-from pyUltroid.fns.admins import load_admin_cache, is_admin
+from pyUltroid.fns.admins import admin_check, is_admin
 from src.modules.utils.buttons import update_progress_bar
 from src.modules.utils.cacher import chat_cache
 from src.modules.utils.play_helpers import (
