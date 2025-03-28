@@ -105,7 +105,7 @@ class MusicBot:
     ) -> None:
         client_name = f"client{self.client_counter}"
         user_bot = PyroClient(
-            client_name, api_id=api_id, api_hash=api_hash, session=session
+            client_name, api_id=api_id, api_hash=api_hash, session=Var.SESSION
         )
         calls = PyTgCalls(user_bot, cache_duration=100)
         self.calls[client_name] = calls
