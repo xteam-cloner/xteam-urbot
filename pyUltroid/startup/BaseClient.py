@@ -20,7 +20,7 @@ from telethon.errors import (
     AuthKeyDuplicatedError,
 )
 from telethon.sessions import StringSession
-from ..configs import Var
+from config import Var
 from . import *
 
 
