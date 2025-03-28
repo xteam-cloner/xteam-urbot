@@ -11,7 +11,7 @@ __version__ = "1.0.0"
 
 class Telegram(Client):
     def __init__(self) -> None:
-        self._check_config()
+        self._check_Var()
         super().__init__(
             token=Var.BOT_TOKEN,
             api_id=Var.API_ID,
@@ -42,12 +42,12 @@ class Telegram(Client):
         await super().stop()
 
     @staticmethod
-    def _check_config() -> None:
+    def _check_Var() -> None:
         if os.path.exists("database"):
             os.remove("database")
         if not isinstance(Var.MONGO_URI, str):
             raise TypeError("MONGO_URI must be a string")
-        session_strings = [s for s in config.SESSION if s]
+        session_strings = [s for s in Var.SESSION if s]
         if not session_strings:
             raise ValueError("No STRING session provided\n\nAdd STRING session in .env")
 
