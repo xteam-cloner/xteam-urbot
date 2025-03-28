@@ -385,4 +385,5 @@ class MusicBot:
         return self.calls[client_name].ping, await self.calls[client_name].cpu_usage
 
 
-call: MusicBot = MusicBot()
+# Initialize the MusicBot instance
+call = MusicBot()
