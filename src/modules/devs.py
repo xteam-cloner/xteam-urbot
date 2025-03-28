@@ -20,7 +20,7 @@ from pytdbot import VERSION as py_td_ver
 from pytdbot import types, Client
 from pytgcalls import __version__ as pytgver
 
-from config import OWNER_ID
+from config import Var
 from src.database import db
 from src.logger import LOGGER
 from src.modules.utils import Filter
