@@ -10,7 +10,7 @@ from src.modules.utils import (
     play_button,
     sec_to_min,
 )
-from pyUltroid.fns.admins import admin_check, is_admin
+from pyUltroid.fns.admins import admin_check #Removed is_admin
 from src.modules.utils.buttons import update_progress_bar
 from src.modules.utils.cacher import chat_cache
 from src.modules.utils.play_helpers import (
@@ -189,13 +189,7 @@ async def play_audio(event):
         return
 
     await admin_check(event, chat_id)
-    admin = await is_admin(chat_id, event.get_me().id)
-    if not admin:
-        await event.respond(
-            "I need to be an admin with invite user permission if the group is private.\n\n"
-            "After promoting me, please try again or use /reload."
-        )
-        return
+    #removed is_admin check
 
     reply = None
     url = await get_url(event, None)
@@ -219,129 +213,5 @@ async def play_audio(event):
         )
         return
 
-    # Check user status and handle bans/restrictions
-    user_key = f"{chat_id}:{assistant_id}"
-    user_status = user_status_cache.get(user_key) or await check_user_status(
-        client, chat_id, assistant_id
-    )
-
-    if not user_status:
-        await reply_message.edit(f"❌ {str(user_status)}")
-
-    if user_status in {
-        "chatMemberStatusBanned",
-        "chatMemberStatusLeft",
-        "chatMemberStatusRestricted",
-    }:
-        if user_status == "chatMemberStatusBanned":
-            await unban_ub(client, chat_id, assistant_id)
-        join = await join_ub(chat_id, client, ub)
-        if not join:
-            await reply_message.edit(f"❌ {str(join)}")
-
-    args = extract_argument(event.raw_text)
-    telegram = Telegram(reply)
-    wrapper = MusicServiceWrapper(url or args)
-    await del_msg(event.message)
-
-    if not args and not url and not telegram.is_valid():
-        recommendations = await wrapper.get_recommendations()
-        text = "Usage: /play song_name\nSupports Spotify track, playlist, album, artist links.\n\n"
-        if not recommendations:
-            await reply_message.edit(text, buttons=SupportButton)
-            return
-
-        platform = recommendations.tracks[0].platform
-        text += "Tap on a song name to play it."
-        buttons = [
-            [Button.inline(f"{track.name[:18]} - {track.artist}", data=f"play_{platform}_{track.id}")]
-            for track in recommendations.tracks
-        ]
-
-        await reply_message.edit(text, buttons=buttons)
-        return
-
-    user_by = event.sender.username
-    if telegram.is_valid():
-        _path = await telegram.dl()
-        if not _path:
-            await reply_message.edit(f"❌ {str(_path)}")
-            return
-
-        file_path = _path.path
-        if not file_path:
-            await reply_message.edit("❌ Error downloading the file.")
-            return
-
-        _song = PlatformTracks(
-            tracks=[
-                MusicTrack(
-                    name=telegram.get_file_name(),
-                    artist="AshokShau",
-                    id=reply.media.document.id,
-                    year=0,
-                    cover="",
-                    duration=await get_audio_duration(file_path),
-                    platform="telegram",
-                )
-            ]
-        )
-
-        await play_music(client, reply_message, _song, user_by, file_path)
-        return
-
-    if url:
-        if wrapper.is_valid(url):
-            _song = await wrapper.get_info()
-            if not _song:
-                await reply_message.edit(
-                    "❌ Unable to retrieve song info.\n\nPlease report this issue if you think it's a bug.",
-                    buttons=SupportButton,
-                )
-                return
-
-            await play_music(client, reply_message, _song, user_by)
-            return
-
-        await reply_message.edit(
-            "❌ Invalid URL! Provide a valid link.",
-            buttons=SupportButton,
-        )
-        return
-
-    # Handle text-based search
-    play_type = await db.get_play_type(chat_id)
-    search = await wrapper.search()
-    if not search:
-        await reply_message.edit(
-            "❌ No results found. Please report this issue if you think it's a bug.",
-            buttons=SupportButton,
-        )
-        return
-
-    platform = search.tracks[0].platform
-
-    if play_type == 0:
-        _song_id = search.tracks[0].id
-        url = _get_platform_url(platform, _song_id)
-        if _song := await MusicServiceWrapper(url).get_info():
-            await play_music(client, reply_message, _song, user_by)
-            return
-
-        await reply_message.edit(
-            "❌ Unable to retrieve song info.",
-            buttons=SupportButton,
-        )
-        return
-
-    buttons = [
-        [Button.inline(f"{rec.name[:18]} - {rec.artist}", data=f"play_{platform}_{rec.id}")]
-        for rec in search.tracks[:4]
-    ]
-
-    await reply_message.edit(
-        f"{user_by}, select a song to play:",
-        buttons=buttons,
-        link_preview=False,
-        parse_mode='html',
-)
+    # Check
+    
