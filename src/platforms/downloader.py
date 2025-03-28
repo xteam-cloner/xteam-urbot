@@ -53,7 +53,7 @@ class MusicServiceWrapper(MusicService):
 
         return (
             SpotifyData(query)
-            if config.API_URL and config.API_KEY
+            if Var.API_URL and Var.API_KEY
             else YouTubeData(query)
         )
 
@@ -80,7 +80,7 @@ class SpotifyData(MusicService):
     SPOTIFY_URL_PATTERN = re.compile(
         r"^(https?://)?(open\.spotify\.com/(track|playlist|album|artist)/[a-zA-Z0-9]+)(\?.*)?$"
     )
-    API_URL = config.API_URL
+    API_URL = Var.API_URL
 
     def __init__(self, query: str = None) -> None:
         self.query = query
