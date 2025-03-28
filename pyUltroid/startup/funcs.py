@@ -16,7 +16,7 @@ from telethon import __version__
 import pyrogram 
 from platform import python_version
 from pyUltroid.version import __version__ as UltVer
-from ..configs import Var
+from config import Var
 #from .. import ultroid_bot
 try:
     from pytz import timezone
