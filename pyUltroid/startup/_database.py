@@ -13,7 +13,7 @@ from .. import run_as_module
 from . import *
 
 if run_as_module:
-    from ..configs import Var
+    from config import Var
 
 
 Redis = MongoClient = psycopg2 = Database = None
