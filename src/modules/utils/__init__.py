@@ -10,6 +10,7 @@ __all__ = [
 
 import re
 from typing import Union
+import asyncio
 
 from mutagen import File
 from pytdbot import filters, types
