@@ -9,8 +9,18 @@ from telethon import TelegramClient, events
 from telethon.errors import ChatAdminRequiredError
 from telethon.tl.functions.phone import CreateGroupCallRequest, DiscardGroupCallRequest
 from telethon.tl.types import InputPeerChannel, InputPeerChat
+from pytgcalls import PyTgCalls, exceptions
+from pytgcalls.types import (
+    MediaStream,
+    Update,
+    stream,
+    VideoQuality,
+    AudioQuality,
+    ChatUpdate,
+    UpdatedGroupCallParticipant,
+)
 
-import config
+from pyUltroid.configs import Var
 from src.database import db
 from src.logger import LOGGER
 from src.modules.utils import sec_to_min, get_audio_duration
@@ -22,7 +32,7 @@ from src.platforms.downloader import MusicServiceWrapper, YouTubeData, SpotifyDa
 
 async def start_clients() -> None:
     """Start Telethon clients."""
-    session_strings = [s for s in config.SESSION_STRINGS if s]
+    session = [s for s in Var.SESSION if s]
     if not session_strings:
         LOGGER.error("No STRING session provided. Exiting...")
         raise SystemExit(1)
@@ -30,8 +40,8 @@ async def start_clients() -> None:
     try:
         await asyncio.gather(
             *[
-                call.start_client(config.API_ID, config.API_HASH, s)
-                for s in session_strings
+                call.start_client(Var.API_ID, Var.API_HASH, s)
+                for s in session
             ]
         )
         LOGGER.info("✅ Clients started successfully.")
