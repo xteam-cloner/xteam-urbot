@@ -13,7 +13,7 @@ import sys
 from telethon.errors.rpcerrorlist import AuthKeyDuplicatedError
 from telethon.sessions.string import _STRUCT_PREFORMAT, CURRENT_VERSION, StringSession
 
-from ..configs import Var
+from config import Var
 from . import *
 from .BaseClient import UltroidClient
 
