@@ -63,11 +63,9 @@ class MusicBot:
         self.bot: Optional[TelegramClient] = None
 
     async def add_bot(self, c: TelegramClient):
-        """Add the main bot client."""
         self.bot = c
 
     async def _get_client_name(self, chat_id: int) -> str:
-    """Get the associated client for a specific chat ID."""
     if chat_id == 1:
         # if chat_id is 1, return a random available client
         if self.available_clients:
