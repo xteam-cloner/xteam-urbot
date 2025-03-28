@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 import aiofiles
 import httpx
 
-from config import API_KEY
+from config import Var
 from src.logger import LOGGER
 
 
