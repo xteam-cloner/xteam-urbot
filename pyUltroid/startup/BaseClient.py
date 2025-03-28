@@ -222,3 +222,34 @@ class UltroidClient(TelegramClient):
         return self.loop.run_until_complete(function)
 
     def run(self):
+        """run asyncio loop"""
+        self.run_until_disconnected()
+
+    def add_handler(self, func, *args, **kwargs):
+        """Add new event handler, ignoring if exists"""
+        if func in [_[0] for _ in self.list_event_handlers()]:
+            return
+        self.add_event_handler(func, *args, **kwargs)
+
+    @property
+    def utils(self):
+        return telethon_utils
+
+    @property
+    def full_name(self):
+        """full name of Client"""
+        return self.utils.get_display_name(self.me)
+
+    @property
+    def uid(self):
+        """Client's user id"""
+        return self.me.id
+
+    def to_dict(self):
+        return dict(inspect.getmembers(self))
+
+    async def parse_id(self, text):
+        with contextlib.suppress(ValueError):
+            text = int(text)
+        return await self.get_peer_id(text)
+
