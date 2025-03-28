@@ -121,3 +121,23 @@ class Filter:
             return event.chat_id in chat_ids if hasattr(event, "chat_id") else False
 
         return filters.create(filter_func)
+
+
+class MediaStream:
+    class Flags:
+        IGNORE = 0
+
+    def __init__(self, audio_path=None, media_path=None, audio_parameters=None, video_parameters=None, video_flags=None):
+        self.audio_path = audio_path
+        self.media_path = media_path
+        self.audio_parameters = audio_parameters
+        self.video_parameters = video_parameters
+        self.video_flags = video_flags
+
+
+class AudioQuality:
+    STUDIO = "studio"
+
+
+class VideoQuality:
+    SD_360p = "360p"
