@@ -222,5 +222,3 @@ class UltroidClient(TelegramClient):
         return self.loop.run_until_complete(function)
 
     def run(self):
-        
-      
