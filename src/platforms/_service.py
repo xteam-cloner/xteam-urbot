@@ -9,7 +9,7 @@ from Crypto.Cipher import AES
 from Crypto.Util import Counter
 from yt_dlp import YoutubeDL, utils
 
-from config import DOWNLOADS_DIR, PROXY_URL
+from config import Var
 from src.logger import LOGGER
 from src.platforms._httpx import HttpxClient
 from src.platforms.dataclass import TrackInfo
