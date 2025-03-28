@@ -221,150 +221,165 @@ async def play_music(
     return
 
 
+@Client.on_message(Filter.command("test"))
+async def test_command(c: Client, msg: types.Message) -> None:
+    """Test command to verify command registration."""
+    LOGGER.info("Test command received")
+    await msg.reply_text("Test command working!")
+
 @Client.on_message(Filter.command("play"))
 async def play_audio(c: Client, msg: types.Message) -> None:
     """Handle the /play command."""
+    LOGGER.info(f"Received play command from {msg.sender_id} in chat {msg.chat_id}")
+    
     chat_id = msg.chat_id
     if chat_id > 0:
+        LOGGER.info("Command used in private chat, ignoring")
         return await msg.reply_text("This command is only available in supergroups.")
 
-    reply: types.Message = None
-    url = await get_url(msg, None)
-    if msg.reply_to_message_id:
-        reply = await msg.getRepliedMessage()
-        url = await get_url(msg, reply)
+    try:
+        reply: types.Message = None
+        url = await get_url(msg, None)
+        if msg.reply_to_message_id:
+            reply = await msg.getRepliedMessage()
+            url = await get_url(msg, reply)
 
-    reply_message = await msg.reply_text("🔎 Searching...")
-    if isinstance(reply_message, types.Error):
-        LOGGER.warning(f"Error sending reply message: {reply_message}")
-        return
+        LOGGER.info(f"Searching for: {url or msg.text}")
+        reply_message = await msg.reply_text("🔎 Searching...")
+        if isinstance(reply_message, types.Error):
+            LOGGER.warning(f"Error sending reply message: {reply_message}")
+            return
 
-    queue = await chat_cache.get_queue(chat_id)
-    if len(queue) > 10:
-        return await edit_text(
-            reply_message,
-            text=f"❌ Queue full! You have {len(queue)} tracks. Use /end to reset.",
-        )
+        queue = await chat_cache.get_queue(chat_id)
+        if len(queue) > 10:
+            return await edit_text(
+                reply_message,
+                text=f"❌ Queue full! You have {len(queue)} tracks. Use /end to reset.",
+            )
 
-    args = extract_argument(msg.text)
-    telegram = Telegram(reply)
-    wrapper = MusicServiceWrapper(url or args)
-    await del_msg(msg)
+        args = extract_argument(msg.text)
+        telegram = Telegram(reply)
+        wrapper = MusicServiceWrapper(url or args)
+        await del_msg(msg)
 
-    if not args and not url and not telegram.is_valid():
-        recommendations = await wrapper.get_recommendations()
-        text = "ᴜsᴀɢᴇ: /play song_name\nSupports Spotify track, playlist, album, artist links.\n\n"
-        if not recommendations:
-            return await edit_text(reply_message, text=text, reply_markup=SupportButton)
+        if not args and not url and not telegram.is_valid():
+            LOGGER.info("No arguments provided, showing recommendations")
+            recommendations = await wrapper.get_recommendations()
+            text = "ᴜsᴀɢᴇ: /play song_name\nSupports Spotify track, playlist, album, artist links.\n\n"
+            if not recommendations:
+                return await edit_text(reply_message, text=text, reply_markup=SupportButton)
 
-        platform = recommendations.tracks[0].platform
-        text += "Tap on a song name to play it."
+            platform = recommendations.tracks[0].platform
+            text += "Tap on a song name to play it."
+            buttons = [
+                [
+                    types.InlineKeyboardButton(
+                        f"{track.name[:18]} - {track.artist}",
+                        type=types.InlineKeyboardButtonTypeCallback(
+                            f"play_{platform}_{track.id}".encode()
+                        ),
+                    )
+                ]
+                for track in recommendations.tracks
+            ]
+
+            return await edit_text(
+                reply_message,
+                text=text,
+                reply_markup=types.ReplyMarkupInlineKeyboard(buttons),
+            )
+
+        user_by = await msg.mention()
+        if telegram.is_valid():
+            _path = await telegram.dl()
+            if isinstance(_path, types.Error):
+                return await edit_text(reply_message, text=f"❌ {str(_path)}")
+
+            file_path = _path.path
+            if not file_path:
+                return await edit_text(reply_message, text="❌ Error downloading the file.")
+
+            _song = PlatformTracks(
+                tracks=[
+                    MusicTrack(
+                        name=telegram.get_file_name(),
+                        artist="AshokShau",
+                        id=reply.remote_unique_file_id,
+                        year=0,
+                        cover="",
+                        duration=await get_audio_duration(file_path),
+                        platform="telegram",
+                    )
+                ]
+            )
+
+            return await play_music(c, reply_message, _song, user_by, file_path)
+
+        if url:
+            if wrapper.is_valid(url):
+                _song = await wrapper.get_info()
+                if not _song:
+                    return await edit_text(
+                        reply_message,
+                        text="❌ Unable to retrieve song info.\n\nPlease report this issue if you think it's a bug.",
+                        reply_markup=SupportButton,
+                    )
+
+                return await play_music(c, reply_message, _song, user_by)
+
+            return await edit_text(
+                reply_message,
+                text="❌ Invalid URL! Provide a valid link.",
+                reply_markup=SupportButton,
+            )
+
+        # Handle text-based search
+        play_type = await db.get_play_type(chat_id)
+        search = await wrapper.search()
+        if not search:
+            return await edit_text(
+                reply_message,
+                text="❌ No results found. Please report this issue if you think it's a bug.",
+                reply_markup=SupportButton,
+            )
+
+        platform = search.tracks[0].platform
+
+        if play_type == 0:
+            _song_id = search.tracks[0].id
+            url = _get_platform_url(platform, _song_id)
+            if _song := await MusicServiceWrapper(url).get_info():
+                return await play_music(c, reply_message, _song, user_by)
+
+            return await edit_text(
+                reply_message,
+                text="❌ Unable to retrieve song info.",
+                reply_markup=SupportButton,
+            )
+
         buttons = [
             [
                 types.InlineKeyboardButton(
-                    f"{track.name[:18]} - {track.artist}",
+                    f"{rec.name[:18]} - {rec.artist}",
                     type=types.InlineKeyboardButtonTypeCallback(
-                        f"play_{platform}_{track.id}".encode()
+                        f"play_{platform}_{rec.id}".encode()
                     ),
                 )
             ]
-            for track in recommendations.tracks
+            for rec in search.tracks[:4]
         ]
 
-        return await edit_text(
+        reply = await edit_text(
             reply_message,
-            text=text,
+            text=f"{user_by}, select a song to play:",
             reply_markup=types.ReplyMarkupInlineKeyboard(buttons),
+            disable_web_page_preview=True,
+            parse_mode="html",
         )
 
-    user_by = await msg.mention()
-    if telegram.is_valid():
-        _path = await telegram.dl()
-        if isinstance(_path, types.Error):
-            return await edit_text(reply_message, text=f"❌ {str(_path)}")
-
-        file_path = _path.path
-        if not file_path:
-            return await edit_text(reply_message, text="❌ Error downloading the file.")
-
-        _song = PlatformTracks(
-            tracks=[
-                MusicTrack(
-                    name=telegram.get_file_name(),
-                    artist="AshokShau",
-                    id=reply.remote_unique_file_id,
-                    year=0,
-                    cover="",
-                    duration=await get_audio_duration(file_path),
-                    platform="telegram",
-                )
-            ]
-        )
-
-        return await play_music(c, reply_message, _song, user_by, file_path)
-
-    if url:
-        if wrapper.is_valid(url):
-            _song = await wrapper.get_info()
-            if not _song:
-                return await edit_text(
-                    reply_message,
-                    text="❌ Unable to retrieve song info.\n\nPlease report this issue if you think it's a bug.",
-                    reply_markup=SupportButton,
-                )
-
-            return await play_music(c, reply_message, _song, user_by)
-
-        return await edit_text(
-            reply_message,
-            text="❌ Invalid URL! Provide a valid link.",
-            reply_markup=SupportButton,
-        )
-
-    # Handle text-based search
-    play_type = await db.get_play_type(chat_id)
-    search = await wrapper.search()
-    if not search:
-        return await edit_text(
-            reply_message,
-            text="❌ No results found. Please report this issue if you think it's a bug.",
-            reply_markup=SupportButton,
-        )
-
-    platform = search.tracks[0].platform
-
-    if play_type == 0:
-        _song_id = search.tracks[0].id
-        url = _get_platform_url(platform, _song_id)
-        if _song := await MusicServiceWrapper(url).get_info():
-            return await play_music(c, reply_message, _song, user_by)
-
-        return await edit_text(
-            reply_message,
-            text="❌ Unable to retrieve song info.",
-            reply_markup=SupportButton,
-        )
-
-    buttons = [
-        [
-            types.InlineKeyboardButton(
-                f"{rec.name[:18]} - {rec.artist}",
-                type=types.InlineKeyboardButtonTypeCallback(
-                    f"play_{platform}_{rec.id}".encode()
-                ),
-            )
-        ]
-        for rec in search.tracks[:4]
-    ]
-
-    reply = await edit_text(
-        reply_message,
-        text=f"{user_by}, select a song to play:",
-        reply_markup=types.ReplyMarkupInlineKeyboard(buttons),
-        disable_web_page_preview=True,
-        parse_mode="html",
-    )
-
-    if isinstance(reply, types.Error):
-        LOGGER.warning(f"Error sending message: {reply}")
-        return
+        if isinstance(reply, types.Error):
+            LOGGER.warning(f"Error sending message: {reply}")
+            return
+    except Exception as e:
+        LOGGER.error(f"Error in play command: {e}", exc_info=True)
+        return await msg.reply_text(f"❌ Error: {str(e)}")
