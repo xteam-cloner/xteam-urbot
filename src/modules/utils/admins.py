@@ -5,21 +5,27 @@ from pytdbot import types, Client
 
 from src.logger import LOGGER
 
-admin_cache = TTLCache(maxsize=1000, ttl=30 * 60)
+from typing import Optional, Tuple, List
+
+from telethon import TelegramClient, events, types
+from cachetools import TTLCache
 
 
-class AdminCache:
-    def __init__(
-            self, chat_id: int, user_info: list[types.ChatMember], cached: bool = True
-    ):
+
+# Configure logging
+
+
+# Replace with your API credentials and session string
+
+admin_cache = TTLCache(maxsize=1000, ttl=30 * 60) # 30 minutes TTL
+
+class AdminCacheData:
+    def __init__(self, chat_id: int, user_info: List[types.ChatParticipant], cached: bool = True):
         self.chat_id = chat_id
         self.user_info = user_info
         self.cached = cached
 
-
-async def load_admin_cache(
-        c: Client, chat_id: int, force_reload: bool = False
-) -> Tuple[bool, AdminCache]:
+async def load_admin_cache(client: TelegramClient, chat_id: int, force_reload: bool = False) -> Tuple[bool, AdminCacheData]:
     """
     Load the admin list from Telegram and cache it, unless already cached.
     Set force_reload to True to bypass the cache and reload the admin list.
@@ -27,56 +33,61 @@ async def load_admin_cache(
     if not force_reload and chat_id in admin_cache:
         return True, admin_cache[chat_id]  # Return cached data if available
 
-    admin_list = await c.searchChatMembers(
-        chat_id, filter=types.ChatMembersFilterAdministrators()
-    )
-    if isinstance(admin_list, types.Error):
-        LOGGER.warning(f"Error loading admin cache for chat_id {chat_id}: {admin_list}")
-        return False, AdminCache(chat_id, [], cached=False)
+    try:
+        admins = await client.get_participants(chat_id, filter=types.ChannelParticipantsAdmins)
+        admin_cache[chat_id] = AdminCacheData(chat_id, admins)
+        return True, admin_cache[chat_id]
+    except Exception as e:
+        logger.warning(f"Error loading admin cache for chat_id {chat_id}: {e}")
+        return False, AdminCacheData(chat_id, [], cached=False)
 
-    admin_cache[chat_id] = AdminCache(chat_id, admin_list["members"])
-    return True, admin_cache[chat_id]
-
-
-async def get_admin_cache_user(
-        chat_id: int, user_id: int
-) -> Tuple[bool, Optional[dict]]:
+async def get_admin_cache_user(chat_id: int, user_id: int) -> Tuple[bool, Optional[types.ChatParticipant]]:
     """
     Check if the user is an admin using cached data.
     """
-    admin_list = admin_cache.get(chat_id)
-    if admin_list is None:
+    admin_data = admin_cache.get(chat_id)
+    if admin_data is None:
         return False, None  # Cache miss
 
-    return next(
-        (
-            (True, user_info)
-            for user_info in admin_list.user_info
-            if user_info["member_id"]["user_id"] == user_id
-        ),
-        (False, None),
-    )
-
+    for user_info in admin_data.user_info:
+        if user_info.id == user_id:
+            return True, user_info
+    return False, None
 
 async def is_owner(chat_id: int, user_id: int) -> bool:
     """
     Check if the user is the owner of the chat.
     """
     is_cached, user = await get_admin_cache_user(chat_id, user_id)
-    user_status = user["status"]["@type"] if user else None
-    return is_cached and user_status == "chatMemberStatusCreator"
-
+    if user:
+        return isinstance(user.participant, types.ChannelParticipantCreator)
+    return False
 
 async def is_admin(chat_id: int, user_id: int) -> bool:
     """
     Check if the user is an admin (including the owner) in the chat.
     """
     is_cached, user = await get_admin_cache_user(chat_id, user_id)
-    user_status = user["status"]["@type"] if user else None
-    if chat_id == user_id:
-        return True  # Anon Admin
+    if user:
+        return isinstance(user.participant, (types.ChannelParticipantCreator, types.ChannelParticipantAdmin))
+    return False
 
-    return is_cached and user_status in [
-        "chatMemberStatusCreator",
-        "chatMemberStatusAdministrator",
-    ]
+# Example usage within a command handler
+@client.on(events.NewMessage(pattern='/checkadmin'))
+async def check_admin(event):
+    chat_id = event.chat_id
+    user_id = event.sender_id
+
+    is_admin_result = await is_admin(chat_id, user_id)
+    is_owner_result = await is_owner(chat_id, user_id)
+
+    await event.respond(f"Admin: {is_admin_result}, Owner: {is_owner_result}")
+
+async def main():
+    await client.start()
+    await client.run_until_disconnected()
+
+if __name__ == '__main__':
+    import asyncio
+    asyncio.run(main())
+    
