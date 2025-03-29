@@ -10,7 +10,6 @@ __all__ = [
 
 import re
 from typing import Union
-import asyncio
 
 from mutagen import File
 from pytdbot import filters, types
@@ -47,24 +46,19 @@ class Filter:
             commands = [commands]
 
         async def filter_func(_, event) -> bool:
-            LOGGER.debug(f"Checking command filter for event: {event}")
             if isinstance(event, types.Message) and isinstance(
                     event.content, types.MessageText
             ):
-                text = event.content.text.text
-                LOGGER.debug(f"Checking message text: {text}")
                 return any(
-                    text.startswith(f"/{cmd.lower()}")
+                    event.content.text.text.startswith(f"/{cmd.lower()}")
                     for cmd in commands
                 )
 
             if isinstance(event, types.UpdateNewMessage) and isinstance(
                     event.message, types.MessageText
             ):
-                text = event.message.text.text
-                LOGGER.debug(f"Checking update message text: {text}")
                 return any(
-                    text.startswith(f"/{cmd.lower()}")
+                    event.message.text.text.startswith(f"/{cmd.lower()}")
                     for cmd in commands
                 )
 
@@ -121,23 +115,3 @@ class Filter:
             return event.chat_id in chat_ids if hasattr(event, "chat_id") else False
 
         return filters.create(filter_func)
-
-
-class MediaStream:
-    class Flags:
-        IGNORE = 0
-
-    def __init__(self, audio_path=None, media_path=None, audio_parameters=None, video_parameters=None, video_flags=None):
-        self.audio_path = audio_path
-        self.media_path = media_path
-        self.audio_parameters = audio_parameters
-        self.video_parameters = video_parameters
-        self.video_flags = video_flags
-
-
-class AudioQuality:
-    STUDIO = "studio"
-
-
-class VideoQuality:
-    SD_360p = "360p"
