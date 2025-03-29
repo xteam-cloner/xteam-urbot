@@ -18,7 +18,7 @@ from pytgcalls.types import (
     UpdatedGroupCallParticipant,
 )
 
-from config import Var
+import config
 from src.database import db
 from src.logger import LOGGER
 from src.modules.utils import sec_to_min, get_audio_duration
@@ -31,16 +31,16 @@ from src.platforms.downloader import MusicServiceWrapper, YouTubeData, SpotifyDa
 
 async def start_clients() -> None:
     """Start PyTgCalls clients."""
-    session = [s for s in Var.SESSION if s]
-    if not session:
+    session_strings = [s for s in config.SESSION_STRINGS if s]
+    if not session_strings:
         LOGGER.error("No STRING session provided. Exiting...")
         raise SystemExit(1)
 
     try:
         await asyncio.gather(
             *[
-                call.start_client(Var.API_ID, Var.API_HASH, s)
-                for s in session
+                call.start_client(config.API_ID, config.API_HASH, s)
+                for s in session_strings
             ]
         )
         LOGGER.info("✅ Clients started successfully.")
@@ -101,11 +101,11 @@ class MusicBot:
         return types.Error(code=400, message="Client not found")
 
     async def start_client(
-            self, api_id: int, api_hash: str, session: str
+            self, api_id: int, api_hash: str, session_string: str
     ) -> None:
         client_name = f"client{self.client_counter}"
         user_bot = PyroClient(
-            client_name, api_id=api_id, api_hash=api_hash, session=Var.SESSION
+            client_name, api_id=api_id, api_hash=api_hash, session_string=session_string
         )
         calls = PyTgCalls(user_bot, cache_duration=100)
         self.calls[client_name] = calls
@@ -385,5 +385,4 @@ class MusicBot:
         return self.calls[client_name].ping, await self.calls[client_name].cpu_usage
 
 
-# Initialize the MusicBot instance
-call = MusicBot()
+call: MusicBot = MusicBot()
