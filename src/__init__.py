@@ -13,7 +13,7 @@ class Telegram(Client):
     def __init__(self) -> None:
         self._check_config()
         super().__init__(
-            token=config.TOKEN,
+            token=config.BOT_TOKEN,
             api_id=config.API_ID,
             api_hash=config.API_HASH,
             default_parse_mode="html",
