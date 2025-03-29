@@ -4,7 +4,7 @@ from typing import Optional, Any
 
 from py_yt import VideosSearch, Playlist
 
-from config import Var
+import config
 from src.logger import LOGGER
 from src.platforms._httpx import HttpxClient
 from src.platforms._service import SpotifyDownload, YouTubeDownload
@@ -53,7 +53,7 @@ class MusicServiceWrapper(MusicService):
 
         return (
             SpotifyData(query)
-            if Var.API_URL and Var.API_KEY
+            if config.API_URL and config.API_KEY
             else YouTubeData(query)
         )
 
@@ -80,7 +80,7 @@ class SpotifyData(MusicService):
     SPOTIFY_URL_PATTERN = re.compile(
         r"^(https?://)?(open\.spotify\.com/(track|playlist|album|artist)/[a-zA-Z0-9]+)(\?.*)?$"
     )
-    API_URL = Var.API_URL
+    API_URL = config.API_URL
 
     def __init__(self, query: str = None) -> None:
         self.query = query
