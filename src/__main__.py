@@ -1,7 +1,7 @@
 from aiofiles import os
 
 import config
-from src import client
+from src import Client
 
 
 async def create_directories() -> None:
