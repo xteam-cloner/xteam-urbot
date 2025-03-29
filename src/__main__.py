@@ -14,5 +14,5 @@ async def create_directories() -> None:
 
 
 if __name__ == "__main__":
-    client.loop.create_task(create_directories())
-    client.run()
+    Client.loop.create_task(create_directories())
+    Client.run()
