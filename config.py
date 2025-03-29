@@ -9,7 +9,7 @@ API_ID = int(getenv("API_ID", None))
 API_HASH = getenv("API_HASH", None)
 
 "You can get this variable from @BotFather"
-TOKEN = getenv("TOKEN", None)
+BOT_TOKEN = getenv("TOKEN", None)
 
 "Pyrogram/kurigram String Session"
 STRING = getenv("STRING", None)
