@@ -336,12 +336,12 @@ def page_num(index, key):
         new_.append(
             [
                 Button.inline(
-                    "« Pʀᴇᴠɪᴏᴜs",
+                    "<",
                     data=f"uh_{key}_{index-1}",
                 ),
                 Button.inline("×", data="open"),
                 Button.inline(
-                    ">>",
+                    ">",
                     data=f"uh_{key}_{index+1}",
                 ),
             ]
