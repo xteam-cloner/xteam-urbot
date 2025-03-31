@@ -213,7 +213,7 @@ async def uptd_plugin(event):
         data += f"|{index}"
     buttons.append(
         [
-            Button.inline("« Bᴀᴄᴋ", data=data),
+            Button.inline("<<", data=data),
         ]
     )
     try:
@@ -244,7 +244,7 @@ async def _(event):
             file="ultroid_updates.txt",
             buttons=[
                 [Button.inline("• Uᴘᴅᴀᴛᴇ Nᴏᴡ •", data="updatenow")],
-                [Button.inline("« Bᴀᴄᴋ", data="ownr")],
+                [Button.inline("<<", data="ownr")],
             ],
         )
         remove("ultroid_updates.txt")
@@ -253,7 +253,7 @@ async def _(event):
             changelog_str,
             buttons=[
                 [Button.inline("Update Now", data="updatenow")],
-                [Button.inline("« Bᴀᴄᴋ", data="ownr")],
+                [Button.inline("<<", data="ownr")],
             ],
             parse_mode="html",
         )
@@ -286,7 +286,7 @@ async def _(e):
     button = InButtons.copy()
     button.append(
         [
-            Button.inline("« Bᴀᴄᴋ", data="open"),
+            Button.inline("<<", data="open"),
         ],
     )
     await e.edit(buttons=button, link_preview=False)
@@ -318,7 +318,7 @@ def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
     cols = udB.get_key("HELP_COLUMNS") or 2
     loaded = HELP.get(key, [])
-    emoji = udB.get_key("EMOJI_IN_HELP") or "❍"
+    emoji = udB.get_key("EMOJI_IN_HELP") or "🫧"
     List = [
         Button.inline(f"{emoji} {x} {emoji}", data=f"uplugin_{key}_{x}|{index}")
         for x in sorted(loaded)
@@ -331,7 +331,7 @@ def page_num(index, key):
         new_ = fl_[0] if fl_ else []
         index = 0
     if index == 0 and len(fl_) == 1:
-        new_.append([Button.inline("« Bᴀᴄᴋ »", data="open")])
+        new_.append([Button.inline("×", data="open")])
     else:
         new_.append(
             [
@@ -339,9 +339,9 @@ def page_num(index, key):
                     "« Pʀᴇᴠɪᴏᴜs",
                     data=f"uh_{key}_{index-1}",
                 ),
-                Button.inline("« Bᴀᴄᴋ »", data="open"),
+                Button.inline("×", data="open"),
                 Button.inline(
-                    "Nᴇxᴛ »",
+                    ">>",
                     data=f"uh_{key}_{index+1}",
                 ),
             ]
