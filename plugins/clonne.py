@@ -9,6 +9,8 @@ from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.types import InputPhoto
 from . import eor as edit_or_reply, ultroid_cmd as man_cmd, LOGS
 from pyUltroid import *
+from pyUltroid.storage import *
+
 if not hasattr(STORAGE, "userObj"):
     STORAGE.userObj = False
 
