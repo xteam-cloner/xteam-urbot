@@ -7,6 +7,8 @@
 
 import os
 import sys
+from math import ceil
+from pathlib import Path
 import telethonpatch
 from .version import __version__
 
@@ -28,7 +30,12 @@ if run_as_module:
     from .startup.connections import validate_session, vc_connection
     from .startup.funcs import _version_changes, autobot, enable_inline, update_envs
     from .version import ultroid_version
+    from .storage import Storage
 
+
+def STORAGE(n):
+    return Storage(Path("data") / n)
+    
     if not os.path.exists("./plugins"):
         LOGS.error(
             "'plugins' folder not found!\nMake sure that, you are on correct path."
