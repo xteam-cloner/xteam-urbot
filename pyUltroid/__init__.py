@@ -7,8 +7,6 @@
 
 import os
 import sys
-from math import ceil
-from pathlib import Path
 import telethonpatch
 from .version import __version__
 
@@ -30,9 +28,7 @@ if run_as_module:
     from .startup.connections import validate_session, vc_connection
     from .startup.funcs import _version_changes, autobot, enable_inline, update_envs
     from .version import ultroid_version
-    from .storage import Storage
 
-    
     if not os.path.exists("./plugins"):
         LOGS.error(
             "'plugins' folder not found!\nMake sure that, you are on correct path."
@@ -102,11 +98,12 @@ if run_as_module:
     HNDLR = udB.get_key("HNDLR") or "."
     DUAL_HNDLR = udB.get_key("DUAL_HNDLR") or "/"
     SUDO_HNDLR = udB.get_key("SUDO_HNDLR") or HNDLR
-   else:
-print("pyUltroid 2022 © TeamUltroid")
+else:
+    print("pyUltroid 2022 © TeamUltroid")
 
-from logging import getLogger
+    from logging import getLogger
 
-LOGS = getLogger("pyUltroid")
+    LOGS = getLogger("pyUltroid")
 
-ultroid_bot = asst = udB = vcClient = None
+    ultroid_bot = asst = udB = vcClient = None
+        
