@@ -50,3 +50,6 @@ class Storage:
             self._root(parents=True, exist_ok=True)
         with open(self._root / FILE_NAME, "w") as file_pointer:
             json.dump(self._data, file_pointer)
+
+def STORAGE(n):
+    return Storage(Path("data") / n)
