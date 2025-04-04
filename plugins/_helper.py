@@ -51,7 +51,7 @@ async def help_func(ult):
     await ult.edit(text, buttons=page_num(count, key), link_preview=False)
 else:
 try:
-    results = await ult.client.inline_query(asst.me.username, text, buttons=page_num(count, key), link_preview=False))
+    results = await ult.client.inline_query(asst.me.username, text, buttons=page_num(count, key), link_preview=False)
 except BotMethodInvalidError:
     return await ult.reply(
         "Inline mode is disabled. Please enable it in bot settings or contact support.",
