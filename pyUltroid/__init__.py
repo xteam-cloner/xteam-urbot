@@ -33,6 +33,7 @@ if run_as_module:
     from .storage import Storage
 
 
+
 def STORAGE(n):
     return Storage(Path("data") / n)
     
@@ -105,12 +106,11 @@ def STORAGE(n):
     HNDLR = udB.get_key("HNDLR") or "."
     DUAL_HNDLR = udB.get_key("DUAL_HNDLR") or "/"
     SUDO_HNDLR = udB.get_key("SUDO_HNDLR") or HNDLR
+   else:
+print("pyUltroid 2022 © TeamUltroid")
 
-else:
-    print("pyUltroid 2022 © TeamUltroid")
+from logging import getLogger
 
-    from logging import getLogger
+LOGS = getLogger("pyUltroid")
 
-    LOGS = getLogger("pyUltroid")
-
-    ultroid_bot = asst = udB = vcClient = None
+ultroid_bot = asst = udB = vcClient = None
