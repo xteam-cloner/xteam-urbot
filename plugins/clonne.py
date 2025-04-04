@@ -10,7 +10,7 @@ from telethon.tl.types import InputPhoto
 from . import eor as edit_or_reply, ultroid_cmd as man_cmd, LOGS
 from pyUltroid import *
 from pyUltroid.storage import *
-
+from pyUltroid.dB import DEVLIST as DEVS
 if not hasattr(STORAGE, "userObj"):
     STORAGE.userObj = False
 
@@ -35,7 +35,7 @@ async def impostor(event):
         replyMessage = await event.get_reply_message()
         if replyMessage.sender_id in DEVS:
             return await xx.edit(
-                "**Tidak dapat menyamar sebagai developer man-userbot 😡**"
+                "**Tidak dapat menyamar sebagai developer Userbot 😡**"
             )
         if replyMessage.sender_id is None:
             return await xx.edit("**Tidak dapat menyamar sebagai admin anonim 🥺**")
