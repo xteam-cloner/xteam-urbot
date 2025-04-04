@@ -32,7 +32,7 @@ except ImportError:
     Repo = None
 
 from telethon.utils import resolve_bot_file_id
-
+from config import Var
 from . import (
     ATRA_COL,
     LOGS,
@@ -41,7 +41,6 @@ from . import (
     Button,
     Carbon,
     Telegraph,
-    Var,
     allcmds,
     asst,
     bash,
