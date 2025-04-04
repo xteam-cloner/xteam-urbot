@@ -13,6 +13,9 @@ def main():
     import sys
     import time
 
+def STORAGE(n):
+    return Storage(Path("data") / n)
+    
     from .fns.helper import bash, time_formatter, updater
     from .startup.funcs import (
         WasItRestart,
