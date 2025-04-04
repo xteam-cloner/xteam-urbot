@@ -81,11 +81,11 @@ def paginate_modules(page_number, module_dict, prefix):
     )
     chunked_modules = [modules[i : i + 9] for i in range(0, len(modules), 9)]
     if len(chunked_modules) == 0:
-        return [[InlineKeyboardButton("Back", callback_data="help_back")]]
+        return [[Button.inline("Back", callback_data="help_back")]]
     current_page = chunked_modules[page_number]
     buttons = [
         [
-            InlineKeyboardButton(
+            Button.inline(
                 text=module_name.replace("_", " ").title(),
                 callback_data=f"help_module({module_name})",
             )
@@ -96,13 +96,13 @@ def paginate_modules(page_number, module_dict, prefix):
         nav_buttons = []
         if page_number > 0:
             nav_buttons.append(
-                InlineKeyboardButton(
+                Button.inline(
                     text="<", callback_data=f"help_prev({page_number - 1})"
                 )
             )
         if page_number < len(chunked_modules) - 1:
             nav_buttons.append(
-                InlineKeyboardButton(
+                Button.inline(
                     text=">", callback_data=f"help_next({page_number + 1})"
                 )
             )
@@ -144,7 +144,7 @@ async def menu_inline(client, inline_query):
             (
                 InlineQueryResultArticle(
                     title="Help Menu!",
-                    reply_markup=InlineKeyboardMarkup(
+                    reply_markup=Button.inline(
                         paginate_modules(0, LIST, "help")
                     ),
                     input_message_content=InputTextMessageContent(msg, parse_mode="html"),
@@ -164,10 +164,10 @@ async def menu_callback(client, callback_query):
     if mod_match:
         module = (mod_match.group(1)).replace(" ", "_")
         text = f"<b>{LIST[module].__HELP__}</b>\n".format(prefix[0])
-        button = [[InlineKeyboardButton("Kembali", callback_data="help_back")]]
+        button = [[Button.inline("Kembali", callback_data="help_back")]]
         await callback_query.edit_message_text(
             text=text + f"\n<b>© {bot.me.mention}</b>",
-            reply_markup=InlineKeyboardMarkup(button),
+            reply_markup=Button.inline(button),
             disable_web_page_preview=True,
             parse_mode="html",
         )
@@ -179,7 +179,7 @@ async def menu_callback(client, callback_query):
         curr_page = int(prev_match.group(1))
         await callback_query.edit_message_text(
             text=top_text,
-            reply_markup=InlineKeyboardMarkup(
+            reply_markup=Button.inline(
                 paginate_modules(curr_page - 1, LIST, "help")
             ),
             disable_web_page_preview=True,
@@ -189,7 +189,7 @@ async def menu_callback(client, callback_query):
         next_page = int(next_match.group(1))
         await callback_query.edit_message_text(
             text=top_text,
-            reply_markup=InlineKeyboardMarkup(
+            reply_markup=Button.inline(
                 paginate_modules(next_page + 1, LIST, "help")
             ),
             disable_web_page_preview=True,
@@ -198,7 +198,7 @@ async def menu_callback(client, callback_query):
     if back_match:
         await callback_query.edit_message_text(
             text=top_text,
-            reply_markup=InlineKeyboardMarkup(
+            reply_markup=Button.inline(
                 paginate_modules(0, LIST, "help")
             ),
             disable_web_page_preview=True,
@@ -212,12 +212,12 @@ async def help_handler(event):
     await help_cmd(bot, event)
 
 
-@events.register(events.InlineQuery(pattern=r"^help"))
+@in_pattern("help", owner=True)
 async def inline_help_handler(event):
     await menu_inline(bot, event)
 
 
-@events.register(events.CallbackQuery(pattern=r"^help_"))
+@callback("help", owner=True)
 async def callback_help_handler(event):
     await menu_callback(bot, event)
     
