@@ -32,10 +32,6 @@ if run_as_module:
     from .version import ultroid_version
     from .storage import Storage
 
-
-
-def STORAGE(n):
-    return Storage(Path("data") / n)
     
     if not os.path.exists("./plugins"):
         LOGS.error(
