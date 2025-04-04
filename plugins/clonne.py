@@ -11,6 +11,7 @@ from . import eor as edit_or_reply, ultroid_cmd as man_cmd, LOGS
 from pyUltroid import *
 from pyUltroid.storage import *
 from pyUltroid.dB import DEVLIST as DEVS
+
 if not hasattr(STORAGE, "userObj"):
     STORAGE.userObj = False
 
@@ -55,10 +56,10 @@ async def impostor(event):
 async def updateProfile(event, userObj, restore=False):
     firstName = (
         "Deleted Account"
-        if userObj.user.first_name is None
-        else userObj.user.first_name
+        if userObj.users.first_name is None
+        else userObj.users.first_name
     )
-    lastName = "" if userObj.user.last_name is None else userObj.user.last_name
+    lastName = "" if userObj.users.last_name is None else userObj.users.last_name
     userAbout = userObj.about if userObj.about is not None else ""
     userAbout = "" if len(userAbout) > 70 else userAbout
     if restore:
