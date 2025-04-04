@@ -37,7 +37,7 @@ _main_help_menu = [
     [Button.inline("ᴄʟᴏꜱᴇ", data="close")],
 ]
 
-@ultroid_cmd(pattern=r"helper(.*)"), owner=True)
+@ultroid_cmd(pattern="helper(.*)")
 async def help_func(ult):
     key, count = ult.data_match.group(1).decode("utf-8").split("_")
     if key == "VCBot" and HELP.get("VCBot") is None:
