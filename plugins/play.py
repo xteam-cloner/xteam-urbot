@@ -30,10 +30,9 @@ app = TelegramClient(
     'pytgcalls', 
     Var.API_ID,
     Var.API_HASH,
-    bot_token=Var.BOT_TOKEN,
+    Var.BOT_TOKEN,
 )
 call_py = PyTgCalls(app)
-
 app.start()
 call_py.start()
 call_py.play(
