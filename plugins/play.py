@@ -7,7 +7,8 @@ from telethon.errors.rpcerrorlist import PeerIdInvalidError, ChatAdminRequiredEr
 import asyncio
 import os
 import random
-from config import Var 
+from config import Var
+from . import LOGS
 from . import ultroid_bot as client
 from pytgcalls import PyTgCalls
 from pytgcalls.exceptions import (
@@ -27,7 +28,7 @@ app = TelegramClient(Var.SESSION, Var.api_id, Var.api_hash)
 call_py = PyTgCalls(app)
 call_py.start()
 call_py.play(
-    -1001234567890,
+    LOGS,
     'http://docs.evostream.com/sample_content/assets/sintel1m720p.mp4',
 )
 idle()
