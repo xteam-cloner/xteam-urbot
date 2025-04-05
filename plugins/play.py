@@ -7,9 +7,8 @@ from telethon.errors.rpcerrorlist import PeerIdInvalidError, ChatAdminRequiredEr
 import asyncio
 import os
 import random
-import config 
-from . import ultroid_bot as client 
-from pytgcalls import PyTgCalls
+from config import Var 
+from . import ultroid_bot as client
 from pytgcalls import PyTgCalls
 from pytgcalls.exceptions import (
     AlreadyJoinedError,
@@ -24,7 +23,7 @@ from pytgcalls.types import (
 from pytgcalls.types.stream import StreamAudioEnded
 
 # Initialize the client
-client = TelegramClient(session, api_id, api_hash)
+client = TelegramClient(Var.SESSION, Var.api_id, Var.api_hash)
 call_py = PyTgCalls(client)
 
 active_calls = {}
