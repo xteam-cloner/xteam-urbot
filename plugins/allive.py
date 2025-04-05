@@ -113,7 +113,7 @@ async def alive(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
-    await event.client.send_message(event.chat.id, file=random.choice(PHOTO), message_text, parse_mode="html")
+    await event.client.send_message(event.chat.id, file=randomchoice(PHOTO), message_text, parse_mode="html")
 
 @xteam_cmd(pattern="Alive$")
 async def alive_video(event):
