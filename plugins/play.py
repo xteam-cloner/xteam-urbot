@@ -23,8 +23,14 @@ from pytgcalls.types import (
 from pytgcalls.types.stream import StreamAudioEnded
 
 # Initialize the client
-client = TelegramClient(Var.SESSION, Var.api_id, Var.api_hash)
-call_py = PyTgCalls(client)
+app = TelegramClient(Var.SESSION, Var.api_id, Var.api_hash)
+call_py = PyTgCalls(app)
+call_py.start()
+call_py.play(
+    -1001234567890,
+    'http://docs.evostream.com/sample_content/assets/sintel1m720p.mp4',
+)
+idle()
 
 active_calls = {}
 audio_data = {}
@@ -78,7 +84,7 @@ async def play_audio(client, chat_id, file_path, reply_to_message):
     except Exception as e:
         print(f"Error during audio playback: {e}")
 
-@client.on(events.NewMessage(pattern=r'(?i)^.joinvc(?: |$)(.*)?'))
+@app.on(events.NewMessage(pattern=r'(?i)^.joinvc(?: |$)(.*)?'))
 async def join_vc(event):
     global active_calls
     client_id = client.me.id
@@ -124,7 +130,7 @@ async def join_vc(event):
     active_calls[client_id] = chat_id
     add_list(client.me.id, text)
 
-@client.on(events.NewMessage(pattern=r'(?i)^.play(?: |$)(.*)?'))
+@app.on(events.NewMessage(pattern=r'(?i)^.play(?: |$)(.*)?'))
 async def play_audio_cmd(event):
     client_id = client.me.id
     chat_id = event.chat_id
@@ -142,7 +148,7 @@ async def play_audio_cmd(event):
     audio_data.pop(client_id, None)
     await msg.edit("<b>Ended!</b>")
 
-@client.on(events.NewMessage(pattern=r'(?i)^.leavevc(?: |$)(.*)?'))
+@app.on(events.NewMessage(pattern=r'(?i)^.leavevc(?: |$)(.*)?'))
 async def leave_vc(event):
     client_id = client.me.id
     chat_id = event.chat_id
@@ -156,7 +162,7 @@ async def leave_vc(event):
     except Exception as e:
         await event.respond(f"ERROR: {e}")
 
-@client.on(events.NewMessage(pattern=r'(?i)^.startvc(?: |$)(.*)?'))
+@app.on(events.NewMessage(pattern=r'(?i)^.startvc(?: |$)(.*)?'))
 async def start_vc(event):
     vctitle = event.pattern_match.group(1)
     mk = await event.respond("`Processing....`")
@@ -175,7 +181,7 @@ async def start_vc(event):
     except Exception as e:
         return await mk.edit(f"Error: {str(e)}")
 
-@client.on(events.NewMessage(pattern=r'(?i)^.stopvc'))
+@app.on(events.NewMessage(pattern=r'(?i)^.stopvc'))
 async def stop_vc(event):
     mk = await event.respond("`Processing....`")
     try:
