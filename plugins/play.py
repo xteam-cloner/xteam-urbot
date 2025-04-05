@@ -10,6 +10,7 @@ import random
 from config import Var
 from . import LOGS
 from . import ultroid_bot as client
+from pytgcalls import idle
 from pytgcalls import PyTgCalls
 from pytgcalls.exceptions import (
     AlreadyJoinedError,
