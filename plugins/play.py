@@ -26,12 +26,7 @@ from pytgcalls.types.stream import StreamAudioEnded
 from pyUltroid import *
 
 # Initialize the client
-app = TelegramClient(
-    'pytgcalls', 
-    Var.API_ID,
-    Var.API_HASH,
-    Var.BOT_TOKEN,
-)
+app = TelegramClient(Var.API_ID, Var.API_HASH, Var.BOT_TOKEN)
 call_py = PyTgCalls(app)
 app.start()
 call_py.start()
