@@ -9,10 +9,23 @@ import os
 import random
 import config 
 from . import ultroid_bot as client 
-import pytgcalls
-from pytgcalls import MediaStream, idle
+from pytgcalls import PyTgCalls
+from pytgcalls import PyTgCalls
+from pytgcalls.exceptions import (
+    AlreadyJoinedError,
+    NoActiveGroupCall,
+)
+from pytgcalls.types import (
+    JoinedGroupCallParticipant,
+    LeftGroupCallParticipant,
+    MediaStream,
+    Update,
+)
+from pytgcalls.types.stream import StreamAudioEnded
+
 # Initialize the client
 client = TelegramClient(session, api_id, api_hash)
+call_py = PyTgCalls(client)
 
 active_calls = {}
 audio_data = {}
