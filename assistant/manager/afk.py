@@ -16,7 +16,7 @@ from telethon.tl.types import (
 )
 from telethon.utils import get_display_name
 
-from pyUltroid.fns.helper import inline_mention, time_formatter
+from xteam.fns.helper import inline_mention, time_formatter
 
 from . import asst, asst_cmd
 

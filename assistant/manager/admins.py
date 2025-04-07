@@ -9,7 +9,7 @@ import re
 
 from telethon.errors.rpcerrorlist import UserNotParticipantError
 
-from pyUltroid import _ult_cache
+from xteam import _ult_cache
 
 from . import *
 
