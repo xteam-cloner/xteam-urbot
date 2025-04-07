@@ -3,8 +3,8 @@ import sys
 from glob import glob
 from typing import Any, Dict, List, Union
 
-from pyUltroid import *
-from pyUltroid.fns.tools import translate
+from xteam import *
+from xteam.fns.tools import translate
 
 try:
     from yaml import safe_load
