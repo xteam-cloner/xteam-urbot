@@ -9,7 +9,7 @@ from xteam.fns.tools import translate
 try:
     from yaml import safe_load
 except ModuleNotFoundError:
-    from pyUltroid.fns.tools import safe_load
+    from xteam.fns.tools import safe_load
 
 ULTConfig.lang = udB.get_key("language") or os.getenv("LANGUAGE", "en")
 
