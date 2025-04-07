@@ -4,11 +4,11 @@ Get your Necessary Variables
 
 Clone the repository:
 
-• git clone https://github.com/xteam-cloner/Userbotx
+• git clone https://github.com/xteam-cloner/xteam-urbot
 
 Go to the cloned folder:
 
-• cd Userbotx
+• cd xteam-urbot
 
 Create a virtual env:
 
@@ -19,17 +19,16 @@ Install the requirements:
 
 • pip3 install --no-cache-dir  -r requirements.txt
 
-• pip3 install --no-cache-dir -r re*/st*/op*.txt
 
 Fill your variables in the env by
 
-• cp sample.env .env && vi .env
+• nano .env
 
 If you have finished edit, CTRL S + CTRL X.
 
 • Install screen to keep running your bot when you close the terminal by
 
-• screen -S Userbot
+• screen -S xteam-urbot
 
 • Finally Run the bot:
 
