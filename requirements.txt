@@ -1,6 +1,6 @@
 # Important Requirements here.
 telethon
-git+https://github.com/xteam-cloner/xteam.git
+xteam
 # https://github.com/TeamUltroid/Telethon/archive/ultroid.zip
 https://github.com/New-dev0/Telethon-Patch/archive/main.zip
 python-decouple
