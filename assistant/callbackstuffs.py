@@ -17,7 +17,7 @@ from random import choice
 from bs4 import BeautifulSoup as bs
 
 try:
-    from pyUltroid.fns.gDrive import GDriveManager
+    from xteam.fns.gDrive import GDriveManager
 except ImportError:
     GDriveManager = None
 from telegraph import upload_file as upl
@@ -25,9 +25,9 @@ from telethon import Button, events
 from telethon.tl.types import MessageMediaWebPage
 from telethon.utils import get_peer_id
 
-from pyUltroid.fns.helper import fast_download, progress
-from pyUltroid.fns.tools import Carbon, async_searcher, get_paste, telegraph_client
-from pyUltroid.startup.loader import Loader
+from xteam.fns.helper import fast_download, progress
+from xteam.fns.tools import Carbon, async_searcher, get_paste, telegraph_client
+from xteam.startup.loader import Loader
 
 from . import *
 
@@ -322,7 +322,7 @@ async def update(eve):
         await eve.edit(get_string("clst_1"))
         call_back()
         await bash("git pull && pip3 install -r requirements.txt")
-        execl(sys.executable, sys.executable, "-m", "pyUltroid")
+        execl(sys.executable, sys.executable, "-m", "xteam")
 
 
 @callback(re.compile("changes(.*)"), owner=True)

@@ -17,7 +17,7 @@ from random import choice
 from re import compile as re_compile
 from platform import python_version as pyver
 from telethon import __version__
-from pyUltroid.version import __version__ as UltVer
+from xteam.version import __version__ as UltVer
 from bs4 import BeautifulSoup as bs
 from telethon import Button
 from telethon.tl.alltlobjects import LAYER, tlobjects
@@ -26,8 +26,8 @@ from telethon.tl.types import InputWebDocument as wb
 from secrets import choice
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
 from telethon.tl.types import InputMessagesFilterPhotos
-from pyUltroid.fns.misc import google_search
-from pyUltroid.fns.tools import (
+from xteam.fns.misc import google_search
+from xteam.fns.tools import (
     _webupload_cache,
     async_searcher,
     get_ofox,

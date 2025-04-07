@@ -12,9 +12,9 @@ from telethon import Button, events
 from telethon.errors.rpcerrorlist import MessageDeleteForbiddenError
 from telethon.utils import get_display_name
 
-from pyUltroid._misc import SUDO_M, owner_and_sudos
-from pyUltroid.dB.base import KeyManager
-from pyUltroid.fns.helper import inline_mention
+from xteam._misc import SUDO_M, owner_and_sudos
+from xteam.dB.base import KeyManager
+from xteam.fns.helper import inline_mention
 from strings import get_string
 
 from . import *
@@ -77,7 +77,7 @@ async def restart_callback(e):
         restart_counter += 1
     #        return await restart_callback(e)
     await bash("git pull && pip3 install -r requirements.txt")
-    os.execl(sys.executable, sys.executable, "-m", "pyUltroid")
+    os.execl(sys.executable, sys.executable, "-m", "xteam")
     
 
 

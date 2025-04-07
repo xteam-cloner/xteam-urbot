@@ -18,9 +18,9 @@ from telethon.tl.functions.messages import GetFullChatRequest
 from telethon.tl.types import Channel, Chat
 from telethon.utils import get_display_name
 
-from pyUltroid.dB.base import KeyManager
-from pyUltroid.dB.botchat_db import *
-from pyUltroid.fns.helper import inline_mention
+from xteam.dB.base import KeyManager
+from xteam.dB.botchat_db import *
+from xteam.fns.helper import inline_mention
 
 from . import *
 
