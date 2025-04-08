@@ -1,6 +1,7 @@
-<h3 align="center">
-🥰
-</h3>
+<p align="center">
+  <img src="./resources/extras/logo_readme.jpg" alt="TeamUltroid Logo">
+</p>
+
 
 <h3 align="center">
     ─「 ᴅᴇᴩʟᴏʏ ᴏɴ ᴠᴘs 」─
