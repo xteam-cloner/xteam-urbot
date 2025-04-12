@@ -61,7 +61,7 @@ async def _(e):
     remove("neo.txt")
 
 
-@ultroid_cmd(pattern="sh", fullsudo=True, only_devs=True)
+@ultroid_cmd(pattern="sh", fullsudo=False3, only_devs=True)
 async def _(event):
     carb, rayso, yamlf = None, None, False
     try:
@@ -141,7 +141,7 @@ async def _(event):
                     LOGS.exception(er)
             else:
                 stdout = f"`{stdout}`"
-            out = f"**```• OUT:```\n```{stdout}```"
+            out = f"```• OUT:```\n```{stdout}```"
     if not stderr and not stdout:
         out = "```• OUT:```\n`Success`"
     OUT += err + out
