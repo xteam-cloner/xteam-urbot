@@ -51,7 +51,7 @@ _gdemote_rights = ChatAdminRights(
     pin_messages=False,
 )
 
-keym = KeyManager("BLACKLIST_GCAST", cast=list)
+keym = KeyManager("BLACKLIST_CHATS", cast=list)
 
 
 @ultroid_cmd(pattern="Gcast( (.*)|$)", fullsudo=True)
@@ -86,7 +86,7 @@ async def gcast(event):
             if (
                 not keym.contains(chat)
                 and int(f"-100{str(chat)}") not in NOSPAM_CHAT
-                and chat not in BLACKLIST_GCAST  # Added blacklist check
+                and chat not in BLACKLIST_CHATS  # Added blacklist check
                 and (
                     (
                         event.text[2:7] != "admin"
@@ -147,8 +147,8 @@ BLACKLIST_GCAST = set()
 @ultroid_cmd(pattern="addbl( (.*)|$)", fullsudo=True)
 async def add_gblacklist(event):
     chat_id = event.pattern_match.group(1)
-    if chat_id not in BLACKLIST_GCAST:
-        BLACKLIST_GCAST.add(chat_id)
+    if chat_id not in BLACKLIST_CHATS:
+        BLACKLIST_CHATS.add(chat_id)
         await event.edit(f"Chat {chat_id} has been added to the gcast blacklist.")
     else:
         await event.edit(f"Chat {chat_id} is already in the gcast blacklist.")
@@ -156,8 +156,8 @@ async def add_gblacklist(event):
 @ultroid_cmd(pattern="unbl( (.*)|$)", fullsudo=True)
 async def remove_gblacklist(event):
     chat_id = event.pattern_match.group(1)
-    if chat_id in BLACKLIST_GCAST:
-        BLACKLIST_GCAST.remove(chat_id)
+    if chat_id in BLACKLIST_CHATS:
+        BLACKLIST_CHATS.remove(chat_id)
         await event.edit(f"Chat {chat_id} has been removed from the gcast blacklist.")
     else:
         await event.edit(f"Chat {chat_id} is not in the gcast blacklist.")
