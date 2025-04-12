@@ -146,7 +146,7 @@ BLACKLIST_GCAST = set()
 
 @ultroid_cmd(pattern="addbl( (.*)|$)", fullsudo=True)
 async def add_gblacklist(event):
-    chat_id = int(event.pattern_match.group(1))
+    chat_id = event.pattern_match.group(1)
     if chat_id not in BLACKLIST_GCAST:
         BLACKLIST_GCAST.add(chat_id)
         await event.edit(f"Chat {chat_id} has been added to the gcast blacklist.")
@@ -155,7 +155,7 @@ async def add_gblacklist(event):
 
 @ultroid_cmd(pattern="unbl( (.*)|$)", fullsudo=True)
 async def remove_gblacklist(event):
-    chat_id = int(event.pattern_match.group(1))
+    chat_id = event.pattern_match.group(1)
     if chat_id in BLACKLIST_GCAST:
         BLACKLIST_GCAST.remove(chat_id)
         await event.edit(f"Chat {chat_id} has been removed from the gcast blacklist.")
