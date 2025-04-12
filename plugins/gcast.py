@@ -142,8 +142,6 @@ async def gcast(event):
 
 # --- New functions for managing the gcast blacklist ---
 
-BLACKLIST_GCAST = set()
-
 @ultroid_cmd(pattern="addbl( (.*)|$)", fullsudo=True)
 async def add_gblacklist(event):
     chat_id = event.pattern_match.group(1)
