@@ -3,7 +3,7 @@ import importlib
 import types
 from telethon import TelegramClient, events, utils
 import asyncio
-from . import *
+from . import ultroid_cmd
 
 async def meval(code, globs, **kwargs):
     # This function is released in the public domain. Feel free to kang it (although I like credit)
@@ -102,9 +102,9 @@ async def meval(code, globs, **kwargs):
 
 @ultroid_cmd(pattern="ev")
 async def eval_handler(event):
-    code = event.text[6:]
+    code = event.text[3:]  # Corrected: Remove only the "ev " prefix
     env = {
-        'client': client,
+        'client': event.client,  # Corrected: Use event.client
         'event': event,
         'message': event.message,
         'chat': event.chat,
@@ -121,4 +121,4 @@ async def eval_handler(event):
         output = f"**Output:**\n`{result}`"
     except Exception as e:
         output = f"**Error:**\n`{e}`"
-    await event.reply(output) 
+    await event.reply(output)
