@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./resources/extras/logo_readme.jpg" alt="TeamUltroid Logo">
+  <img src="./resources/extras/logo_readme.jpg" alt="xteam-urbot Logo">
 </p>
 
 
@@ -7,11 +7,6 @@
     ─「 ᴅᴇᴩʟᴏʏ ᴏɴ ᴠᴘs 」─
 </h3>
 
-</h3>
-
-<details>
-<summary><b>ᴅᴇᴩʟᴏʏ ᴏɴ ᴠᴘs</b></summary>
-<br>
 
 Copy these blue words on by on from here to use commands in you own vps.
 </h3>
@@ -57,3 +52,8 @@ bash startup
 ```console
 apt update && apt upgrade -y && apt install python wget -y && pip install Telethon && wget https://raw.githubusercontent.com/xteam-cloner/Userbotx/dev/resources/session/ssgen.py && python ssgen.py
 ```
+</h3>
+
+# License
+[![License](https://www.gnu.org/graphics/agplv3-155x51.png)](LICENSE)   
+xteam is licensed under [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html) v3 or later.
