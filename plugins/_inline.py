@@ -309,10 +309,17 @@ async def opner(event):
     )
 
 
-@callback(data="close", owner=False)
+"""@callback(data="close", owner=False)
 async def on_plug_in_callback_query_handler(event):
     await event.delete()
+"""
 
+@callback(data="close", owner=False)
+async def closet(lol):
+    try:
+        await lol.delete()
+    except MessageDeleteForbiddenError:
+        await lol.answer("MESSAGE_TOO_OLD", alert=True)
 
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
