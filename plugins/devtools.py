@@ -61,7 +61,7 @@ async def _(e):
     remove("neo.txt")
 
 
-@ultroid_cmd(pattern="sh", fullsudo=False3, only_devs=True)
+@ultroid_cmd(pattern="sh", fullsudo=False, only_devs=True)
 async def _(event):
     carb, rayso, yamlf = None, None, False
     try:
