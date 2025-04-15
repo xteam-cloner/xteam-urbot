@@ -86,7 +86,7 @@ async def inline_alive(o):
     )
 
 
-@in_pattern("ultd", owner=False)
+@in_pattern("ultd", owner=True)
 async def inline_handler(event):
     z = []
     for x in LIST.values():
@@ -129,7 +129,7 @@ async def _(event):
     await event.answer([result])
 
 
-@callback("ownr", owner=False)
+@callback("ownr", owner=True)
 async def setting(event):
     z = []
     for x in LIST.values():
@@ -160,7 +160,7 @@ async def setting(event):
 _strings = {"Official": helps, "Addons": zhelps, "VCBot": get_string("inline_6")}
 
 
-@callback(re.compile("uh_(.*)"), owner=False)
+@callback(re.compile("uh_(.*)"), owner=True)
 async def help_func(ult):
     key, count = ult.data_match.group(1).decode("utf-8").split("_")
     if key == "VCBot" and HELP.get("VCBot") is None:
@@ -174,7 +174,7 @@ async def help_func(ult):
     await ult.edit(text, buttons=page_num(count, key), link_preview=False)
 
 
-@callback(re.compile("uplugin_(.*)"), owner=False)
+@callback(re.compile("uplugin_(.*)"), owner=True)
 async def uptd_plugin(event):
     key, file = event.data_match.group(1).decode("utf-8").split("_")
     index = None
@@ -275,7 +275,7 @@ async def _(event):
     await event.answer(pin, cache_time=0, alert=True)
 
 
-@callback(data="inlone", owner=False)
+@callback(data="inlone", owner=True)
 async def _(e):
     _InButtons = [
         Button.switch_inline(_, query=InlinePlugin[_], same_peer=True)
@@ -292,7 +292,7 @@ async def _(e):
     await e.edit(buttons=button, link_preview=False)
 
 
-@callback(data="open", owner=False)
+@callback(data="open", owner=True)
 async def opner(event):
     z = []
     for x in LIST.values():
@@ -309,17 +309,10 @@ async def opner(event):
     )
 
 
-"""@callback(data="close", owner=False)
+@callback(data="close", owner=True)
 async def on_plug_in_callback_query_handler(event):
     await event.delete()
-"""
 
-@callback(data="close", owner=False)
-async def closet(lol):
-    try:
-        await lol.delete()
-    except MessageDeleteForbiddenError:
-        await lol.answer("MESSAGE_TOO_OLD", alert=True)
 
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5

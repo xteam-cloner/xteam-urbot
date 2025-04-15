@@ -32,7 +32,7 @@ except ImportError:
     Repo = None
 
 from telethon.utils import resolve_bot_file_id
-from xteam.configs import Var
+from config import Var
 from . import (
     ATRA_COL,
     LOGS,
@@ -218,7 +218,7 @@ async def restartbt(ult):
 
 @ultroid_cmd(
     pattern="shutdown$",
-    fullsudo=False,
+    fullsudo=True,
 )
 async def shutdownbot(ult):
     await shutdown(ult)
