@@ -15,7 +15,7 @@ import io
 from telethon.errors.rpcerrorlist import FloodWaitError
 from telethon.utils import get_display_name, get_peer_id
 
-from pyUltroid.dB.base import KeyManager
+from xteam.dB.base import KeyManager
 
 from . import LOGS, asst, eor, events, get_string, udB, ultroid_bot, ultroid_cmd
 
