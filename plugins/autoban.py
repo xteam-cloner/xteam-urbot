@@ -11,7 +11,7 @@ __doc__ = get_help("help_autoban")
 
 from telethon import events
 
-from pyUltroid.dB.base import KeyManager
+from xteam.dB.base import KeyManager
 
 from . import LOGS, asst, ultroid_bot, ultroid_cmd
 
