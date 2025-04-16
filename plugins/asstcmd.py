@@ -11,8 +11,8 @@ __doc__ = get_help("help_asstcmd")
 
 import os
 
-from pyUltroid.dB.asstcmd_db import add_cmd, cmd_reply, list_cmds, rem_cmd
-from pyUltroid.fns.tools import create_tl_btn, format_btn, get_msg_button
+from xteam.dB.asstcmd_db import add_cmd, cmd_reply, list_cmds, rem_cmd
+from xteam.fns.tools import create_tl_btn, format_btn, get_msg_button
 
 try:
     from telegraph import upload_file as uf
