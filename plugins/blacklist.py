@@ -10,7 +10,7 @@ from . import get_help
 __doc__ = get_help("help_blacklist")
 
 
-from pyUltroid.dB.blacklist_db import (
+from xteam.dB.blacklist_db import (
     add_blacklist,
     get_blacklist,
     list_blacklist,
