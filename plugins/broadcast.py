@@ -15,7 +15,7 @@ import io
 
 from telethon.utils import get_display_name
 
-from pyUltroid.dB.base import KeyManager
+from xteam.dB.base import KeyManager
 
 from . import HNDLR, LOGS, eor, get_string, udB, ultroid_bot, ultroid_cmd
 
