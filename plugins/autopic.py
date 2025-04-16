@@ -13,8 +13,8 @@ from random import shuffle
 
 from telethon.tl.functions.photos import UploadProfilePhotoRequest
 
-from pyUltroid.fns.helper import download_file
-from pyUltroid.fns.tools import get_google_images
+from xteam.fns.helper import download_file
+from xteam.fns.tools import get_google_images
 
 from . import LOGS, get_help, get_string, udB, ultroid_bot, ultroid_cmd
 
