@@ -15,7 +15,7 @@
 
 """
 
-from pyUltroid.dB.nsfw_db import profan_chat, rem_profan
+from xteam.dB.nsfw_db import profan_chat, rem_profan
 
 from . import get_string, ultroid_cmd
 
