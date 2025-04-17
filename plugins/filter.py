@@ -16,8 +16,8 @@ from telegraph import upload_file as uf
 from telethon.tl.types import User
 from telethon.utils import pack_bot_file_id
 
-from pyUltroid.dB.filter_db import add_filter, get_filter, list_filter, rem_filter
-from pyUltroid.fns.tools import create_tl_btn, format_btn, get_msg_button
+from xteam.dB.filter_db import add_filter, get_filter, list_filter, rem_filter
+from xteam.fns.tools import create_tl_btn, format_btn, get_msg_button
 
 from . import events, get_string, mediainfo, udB, ultroid_bot, ultroid_cmd
 from ._inline import something
