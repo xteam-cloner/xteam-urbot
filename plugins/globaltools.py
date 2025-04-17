@@ -44,9 +44,9 @@ from telethon.tl.functions.channels import EditAdminRequest
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.types import ChatAdminRights, User
 
-from pyUltroid.dB import DEVLIST
-from pyUltroid.dB.base import KeyManager
-from pyUltroid.dB.gban_mute_db import (
+from xteam.dB import DEVLIST
+from xteam.dB.base import KeyManager
+from xteam.dB.gban_mute_db import (
     gban,
     gmute,
     is_gbanned,
@@ -55,7 +55,7 @@ from pyUltroid.dB.gban_mute_db import (
     ungban,
     ungmute,
 )
-from pyUltroid.fns.tools import create_tl_btn, format_btn, get_msg_button
+from xteam.fns.tools import create_tl_btn, format_btn, get_msg_button
 
 from . import (
     HNDLR,
