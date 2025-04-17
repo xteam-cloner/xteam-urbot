@@ -30,8 +30,8 @@ import time
 
 from telethon.tl.types import Message
 
-from pyUltroid.fns.gDrive import GDriveManager
-from pyUltroid.fns.helper import time_formatter
+from xteam.fns.gDrive import GDriveManager
+from xteam.fns.helper import time_formatter
 
 from . import ULTConfig, asst, eod, eor, get_string, ultroid_cmd
 
