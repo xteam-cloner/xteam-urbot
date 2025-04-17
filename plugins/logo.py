@@ -23,8 +23,8 @@ try:
     from PIL import Image
 except ImportError:
     Image = None
-from pyUltroid.fns.misc import unsplashsearch
-from pyUltroid.fns.tools import LogoHelper
+from xteam.fns.misc import unsplashsearch
+from xteam.fns.tools import LogoHelper
 
 from . import OWNER_ID, OWNER_NAME, download_file, get_string, mediainfo, ultroid_cmd
 
