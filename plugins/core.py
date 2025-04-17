@@ -13,7 +13,7 @@ __doc__ = get_help("help_core")
 
 import os
 
-from pyUltroid.startup.loader import load_addons
+from xteam.startup.loader import load_addons
 
 from . import LOGS, async_searcher, eod, get_string, safeinstall, ultroid_cmd, un_plug
 
