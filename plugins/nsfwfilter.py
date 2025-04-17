@@ -25,7 +25,7 @@ try:
 except ImportError:
     detector = None
     LOGS.error("nsfwfilter: 'Profanitydetector' not installed!")
-from pyUltroid.dB.nsfw_db import is_nsfw, nsfw_chat, rem_nsfw
+from xteam.dB.nsfw_db import is_nsfw, nsfw_chat, rem_nsfw
 
 from . import HNDLR, async_searcher, eor, events, udB, ultroid_bot, ultroid_cmd
 
