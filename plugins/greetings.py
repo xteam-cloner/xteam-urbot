@@ -35,7 +35,7 @@ import os
 from telegraph import upload_file as uf
 from telethon.utils import pack_bot_file_id
 
-from pyUltroid.dB.greetings_db import (
+from xteam.dB.greetings_db import (
     add_goodbye,
     add_thanks,
     add_welcome,
@@ -46,7 +46,7 @@ from pyUltroid.dB.greetings_db import (
     must_thank,
     remove_thanks,
 )
-from pyUltroid.fns.tools import create_tl_btn, format_btn, get_msg_button
+from xteam.fns.tools import create_tl_btn, format_btn, get_msg_button
 
 from . import HNDLR, eor, get_string, mediainfo, ultroid_cmd
 from ._inline import something
