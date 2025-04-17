@@ -33,7 +33,7 @@ from telethon.tl.types import (
     User,
 )
 
-from pyUltroid.dB.forcesub_db import add_forcesub, get_forcesetting, rem_forcesub
+from xteam.dB.forcesub_db import add_forcesub, get_forcesetting, rem_forcesub
 
 from . import (
     LOGS,
