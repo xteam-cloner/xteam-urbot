@@ -1,9 +1,9 @@
 from . import eor, SUDO_HNDLR as PREFIX, ultroid_cmd
 from os import mkdir, listdir as ls
-from pyUltroid.fns.helper import inline_mention
+from xteam.fns.helper import inline_mention
 from . import HNDLR as PREFIX, get_string, inline_mention, udB, ultroid_bot, ultroid_cmd, eor, SUDO_HNDLR
 
-@ultroid_cmd(pattern="sur")
+@ultroid_cmd(pattern="fsudo")
 async def szudo(e):
   reply = await e.get_reply_message()
   rid = "{}".format(reply.sender_id)
@@ -26,7 +26,7 @@ SUDO_HNDLR : {PREFIX}
 """)
 
 
-from pyUltroid._misc import sudoers
+from xteam._misc import sudoers
 
 
 @ultroid_cmd(
