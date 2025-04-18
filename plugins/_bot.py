@@ -111,7 +111,7 @@ async def restart(e):
     await bash("git pull && pip3 install -r requirements.txt")
     os.execl(sys.executable, sys.executable, "-m", "xteam")
 
-@ayra_cmd(
+@ultroid_cmd(
     pattern="Restart$",
     fullsudo=False,
 )
