@@ -16,7 +16,7 @@ speedtest-cli
 python-telegram-bot
 emoji
 tqdm
-
+pyshorteners
 # Required only for Local Deploys
 # ------------------------------------------------------ #
 
