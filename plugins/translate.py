@@ -42,7 +42,7 @@ from telethon.tl.types import (
     DocumentAttributeVideo,
 )
 
-from pyUltroid.fns.tools import metadata, translate
+from xteam.fns.tools import metadata, translate
 
 from . import *
 from . import HNDLR, LOGS, ULTConfig, bash, con, eor, get_string
