@@ -114,7 +114,7 @@ async def alive(event):
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
     await event.client.send_file(
-        event.chat.id, 
+        event.chat_id,
         file=random.choice(PHOTO), 
         caption=message_text, 
         parse_mode="html")
