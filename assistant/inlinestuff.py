@@ -99,7 +99,7 @@ apis = [
 @in_pattern(owner=False, func=lambda x: not x.text)
 async def help(e):
     TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
-    #MSG = format_message_text(MSG)
+    MSG = choice(ALIVE_TEXT)
     #message_text = format_message_text(MSG)
     WEB0 = wb(
         "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []
@@ -107,7 +107,7 @@ async def help(e):
     res = [
         await e.builder.article(
             type="photo",
-            text=ALIVE_TEXT,
+            text=MSG,
             include_media=True,
             buttons=PING_ALIVE,
             title="About",
