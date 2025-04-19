@@ -34,7 +34,7 @@ from xteam.fns.tools import (
     saavn_search,
     webuploader,
 )
-
+from pyrogram.types import Message
 from . import *
 from . import _ult_cache
 from plugins import (
