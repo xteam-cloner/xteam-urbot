@@ -107,7 +107,7 @@ async def help(e):
     res = [
         await e.builder.article(
             type="photo",
-            text=message_text,
+            text=ALIVE_TEXT,
             include_media=True,
             buttons=PING_ALIVE,
             title="About",
