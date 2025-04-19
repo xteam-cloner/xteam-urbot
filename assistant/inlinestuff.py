@@ -94,13 +94,8 @@ apis = [
     "QUl6YVN5RGRPS253blB3VklRX2xiSDVzWUU0Rm9YakFLSVFWMERR",
 ]
 
-
-
-@in_pattern(owner=False, func=lambda x: not x.text)
-async def help(e):
-    TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
-    MSG = """
-    xteam-urbot is a versatile and feature-rich Telegram userbot built using the Telethon library in Python. Think of it as a customizable bot that runs on your Telegram account, allowing you to automate tasks, manage your groups more effectively, and add a variety of fun and useful features to your Telegram experience.
+def format_message_text(msg):
+    return f"""xteam-urbot is a versatile and feature-rich Telegram userbot built using the Telethon library in Python. Think of it as a customizable bot that runs on your Telegram account, allowing you to automate tasks, manage your groups more effectively, and add a variety of fun and useful features to your Telegram experience.
     •xteam-urbot interesting:
     •Extensive Functionality: xteam-urbot boasts a wide array of built-in modules (plugins) that can perform various actions. These can include things like:
     * Moderation tools: Anti-flood, ban/kick/mute users, manage messages.
@@ -120,13 +115,19 @@ async def help(e):
     • TeamX Organization: You can explore other related projects and plugins under the Teamxteam-urbot organization on GitHub: https://github.com/Teamxteam-urbot.
     •In short, xteam-urbot is a powerful tool for Telegram users who want to extend the platform's functionality and automate tasks. However, it comes with a learning curve and requires responsible usage.
     """
+
+
+@in_pattern(owner=False, func=lambda x: not x.text)
+async def help(e):
+    TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
+    MSG = format_message_text(msg)
     WEB0 = wb(
         "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []
     )
     res = [
         await e.builder.article(
             type="photo",
-            text=MSG,
+            text=message_text,
             include_media=True,
             buttons=PING_ALIVE,
             title="Inline",
