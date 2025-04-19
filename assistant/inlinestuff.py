@@ -112,7 +112,7 @@ def format_message_text(MSG):
     * Resource Usage: Running a userbot can consume resources on your device or server.
     •Where to find more information:
     • GitHub: The main repository for xteam-urbot is on GitHub at https://github.com/xteam-cloner/xteam-urbot. You'll find the source code, installation instructions, and documentation there.
-    • TeamX Organization: You can explore other related projects and plugins under the Teamxteam-urbot organization on GitHub: https://github.com/Teamxteam-urbot.
+    • TeamX Organization: You can explore other related projects and plugins under the xteam-urbot organization on GitHub: https://github.com/xteam-cloner.
     •In short, xteam-urbot is a powerful tool for Telegram users who want to extend the platform's functionality and automate tasks. However, it comes with a learning curve and requires responsible usage.
     """
 
@@ -120,7 +120,7 @@ def format_message_text(MSG):
 @in_pattern(owner=False, func=lambda x: not x.text)
 async def help(e):
     TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
-    MSG = format_message_text(MSG)
+    #MSG = format_message_text(MSG)
     message_text = format_message_text(MSG)
     WEB0 = wb(
         "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []
