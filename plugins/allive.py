@@ -125,7 +125,16 @@ async def alive(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
-    await event.respond(event.chat_id, caption=message_text, parse_mode="html")
+    await event.edit(f"<blockquote>┏──────────────────┓\n❍─┫ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!┣─❍\n" \
+                     f"┣──────────────────┫\n" \
+                     f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
+                     f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
+                     f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
+                     f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
+                     f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
+                     f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n" \
+                     f"┗──────────────────┛\n</blockquote>",
+                     parse_mode="html")
 
 @xteam_cmd(pattern="Alive$")
 async def alive_video(event):
