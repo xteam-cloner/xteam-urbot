@@ -119,7 +119,7 @@ def format_message_text(uptime):
 @xteam_cmd(pattern="alive$")
 async def alive(event):
     start = time.time()
-    pro = await event.eor("⚡")
+    pro = await event.eor("♥️")
     await asyncio.sleep(2)
     await pro.delete()
     end = round((time.time() - start) * 1000)
