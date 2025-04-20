@@ -125,7 +125,7 @@ async def alive(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
-    await event.client.send_file(
+    await event.client.send_message(
         event.chat_id,
         caption=message_text, 
         parse_mode="html")
@@ -151,7 +151,7 @@ async def alive_video(event):
         uptime = time_formatter((time.time() - start_time) * 1000)
         message_text = format_message_text(uptime)
 
-        await event.client.send_file(
+        await asst.client.send_file(
             event.chat.id,
             file=random.choice(asupannya),
             caption=message_text,
