@@ -121,11 +121,10 @@ async def alive(event):
     start = time.time()
     pro = await event.eor("♥️")
     await asyncio.sleep(2)
-    await pro.delete()
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
-    await event.edit(f"<blockquote>┏──────────────────┓\n❍─┫ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!┣─❍\n" \
+    await pro.edit(f"<blockquote>┏──────────────────┓\n❍─┫ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!┣─❍\n" \
                      f"┣──────────────────┫\n" \
                      f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
                      f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
