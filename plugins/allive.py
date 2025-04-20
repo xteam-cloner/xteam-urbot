@@ -94,7 +94,7 @@ Mukesh = [
     ],
 ]
 
-def format_message_text(uptime):
+"""def format_message_text(uptime):
     return f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n" \
            f"<blockquote>❍ ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
            f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
@@ -103,6 +103,18 @@ def format_message_text(uptime):
            f"❍ ᴘʏʀᴏɢʀᴀᴍ : {pver}\n" \
            f"❍ ᴘʏ-ᴛɢᴄᴀʟʟꜱ : {pytver}\n" \
            f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n</blockquote>"
+"""
+def format_message_text(uptime):
+    return f"<blockquote>┏──────────────────┓\nᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!\n" \ 
+    f"┣──────────────────┫\n" \
+    f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
+    f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
+    f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
+    f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
+    f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
+    f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n" \
+    f"┣──────────────────┫\n@xteam_cloner\n" \
+    f"┗──────────────────┛\n</blockquote>"
 
 @xteam_cmd(pattern="alive$")
 async def alive(event):
