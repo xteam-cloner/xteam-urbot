@@ -125,7 +125,7 @@ async def alive(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
-    await event.client.send_message(
+    await event.reply(
         event.chat_id,
         caption=message_text, 
         parse_mode="html")
