@@ -106,7 +106,7 @@ Mukesh = [
 """
 
 def format_message_text(uptime):
-    return f"<blockquote>┏──────────────────┓\nᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!\n" \
+    return f"<blockquote>┏──────────────────┓\n❍─┫ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!┣─❍\n" \
            f"┣──────────────────┫\n" \
            f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
            f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
@@ -114,7 +114,6 @@ def format_message_text(uptime):
            f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
            f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
            f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n" \
-           f"┣──────────────────┫\n@xteam_cloner\n" \
            f"┗──────────────────┛\n</blockquote>"
 
 @xteam_cmd(pattern="alive$")
@@ -128,7 +127,6 @@ async def alive(event):
     message_text = format_message_text(uptime)
     await event.client.send_file(
         event.chat_id,
-        file=random.choice(PHOTO), 
         caption=message_text, 
         parse_mode="html")
 
