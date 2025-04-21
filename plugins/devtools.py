@@ -80,7 +80,7 @@ async def _(event):
     OUT = f"```• Input:\n{cmd}\n\n```"
     err, out = "", ""
     if stderr:
-        err = f"```• Input:\n{stderr}\n\n```"
+        err = f"<blockquote>• Input:\n{stderr}\n\n</blockquote>", parse_mode="html"
     if stdout:
         if (carb or udB.get_key("CARBON_ON_BASH")) and (
             event.is_private
@@ -155,8 +155,9 @@ async def _(event):
                 force_document=True,
                 thumb=ULTConfig.thumb,
                 allow_cache=False,
-                caption=f"```{cmd}```" if len(cmd) < 998 else None,
+                caption=f"<blockquote>{cmd}</blockquote>" if len(cmd) < 998 else None,
                 reply_to=reply_to_id,
+                parse_mode="html",
             )
 
             await xx.delete()
