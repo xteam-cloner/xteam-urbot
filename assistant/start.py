@@ -162,9 +162,8 @@ async def ultroid(event):
                 parse_mode="html",
             )
             await event.react("🔥")  # Add a thumbs-up emoji reaction
-            
 
-"""@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
+@asst_cmd(pattern="startt( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
 async def ultroid(event):
     args = event.pattern_match.group(1).strip()
     keym = KeyManager("BOT_USERS", cast=list)
@@ -191,13 +190,16 @@ async def ultroid(event):
             await get_stored_file(event, args)
         if not udB.get_key("STARTMSG"):
             if udB.get_key("PMBOT"):
-                ok = "You can contact my master using this bot!!\n\nSend your Message, I will Deliver it To Master. ✉️"
+                ok = "You can contact my master using this bot!!\n\nSend your Message, I will Deliver it To Master."
             await event.reply(
-                f"Hey there {mention}, this is Ultroid Assistant of {me}! 👋\n\n{ok}",
+                f"Hey there {mention}, this is Assistant of {me}!\n\n{ok}",
                 file=udB.get_key("STARTMEDIA"),
                 buttons=[Button.inline("Info.", data="ownerinfo")]
                 if Owner_info_msg
                 else None,
+                message_effect=MessageEffect(  # Tambahkan efek pesan di sini
+                    type="Popout"  # Contoh efek: Popout, другую efek bisa dicoba
+                )
             )
         else:
             await event.reply(
@@ -206,23 +208,35 @@ async def ultroid(event):
                 buttons=[Button.inline("Info.", data="ownerinfo")]
                 if Owner_info_msg
                 else None,
+                message_effect=MessageEffect(  # Tambahkan efek pesan di sini
+                    type="Popout"  # Contoh efek: Popout, другу efek bisa dicoba
+                )
             )
     else:
         name = get_display_name(event.sender)
         if args == "set":
             await event.reply(
-                "Choose from the below options - ⚙️",
+                "Choose from the below options -",
                 buttons=_settings,
+                message_effect=MessageEffect(  # Tambahkan efek pesan di sini
+                    type="Popout"  # Contoh efek: Popout, другу efek bisa dicoba
+                )
             )
         elif args:
             await get_stored_file(event, args)
         else:
-            await event.reply(
-                get_string("ast_3").format(name),
+            await event.respond(
+                f"<blockquote>Hey {name}. Please browse through the options</blockquote>",
                 buttons=_start,
+                parse_mode="html",
+                message_effect=MessageEffect(  # Tambahkan efek pesan di sini
+                    type="Popout"  # Contoh efek: Popout, другу efek bisa dicoba
+                )
             )
-            await event.react("🔥")
-"""
+            await event.react("🔥")  # Add a thumbs-up emoji reaction
+            
+
+
 @callback("itkkstyo", owner=True)
 async def ekekdhdb(e):
     text = f"When New Visitor will visit your Assistant Bot. You will get this log message!\n\nTo Disable : {HNDLR}setdb OFF_START_LOG True"
