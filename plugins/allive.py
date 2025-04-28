@@ -133,7 +133,8 @@ async def alive(event):
                      f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
                      f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n" \
                      f"┗──────────────────┛\n</blockquote>",
-                     parse_mode="html")
+                   message_effect=32197,
+                   parse_mode="html")
 
 @xteam_cmd(pattern="Alive$")
 async def alive_video(event):
