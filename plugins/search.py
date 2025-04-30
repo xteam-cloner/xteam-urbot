@@ -68,20 +68,20 @@ async def gitsearch(event):
         ufollowing = ult["following"]
     except BaseException:
         return await event.eor(get_string("srch_2"))
-    fullusr = f"""
-**[GITHUB]({ulink})**
-**Name** - {uacc}
-**UserName** - {uname}
-**ID** - {uid}
-**Company** - {ucomp}
-**Blog** - {ublog}
-**Location** - {ulocation}
-**Bio** - {ubio}
-**Repos** - {urepos}
-**Followers** - {ufollowers}
-**Following** - {ufollowing}
-"""
-    await event.respond(fullusr, file=upic)
+    fullusr = f"""<blockquote>
+[GITHUB]({ulink})
+Name - {uacc}
+UserName - {uname}
+ID** - {uid}
+Company - {ucomp}
+Blog - {ublog}
+Location - {ulocation}
+Bio** - {ubio}
+Repos - {urepos}
+Followers - {ufollowers}
+Following - {ufollowing}
+</blockquote>"""
+    await event.respond(fullusr, file=upic, parse_mode="html")
     await event.delete()
 
 
