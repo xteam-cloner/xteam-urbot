@@ -104,10 +104,10 @@ async def inline_handler(event):
             text=text,
             buttons=page_num,
         )
-    #else:
-        #result = await event.builder.article(
-            #title="Ultroid Help Menu", text=text, buttons=page_num
-        #)
+    else:
+        result = await event.builder.article(
+            title="Ultroid Help Menu", text=text, buttons=page_num
+        )
     await event.answer([result], private=True, cache_time=300, gallery=True)
 
 
