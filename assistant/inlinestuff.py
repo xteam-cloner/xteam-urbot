@@ -99,22 +99,23 @@ apis = [
 @in_pattern(owner=False, func=lambda x: not x.text)
 async def help(e):
     TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
-    MSG = choice(ALIVE_TEXT)
+    MSG = "<blockquote>🔥 xteam Urbot 🔥</blockquote>"
     #message_text = format_message_text(MSG)
     WEB0 = wb(
-        "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg", 0, "image/jpg", []
+        "https://files.catbox.moe/k9ljse.jpg", 0, "image/jpg", []
     )
     res = [
         await e.builder.article(
             type="photo",
-            text=choice(ALIVE_TEXT),
+            text=MSG,
             include_media=True,
             buttons=PING_ALIVE,
             title="About",
-            description="xteam-urbot",
+            description=choice(ALIVE_TEXT),
             url=TLINK,
             thumb=WEB0,
             content=wb(TLINK, 0, "image/jpg", []),
+            parse_mode="html",
         )
     ]
     await e.answer(
