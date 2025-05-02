@@ -126,6 +126,38 @@ async def help(e):
         switch_pm_param="start",
     )
 
+#@in_pattern(owner=False, func=lambda x: not x.text)
+@in_pattern("help", owner=True)
+async def help(e):
+    TLINK = inline_pic() or "https://files.catbox.moe/k9ljse.jpg"
+    MSG = "<blockquote>🔥 xteam Urbot 🔥</blockquote>"
+    #message_text = format_message_text(MSG)
+    WEB0 = wb(
+        "https://files.catbox.moe/k9ljse.jpg", 0, "image/jpg", []
+    )
+    res = [
+        await e.builder.article(
+            type="photo",
+            text=MSG,
+            include_media=True,
+            buttons=page_num,
+            title="About",
+            description=choice(ALIVE_TEXT),
+            url=TLINK,
+            thumb=WEB0,
+            content=wb(TLINK, 0, "image/jpg", []),
+            parse_mode="html",
+        )
+    ]
+    await e.answer(
+        res,
+        private=True,
+        cache_time=300,
+        switch_pm="xteam-userbot",
+        switch_pm_param="start",
+    )
+    
+
 @callback("ping", owner=False)
 async def _(event):
     start = datetime.now()
