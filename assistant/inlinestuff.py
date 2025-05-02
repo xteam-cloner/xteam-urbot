@@ -37,6 +37,7 @@ from xteam.fns.tools import (
 from pyrogram.types import Message
 from . import *
 from . import _ult_cache
+from plugins._inline import page_num
 from plugins import (
     ATRA_COL,
     LOGS,
