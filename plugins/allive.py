@@ -133,8 +133,8 @@ async def alive(event):
                      f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
                      f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n" \
                      f"┗──────────────────┛\n</blockquote>",
-                   message_effect=32197,
-                   parse_mode="html")
+                   parse_mode="html",
+                  )
 
 @xteam_cmd(pattern="Alive$")
 async def alive_video(event):
@@ -157,7 +157,7 @@ async def alive_video(event):
         uptime = time_formatter((time.time() - start_time) * 1000)
         message_text = format_message_text(uptime)
 
-        await asst.send_file(
+        await ultroid_bot.send_file(
             event.chat.id,
             file=random.choice(asupannya),
             caption=message_text,
