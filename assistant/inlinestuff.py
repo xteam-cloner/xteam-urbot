@@ -98,7 +98,7 @@ apis = [
 
 @in_pattern(owner=False, func=lambda x: not x.text)
 async def help(e):
-    TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
+    TLINK = inline_pic() or "https://files.catbox.moe/k9ljse.jpg"
     MSG = "<blockquote>🔥 xteam Urbot 🔥</blockquote>"
     #message_text = format_message_text(MSG)
     WEB0 = wb(
