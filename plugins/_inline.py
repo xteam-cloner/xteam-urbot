@@ -86,7 +86,7 @@ async def inline_alive(o):
     )
 
 
-@in_pattern("ultdk", owner=True)
+@in_pattern("help", owner=True)
 async def inline_handler(event):
     z = []
     for x in LIST.values():
@@ -160,7 +160,7 @@ async def setting(event):
 _strings = {"Official": helps, "Addons": zhelps, "VCBot": get_string("inline_6")}
 
 
-@callback(re.compile("ultd(.*)"), owner=True)
+@callback(re.compile("uh_(.*)"), owner=True)
 async def help_func(ult):
     key, count = ult.data_match.group(1).decode("utf-8").split("_")
     if key == "VCBot" and HELP.get("VCBot") is None:
