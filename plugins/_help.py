@@ -123,3 +123,71 @@ async def _help(ult):
             return await ult.eor("The bot's inline mode is currently disabled.")
         await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
         await ult.delete()
+
+@ultroid_cmd(pattern="helper( (.*)|$)")
+async def _help(ult):
+    plug = ult.pattern_match.group(1).strip()
+    chat = await ult.get_chat()
+    if plug:
+        try:
+            if plug in HELP["Official"]:
+                output = f"**Plugin** - `{plug}`\n"
+                for i in HELP["Official"][plug]:
+                    output += i
+                output += "\n© @xteam_cloner"
+                await ult.eor(output)
+            else:
+                try:
+                    x = get_string("help_11").format(plug)
+                    for d in LIST[plug]:
+                        x += HNDLR + d
+                        x += "\n"
+                    x += "\n© @xteam_cloner"
+                    await ult.eor(x)
+                except BaseException:
+                    file = None
+                    compare_strings = []
+                    for file_name in LIST:
+                        compare_strings.append(file_name)
+                        value = LIST[file_name]
+                        for j in value:
+                            j = cmd_regex_replace(j)
+                            compare_strings.append(j)
+                            if j.strip() == plug:
+                                file = file_name
+                                break
+                    if not file:
+                        # the entered command/plugin name is not found
+                        text = f"`{plug}` is not a valid plugin!"
+                        best_match = None
+                        for _ in compare_strings:
+                            if plug in _ and not _.startswith("_"):
+                                best_match = _
+                                break
+                        if best_match:
+                            text += f"\nDid you mean `{best_match}`?"
+                        return await ult.eor(text)
+                    output = f"**Command** `{plug}` **found in plugin** - `{file}`\n"
+                    if file in HELP["Official"]:
+                        for i in HELP["Official"][file]:
+                            output += i
+                    output += "\n© @xteam_cloner"
+                    await ult.eor(output)
+        except BaseException as er:
+            LOGS.exception(er)
+            await ult.eor("Error 🤔 occurred.")
+    else:
+        try:
+            results = await ult.client.inline_query(asst.me.username, "ultd")
+        except BotMethodInvalidError:
+            return await ult.reply(
+                "Inline mode is disabled. Please enable it in bot settings or contact support.",
+            )
+        except BotResponseTimeoutError:
+            return await ult.eor(
+                "The bot did not respond in time. Please try again later.",
+            )
+        except BotInlineDisabledError:
+            return await ult.eor("The bot's inline mode is currently disabled.")
+        await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
+        await ult.delete()
