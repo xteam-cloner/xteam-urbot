@@ -85,6 +85,17 @@ async def inline_alive(o):
         switch_pm_param="start",
     )
 
+@in_pattern("alive", owner=False)
+async def inline_handler(event):
+    key = "Official"
+    count = 0
+    text = _strings.get(key, "").format(OWNER_NAME, HNDLR, len(HELP.get(key)))
+
+    result = await event.builder.article(
+        title="alive", text=text, buttons=page_num(count, key)
+    )
+    await event.answer([result], cache_time=0)
+    
 
 @in_pattern("ultd", owner=True)
 async def inline_handler(event):
