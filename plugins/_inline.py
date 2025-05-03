@@ -150,11 +150,11 @@ async def inline_handler(event):
             print(f"Error sending inline photo: {e}")
             # Mungkin fallback ke article jika gagal mengirim foto
             result = await event.builder.article(
-                title="Ultroid Help Menu", text=text, buttons=page_num
+                title="Ultroid Help Menu", text=text, buttons=_main_help_menu
             )
     else:
         result = await event.builder.article(
-            title="Ultroid Help Menu", text=text, buttons=page_num
+            title="Ultroid Help Menu", text=text, buttons=_main_help_menu
         )
 
     try:
