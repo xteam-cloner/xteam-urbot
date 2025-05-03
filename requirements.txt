@@ -1,5 +1,5 @@
 # Important Requirements here.
-telethon==1.40.0
+telethon==1.39.0
 py-tgcalls==1.2.9
 ntgcalls==1.1.2
 git+https://github.com/xteam-cloner/xteam
