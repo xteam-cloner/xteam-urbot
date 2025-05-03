@@ -86,7 +86,7 @@ async def inline_alive(o):
     )
 
 
-@in_pattern("help", owner=True)
+@in_pattern("ultd", owner=True)
 async def inline_handler(event):
     z = []
     for x in LIST.values():
