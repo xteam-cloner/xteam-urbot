@@ -97,15 +97,7 @@ async def inline_handler(event):
         len(HELP.get("Addons", [])),
         len(z),
     )
-    if inline_pic():
-        result = await event.builder.photo(
-            file=inline_pic(),
-            link_preview=False,
-            text=text,
-            buttons=page_num,
-        )
-    else:
-        result = await event.builder.article(
+    result = await event.builder.article(
             title="Ultroid Help Menu", text=text, buttons=_main_help_menu
         )
     await event.answer([result], private=True, cache_time=300, gallery=True)
