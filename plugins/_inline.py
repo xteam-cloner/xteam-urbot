@@ -112,26 +112,45 @@ async def inline_handler(event):
 
 @in_pattern("xteam", owner=True)
 async def inline_handler(event):
-    z = []
-    for x in LIST.values():
-        z.extend(x)
+    all_commands = []
+    for commands in LIST.values():
+        all_commands.extend(commands)
+
+    help_count = len(HELP.get("Official", []))
+    total_commands = len(all_commands)
+
     text = get_string("inline_4").format(
         OWNER_NAME,
-        len(HELP.get("Official", [])),
-        len(z),
+        help_count,
+        total_commands,
     )
-    if inline_pic():
-        result = await event.builder.photo(
-            file=inline_pic(),
-            link_preview=False,
-            text=text,
-            buttons=page_num,
-        )
+
+    inline_image = inline_pic()
+
+    if inline_image:
+        try:
+            result = await event.builder.photo(
+                file=inline_image,
+                link_preview=False,
+                text=text,
+                buttons=page_num,  # Pastikan page_num dibuat dengan benar
+            )
+        except Exception as e:
+            print(f"Error sending inline photo: {e}")
+            # Mungkin fallback ke article jika gagal mengirim foto
+            result = await event.builder.article(
+                title="Ultroid Help Menu", text=text, buttons=page_num
+            )
     else:
         result = await event.builder.article(
             title="Ultroid Help Menu", text=text, buttons=page_num
         )
-    await event.answer([result], private=True, cache_time=300, gallery=True)
+
+    try:
+        await event.answer([result], private=True, cache_time=300, gallery=True)
+    except Exception as e:
+        print(f"Error answering inline query: {e}")
+
 
 @in_pattern("pasta", owner=True)
 async def _(event):
