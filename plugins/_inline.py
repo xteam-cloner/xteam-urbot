@@ -151,6 +151,18 @@ async def setting(event):
 
 _strings = {"Official": helps, "Addons": zhelps, "VCBot": get_string("inline_6")}
 
+@callback("uh_{key}_{count}", owner=True)
+async def help_func(ult, key: str, count: str):
+    if key == "VCBot" and HELP.get("VCBot") is None:
+        return await ult.answer(get_string("help_12"), alert=True)
+    elif key == "Addons" and HELP.get("Addons") is None:
+        return await ult.answer(get_string("help_13").format(HNDLR), alert=True)
+    if "|" in count:
+        _, count = count.split("|")
+    count = int(count) if count else 0
+    text = _strings.get(key, "").format(OWNER_NAME, len(HELP.get(key)))
+    await ult.edit(text, buttons=page_num(count, key), link_preview=False)
+    
 
 @callback(re.compile("uh_(.*)"), owner=True)
 async def help_func(ult):
