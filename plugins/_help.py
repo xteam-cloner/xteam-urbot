@@ -124,7 +124,7 @@ async def _help(ult):
         await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
         await ult.delete()
 
-Import base64
+import base64
 import inspect
 from datetime import datetime
 from html import unescape
