@@ -229,7 +229,7 @@ async def _help(ult):
             await ult.eor("Error 🤔 occurred.")
     else:
         try:
-            results = await ult.client.inline_query(asst.me.username, "uh_")
+            results = await ult.client.inline_query(asst.me.username, "Official")
         except BotMethodInvalidError:
             return await ult.reply(
                 "Inline mode is disabled. Please enable it in bot settings or contact support.",
