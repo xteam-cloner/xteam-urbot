@@ -106,10 +106,14 @@ async def inline_handler(event):
 async def inline_handler(event):
     key = "Official"
     count = 0
-    text = _strings.get(key, "").format(OWNER_NAME, HNDLR, len(HELP.get(key)))
-
+    text = get_string("inline_4").format(
+        OWNER_NAME,
+        len(HELP.get("Official", [])),
+        len(HELP.get("Addons", [])),
+        len(z),
+    )
     result = await event.builder.article(
-        title="alive", text=text, buttons=page_num(count, key)
+        title="Menu Help", text=text, buttons=page_num(count, key)
     )
     await event.answer([result], cache_time=0)
 
