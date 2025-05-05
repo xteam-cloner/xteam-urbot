@@ -106,7 +106,7 @@ async def inline_handler(event):
 async def inline_handler(event):
     key = "Official"
     count = 0
-    text = get_string("inline_4", key, "").format(
+    text = get_string("inline_4", key).format(
         OWNER_NAME,
         len(HELP.get("Official", [])),
         len(HELP.get("Addons", [])),
