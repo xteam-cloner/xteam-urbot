@@ -24,6 +24,7 @@ from . import (
     split_list,
     start_time,
     udB,
+eor,
 )
 from ._help import _main_help_menu
 
@@ -33,7 +34,7 @@ from telethon import events, Button
 
 @in_pattern("asupan", owner=True)
 async def asupan_handler(event):
-    xx = await event.reply("Mencari asupan...")
+    xx = await event.eor("Mencari asupan...")
     try:
         asupannya = [
             asupan
