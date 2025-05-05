@@ -34,7 +34,7 @@ from telethon import events, Button
 
 @in_pattern("asupan", owner=True)
 async def asupan_handler(event):
-    xx = await event.eor("Mencari asupan...")
+    xx = await event.answer("Mencari asupan...")
     try:
         asupannya = [
             asupan
