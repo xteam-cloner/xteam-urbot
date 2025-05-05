@@ -59,10 +59,10 @@ async def desah_cmd(event):
 @ultroid_cmd(pattern="asupancb$")
 async def asupancb_cmd(event):
     buttons = [
-        [events.NewMessage.Callback(data=b"asupan")],
-        [events.NewMessage.Callback(data=b"pap")],
-        [events.NewMessage.Callback(data=b"ppcp")],
-        [events.NewMessage.Callback(data=b"desah")],
+        [events.CallbackQuery(data=b"asupan")],
+        [events.CallbackQuery(data=b"pap")],
+        [events.CallbackQuery(data=b"ppcp")],
+        [events.CallbackQuery(data=b"desah")],
     ]
     await event.reply(
         "Pilih asupan berdasarkan kategori:", buttons=buttons, reply_to=event.reply_to_msg_id
@@ -73,12 +73,12 @@ async def asupancb_cmd(event):
 async def asupancbg_cmd(event):
     buttons = [
         [
-            events.NewMessage.Callback(data=b"asupan"),
-            events.NewMessage.Callback(data=b"pap"),
+            events.CallbackQuery(data=b"asupan"),
+            events.CallbackQuery(data=b"pap"),
         ],
         [
-            events.NewMessage.Callback(data=b"ppcp"),
-            events.NewMessage.Callback(data=b"desah"),
+            events.CallbackQuery(data=b"ppcp"),
+            events.CallbackQuery(data=b"desah"),
         ],
     ]
     await event.reply(
@@ -123,4 +123,3 @@ async def ppcp_callback(event):
 async def desah_callback(event):
     await fetch_and_send(event, "@desahancewesangesange", InputMessagesFilterVoice, caption="Desahan Cewe")
     await event.answer("Mengirim suara desahan...")
-          
