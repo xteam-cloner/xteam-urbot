@@ -33,7 +33,7 @@ from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroi
 _main_help_menu = [
     [
         Button.url("18+",url=f"https://t.me/+5WS60Gdkpt84YWM1"),
-        Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="Official_"),
+        Button.inline("ᴍᴏᴅᴜʟᴇꜱ", data="Official"),
     ],
     [Button.inline("ᴄʟᴏꜱᴇ", data="close")],
 ]
