@@ -4,122 +4,195 @@
 # ⚠️ Do not remove credits
 
 from secrets import choice
-from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
-from telethon.tl.types import InputMessagesFilterPhotos
-from telethon import events
+from telethon.tl.types import (
+    InputMessagesFilterVideo,
+    InputMessagesFilterVoice,
+    InputMessagesFilterPhotos,
+    InlineQueryResultDocument,
+    InlineQueryResultPhoto,
+    InlineQueryResultAudio,
+    DocumentAttributeFilename,
+    MessageMediaPhoto,
+    MessageMediaDocument,
+    MessageMediaVoice,
+)
 from telethon.utils import get_display_name
-from . import eor, ultroid_cmd, get_string, OWNER_NAME
-
-
-async def fetch_and_send(event, channel, filter_type, caption=None):
-    xx = await event.reply(get_string("asupan_1"))
-    try:
-        items = [
-            item
-            async for item in event.client.iter_messages(
-                channel, filter=filter_type
-            )
-        ]
-        if items:
-            await event.client.send_file(
-                event.chat_id,
-                file=choice(items),
-                caption=caption,
-                reply_to=event.reply_to_msg_id,
-            )
-            await xx.delete()
-        else:
-            await xx.edit(f"**Tidak bisa menemukan item dari {channel}.**")
-    except Exception as e:
-        await xx.edit(f"**Terjadi kesalahan saat mengambil item dari {channel}:** `{e}`")
+from telethon.errors import QueryIdInvalidError
+from . import eor, ultroid_cmd, get_string, OWNER_NAME, bot
 
 
 @ultroid_cmd(pattern="asupan$")
-async def asupan_cmd(event):
-    await fetch_and_send(
-        event, "@xcryasupan", InputMessagesFilterVideo, caption=f"Asupan BY 🥀{OWNER_NAME}🥀"
-    )
+async def _(event):
+    xx = await event.eor(get_string("asupan_1"))
+    try:
+        asupannya = [
+            asupan
+            async for asupan in event.client.iter_messages(
+                "@xcryasupan", filter=InputMessagesFilterVideo
+            )
+        ]
+        await event.client.send_file(
+            event.chat_id,
+            file=choice(asupannya),
+            caption=f"Asupan BY 🥀{OWNER_NAME}🥀",
+            reply_to=event.reply_to_msg_id,
+        )
+        await xx.delete()
+    except Exception:
+        await xx.edit("**Tidak bisa menemukan video asupan.**")
 
 
 @ultroid_cmd(pattern="pap$")
-async def pap_cmd(event):
-    await fetch_and_send(event, "@CeweLogoPack", InputMessagesFilterPhotos)
+async def _(event):
+    xx = await event.eor(get_string("asupan_1"))
+    try:
+        papnya = [
+            pap
+            async for pap in event.client.iter_messages(
+                "@CeweLogoPack", filter=InputMessagesFilterPhotos
+            )
+        ]
+        await event.client.send_file(
+            event.chat_id, file=choice(papnya), reply_to=event.reply_to_msg_id
+        )
+        await xx.delete()
+    except Exception:
+        await xx.edit("**Tidak bisa menemukan pap.**")
 
 
 @ultroid_cmd(pattern="ppcp$")
-async def ppcp_cmd(event):
-    await fetch_and_send(event, "@ppcpcilik", InputMessagesFilterPhotos, caption="Couple PAP")
+async def _(event):
+    xx = await event.eor(get_string("asupan_1"))
+    try:
+        ppcpnya = [
+            ppcp
+            async for ppcp in event.client.iter_messages(
+                "@ppcpcilik", filter=InputMessagesFilterPhotos
+            )
+        ]
+        await event.client.send_file(
+            event.chat_id, file=choice(ppcpnya), reply_to=event.reply_to_msg_id
+        )
+        await xx.delete()
+    except Exception:
+        await xx.edit("**Tidak bisa menemukan pap couple.**")
 
 
 @ultroid_cmd(pattern="desah$")
-async def desah_cmd(event):
-    await fetch_and_send(event, "@desahancewesangesange", InputMessagesFilterVoice, caption="Desahan Cewe")
+async def _(event):
+    xx = await event.eor(get_string("asupan_1"))
+    try:
+        desahcewe = [
+            desah
+            async for desah in event.client.iter_messages(
+                "@desahancewesangesange", filter=InputMessagesFilterVoice
+            )
+        ]
+        await event.client.send_file(
+            event.chat_id, file=choice(desahcewe), reply_to=event.reply_to_msg_id
+        )
+        await xx.delete()
+    except Exception:
+        await xx.edit("**Tidak bisa menemukan desahan cewe.**")
 
 
-@ultroid_cmd(pattern="asupancb$")
-async def asupancb_cmd(event):
-    buttons = [
-        [events.CallbackQuery(data=b"asupan")],
-        [events.CallbackQuery(data=b"pap")],
-        [events.CallbackQuery(data=b"ppcp")],
-        [events.CallbackQuery(data=b"desah")],
-    ]
-    await event.reply(
-        "Pilih asupan berdasarkan kategori:", buttons=buttons, reply_to=event.reply_to_msg_id
-    )
+@bot.on(pattern="^/inline_asupan")
+async def inline_asupan_query(event):
+    builder = event.builder
+    result = None
+    query = event.text.split(None, 1)[1] if event.text else None
 
-
-@ultroid_cmd(pattern="asupancbg$")
-async def asupancbg_cmd(event):
-    buttons = [
-        [
-            events.CallbackQuery(data=b"asupan"),
-            events.CallbackQuery(data=b"pap"),
-        ],
-        [
-            events.CallbackQuery(data=b"ppcp"),
-            events.CallbackQuery(data=b"desah"),
-        ],
-    ]
-    await event.reply(
-        "Pilih asupan:", buttons=buttons, reply_to=event.reply_to_msg_id
-    )
-
-
-@ultroid_cmd(pattern="asupancbi$")
-async def asupancbi_cmd(event):
-    inline_keyboard = [
-        [("Video Asupan", "asupan")],
-        [("Foto PAP", "pap")],
-        [("Foto PP Couple", "ppcp")],
-        [("Suara Desahan", "desah")],
-    ]
-    await event.reply(
-        "Pilih jenis asupan:", buttons=inline_keyboard, reply_to=event.reply_to_msg_id
-    )
-
-
-@events.register(events.CallbackQuery(pattern=b"asupan"))
-async def asupan_callback(event):
-    await fetch_and_send(
-        event, "@xcryasupan", InputMessagesFilterVideo, caption=f"Asupan BY 🥀{OWNER_NAME}🥀"
-    )
-    await event.answer("Mengirim video asupan...")
-
-
-@events.register(events.CallbackQuery(pattern=b"pap"))
-async def pap_callback(event):
-    await fetch_and_send(event, "@CeweLogoPack", InputMessagesFilterPhotos)
-    await event.answer("Mengirim foto PAP...")
-
-
-@events.register(events.CallbackQuery(pattern=b"ppcp"))
-async def ppcp_callback(event):
-    await fetch_and_send(event, "@ppcpcilik", InputMessagesFilterPhotos, caption="Couple PAP")
-    await event.answer("Mengirim foto PP Couple...")
-
-
-@events.register(events.CallbackQuery(pattern=b"desah"))
-async def desah_callback(event):
-    await fetch_and_send(event, "@desahancewesangesange", InputMessagesFilterVoice, caption="Desahan Cewe")
-    await event.answer("Mengirim suara desahan...")
+    if query:
+        if query.lower() == "video":
+            asupannya = [
+                asupan
+                async for asupan in event.client.iter_messages(
+                    "@xcryasupan", filter=InputMessagesFilterVideo, limit=10
+                )
+            ]
+            results = []
+            for asupan in asupannya:
+                if asupan.media:
+                    results.append(
+                        builder.document(
+                            asupan.media,
+                            title="Video Asupan",
+                            text=f"Asupan BY 🥀{OWNER_NAME}🥀",
+                        )
+                    )
+            await event.answer(results)
+        elif query.lower() == "pap":
+            papnya = [
+                pap
+                async for pap in event.client.iter_messages(
+                    "@CeweLogoPack", filter=InputMessagesFilterPhotos, limit=10
+                )
+            ]
+            results = []
+            for pap in papnya:
+                if pap.media:
+                    results.append(
+                        builder.photo(pap.media, text=f"PAP BY 🥀{OWNER_NAME}🥀")
+                    )
+            await event.answer(results)
+        elif query.lower() == "ppcp":
+            ppcpnya = [
+                ppcp
+                async for ppcp in event.client.iter_messages(
+                    "@ppcpcilik", filter=InputMessagesFilterPhotos, limit=10
+                )
+            ]
+            results = []
+            for ppcp in ppcpnya:
+                if ppcp.media:
+                    results.append(
+                        builder.photo(ppcp.media, text=f"PPCp BY 🥀{OWNER_NAME}🥀")
+                    )
+            await event.answer(results)
+        elif query.lower() == "desah":
+            desahcewe = [
+                desah
+                async for desah in event.client.iter_messages(
+                    "@desahancewesangesange", filter=InputMessagesFilterVoice, limit=10
+                )
+            ]
+            results = []
+            for desah in desahcewe:
+                if desah.media:
+                    results.append(
+                        builder.audio(
+                            desah.media, title="Desahan Cewe", performer=OWNER_NAME
+                        )
+                    )
+            await event.answer(results)
+        else:
+            await event.answer(
+                [
+                    builder.article(
+                        title="Pilih Kategori",
+                        text="Silakan pilih kategori asupan yang Anda inginkan:",
+                        buttons=[
+                            [("Video", "inline_asupan video")],
+                            [("Foto (PAP)", "inline_asupan pap")],
+                            [("Foto Couple (PPCp)", "inline_asupan ppcp")],
+                            [("Suara (Desah)", "inline_asupan desah")],
+                        ],
+                    )
+                ]
+            )
+    else:
+        await event.answer(
+            [
+                builder.article(
+                    title="Pilih Kategori",
+                    text="Silakan pilih kategori asupan yang Anda inginkan:",
+                    buttons=[
+                        [("Video", "inline_asupan video")],
+                        [("Foto (PAP)", "inline_asupan pap")],
+                        [("Foto Couple (PPCp)", "inline_asupan ppcp")],
+                        [("Suara (Desah)", "inline_asupan desah")],
+                    ],
+                )
+            ]
+        )
+        
