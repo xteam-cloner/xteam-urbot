@@ -143,5 +143,5 @@ async def _helper(ult):
             results = await ult.client.inline_query(asst.me.username, "help")
         except BotInlineDisabledError:
             return await ult.eor(get_string("help_3"))
-        await results[0].click(chat.id, reply_to=ayra.reply_to_msg_id)
+        await results[0].click(chat.id, reply_to=ult.reply_to_msg_id)
         await ult.delete()
