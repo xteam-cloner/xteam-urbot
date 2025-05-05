@@ -102,6 +102,22 @@ async def inline_handler(event):
         )
     await event.answer([result], private=True, cache_time=300, gallery=True)
 
+@in_pattern("Official", owner=True)
+async def inline_handler(event):
+    z = []
+    for x in LIST.values():
+        z.extend(x)
+    text = get_string("inline_4").format(
+        OWNER_NAME,
+        len(HELP.get("Official", [])),
+        len(HELP.get("Addons", [])),
+        len(z),
+    )
+    result = await event.builder.article(
+            title="Ultroid Help Menu", text=text, buttons=page_num
+        )
+    await event.answer([result], private=True, cache_time=300, gallery=True)
+    
 
 @in_pattern("pasta", owner=True)
 async def _(event):
