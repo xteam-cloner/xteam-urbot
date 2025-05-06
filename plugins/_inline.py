@@ -313,9 +313,16 @@ async def opner(event):
     await event.answer([result], cache_time=0)
 
 
-@callback(data="close")
+"""@callback(data="close")
 async def on_plug_in_callback_query_handler(event):
-    await event.client.delete()
+    await event.client.delete()"""
+
+@callback(data="close")
+async def close_all_callback(event):
+    await event.answer()  # Mengirim notifikasi ke pengguna (opsional)
+    await event.edit(text="Pesan ditutup.", reply_markup=None) # Contoh: Mengedit pesan dan menghapus keyboard
+
+# ... (jalankan client Anda) ...
 
 
 def page_num(index, key):
