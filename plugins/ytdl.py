@@ -14,9 +14,8 @@ async def download_from_youtube_(event):
     
     await event.eor("Please choose an option:", buttons=buttons)
 
-@ultroid_cmd(
-    pattern="button_callback",
-)
+
+@callback("button_callback")
 async def button_callback(event):
     data = event.data.decode("utf-8")
     if data == "download_song":
