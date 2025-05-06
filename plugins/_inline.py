@@ -299,24 +299,23 @@ async def _(e):
 
 @callback(data="open", owner=True)
 async def opner(event):
-    z = []
-    for x in LIST.values():
-        z.extend(x)
-    await event.edit(
-        get_string("inline_4").format(
-            OWNER_NAME,
-            len(HELP.get("Official", [])),
-            len(HELP.get("Addons", [])),
-            len(z),
-        ),
-        buttons=page_num(count, key),
-        link_preview=False,
+    key = "Official"
+    count = 0
+    text = get_string("inline_4", key).format(
+        OWNER_NAME,
+        len(HELP.get("Official", [])),
+        len(HELP.get("Addons", [])),
+        len(key),
     )
+    result = await event.builder.article(
+        title="Menu Help", text=text, buttons=page_num(count, key)
+    )
+    await event.answer([result], cache_time=0)
 
 
 @callback(data="close")
-async def on_plug_in_callback_query_handler(ult):
-    await ult.delete()
+async def on_plug_in_callback_query_handler(event):
+    await event.delete()
 
 
 def page_num(index, key):
