@@ -85,22 +85,22 @@ async def inline_alive(o):
         switch_pm_param="start",
     )
 
-
-@in_pattern("ultd", owner=True)
-async def inline_handler(event):
-    z = []
-    for x in LIST.values():
-        z.extend(x)
-    text = get_string("inline_4").format(
+@in_pattern("helpme", owner=False)
+async def inline_haandler(event):
+    key = "Official"
+    count = 0
+    text = get_string("inline_4", key).format(
         OWNER_NAME,
         len(HELP.get("Official", [])),
         len(HELP.get("Addons", [])),
-        len(z),
+        len(key),
     )
+    text = f"> {text}"  # Menambahkan blockquote di awal teks
     result = await event.builder.article(
-            title="Ultroid Help Menu", text=text, buttons=_main_help_menu
-        )
-    await event.answer([result], private=True, cache_time=300, gallery=True)
+        title="Menu Help", text=text, buttons=page_num(count, key)
+    )
+    await event.answer([result], cache_time=0)
+    
 
 @in_pattern("help", owner=False)
 async def inline_handler(event):
