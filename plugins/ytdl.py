@@ -8,8 +8,8 @@ from telethon import Button
 async def download_from_youtube_(event):
     # Create buttons for user selection
     buttons = [
-        [Button.inline("Download Song", b"download_song")],
-        [Button.inline("Download Video", b"download_video")]
+        [Button.inline("Download Song", data="download_song")],
+        [Button.inline("Download Video", data="download_video")]
     ]
     
     await event.eor("Please choose an option:", buttons=buttons)
