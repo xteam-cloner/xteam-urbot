@@ -296,7 +296,7 @@ async def _(e):
     )
     await e.edit(buttons=button, link_preview=False)
 
-
+"""
 @callback(data="open", owner=True)
 async def opner(event):
     key = "Official"
@@ -311,7 +311,7 @@ async def opner(event):
         title="Menu Help", text=text, buttons=page_num(count, key)
     )
     await event.answer([result], cache_time=0)
-
+"""
 
 """@callback(data="close")
 async def on_plug_in_callback_query_handler(event):
