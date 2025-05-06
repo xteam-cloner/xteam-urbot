@@ -309,7 +309,7 @@ async def opner(event):
             len(HELP.get("Addons", [])),
             len(z),
         ),
-        buttons=_main_help_menu,
+        buttons=page_num(count, key),
         link_preview=False,
     )
 
