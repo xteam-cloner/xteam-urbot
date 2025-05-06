@@ -315,7 +315,7 @@ async def opner(event):
 
 @callback(data="close")
 async def on_plug_in_callback_query_handler(event):
-    await event.delete()
+    await event.client.delete()
 
 
 def page_num(index, key):
