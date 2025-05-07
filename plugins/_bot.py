@@ -111,31 +111,6 @@ async def restart(e):
     await bash("git pull && pip3 install -r requirements.txt")
     os.execl(sys.executable, sys.executable, "-m", "xteam")
 
-import os
-import sys
-from subprocess import run as bash
-
-@ultroid_cmd(
-    pattern="Restart$",
-    fullsudo=False,
-)
-async def restart(e):
-    try:
-        await e.eor("`Processing...`")
-        process = await bash("git pull && pip3 install -r requirements.txt", capture_output=True, text=True)
-        if process.returncode == 0:
-            await e.edit("`Restarting, please wait...`")
-            os.execl(sys.executable, sys.executable, "-m", "xteam")
-        else:
-            error_message = f"`Restart failed!`\n`Error:`\n```\n{process.stderr}\n```"
-            await e.edit(error_message)
-    except Exception as err:
-        await e.edit(f"`An unexpected error occurred:`\n```\n{err}\n```")
-    finally:
-        # Kode ini akan dieksekusi setelah try atau except selesai
-        if 'process' in locals() and process.returncode == 0:
-            await e.edit("`Restarting Success!`")
-
 @ultroid_cmd(
     pattern="shutdown$",
     fullsudo=True,
