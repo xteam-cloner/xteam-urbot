@@ -22,7 +22,7 @@ from youtubesearchpython import SearchVideos
 from yt_dlp import YoutubeDL
 
 from . import *
-
+from . import xteam as ayra_cmd
 
 def run_sync(func, *args, **kwargs):
     return get_event_loop().run_in_executor(None, partial(func, *args, **kwargs))
@@ -50,6 +50,7 @@ async def yt_video(e):
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "nocheckcertificate": True,
             "geo_bypass": True,
+            "cookiefile": "cookies.txt",
         }
     )
     await infomsg.eor("Mulai Mendownload...")
@@ -73,7 +74,7 @@ async def yt_video(e):
         file_name=title,
         duration=duration,
         supports_streaming=True,
-        caption=f'**💡 Informasi** {"video"}\n\n**🏷 Nama:** {title}\n**🧭 Durasi:** {duration}\n**👀 Dilihat:** {views}\n**📢 Channel:** {channel}\n**Upload By: {ayra_bot.full_name}**',
+        caption=f'**💡 Informasi** {"video"}\n\n**🏷 Nama:** {title}\n**🧭 Durasi:** {duration}\n**👀 Dilihat:** {views}\n**📢 Channel:** {channel}\n**Upload By: {ultroid_bot.full_name}**',
         reply_to=e.reply_to_msg_id,
     )
     await infomsg.delete()
@@ -104,6 +105,7 @@ async def yt_audio(e):
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "nocheckcertificate": True,
             "geo_bypass": True,
+            "cookiefile": "cookies.txt",
         }
     )
     await infomsg.edit("Mulai Mendownload...")
@@ -127,7 +129,7 @@ async def yt_audio(e):
         file_name=title,
         duration=duration,
         supports_streaming=False,
-        caption=f'**💡 Informasi** {"Audio"}\n\n**🏷 Nama:** {title}\n**🧭 Durasi:** {duration}\n**👀 Dilihat:** {views}\n**📢 Channel:** {channel}\n**Upload By: {ayra_bot.full_name}**',
+        caption=f'**💡 Informasi** {"Audio"}\n\n**🏷 Nama:** {title}\n**🧭 Durasi:** {duration}\n**👀 Dilihat:** {views}\n**📢 Channel:** {channel}\n**Upload By: {ultroid_bot.full_name}**',
         reply_to=e.reply_to_msg_id,
     )
     await infomsg.delete()
