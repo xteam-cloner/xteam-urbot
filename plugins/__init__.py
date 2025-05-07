@@ -47,6 +47,8 @@ asst: UltroidClient
 LOG_CHANNEL = udB.get_key("LOG_CHANNEL")
 StartTime = time.time()
 
+xteam = ultroid_cmd
+
 def inline_pic():
     INLINE_PIC = udB.get_key("INLINE_PIC")
     if INLINE_PIC is None:
