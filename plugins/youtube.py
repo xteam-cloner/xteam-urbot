@@ -13,60 +13,16 @@
 • `{i}songv <(youtube) search query>`
    Search and download video from youtube.
 """
-from xteam.fns.ytdl import download_yt, get_yt_link
-
-from . import get_string, requests, ultroid_cmd
-
-
-@ultroid_cmd(
-    pattern="song(s|v) ?(.*)",
-)
-async def download_from_youtube_(event):
-    ytd = {
-        "prefer_ffmpeg": True,
-        "addmetadata": True,
-        "geo-bypass": True,
-        "nocheckcertificate": True,
-        "cookiefile": "cookies.txt",
-    }
-    opt = event.pattern_match.group(1).strip()
-    xx = await event.eor(get_string("com_1"))
-    if opt == "s":
-        ytd["format"] = "bestaudio"
-        ytd["outtmpl"] = "%(id)s.m4a"
-        try:
-            query = event.text.split(" ", 1)[1]
-        except IndexError:
-            return await xx.eor(get_string("youtube_5"))
-        url = get_yt_link(query)
-        if not url:
-            return await xx.edit(get_string("unspl_1"))
-        await xx.eor(get_string("youtube_6"))
-    elif opt == "v":
-        ytd["format"] = "best"
-        ytd["outtmpl"] = "%(id)s.mp4"
-        ytd["postprocessors"] = [{"key": "FFmpegMetadata"}]
-        try:
-            query = event.text.split(" ", 1)[1]
-        except IndexError:
-            return await xx.eor(get_string("youtube_7"))
-        url = get_yt_link(query)
-        if not url:
-            return await xx.edit(get_string("unspl_1"))
-        await xx.eor(get_string("youtube_8"))
-    else:
-        return
-    await download_yt(xx, url, ytd)
 
 from xteam.fns.ytdl import download_yt, get_yt_link, get_yt_info
-
+from yt_dlp import YoutubeDL
 from . import get_string, requests, ultroid_cmd
+import logging
+
+logging.basicConfig(level=logging.ERROR)
 
 
-@ultroid_cmd(
-    pattern="song(ss|vv) ?(.*)",
-)
-async def download_from_youtube_(event):
+async def download_youtube(event, opt):
     ytd = {
         "prefer_ffmpeg": True,
         "addmetadata": True,
@@ -74,17 +30,17 @@ async def download_from_youtube_(event):
         "nocheckcertificate": True,
         "cookiefile": "cookies.txt",
     }
-    opt = event.pattern_match.group(1).strip()
-    xx = await event.eor(get_string("com_1"))
+    message = await event.eor(get_string("com_1"))  # Assuming com_1 is a relevant message
     try:
         query = event.text.split(" ", 1)[1]
     except IndexError:
-        return await xx.eor(
-            get_string("youtube_5") if opt == "s" else get_string("youtube_7")
+        return await message.edit(
+            get_string("youtube_5") if opt in ("s", "ss") else get_string("youtube_7")
         )
+
     url = get_yt_link(query)
     if not url:
-        return await xx.edit(get_string("unspl_1"))
+        return await message.edit(get_string("unspl_1"))
 
     yt_info = get_yt_info(url)
     if yt_info:
@@ -102,18 +58,34 @@ async def download_from_youtube_(event):
             info_text += f"**Channel:** {channel_name}\n"
         if view_count is not None:
             info_text += f"**Views:** {view_count:,}\n"
-        await xx.edit(f"{get_string('youtube_6' if opt == 's' else 'youtube_8')}\n\n{info_text}")
+        await message.edit(
+            f"{get_string('youtube_6' if opt in ('s', 'ss') else 'youtube_8')}\n\n{info_text}"
+        )
     else:
-        await xx.edit(get_string("youtube_6" if opt == "s" else "youtube_8"))
+        await message.edit(
+            get_string("youtube_6") if opt in ("s", "ss") else get_string("youtube_8")
+        )
 
-    if opt == "s":
+    if opt in ("s", "ss"):
         ytd["format"] = "bestaudio"
         ytd["outtmpl"] = "%(id)s.m4a"
-    elif opt == "v":
+    elif opt in ("v", "vv"):
         ytd["format"] = "best"
         ytd["outtmpl"] = "%(id)s.mp4"
         ytd["postprocessors"] = [{"key": "FFmpegMetadata"}]
     else:
         return
 
-    await download_yt(xx, url, ytd)
+    try:
+        await download_yt(message, url, ytd)
+    except Exception as e:
+         logging.error(f"Error during download: {e}")
+         await message.edit(get_string("download_error")) # Replace "download_error" with a relevant string
+
+@ultroid_cmd(pattern="song(s|v) ?(.*)")
+async def download_song(event):
+    await download_youtube(event, event.pattern_match.group(1).strip())
+
+@ultroid_cmd(pattern="song(ss|vv) ?(.*)")
+async def download_song_info(event):
+    await download_youtube(event, event.pattern_match.group(1).strip())
