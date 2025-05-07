@@ -112,6 +112,16 @@ async def restart(e):
     os.execl(sys.executable, sys.executable, "-m", "xteam")
 
 @ultroid_cmd(
+    pattern="Restart$",
+    fullsudo=False,
+)
+async def restart(e):
+    await e.eor("`Processing...`")
+    await bash("git pull")
+    await e.eor("Done.")
+    os.execl(sys.executable, sys.executable, "-m", "xteam")
+
+@ultroid_cmd(
     pattern="shutdown$",
     fullsudo=True,
 )
