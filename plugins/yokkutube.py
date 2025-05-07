@@ -22,13 +22,13 @@ from youtubesearchpython import SearchVideos
 from yt_dlp import YoutubeDL
 
 from . import *
-from . import xteam as ayra_cmd
+from . import ultroid_cmd as ayra_cmd
 
 def run_sync(func, *args, **kwargs):
     return get_event_loop().run_in_executor(None, partial(func, *args, **kwargs))
 
 
-@ayra_cmd(pattern="^[Vv][Ii][Dd][Ee][Oo]( (.*)|$)")
+@ayra_cmd(pattern="video( (.*)|$)")
 async def yt_video(e):
     infomsg = await e.eor("`Processing...`")
     try:
@@ -53,7 +53,7 @@ async def yt_video(e):
             "cookiefile": "cookies.txt",
         }
     )
-    await infomsg.eor("Mulai Mendownload...")
+    await infomsg.eor("Start Downloading...")
     try:
         ytdl_data = await run_sync(ydl.extract_info, link, download=True)
         file_path = ydl.prepare_filename(ytdl_data)
@@ -83,7 +83,7 @@ async def yt_video(e):
             os.remove(files)
 
 
-@ayra_cmd(pattern="^[Ss][Oo][Nn][Gg]( (.*)|$)")
+@ayra_cmd(pattern="song( (.*)|$)")
 async def yt_audio(e):
     infomsg = await e.eor("`Processing...`")
     try:
@@ -108,7 +108,7 @@ async def yt_audio(e):
             "cookiefile": "cookies.txt",
         }
     )
-    await infomsg.edit("Mulai Mendownload...")
+    await infomsg.edit("Start Downloading...")
     try:
         ytdl_data = await run_sync(ydl.extract_info, link, download=True)
         file_path = ydl.prepare_filename(ytdl_data)
