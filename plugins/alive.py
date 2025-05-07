@@ -94,16 +94,6 @@ Mukesh = [
     ],
 ]
 
-"""def format_message_text(uptime):
-    return f"<blockquote>ʜᴇʏ, ɪ ᴀᴍ {BOT_NAME} 🥀</blockquote>\n" \
-           f"<blockquote>❍ ᴍʏ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
-           f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
-           f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
-           f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
-           f"❍ ᴘʏʀᴏɢʀᴀᴍ : {pver}\n" \
-           f"❍ ᴘʏ-ᴛɢᴄᴀʟʟꜱ : {pytver}\n" \
-           f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n</blockquote>"
-"""
 
 def format_message_text(uptime):
     return f"<blockquote>┏──────────────────┓\n❍─┫ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!┣─❍\n" \
@@ -119,17 +109,17 @@ def format_message_text(uptime):
 @xteam_cmd(pattern="alive$")
 async def alive(event):
     start = time.time()
-    pro = await event.eor("♥️")
-    await asyncio.sleep(2)
+    pro = await event.eor("🔥")
+    await asyncio.sleep(1)
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
     await pro.edit(f"<blockquote>┏──────────────────┓\n❍─┫ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!┣─❍\n" \
                      f"┣──────────────────┫\n" \
-                     f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
-                     f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
-                     f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
-                     f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
+                     f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n" \
+                     f"❍ ʟɪʙʀᴀʀʏ : {lver}\n\n" \
+                     f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n\n" \
+                     f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n\n" \
                      f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
                      f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n" \
                      f"┗──────────────────┛\n</blockquote>",
@@ -153,11 +143,9 @@ async def alive_video(event):
         pro = await event.eor("⚡")
         await asyncio.sleep(2)
         await pro.delete()
-
         uptime = time_formatter((time.time() - start_time) * 1000)
         message_text = format_message_text(uptime)
-
-        await ultroid_bot.send_file(
+        await client.send_file(
             event.chat.id,
             file=random.choice(asupannya),
             caption=message_text,
@@ -166,4 +154,3 @@ async def alive_video(event):
 
     except Exception as e:
         await event.respond(f"An error occurred: {e}")
-                     
