@@ -97,14 +97,14 @@ Mukesh = [
 
 def format_message_text(uptime):
     return f"<blockquote>┏──────────────────┓\n❍─┫ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!┣─❍\n" \
-           f"┣──────────────────┫\n" \
-           f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
-           f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
-           f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
-           f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
-           f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
-           f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n" \
-           f"┗──────────────────┛\n</blockquote>"
+                     f"┣──────────────────┫\n\n" \
+                     f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n" \
+                     f"❍ ʟɪʙʀᴀʀʏ : {lver}\n\n" \
+                     f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n\n" \
+                     f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n\n" \
+                     f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n\n" \
+                     f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n\n" \
+                     f"┗──────────────────┛\n</blockquote>"
 
 @xteam_cmd(pattern="alive$")
 async def alive(event):
@@ -120,7 +120,7 @@ async def alive(event):
                      f"❍ ʟɪʙʀᴀʀʏ : {lver}\n\n" \
                      f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n\n" \
                      f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n\n" \
-                     f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
+                     f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n\n" \
                      f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n" \
                      f"┗──────────────────┛\n</blockquote>",
                    parse_mode="html",
