@@ -50,6 +50,7 @@ async def yt_video(e):
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "nocheckcertificate": True,
             "geo_bypass": True,
+            "cookiefile": "cookies.txt",
         }
     )
     await infomsg.eor("Mulai Mendownload...")
@@ -104,6 +105,7 @@ async def yt_audio(e):
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "nocheckcertificate": True,
             "geo_bypass": True,
+            "cookiefile": "cookies.txt",
         }
     )
     await infomsg.edit("Mulai Mendownload...")
