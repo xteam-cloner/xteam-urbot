@@ -22,13 +22,13 @@ from youtubesearchpython import SearchVideos
 from yt_dlp import YoutubeDL
 
 from . import *
-from . import ultroid_cmd as ayra_cmd
+
 
 def run_sync(func, *args, **kwargs):
     return get_event_loop().run_in_executor(None, partial(func, *args, **kwargs))
 
 
-@ayra_cmd(pattern="video( (.*)|$)")
+@ultroid_cmd(pattern="Video( (.*)|$)")
 async def yt_video(e):
     infomsg = await e.eor("`Processing...`")
     try:
@@ -50,10 +50,9 @@ async def yt_video(e):
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "nocheckcertificate": True,
             "geo_bypass": True,
-            "cookiefile": "cookies.txt",
         }
     )
-    await infomsg.eor("Start Downloading...")
+    await infomsg.eor("Mulai Mendownload...")
     try:
         ytdl_data = await run_sync(ydl.extract_info, link, download=True)
         file_path = ydl.prepare_filename(ytdl_data)
@@ -83,7 +82,7 @@ async def yt_video(e):
             os.remove(files)
 
 
-@ayra_cmd(pattern="song( (.*)|$)")
+@ultroid_cmd(pattern="Song( (.*)|$)")
 async def yt_audio(e):
     infomsg = await e.eor("`Processing...`")
     try:
@@ -105,10 +104,9 @@ async def yt_audio(e):
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "nocheckcertificate": True,
             "geo_bypass": True,
-            "cookiefile": "cookies.txt",
         }
     )
-    await infomsg.edit("Start Downloading...")
+    await infomsg.edit("Mulai Mendownload...")
     try:
         ytdl_data = await run_sync(ydl.extract_info, link, download=True)
         file_path = ydl.prepare_filename(ytdl_data)
