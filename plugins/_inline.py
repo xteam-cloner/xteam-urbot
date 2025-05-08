@@ -103,7 +103,7 @@ async def inline_haandler(event):
     
 
 @in_pattern("help", owner=False)
-async def inline_handler(event):
+async def inline_handler(ult):
     key = "Official"
     count = 0
     text = get_string("inline_4", key).format(
@@ -112,10 +112,10 @@ async def inline_handler(event):
         len(HELP.get("Addons", [])),
         len(key),
     )
-    result = await event.builder.article(
+    result = await ult.builder.article(
         title="Menu Help", text=text, buttons=page_num(count, key)
     )
-    await event.answer([result], cache_time=0)
+    await ult.answer([result], cache_time=0)
 
 @in_pattern("pasta", owner=True)
 async def _(event):
@@ -180,8 +180,8 @@ async def help_func(ult):
 
 
 @callback(re.compile("uplugin_(.*)"), owner=True)
-async def uptd_plugin(event):
-    key, file = event.data_match.group(1).decode("utf-8").split("_")
+async def uptd_plugin(ult):
+    key, file = ult.data_match.group(1).decode("utf-8").split("_")
     index = None
     if "|" in file:
         file, index = file.split("|")
@@ -222,11 +222,11 @@ async def uptd_plugin(event):
         ]
     )
     try:
-        await event.edit(help_, buttons=buttons)
+        await ult.edit(help_, buttons=buttons)
     except Exception as er:
         LOGS.exception(er)
         help = f"Do `{HNDLR}help {key}` to get list of commands."
-        await event.edit(help, buttons=buttons)
+        await ult.edit(help, buttons=buttons)
 
 
 @callback(data="doupdate", owner=True)
@@ -296,67 +296,13 @@ async def _(e):
     )
     await e.edit(buttons=button, link_preview=False)
 
-"""
-@callback(data="open", owner=True)
-async def opner(event):
-    key = "Official"
-    count = 0
-    text = get_string("inline_4", key).format(
-        OWNER_NAME,
-        len(HELP.get("Official", [])),
-        len(HELP.get("Addons", [])),
-        len(key),
-    )
-    result = await event.builder.article(
-        title="Menu Help", text=text, buttons=page_num(count, key)
-    )
-    await event.answer([result], cache_time=0)
-"""
 
-"""@callback(data="close")
-async def on_plug_in_callback_query_handler(event):
-    await event.client.delete()"""
+@callback(data="close")
+async def on_plug_in_callback_query_handler(ult):
+    await ult.delete()
 
 
 def page_num(index, key):
-    rows = udB.get_key("HELP_ROWS") or 5
-    cols = udB.get_key("HELP_COLUMNS") or 2
-    loaded = HELP.get(key, [])
-    emoji = udB.get_key("EMOJI_IN_HELP") or ""
-    List = [
-        Button.inline(f"{emoji} {x} {emoji}", data=f"uplugin_{key}_{x}|{index}")
-        for x in sorted(loaded)
-    ]
-    all_ = split_list(List, cols)
-    fl_ = split_list(all_, rows)
-    try:
-        new_ = fl_[index]
-    except IndexError:
-        new_ = fl_[0] if fl_ else []
-        index = 0
-    buttons = []
-    if len(fl_) > 1:
-        nav_buttons = []
-        if index > 0:
-            nav_buttons.append(Button.inline("<", data=f"uh_{key}_{index-1}"))
-        nav_buttons.append(Button.inline("×", data="close_all_help"))
-        if index < len(fl_) - 1:
-            nav_buttons.append(Button.inline(">", data=f"uh_{key}_{index+1}"))
-        if new_:
-            buttons.extend(new_)
-        buttons.append(nav_buttons)
-    elif new_:
-        buttons.extend(new_)
-        buttons.append([Button.inline("×", data="close_all_help")])
-    else:
-        buttons.append([Button.inline("×", data="close_all_help")])
-    return buttons
-
-@callback(data="close_all_help")
-async def close_all(event):
-    await event.delete()
-
-"""def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
     cols = udB.get_key("HELP_COLUMNS") or 2
     loaded = HELP.get(key, [])
@@ -389,7 +335,7 @@ async def close_all(event):
             ]
         )
     return new_
-"""
+
 
 # --------------------------------------------------------------------------------- #
 
