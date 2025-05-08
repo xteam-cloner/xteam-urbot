@@ -42,13 +42,12 @@ async def download_youtube(event, opt):
     if not url:
         return await message.edit(get_string("unspl_1"))
 
-    yt_info = get_yt_info(url)
+    yt_info = get_yt_link(url)
     if yt_info:
         title = yt_info.get("title")
         duration = yt_info.get("duration")
         view_count = yt_info.get("view_count")
         channel_name = yt_info.get("uploader")
-
         info_text = f"**Judul:** {title}\n"
         if duration:
             minutes = duration // 60
@@ -80,7 +79,7 @@ async def download_youtube(event, opt):
         await download_yt(message, url, ytd)
     except Exception as e:
          logging.error(f"Error during download: {e}")
-         await message.edit(get_string("download_error")) # Replace "download_error" with a relevant string
+         await message.edit(get_string("youtube_6")) # Replace "download_error" with a relevant string
 
 @ultroid_cmd(pattern="song(s|v) ?(.*)")
 async def download_song(event):
