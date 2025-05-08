@@ -103,7 +103,6 @@ async def inline_haandler(event):
     
 
 @in_pattern("help", owner=False)
-@callback(data="open", owner=True)
 async def inline_handler(ult):
     key = "Official"
     count = 0
@@ -298,6 +297,21 @@ async def _(e):
     )
     await e.edit(buttons=button, link_preview=False)
 
+
+@callback(data="open", owner=True)
+async def inline_handler(ult):
+    key = "Official"
+    count = 0
+    text = get_string("inline_4", key).format(
+        OWNER_NAME,
+        len(HELP.get("Official", [])),
+        len(HELP.get("Addons", [])),
+        len(key),
+    )
+    result = await ult.builder.article(
+        title="Menu Help", text=text, buttons=page_num(count, key)
+    )
+    await ult.answer([result], cache_time=0)
 
 @callback(data="close", owner=True)
 async def on_plug_in_callback_query_handler(event):
