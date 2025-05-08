@@ -103,6 +103,7 @@ async def inline_haandler(event):
     
 
 @in_pattern("help", owner=False)
+@callback(data="open", owner=True)
 async def inline_handler(ult):
     key = "Official"
     count = 0
@@ -117,6 +118,7 @@ async def inline_handler(ult):
     )
     await ult.answer([result], cache_time=0)
 
+    
 @in_pattern("pasta", owner=True)
 async def _(event):
     ok = event.text.split("-")[1]
@@ -297,10 +299,13 @@ async def _(e):
     await e.edit(buttons=button, link_preview=False)
 
 
-@callback(data="close")
-async def on_plug_in_callback_query_handler(ult):
-    await ult.delete()
-
+@callback(data="close", owner=True)
+async def on_plug_in_callback_query_handler(event):
+    await event.edit(
+        get_string("inline_5"),
+        buttons=Button.inline("🏡 Modules 🏡", data="open"),
+    )
+    
 
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
