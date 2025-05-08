@@ -14,7 +14,7 @@
    Search and download video from youtube.
 """
 
-from xteam.fns.ytdl import download_yt, get_yt_link, get_yt_info
+from xteam.fns.ytdl import download_yt, get_yt_link
 from yt_dlp import YoutubeDL
 from . import get_string, requests, ultroid_cmd
 import logging
