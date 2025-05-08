@@ -74,8 +74,9 @@ async def yt_video(e):
         file_name=title,
         duration=duration,
         supports_streaming=True,
-        caption=f'**💡 Informasi** {"video"}\n\n**🏷 Nama:** {title}\n**🧭 Durasi:** {duration}\n**👀 Dilihat:** {views}\n**📢 Channel:** {channel}\n**Upload By: {ultroid_bot.full_name}**',
+        caption=f'<blockquote>💡 Informasi {"video"}\n\n🏷 Nama: {title}\n🧭 Durasi: {duration}\n👀 Dilihat: {views}\n📢 Channel: {channel}\nUpload By: {ultroid_bot.full_name}</blockquote>',
         reply_to=e.reply_to_msg_id,
+        parse_mode="html",
     )
     await infomsg.delete()
     for files in (thumbnail, file_path):
@@ -129,8 +130,9 @@ async def yt_audio(e):
         file_name=title,
         duration=duration,
         supports_streaming=False,
-        caption=f'**💡 Informasi** {"Audio"}\n\n**🏷 Nama:** {title}\n**🧭 Durasi:** {duration}\n**👀 Dilihat:** {views}\n**📢 Channel:** {channel}\n**Upload By: {ultroid_bot.full_name}**',
+        caption=f'<blockquote>💡 Informasi {"Audio"}\n\n🏷 Nama: {title}\n🧭 Durasi: {duration}\n👀 Dilihat: {views}\n**📢 Channel: {channel}\nUpload By: {ultroid_bot.full_name}</blockquote>',
         reply_to=e.reply_to_msg_id,
+        parse_mode="html",
     )
     await infomsg.delete()
     for files in (thumbnail, file_path):
