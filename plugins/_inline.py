@@ -357,7 +357,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="close")])
+        new_.append([Button.inline("×", data="uh_Official_")])
 
     return new_
 
