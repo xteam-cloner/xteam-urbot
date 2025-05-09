@@ -317,7 +317,7 @@ async def opner(event):
 async def on_plug_in_callback_query_handler(event):
     await event.edit(
         get_string("inline_5"),
-        buttons=Button.inline("🏡 Modules 🏡", data="open"),
+        buttons=Button.inline("🏡 Modules 🏡", data="uh_Official_"),
     )
     
 def page_num(index, key):
