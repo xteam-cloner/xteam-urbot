@@ -345,7 +345,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="close"))
+    nav_buttons.append(Button.inline("×", data="uh_Official_"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
