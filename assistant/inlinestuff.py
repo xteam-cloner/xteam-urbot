@@ -185,12 +185,6 @@ async def alive(event):
     await event.answer(text, alert=True)
 
 
-@callback("close", owner=False)
-async def on_plug_in_callback_query_handler(event):
-    await event.edit(
-        get_string("inline_5"),
-        buttons=Button.inline("Oᴘᴇɴ Aɢᴀɪɴ", data="open"),
-    )
 
 @in_pattern("ofox", owner=True)
 async def _(e):
