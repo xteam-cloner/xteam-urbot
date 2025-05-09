@@ -95,11 +95,11 @@ async def inline_haandler(event):
         len(HELP.get("Addons", [])),
         len(key),
     )
-    text = f"> {text}"  # Menambahkan blockquote di awal teks
+    text = f"<blockquote> {text}</blockquote>"  # Menambahkan blockquote di awal teks
     result = await event.builder.article(
-        title="Menu Help", text=text, buttons=page_num(count, key)
+        title="Menu Help", text=text, buttons=page_num(count, key), parse_mode="html"
     )
-    await event.answer([result], cache_time=0)
+    await event.answer([result], cache_time=0, parse_mode="html")
     
 
 @in_pattern("help", owner=False)
@@ -346,7 +346,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="close"))
+    nav_buttons.append(Button.inline("×", data="uh_Official_"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -358,7 +358,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="close")])
+        new_.append([Button.inline("×", data="uh_Official_")])
 
     return new_
 
