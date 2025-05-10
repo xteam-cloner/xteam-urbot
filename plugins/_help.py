@@ -47,7 +47,7 @@ async def _help(event):
             x = get_string("help_11").format(plug)
             if plug in LIST:
                 for d in LIST[plug]:
-                    x += HNDLR + d
+                    x += "" + d
                     x += "\n"
                 x += "\n© @teamX"
                 await event.eor(x)
