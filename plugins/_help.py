@@ -61,12 +61,13 @@ async def _help(event):
         await event.delete()
 
 
-@ultroid_cmd(pattern="helpme( (.*)|$)")
-async def _helpme(ult):
+@ultroid_cmd(pattern="Help( (.*)|$)")
+async def _help(ult):
     plug = ult.pattern_match.group(1).strip()
+    chat = await ult.get_chat()
     if plug:
         try:
-            if plug in HELP.get("Official", {}):
+            if plug in HELP["Official"]:
                 output = f"**Plugin** - `{plug}`\n"
                 for i in HELP["Official"][plug]:
                     output += i
@@ -105,6 +106,7 @@ async def _helpme(ult):
                                 file = file_name
                                 break
                     if not file:
+                        # the enter command/plugin name is not found
                         text = f"`{plug}` is not a valid plugin!"
                         best_match = None
                         for _ in compare_strings:
@@ -115,7 +117,7 @@ async def _helpme(ult):
                             text += f"\nDid you mean `{best_match}`?"
                         return await ult.eor(text)
                     output = f"**Command** `{plug}` **found in plugin** - `{file}`\n"
-                    if file in HELP.get("Official", {}):
+                    if file in HELP["Official"]:
                         for i in HELP["Official"][file]:
                             output += i
                     elif HELP.get("Addons") and file in HELP["Addons"]:
@@ -130,5 +132,30 @@ async def _helpme(ult):
             LOGS.exception(er)
             await ult.eor("Error 🤔 occured.")
     else:
-        text = get_string("help_2").format(HNDLR) + "\n\n" + get_string("help_3")
-        await ult.reply(text)
+        try:
+            results = await ult.client.inline_query(asst.me.username, "ultd")
+        except BotMethodInvalidError:
+            z = []
+            for x in LIST.values():
+                z.extend(x)
+            cmd = len(z) + 10
+            if udB.get_key("MANAGER") and udB.get_key("DUAL_HNDLR") == "/":
+                _main_help_menu[2:3] = [[Button.inline("• Manager Help •", "mngbtn")]]
+            return await ult.reply(
+                get_string("inline_4").format(
+                    OWNER_NAME,
+                    len(HELP["Official"]),
+                    len(HELP["Addons"] if "Addons" in HELP else []),
+                    cmd,
+                ),
+                file=inline_pic(),
+                buttons=_main_help_menu,
+            )
+        except BotResponseTimeoutError:
+            return await ult.eor(
+                get_string("help_2").format(HNDLR),
+            )
+        except BotInlineDisabledError:
+            return await ult.eor(get_string("help_3"))
+        await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
+        await ult.delete()                                                    
