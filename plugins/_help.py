@@ -39,6 +39,29 @@ _main_help_menu = [
 
 
 @ultroid_cmd(pattern="help( (.*)|$)")
+async def _help(ayra):
+    plug = event.pattern_match.group(1).strip()
+    chat = await event.get_chat()
+    if plug:
+        try:
+            x = get_string("help_11").format(plug)
+            for d in LIST[plug]:
+                x += HNDLR + d
+                x += "\n"
+                x += "\n© @"
+                await event.eor(x)
+        except BaseException as e:
+            await event.eor(f"{e}")
+    else:
+        try:
+            results = await event.client.inline_query(asst.me.username, "help")
+        except BotInlineDisabledError:
+            return await event.eor(get_string("help_3"))
+        await results[0].click(chat.id, reply_to=event.reply_to_msg_id)
+        await event.delete()
+
+
+@ultroid_cmd(pattern="helpl( (.*)|$)")
 async def _helper(ult):
     plug = ult.pattern_match.group(1).strip()
     chat = await ult.get_chat()
