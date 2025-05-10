@@ -74,7 +74,7 @@ async def _help(event):
                     if best_match:
                         text += f"\nDid you mean {best_match}?"
                     return await event.eor(text)
-                output = f"Command {plug} found in plugin - {file}\n"
+                output = f"Command `{plug}` found in plugin - `{file}`\n"
                 if HELP.get("Official") and file in HELP["Official"]:
                     for i in HELP["Official"][file]:
                         output += i
