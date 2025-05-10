@@ -101,3 +101,61 @@ async def _help(event):
             return await event.eor(get_string("help_3"))
         await results[0].click(chat.id, reply_to=event.reply_to_msg_id)
         await event.delete()
+
+@ultroid_cmd(pattern="helpe( (.*)|$)")
+async def _help(event):
+    plug = event.pattern_match.group(1).strip()
+    chat = await event.get_chat()
+    if plug:
+        try:
+            x = get_string("help_11").format(plug)
+            if plug in LIST:
+                for d in LIST[plug]:
+                    x += HNDLR + d
+                    x += "\n"
+                x += "\n© @teamX"
+                await event.eor(x)
+            else:
+                file = None
+                compare_strings = []
+                for file_name in LIST:
+                    compare_strings.append(file_name)
+                    value = LIST[file_name]
+                    for j in value:
+                        j = cmd_regex_replace(j)
+                        compare_strings.append(j)
+                        if j.strip() == plug:
+                            file = file_name
+                            break
+                if not file:
+                    # the enter command/plugin name is not found
+                    text = f"{plug} is not a valid plugin!"
+                    best_match = None
+                    for _ in compare_strings:
+                        if plug in _ and not _.startswith("_"):
+                            best_match = _
+                            break
+                    if best_match:
+                        text += f"\nDid you mean {best_match}?"
+                    return await event.eor(text)
+                output = f"Command {plug} found in plugin - {file}\n"
+                if HELP.get("Official") and file in HELP["Official"]:
+                    for i in HELP["Official"][file]:
+                        output += i
+                elif HELP.get("Addons") and file in HELP["Addons"]:
+                    for i in HELP["Addons"][file]:
+                        output += i
+                elif HELP.get("VCBot") and file in HELP["VCBot"]:
+                    for i in HELP["VCBot"][file]:
+                        output += i
+                output += "\n© @teamX"
+                await event.eor(output)
+        except BaseException as e:
+            await event.eor(f"{e}")
+    else:
+        try:
+            results = await event.client.inline_query(asst.me.username, "help")
+        except BotInlineDisabledError:
+            return await event.eor(get_string("help_3"))
+        await results[0].click(chat.id, reply_to=event.reply_to_msg_id)
+        await event.delete()
