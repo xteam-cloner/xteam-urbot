@@ -49,6 +49,7 @@ async def _help(event):
                 x += HNDLR + d
                 x += "\n"
                 x += "\n© @"
+                await ult.eor(output)
         else:
             try:
                 x = get_string("help_11").format(plug)
