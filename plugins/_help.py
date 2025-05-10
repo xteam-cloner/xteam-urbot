@@ -50,11 +50,11 @@ async def _help(event):
                 x += "\n"
                 x += "\n© @"
         else:
-                try:
-                    x = get_string("help_11").format(plug)
-                    for d in LIST[plug]:
-                        x += HNDLR + d
-                        x += "\n"
+            try:
+                x = get_string("help_11").format(plug)
+                for d in LIST[plug]:
+                    x += HNDLR + d
+                    x += "\n"
                     x += "\n© @TeamUltroid"
                     await ult.eor(x)
                 except BaseException:
