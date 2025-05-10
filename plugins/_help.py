@@ -48,15 +48,14 @@ async def _help(event):
             for d in LIST[plug]:
                 x += HNDLR + d
                 x += "\n"
-                x += "\n© @"
-                await event.eor(output)
+                x += "\n© @teamX"
         except KeyError:  # It's good practice to catch specific exceptions
             try:
                 x = get_string("help_11").format(plug)
                 for d in LIST[plug]:
                     x += HNDLR + d
                     x += "\n"
-                    x += "\n© @TeamUltroid"
+                    x += "\n© @teamX"
                     await event.eor(x)
             except BaseException:
                 file = None
@@ -91,7 +90,7 @@ async def _help(event):
                 elif HELP.get("VCBot") and file in HELP["VCBot"]:
                     for i in HELP["VCBot"][file]:
                         output += i
-                output += "\n© @TeamUltroid"
+                output += "\n© @teamX"
                 await event.eor(output)
         except BaseException as e:
             await event.eor(f"{e}")
