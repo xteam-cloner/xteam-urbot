@@ -72,8 +72,8 @@ async def _help(event):
                 x += HNDLR + d
                 x += "\n"
                 x += "\n© @"
-                
-                except BaseException:
+        
+        except BaseException:
                     file = None
                     compare_strings = []
                     for file_name in LIST:
