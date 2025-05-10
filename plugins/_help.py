@@ -95,7 +95,7 @@ async def _help(event):
                                 break
                         if best_match:
                             text += f"\nDid you mean `{best_match}`?"
-                        return await ult.eor(text)
+                        return await event.eor(text)
                     output = f"**Command** `{plug}` **found in plugin** - `{file}`\n"
                     if file in HELP["Official"]:
                         for i in HELP["Official"][file]:
@@ -107,13 +107,13 @@ async def _help(event):
                         for i in HELP["VCBot"][file]:
                             output += i
                     output += "\n© @TeamUltroid"
-                    await ult.eor(output)
+                    await event.eor(output)
         except BaseException as er:
             LOGS.exception(er)
-            await ult.eor("Error 🤔 occured.")
+            await event.eor("Error 🤔 occured.")
     else:
         try:
-            results = await ult.client.inline_query(asst.me.username, "ultd")
+            results = await event.client.inline_query(asst.me.username, "help")
         except BotMethodInvalidError:
             z = []
             for x in LIST.values():
@@ -121,7 +121,7 @@ async def _help(event):
             cmd = len(z) + 10
             if udB.get_key("MANAGER") and udB.get_key("DUAL_HNDLR") == "/":
                 _main_help_menu[2:3] = [[Button.inline("• Manager Help •", "mngbtn")]]
-            return await ult.reply(
+            return await event.reply(
                 get_string("inline_4").format(
                     OWNER_NAME,
                     len(HELP["Official"]),
@@ -132,10 +132,10 @@ async def _help(event):
                 buttons=_main_help_menu,
             )
         except BotResponseTimeoutError:
-            return await ult.eor(
+            return await event.eor(
                 get_string("help_2").format(HNDLR),
             )
         except BotInlineDisabledError:
-            return await ult.eor(get_string("help_3"))
-        await results[0].click(chat.id, reply_to=ult.reply_to_msg_id, hide_via=True)
-        await ult.delete()
+            return await event.eor(get_string("help_3"))
+        await results[0].click(chat.id, reply_to=event.reply_to_msg_id, hide_via=True)
+        await event.delete()
