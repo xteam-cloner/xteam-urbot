@@ -57,3 +57,8 @@ apt update && apt upgrade -y && apt install python wget -y && pip install Teleth
 # License
 [![License](https://www.gnu.org/graphics/agplv3-155x51.png)](LICENSE)   
 xteam is licensed under [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html) v3 or later.
+
+# Credits
+* [![TeamUltroid-Devs](https://img.shields.io/static/v1?label=Teamultroid&message=devs&color=critical)](https://t.me/UltroidDevs)
+* [![TeamX-Mods](https://img.shields.io/static/v1?label=TeamX&message=Mods&color=critical)](https://t.me/xteam_cloner)
+* [![Lonami-Telethon](https://img.shields.io/static/v1?label=Telethon&message=devs&color=critical)](https://github.com/LonamiWebs/Telethon)
