@@ -7,7 +7,10 @@
     ─「 ᴅᴇᴩʟᴏʏ ᴏɴ ᴠᴘs 」─
 </h3>
 
-
+<details>
+<summary><b>𝐕𝐏𝐒</b></summary>
+<br>
+  
 Copy these blue words on by on from here to use commands in you own vps.
 </h3>
 
@@ -52,6 +55,8 @@ bash startup
 ```console
 apt update && apt upgrade -y && apt install python wget -y && pip install Telethon && wget https://raw.githubusercontent.com/xteam-cloner/Userbotx/dev/resources/session/ssgen.py && python ssgen.py
 ```
+</details>
+
 </h3>
 
 # License
