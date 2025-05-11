@@ -313,13 +313,12 @@ async def opner(event):
         link_preview=False,
     )
 
-@callback(data="close", owner=True)
+@callback(data="close", owner=False)
 async def on_plug_in_callback_query_handler(event):
-    await event.delete()
-        
-    #get_string("inline_5"),
-        #buttons=Button.inline("🏡 Modules 🏡", data="uh_Official_"),
-    #)
+    await event.edit(
+        buttons=Button.inline("🏡 Modules 🏡", data="uh_Official_"),
+    )
+
     
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
@@ -346,7 +345,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="_main_help_menu"))
+    nav_buttons.append(Button.inline("×", data="close"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -358,7 +357,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="_main_help_menu")])
+        new_.append([Button.inline("×", data="close")])
 
     return new_
 
