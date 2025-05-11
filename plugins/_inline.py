@@ -313,8 +313,8 @@ async def opner(event):
         link_preview=False,
     )
 
-@callback(data="close", owner=False)
-async def on_plug_in_callback_query_handler(event):
+@callback(data="tutupbotol", owner=False)
+async def tutupbotol(event):
     await event.edit(
         buttons=Button.inline("🏡 Modules 🏡", data="uh_Official_"),
     )
@@ -345,7 +345,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="close"))
+    nav_buttons.append(Button.inline("×", data="tutupbotol"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -357,7 +357,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="close")])
+        new_.append([Button.inline("×", data="tutupbotol")])
 
     return new_
 
