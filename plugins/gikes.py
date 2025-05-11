@@ -119,15 +119,6 @@ async def ungblacker(event):
     await gblacker(event, "remove")
 
 
-@ultroid_cmd(pattern="blchat")
-async def chatbl(event):
-    id = event.chat_id
-    if xx := list_bl(id):
-        sd = "**• Daftar Blacklist Gcast**\n\n"
-        return await event.eor(sd + xx)
-    await event.eor("**Belum ada daftar**")
-
-
 async def gblacker(event, type_):
     args = event.text.split()
     if len(args) > 2:
