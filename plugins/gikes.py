@@ -25,7 +25,8 @@
 import asyncio
 
 from xteam.dB import DEVLIST as DEVS
-from xteam.dB.gcast_blacklist_db import add_gblacklist, list_bl, rem_gblacklist
+from xteam.dB.gcast_blacklist_db import add_gblacklist, rem_gblacklist
+from xteam.dB.blacklist_chat_db import add_black_chat
 from telethon.errors.rpcerrorlist import FloodWaitError
 
 from . import *
