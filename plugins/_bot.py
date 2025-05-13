@@ -113,13 +113,21 @@ async def restart(e):
 
 @ultroid_cmd(
     pattern="Restart$",
-    fullsudo=False,
+    fullsudo=True,
 )
-async def restart(e):
-    await e.eor("`Processing...`")
-    await bash("git pull")
-    await e.eor("Done.")
-    os.execl(sys.executable, sys.executable, "-m", "xteam")
+async def restartbt(ult):
+    ok = await ult.eor(get_string("bot_5"))
+    call_back()
+    who = "bot" if ult.client._bot else "user"
+    udB.set_key("_RESTART", f"{who}_{ult.chat_id}_{ok.id}")
+    if heroku_api:
+        return await restart(ok)
+    await bash("git pull && pip3 install -r requirements.txt")
+    if len(sys.argv) > 1:
+        os.execl(sys.executable, sys.executable, "main.py")
+    else:
+        os.execl(sys.executable, sys.executable, "-m", "xteam")
+        
 
 @ultroid_cmd(
     pattern="shutdown$",
