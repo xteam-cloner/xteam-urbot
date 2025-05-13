@@ -96,33 +96,33 @@ def bandwidth():
 
 # Text template for displaying server info
 INFO_TEMPLATE = (
-    "<b><u>👾 Server Info:</u>\n\n"
-    "<u>🗄 Used resources:</u>\n"
-    "    CPU: {} Cores ({}%)\n"
+    "<b><u><blockquote>👾 Server Info:</blockquote></u>\n\n"
+    "<u><blockquote>🗄 Used resources:</blockquote></u>\n"
+    "<blockquote>    CPU: {} Cores ({}%)\n"
     "    RAM: {} / {} ({}%)\n"
-    "    DISK: {} / {} ({}%)\n\n"
-    "<u>🌐 Network Stats:</u>\n"
-    "    Upload: {}\n"
+    "    DISK: {} / {} ({}%)\n\n</blockquote>"
+    "<u><blockquote>🌐 Network Stats:</blockquote></u>\n"
+    "<blockquote>    Upload: {}\n"
     "    Download: {}\n"
-    "    Total: {}\n\n"
-    "<u>🧾 Dist info:</u>\n"
-    "    Kernel: {}\n"
+    "    Total: {}\n\n</blockquote>"
+    "<u><blockquote>🧾 Dist info:</blockquote></u>\n"
+    "<blockquote>    Kernel: {}\n"
     "    Arch: {}\n"
-    "    OS: {}\n\n"
-    "<u>📦 Python libs:</u>\n"
-    "    Telethon: {}\n"
+    "    OS: {}\n\n</blockquote>"
+    "<u><blockquote>📦 Python libs:</blockquote></u>\n"
+    "<blockquote>    Telethon: {}\n"
     "    Aiohttp: {}\n"
     "    GitPython: {}\n"
-    "    xteam: {}\n"
+    "    Xteam: {}\n"
     "    Python: {}\n"
-    "    Pip: {}</b>"
+    "    Pip: {}</b></blockquote>"
 )
 
 
 @ultroid_cmd(pattern="sinfo$")
 async def serverinfo_cmd(message):
     """server information."""
-    await message.edit("<b><i>🔄 Getting server info...</i></b>", parse_mode="html")
+    await message.edit("<b><i><blockquote>🔄 Getting server info...</i></b></blockquote>", parse_mode="html")
 
     (
         cpu_cores,
