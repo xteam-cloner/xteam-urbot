@@ -104,15 +104,6 @@ heroku_api = Var.HEROKU_API
 
 @ultroid_cmd(
     pattern="restart$",
-    fullsudo=False,
-)
-async def restart(e):
-    await e.eor("`Processing...`")
-    await bash("git pull && pip3 install -r requirements.txt")
-    os.execl(sys.executable, sys.executable, "-m", "xteam")
-
-@ultroid_cmd(
-    pattern="Restart$",
     fullsudo=True,
 )
 async def restark(ult):
