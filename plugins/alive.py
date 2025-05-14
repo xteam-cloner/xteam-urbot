@@ -114,13 +114,14 @@ async def alive(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
-    await pro.edit(f"<blockquote>⋆˚࿔ ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ 𝜗𝜚˚⋆\n\n" \
-                     f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n" \
-                     f"❍ ʟɪʙʀᴀʀʏ : {lver}\n" \
-                     f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n" \
-                     f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n" \
-                     f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n" \
-                     f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n</blockquote>",
+    await pro.edit(f"<blockquote>⋆˚࿔ {asst.me.username} ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ 𝜗𝜚˚⋆\n\n" \
+                     f"✵ Owner : {OWNER_NAME}\n" \
+                     f"✵ Dc id : {ultroid_bot.dc_id}
+                     f"✵ Library : {lver}\n" \
+                     f"✵ Uptime : {uptime}\n" \
+                     f"✵ Telethon : {tver}\n" \
+                     f"✵ Pyrogram :  {pver}\n" \
+                     f"✵ Python : {pyver()}\n</blockquote>",
                    parse_mode="html",
                   )
 
