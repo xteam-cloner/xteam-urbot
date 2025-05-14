@@ -116,7 +116,7 @@ async def alive(event):
     message_text = format_message_text(uptime)
     await pro.edit(f"<blockquote>⋆˚࿔ {asst.me.username} ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ 𝜗𝜚˚⋆\n\n" \
                      f"✵ Owner : {OWNER_NAME}\n" \
-                     f"✵ Dc id : {ultroid_bot.dc_id}
+                     f"✵ Dc id : {ultroid_bot.dc_id}\n \
                      f"✵ Library : {lver}\n" \
                      f"✵ Uptime : {uptime}\n" \
                      f"✵ Telethon : {tver}\n" \
