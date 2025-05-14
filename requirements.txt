@@ -1,5 +1,5 @@
 # Important Requirements here.
-telethon==1.39.0
+telethon==1.40.0
 aiofiles==24.1.0
 aiohttp==3.10.3
 asyncio==3.4.3
