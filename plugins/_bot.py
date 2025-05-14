@@ -115,9 +115,8 @@ async def restart(e):
     pattern="Restart$",
     fullsudo=True,
 )
-async def restartbt(ult):
+async def restark(ult):
     ok = await ult.eor(get_string("bot_5"))
-    call_back()
     who = "bot" if ult.client._bot else "user"
     udB.set_key("_RESTART", f"{who}_{ult.chat_id}_{ok.id}")
     if heroku_api:
@@ -128,6 +127,22 @@ async def restartbt(ult):
     else:
         os.execl(sys.executable, sys.executable, "-m", "xteam")
         
+@ultroid_cmd(
+    pattern="gs$",
+    fullsudo=False,
+)
+async def restart(e):
+    try:
+        await e.eor("`Processing...`")
+        process = await bash("git pull && pip3 install -r requirements.txt")
+        if process == 0:  # Check if the bash command was successful (exit code 0)
+            await e.eor("`Restarting Success...`")
+            os.execl(sys.executable, sys.executable, "-m", "xteam")
+        else:
+            await e.eor("`Restarting Failed!`\n`Check logs for more info.`")
+    except Exception as err:
+        await e.eor(f"`An error occurred during restart!`\n`{err}`")
+
 
 @ultroid_cmd(
     pattern="shutdown$",
