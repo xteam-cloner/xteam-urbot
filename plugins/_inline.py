@@ -313,21 +313,16 @@ async def opner(event):
         link_preview=False,
     )
 
-@callback(data="tutupbool", owner=False)
+@callback(data="tutupbotol", owner=False)
 async def tutupbotol(event):
-    await event.edit(
-        buttons=Button.inline("🏡 Modules 🏡", data="uh_Official_"),
-    )
-
-@callback(data="tutupbotol")
-async def botoltutup(e):
-    try:
-        await e.answer("Deleted.")
-        await e.delete()
-    except BaseException:
-        await ultroid_bot.delete_messages(e.chat_id, e.id)
-
+    await event.delete()
     
+    
+    """await event.edit(
+        buttons=Button.inline("🏡 Modules 🏡", data="uh_Official_"),
+    )"""
+
+
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
     cols = udB.get_key("HELP_COLUMNS") or 2
