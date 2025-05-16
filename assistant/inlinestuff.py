@@ -98,7 +98,7 @@ apis = [
 
 
 @in_pattern(owner=False, func=lambda x: not x.text)
-async def help(e):
+async def home(e):
     TLINK = inline_pic() or "https://files.catbox.moe/k9ljse.jpg"
     MSG = "xᴛᴇᴀᴍ • ᴜʀʙᴏᴛ"
     #message_text = format_message_text(MSG)
