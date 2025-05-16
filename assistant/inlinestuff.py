@@ -1,5 +1,5 @@
 # Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
+# Copyright (C) 2021-2025 TeamUltroid
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -7,69 +7,28 @@
 
 import base64
 import inspect
-import asyncio
-import os
-import sys
-import time
 from datetime import datetime
 from html import unescape
 from random import choice
 from re import compile as re_compile
-from platform import python_version as pyver
-from telethon import __version__
-from xteam.version import __version__ as UltVer
+
 from bs4 import BeautifulSoup as bs
 from telethon import Button
 from telethon.tl.alltlobjects import LAYER, tlobjects
 from telethon.tl.types import DocumentAttributeAudio as Audio
 from telethon.tl.types import InputWebDocument as wb
-from secrets import choice
-from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
-from telethon.tl.types import InputMessagesFilterPhotos
-from xteam.fns.misc import google_search
-from xteam.fns.tools import (
+
+from pyUltroid.fns.misc import google_search
+from pyUltroid.fns.tools import (
     _webupload_cache,
     async_searcher,
     get_ofox,
     saavn_search,
     webuploader,
 )
-from pyrogram.types import Message
+
 from . import *
 from . import _ult_cache
-from plugins._inline import page_num
-from plugins import (
-    ATRA_COL,
-    LOGS,
-    OWNER_NAME,
-    ULTROID_IMAGES,
-    ALIVE_TEXT,
-    ALIVE_NAME,
-    stickers,
-    Button,
-    Carbon,
-    Telegraph,
-    Var,
-    allcmds,
-    asst,
-    bash,
-    call_back,
-    callback,
-    def_logs,
-    eor,
-    get_string,
-    heroku_logs,
-    in_pattern,
-    inline_pic,
-    restart,
-    shutdown,
-    start_time,
-    time_formatter,
-    udB,
-    ultroid_cmd,
-    ultroid_version,
-    updater,
-)
 
 SUP_BUTTONS = [
     [
@@ -78,112 +37,15 @@ SUP_BUTTONS = [
     ],
 ]
 
-PING_ALIVE = [
-    [
-        Button.inline("🏠 Main menu 🏠", data="open"),
-    ],
-]
-
-
 ofox = "https://graph.org/file/231f0049fcd722824f13b.jpg"
 gugirl = "https://graph.org/file/0df54ae4541abca96aa11.jpg"
-ultpic = "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg"
-xteam = "https://telegra.ph/file/8d7b534e34e13316a7dd2.jpg"
+ultpic = "https://graph.org/file/4136aa1650bc9d4109cc5.jpg"
+
 apis = [
     "QUl6YVN5QXlEQnNZM1dSdEI1WVBDNmFCX3c4SkF5NlpkWE5jNkZV",
     "QUl6YVN5QkYwenhMbFlsUE1wOXh3TVFxVktDUVJxOERnZHJMWHNn",
     "QUl6YVN5RGRPS253blB3VklRX2xiSDVzWUU0Rm9YakFLSVFWMERR",
 ]
-
-
-
-@in_pattern(owner=False, func=lambda x: not x.text)
-async def home(e):
-    TLINK = inline_pic() or "https://files.catbox.moe/k9ljse.jpg"
-    MSG = "xᴛᴇᴀᴍ • ᴜʀʙᴏᴛ"
-    #message_text = format_message_text(MSG)
-    WEB0 = wb(
-        "https://files.catbox.moe/k9ljse.jpg", 0, "image/jpg", []
-    )
-    res = [
-        await e.builder.article(
-            type="photo",
-            text=MSG,
-            include_media=True,
-            buttons=PING_ALIVE,
-            title="About",
-            description=choice(ALIVE_TEXT),
-            url=TLINK,
-            thumb=WEB0,
-            content=wb(TLINK, 0, "image/jpg", []),
-            parse_mode="html",
-        )
-    ]
-    await e.answer(
-        res,
-        private=True,
-        cache_time=300,
-        switch_pm="xteam-userbot",
-        switch_pm_param="start",
-    )
-
-#@in_pattern(owner=False, func=lambda x: not x.text)
-@in_pattern("help", owner=True)
-async def help(e):
-    TLINK = inline_pic() or "https://files.catbox.moe/k9ljse.jpg"
-    MSG = "<blockquote>🔥 xteam Urbot 🔥</blockquote>"
-    #message_text = format_message_text(MSG)
-    WEB0 = wb(
-        "https://files.catbox.moe/k9ljse.jpg", 0, "image/jpg", []
-    )
-    res = [
-        await e.builder.article(
-            type="photo",
-            text=MSG,
-            include_media=True,
-            buttons=page_num,
-            title="About",
-            description=choice(ALIVE_TEXT),
-            url=TLINK,
-            thumb=WEB0,
-            content=wb(TLINK, 0, "image/jpg", []),
-            parse_mode="html",
-        )
-    ]
-    await e.answer(
-        res,
-        private=True,
-        cache_time=300,
-        switch_pm="xteam-userbot",
-        switch_pm_param="start",
-    )
-    
-
-@callback("ping", owner=False)
-async def _(event):
-    start = datetime.now()
-    end = datetime.now()
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    ms = (end - start).microseconds
-    pin = f"🎯 Pong = {ms} ms\n⏰ Uptime = {uptime}"
-    await event.answer(pin, cache_time=0, alert=True)
-
-
-
-alive_txt = """
-━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
-  ❍ ᴜꜱᴇʀʙᴏᴛ - {}
-  ❍ ᴅᴀᴛᴀʙᴀꜱᴇ - {}
-  ❍ ᴛᴇʟᴇᴛʜᴏɴ - {}  
-━━━━✿ ᴜꜱᴇʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✿━━━
-"""
-
-
-@callback("alive")
-async def alive(event):
-    text = alive_txt.format(ultroid_version, UltVer, __version__)
-    await event.answer(text, alert=True)
-
 
 
 @in_pattern("ofox", owner=True)
