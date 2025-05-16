@@ -26,14 +26,16 @@ async def get_link_group(event):
         await event.reply("Rᴇᴘʟɪᴇᴅ ᴍᴇssᴀɢᴇ ᴅᴏᴇs ɴᴏᴛ ᴄᴏɴᴛᴀɪɴ ᴀ ᴍᴇᴅɪᴀ ғɪʟᴇ.")
         return
 
-    file_size = 0
+        file_size = 0
     if replied_msg.photo:
-        file_size = replied_msg.photo.size
+        # 'sizes' adalah list, kita ambil ukuran terbesar dari list tersebut
+        if replied_msg.photo.sizes:
+            file_size = max(s.size for s in replied_msg.photo.sizes)
     elif replied_msg.video:
         file_size = replied_msg.video.size
     elif replied_msg.document:
         file_size = replied_msg.document.size
-
+        
     if file_size > 200 * 1024 * 1024:
         await event.reply("Pʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴍᴇᴅɪᴀ ғɪʟᴇ ᴜɴᴅᴇʀ 200MB.")
         return
@@ -98,14 +100,16 @@ async def get_link_group_alt(event):
         await event.reply("Rᴇᴘʟɪᴇᴅ ᴍᴇssᴀɢᴇ ᴅᴏᴇs ɴᴏᴛ ᴄᴏɴᴛᴀɪɴ ᴀ ᴍᴇᴅɪᴀ ғɪʟᴇ.")
         return
 
-    file_size = 0
+        file_size = 0
     if replied_msg.photo:
-        file_size = replied_msg.photo.size
+        # 'sizes' adalah list, kita ambil ukuran terbesar dari list tersebut
+        if replied_msg.photo.sizes:
+            file_size = max(s.size for s in replied_msg.photo.sizes)
     elif replied_msg.video:
         file_size = replied_msg.video.size
     elif replied_msg.document:
         file_size = replied_msg.document.size
-
+        
     if file_size > 200 * 1024 * 1024:
         await event.reply("Pʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴍᴇᴅɪᴀ ғɪʟᴇ ᴜɴᴅᴇʀ 200MB.")
         return
