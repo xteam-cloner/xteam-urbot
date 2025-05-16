@@ -18,14 +18,14 @@ from telethon.errors.rpcerrorlist import FilePartLengthInvalidError, MediaEmptyE
 from telethon.tl.types import DocumentAttributeAudio, DocumentAttributeVideo
 from telethon.tl.types import InputWebDocument as wb
 
-from pyUltroid.fns.helper import (
+from xteam.fns.helper import (
     bash,
     fast_download,
     humanbytes,
     numerize,
     time_formatter,
 )
-from pyUltroid.fns.ytdl import dler, get_buttons, get_formats
+from xteam.fns.ytdl import dler, get_buttons, get_formats
 
 from . import LOGS, asst, callback, in_pattern, udB
 
