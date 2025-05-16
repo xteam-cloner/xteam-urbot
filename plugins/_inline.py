@@ -136,7 +136,7 @@ async def _(event):
     await event.answer([result])
 
 
-@callback("ownr", owner=True)
+@callback("ownr", owner=False)
 async def setting(event):
     z = []
     for x in LIST.values():
@@ -341,15 +341,15 @@ def page_num(index, key):
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
-                "<",
+                "◀️",
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="tutupbotol"))
+    nav_buttons.append(Button.inline("🏡", data="ownr"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
-                ">",
+                "▶️",
                 data=f"uh_{key}_{index+1}",
             )
         )
@@ -357,7 +357,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="tutupbotol")])
+        new_.append([Button.inline("🏡", data="ownr")])
 
     return new_
 
