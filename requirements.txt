@@ -18,6 +18,7 @@ youtube-dl
 youtube-search==2.1.0
 pyrogram
 ffmpeg
+dateutil
 deep-translator
 speedtest-cli
 python-telegram-bot
