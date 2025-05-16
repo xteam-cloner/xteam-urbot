@@ -159,7 +159,7 @@ async def setting(event):
                 Button.inline("•Stats•", data="alive"),
                 Button.inline("•Uᴘᴅᴀᴛᴇ•", data="doupdate"),
             ],
-            [Button.inline("« Bᴀᴄᴋ", data="open")],
+            [Button.inline("🏡 Modules 🏡", data="uh_Official_")],
         ],
     )
 
@@ -348,7 +348,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="tutupbotol"))
+    nav_buttons.append(Button.inline("×", data="ownr"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -360,7 +360,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="tutupbotol")])
+        new_.append([Button.inline("×", data="ownr")])
 
     return new_
 
