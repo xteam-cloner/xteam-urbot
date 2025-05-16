@@ -30,7 +30,7 @@ async def get_link_group(event):
     if replied_msg.photo:
         # 'sizes' adalah list, kita ambil ukuran terbesar dari list tersebut
         if replied_msg.photo.sizes:
-            file_size = max(s.size for s in replied_msg.photo.sizes)
+            file_size = max(s.size for s in replied_msg.photo.sizes if hasattr(s, 'size'))
     elif replied_msg.video:
         file_size = replied_msg.video.size
     elif replied_msg.document:
@@ -104,7 +104,7 @@ async def get_link_group_alt(event):
     if replied_msg.photo:
         # 'sizes' adalah list, kita ambil ukuran terbesar dari list tersebut
         if replied_msg.photo.sizes:
-            file_size = max(s.size for s in replied_msg.photo.sizes)
+            file_size = max(s.size for s in replied_msg.photo.sizes if hasattr(s, 'size'))
     elif replied_msg.video:
         file_size = replied_msg.video.size
     elif replied_msg.document:
