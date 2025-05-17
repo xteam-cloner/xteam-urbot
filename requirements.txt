@@ -45,7 +45,7 @@ pytz
 qrcode
 requests
 tabulate
-telegraph
+telegraph==1.4.1
 tgcrypto
 youtube-search-python
 yt-dlp
