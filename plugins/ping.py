@@ -13,6 +13,8 @@ import asyncio
 import os
 import sys
 import time
+import asyncio
+from telethon.errors import FloodWaitError  # Asumsi kamu menggunakan Telethon
 import pyrogram
 from telethon import events, TelegramClient
 from telethon.tl.functions import PingRequest
@@ -183,3 +185,42 @@ async def on_plug_in_callback_query_handler(event):
         get_string("inline_5"),
         buttons=Button.inline("OPEN", data="open"),
     )
+
+
+async def detect_flood_wait(module_name, func, *args, **kwargs):
+    """
+    Mendeteksi apakah sebuah fungsi menyebabkan FloodWaitError.
+
+    Args:
+        module_name (str): Nama modul atau fungsi yang dipanggil.
+        func (callable): Fungsi yang akan dijalankan.
+        *args: Argumen posisi untuk fungsi.
+        **kwargs: Argumen kata kunci untuk fungsi.
+
+    Returns:
+        Tuple[Any, Optional[int]]: Hasil dari fungsi dan durasi flood wait (jika terjadi), atau (None, None).
+    """
+    try:
+        result = await func(*args, **kwargs)
+        return result, None
+    except FloodWaitError as e:
+        print(f"Terdeteksi Flood Wait pada modul '{module_name}' selama {e.seconds} detik.")
+        return None, e.seconds
+    except Exception as e:
+        print(f"Terjadi error lain pada modul '{module_name}': {e}")
+        return None, None
+
+@xteam_cmd(pattern="Ping$", chats=[], type=["official", "assistant"])
+async def _(event):
+    start = time.time()
+    ping_result, flood_wait_time = await detect_flood_wait("Balas Pesan (Ping)", event.reply, "Ping")
+    end = round((time.time() - start) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 1000)
+
+    message = f"<blockquote>Pong !! {end}ms\nUptime - {uptime}</blockquote>"
+    if flood_wait_time:
+        message += f"\n\n⚠️ Terdeteksi Flood Wait selama {flood_wait_time} detik saat membalas pesan."
+
+    await event.edit(message, parse_mode="html")
+
+# Pastikan dekorator @xteam_cmd dan definisi fungsi _ berada dalam scope yang benar.
