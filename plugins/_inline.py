@@ -85,22 +85,6 @@ async def inline_alive(o):
         switch_pm_param="start",
     )
 
-@in_pattern("helpme", owner=False)
-async def inline_haandler(event):
-    key = "Official"
-    count = 0
-    text = get_string("inline_4", key).format(
-        OWNER_NAME,
-        len(HELP.get("Official", [])),
-        len(HELP.get("Addons", [])),
-        len(key),
-    )
-    text = f"<blockquote> {text}</blockquote>"  # Menambahkan blockquote di awal teks
-    result = await event.builder.article(
-        title="Menu Help", text=text, buttons=page_num(count, key), parse_mode="html"
-    )
-    await event.answer([result], cache_time=0, parse_mode="html")
-    
 
 @in_pattern("help", owner=False)
 async def inline_handler(ult):
@@ -136,7 +120,7 @@ async def _(event):
     await event.answer([result])
 
 
-@callback("ownr", owner=True)
+@callback("ownr", owner=False)
 async def setting(event):
     z = []
     for x in LIST.values():
@@ -166,7 +150,7 @@ async def setting(event):
 
 _strings = {"Official": helps, "Addons": zhelps, "VCBot": get_string("inline_6")}
 
-@callback(re.compile("uh_(.*)"), owner=True)
+@callback(re.compile("uh_(.*)"), owner=False)
 async def help_func(ult):
     key, count = ult.data_match.group(1).decode("utf-8").split("_")
     if key == "VCBot" and HELP.get("VCBot") is None:
@@ -180,7 +164,7 @@ async def help_func(ult):
     await ult.edit(text, buttons=page_num(count, key), link_preview=False)
 
 
-@callback(re.compile("uplugin_(.*)"), owner=True)
+@callback(re.compile("uplugin_(.*)"), owner=False)
 async def uptd_plugin(ult):
     key, file = ult.data_match.group(1).decode("utf-8").split("_")
     index = None
@@ -297,21 +281,7 @@ async def _(e):
     )
     await e.edit(buttons=button, link_preview=False)
 
-@callback(data="open", owner=True)
-async def opner(event):
-    z = []
-    for x in LIST.values():
-        z.extend(x)
-    await event.edit(
-        get_string("inline_4").format(
-            OWNER_NAME,
-            len(HELP.get("Official", [])),
-            len(HELP.get("Addons", [])),
-            len(z),
-        ),
-        buttons=_main_help_menu,
-        link_preview=False,
-    )
+
 
 @callback(data="tutupbotol", owner=False)
 async def tutupbotol(event):
