@@ -40,14 +40,14 @@ async def gcast(event):
         msg = await event.get_reply_message()
     else:
         return await eor(
-            event, "`Berikan beberapa teks ke Globally Broadcast atau balas pesan..`"
+            event, "`Provide some text to Globally Broadcast or reply to a message..`"
         )
-    kk = await event.eor("`Sebentar Kalo Limit Jangan Salahin Kynan Ya...`")
+    kk = await event.eor("`Wait a minute, don't blame me if you reach the limit...`")
     er = 0
     done = 0
     err = ""
     chat_blacklist = udB.get_key("GBLACKLISTS") or []
-    chat_blacklist.append(-1001608847572)
+    chat_blacklist.append(-1002385138723)
     udB.set_key("GBLACKLISTS", chat_blacklist)
     async for x in event.client.iter_dialogs():
         if x.is_group:
@@ -69,7 +69,7 @@ async def gcast(event):
                     err += f"• {str(h)}" + "\n"
                     er += 1
     await kk.edit(
-        f"**Pesan Broadcast Berhasil Terkirim Ke : `{done}` Grup.\nDan Gagal Terkirim Ke : `{er}` Grup.**"
+        f"**Broadcast Message Successfully Sent To : `{done}` Grup.\nAnd Failed to Send To : `{er}` Grup.**"
     )
 
 
