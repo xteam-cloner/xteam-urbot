@@ -69,16 +69,16 @@ async def mention_user(user_id):
 async def _(event):
     start = time.time()
     x = await event.edit("ping")
-    end = round((time.time() - start) * 1000)  # Corrected to milliseconds
-    uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
+    end = round((time.time() - start) * 100)  # Corrected to milliseconds
+    uptime = time_formatter((time.time() - start_time) * 100)  # Corrected to milliseconds
     await x.edit(f"Pong !! {end}ms\nUptime - {uptime}")
 
 @xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
     x = await event.reply("Ping")
-    end = round((time.time() - start) * 1000)  # Corrected to milliseconds
-    uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
+    end = round((time.time() - start) * 100)  # Corrected to milliseconds
+    uptime = time_formatter((time.time() - start_time) * 100)  # Corrected to milliseconds
     await x.edit(f"<blockquote>Pong !! {end}ms\nUptime - {uptime}</blockquote>", parse_mode="html")
 
 
@@ -98,8 +98,8 @@ async def wping(e):
 
         start = time.time()
         x = await e.respond("Pong!")  # Use respond instead of eor for initial message
-        end = round((time.time() - start) * 1000)  # Corrected to milliseconds
-        uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
+        end = round((time.time() - start) * 100)  # Corrected to milliseconds
+        uptime = time_formatter((time.time() - start_time) * 100)  # Corrected to milliseconds
 
         await e.client.send_file(  # send_file is used for sending files with caption and buttons.
             e.chat.id,
@@ -154,8 +154,8 @@ async def detect_flood_wait(module_name, func, *args, **kwargs):
 async def _(event):
     start = time.time()
     ping_result, flood_wait_time = await detect_flood_wait("Balas Pesan (Ping)", event.reply, "Ping")
-    end = round((time.time() - start) * 1000)  # Corrected to milliseconds
-    uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
+    end = round((time.time() - start) * 100)  # Corrected to milliseconds
+    uptime = time_formatter((time.time() - start_time) * 100)  # Corrected to milliseconds
 
     message = f"<blockquote>Pong !! {end}ms\nUptime - {uptime}</blockquote>"
     if flood_wait_time:
