@@ -98,7 +98,7 @@ async def wping(e):
             return
 
         start = time.time()
-        x = await e.respond("Pong!")  # Use respond instead of eor for initial message
+        x = await e.eor("Pong!")  # Use respond instead of eor for initial message
         end = round((time.time() - start) * 100)  # Corrected to milliseconds
         uptime = time_formatter((time.time() - start_time) * 100)  # Corrected to milliseconds
 
