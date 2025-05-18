@@ -98,41 +98,13 @@ desahcewe = [
         )
     ]
 """
-"""@xteam_cmd(pattern="Cping")
-async def wping(e):
-    asupannya = [
-        asupan
-        async for asupan in e.client.iter_messages(
-            "@xcryasupan", filter=InputMessagesFilterVideo
-        )
-    ]
-    start = time.time()
-    x = await e.eor("Pong!")
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    #await asyncio.sleep(1)
-    try:
-       await asst.send_message(
-    e.chat.id,
-    f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner : `{inline_mention(ultroid_bot.me)}`</blockquote>",
-           file=choice(asupannya),
-           buttons=[
-               [
-                   Button.inline("• x🥰x •", data="close")
-               ]
-           ],
-           parse_mode="html",
-       )
-   
-except Exception as e:
-      await x.edit(f"**Ping Error:** {e}")
-"""
+
 @xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
     x = await event.reply("Ping")
-    end = round((time.time() - start) * 10)
-    uptime = time_formatter((time.time() - start_time) * 10)
+    end = round((time.time() - start) * 100000)
+    uptime = time_formatter((time.time() - start_time) * 100000)
     await x.edit(f"<blockquote>Pong !! {end}ms\nUptime - {uptime}</blockquote>", parse_mode="html")
     
 import time
@@ -160,8 +132,8 @@ async def wping(e):
 
         start = time.time()
         x = await e.respond("Pong!")  # Use respond instead of eor for initial message
-        end = round((time.time() - start) * 10)
-        uptime = time_formatter((time.time() - start_time) * 10)
+        end = round((time.time() - start) * 100000)
+        uptime = time_formatter((time.time() - start_time) * 100000)
 
         await e.client.send_file( # send_file is used for sending files with caption and buttons.
             e.chat.id,
@@ -214,8 +186,8 @@ async def detect_flood_wait(module_name, func, *args, **kwargs):
 async def _(event):
     start = time.time()
     ping_result, flood_wait_time = await detect_flood_wait("Balas Pesan (Ping)", event.reply, "Ping")
-    end = round((time.time() - start) * 10)
-    uptime = time_formatter((time.time() - start_time) * 10)
+    end = round((time.time() - start) * 100000)
+    uptime = time_formatter((time.time() - start_time) * 100000)
 
     message = f"<blockquote>Pong !! {end}ms\nUptime - {uptime}</blockquote>"
     if flood_wait_time:
