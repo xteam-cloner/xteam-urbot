@@ -1,5 +1,5 @@
 # UserBot
-# Copyright (C) 2021-2023 Teamx-cloner 
+# Copyright (C) 2021-2023 Teamx-cloner
 #
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
@@ -13,48 +13,46 @@ import asyncio
 import os
 import sys
 import time
-import asyncio
-from telethon.errors import FloodWaitError  # Asumsi kamu menggunakan Telethon
-import pyrogram
+from telethon.errors import FloodWaitError
+from telethon import Button
 from telethon import events, TelegramClient
 from telethon.tl.functions import PingRequest
 from secrets import choice
-from telethon import Button
+from telethon.tl.types import (
+    InputMessagesFilterVideo,
+    InputMessagesFilterVoice,
+    InputMessagesFilterPhotos,
+)
 from xteam._misc import sudoers
-from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
-from telethon.tl.types import InputMessagesFilterPhotos
 from xteam.fns.custom_markdown import CustomMarkdown
 from xteam.fns.helper import download_file, inline_mention
 from ._inline import *
 from xteam.fns.helper import inline_mention
 from . import (
-OWNER_NAME,
-OWNER_ID,
-BOT_NAME,
-OWNER_USERNAME,
-asst,
-start_time,
-time_formatter,
-udB,
-ultroid_cmd as xteam_cmd,
-get_string,
-ultroid_bot as client,
-eor,
-ultroid_bot,
-call_back,
-callback,
+    OWNER_NAME,
+    OWNER_ID,
+    BOT_NAME,
+    OWNER_USERNAME,
+    asst,
+    start_time,
+    time_formatter,
+    udB,
+    ultroid_cmd as xteam_cmd,
+    get_string,
+    ultroid_bot as client,
+    eor,
+    ultroid_bot,
+    call_back,
+    callback,
 )
 
 PING = [
     [  # First row of buttons (you can have multiple rows)
-            #InlineKeyboardButton("Button 1 Text", url="https://example.com/1"),  # Example URL button
-            Button.inline("CLOSE", data="close"),
-        #InlineKeyboardButton("ᴘɪɴɢ", callback_data="close") # Example callback button
-        ]
+        Button.inline("CLOSE", data="close"),
+    ]
 ]
 
-#markup = ReplyInlineMarkup(PING)
-
+# markup = ReplyInlineMarkup(PING)
 
 
 async def mention_user(user_id):
@@ -67,56 +65,24 @@ async def mention_user(user_id):
         print(f"Failed to mention user: {e}")
 
 
-@xteam_cmd(pattern="xping$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="Cping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
     x = await event.edit("ping")
-    end = round((time.time() - start) * 10)
-    uptime = time_formatter((time.time() - start_time) * 10)
-    await x.edit(f"**Pong!\n{end}ms**")
-
-
-"""
-papnya = [
-        pap
-        async for pap in e.client.iter_messages(
-            "@CeweLogoPack", filter=InputMessagesFilterPhotos
-        )
-    ]
-
-ppcpnya = [
-        ppcp
-        async for ppcp in event.client.iter_messages(
-            "@ppcpcilik", filter=InputMessagesFilterPhotos
-        )
-    ]
-
-desahcewe = [
-        desah
-        async for desah in event.client.iter_messages(
-            "@desahancewesangesange", filter=InputMessagesFilterVoice
-        )
-    ]
-"""
+    end = round((time.time() - start) * 1000)  # Corrected to milliseconds
+    uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
+    await x.edit(f"Pong !! {end}ms\nUptime - {uptime}")
 
 @xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
     x = await event.reply("Ping")
-    end = round((time.time() - start) * 100000)
-    uptime = time_formatter((time.time() - start_time) * 100000)
+    end = round((time.time() - start) * 1000)  # Corrected to milliseconds
+    uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
     await x.edit(f"<blockquote>Pong !! {end}ms\nUptime - {uptime}</blockquote>", parse_mode="html")
-    
-import time
-import asyncio
-from telethon import Button
-from telethon.tl.types import InputMessagesFilterVideo
-import random
 
-# Assuming you have these defined elsewhere in your code:
-# @xteam_cmd, e, client, start_time, time_formatter, OWNER_NAME
 
-@xteam_cmd(pattern="kping")
+@xteam_cmd(pattern="Aping")
 async def wping(e):
     try:
         asupannya = [
@@ -132,10 +98,10 @@ async def wping(e):
 
         start = time.time()
         x = await e.respond("Pong!")  # Use respond instead of eor for initial message
-        end = round((time.time() - start) * 100000)
-        uptime = time_formatter((time.time() - start_time) * 100000)
+        end = round((time.time() - start) * 1000)  # Corrected to milliseconds
+        uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
 
-        await e.client.send_file( # send_file is used for sending files with caption and buttons.
+        await e.client.send_file(  # send_file is used for sending files with caption and buttons.
             e.chat.id,
             file=random.choice(asupannya),
             caption=f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
@@ -143,13 +109,14 @@ async def wping(e):
             buttons=Button.inline("• x •", "close"),
         )
 
-        await x.delete() # delete the "pong" message after sending the video with caption.
+        await x.delete()  # delete the "pong" message after sending the video with caption.
 
     except Exception as ex:
         try:
             await x.edit(f"**Ping Error:** {ex}")
         except:
-             await e.respond(f"**Ping Error:** {ex}") #in case x was not defined.
+            await e.respond(f"**Ping Error:** {ex}")  # in case x was not defined.
+
 
 @callback(data="close", owner=True)
 async def on_plug_in_callback_query_handler(event):
@@ -182,12 +149,13 @@ async def detect_flood_wait(module_name, func, *args, **kwargs):
         print(f"Terjadi error lain pada modul '{module_name}': {e}")
         return None, None
 
+
 @xteam_cmd(pattern="Ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
     ping_result, flood_wait_time = await detect_flood_wait("Balas Pesan (Ping)", event.reply, "Ping")
-    end = round((time.time() - start) * 100000)
-    uptime = time_formatter((time.time() - start_time) * 100000)
+    end = round((time.time() - start) * 1000)  # Corrected to milliseconds
+    uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
 
     message = f"<blockquote>Pong !! {end}ms\nUptime - {uptime}</blockquote>"
     if flood_wait_time:
