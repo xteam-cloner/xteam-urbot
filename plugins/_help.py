@@ -39,39 +39,82 @@ _main_help_menu = [
 
 
 @ultroid_cmd(pattern="help( (.*)|$)")
-async def _help(event):
-    plug = event.pattern_match.group(1).strip()
-    chat = await event.get_chat()
-    if plug:
-        try:
-            if plug in HELP["Official"]:
-                output = f"**Plugin:** `{plug}`\n\n"
-                for name, docstring in HELP["Official"][plug].items():
-                    output += f"`{name}`\n  `{docstring}`\n\n"
-                output += "\n© @xteam_cloner"
-                await event.eor(output)
-            elif HELP.get("Addons") and plug in HELP["Addons"]:
-                output = f"**Plugin:** `{plug}`\n\n"
-                for name, docstring in HELP["Addons"][plug].items():
-                    output += f"`{name}`\n  `{docstring}`\n\n"
-                output += "\n© @xteam_cloner"
-                await event.eor(output)
-            elif HELP.get("VCBot") and plug in HELP["VCBot"]:
-                output = f"**Plugin:** `{plug}`\n\n"
-                for name, docstring in HELP["VCBot"][plug].items():
-                    output += f"`{name}`\n  `{docstring}`\n\n"
-                output += "\n© @xteam_cloner"
-                await event.eor(output)
-            else:
-                await event.eor(get_string("help_11").format(plug))
-        except Exception as e:
-            await event.eor(f"**Error:** `{e}`")
-    else:
-        try:
-            results = await event.client.inline_query(asst.me.username, "help")
-            await results[0].click(chat.id, reply_to=event.reply_to_msg_id)
-            await event.delete()
-        except BotInlineDisabledError:
-            await event.eor(get_string("help_3"))
-        except Exception as e:
-            await event.eor(f"**Error:** `{e}`")
+async def _help(ult):
+    plug = ult.pattern_match.group(1).strip()
+    chat = await ult.get_chat()
+    try:
+        if plug:
+            try:
+                x = get_string("help_11").format(plug)
+                for d in LIST[plug]:
+                    x += HNDLR + d + "\n"
+                x += "\n© @TeamUltroid"
+                await ult.eor(x)
+            except KeyError:
+                file = None
+                compare_strings = []
+                for file_name, value in LIST.items():
+                    compare_strings.append(file_name)
+                    for j in value:
+                        j = cmd_regex_replace(j)
+                        compare_strings.append(j)
+                        if j.strip() == plug:
+                            file = file_name
+                            break
+                    if file:
+                        break
+                if not file:
+                    text = f"`{plug}` is not a valid plugin!"
+                    best_match = next(
+                        (
+                            _
+                            for _ in compare_strings
+                            if plug in _ and not _.startswith("_")
+                        ),
+                        None,
+                    )
+                    if best_match:
+                        text += f"\nDid you mean `{best_match}`?"
+                    return await ult.eor(text)
+                output = f"**Command** `{plug}` **found in plugin** - `{file}`\n"
+                if file in HELP.get("Official", {}):
+                    output += "".join(HELP["Official"][file])
+                elif file in HELP.get("Addons", {}):
+                    output += "".join(HELP["Addons"][file])
+                elif file in HELP.get("VCBot", {}):
+                    output += "".join(HELP["VCBot"][file])
+                output += "\n© @TeamUltroid"
+                await ult.eor(output)
+        else:
+            try:
+                results = await ult.client.inline_query(asst.me.username, "help")
+                await results[0].click(
+                    chat.id, reply_to=ult.reply_to_msg_id, hide_via=True
+                )
+                await ult.delete()
+            except BotMethodInvalidError:
+                all_commands = [cmd for cmds in LIST.values() for cmd in cmds]
+                total_commands = len(all_commands) + 10
+                buttons = list(_main_help_menu)
+                if udB.get_key("MANAGER") and udB.get_key("DUAL_HNDLR") == "/":
+                    buttons.insert(2, [Button.inline("• Manager Help •", "mngbtn")])
+                await ult.reply(
+                    get_string("inline_4").format(
+                        OWNER_NAME,
+                        len(HELP.get("Official", {})),
+                        len(HELP.get("Addons", {})),
+                        total_commands,
+                    ),
+                    file=inline_pic(),
+                    buttons=buttons,
+                )
+            except (BotResponseTimeoutError, BotInlineDisabledError) as e:
+                error_message = (
+                    get_string("help_2").format(HNDLR)
+                    if isinstance(e, BotResponseTimeoutError)
+                    else get_string("help_3")
+                )
+                return await ult.eor(error_message)
+    except Exception as er:
+        LOGS.exception(er)
+        await ult.eor("Error 🤔 occurred.")
