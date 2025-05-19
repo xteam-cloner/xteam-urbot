@@ -45,47 +45,24 @@ async def _help(event):
     if plug:
         try:
             x = get_string("help_11").format(plug)
-            if plug in LIST:
-                for d in LIST[plug]:
-                    x += "" + d
-                    x += "\n"
-                x += "\n© @teamX"
-                await event.eor(x)
-            else:
-                file = None
-                compare_strings = []
-                for file_name in LIST:
-                    compare_strings.append(file_name)
-                    value = LIST[file_name]
-                    for j in value:
-                        j = cmd_regex_replace(j)
-                        compare_strings.append(j)
-                        if j.strip() == plug:
-                            file = file_name
-                            break
-                if not file:
-                    # the enter command/plugin name is not found
-                    text = f"{plug} is not a valid plugin!"
-                    best_match = None
-                    for _ in compare_strings:
-                        if plug in _ and not _.startswith("_"):
-                            best_match = _
-                            break
-                    if best_match:
-                        text += f"\nDid you mean {best_match}?"
-                    return await event.eor(text)
-                output = f"Command `{plug}` found in plugin - `{file}`\n"
-                if HELP.get("Official") and file in HELP["Official"]:
-                    for i in HELP["Official"][file]:
-                        output += i
-                elif HELP.get("Addons") and file in HELP["Addons"]:
-                    for i in HELP["Addons"][file]:
-                        output += i
-                elif HELP.get("VCBot") and file in HELP["VCBot"]:
-                    for i in HELP["VCBot"][file]:
-                        output += i
-                output += "\n© @teamX"
-                await event.eor(output)
+            if plug in HELP["Official"]:
+                output = f"Plugin - {plug}\n"
+                for i in HELP["Official"][plug]:
+                    output += i
+                output += "\n© @TeamUltroid"
+                await ult.eor(output)
+            elif HELP.get("Addons") and plug in HELP["Addons"]:
+                output = f"Plugin - {plug}\n"
+                for i in HELP["Addons"][plug]:
+                    output += i
+                output += "\n© @TeamUltroid"
+                await ult.eor(output)
+            elif HELP.get("VCBot") and plug in HELP["VCBot"]:
+                output = f"Plugin - {plug}\n"
+                for i in HELP["VCBot"][plug]:
+                    output += i
+                output += "\n© @TeamUltroid"
+                await ult.eor(output)
         except BaseException as e:
             await event.eor(f"{e}")
     else:
