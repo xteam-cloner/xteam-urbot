@@ -47,8 +47,9 @@ async def _help(ult):
             try:
                 x = get_string("help_11").format(plug)
                 for d in LIST[plug]:
-                    x += HNDLR + d + "\n"
-                x += "\n© @TeamUltroid"
+                    x += HNDLR + d
+                    x += "\n"
+                x += "\n© @xteam_cloner"
                 await ult.eor(x)
             except KeyError:
                 file = None
@@ -83,7 +84,7 @@ async def _help(ult):
                     output += "".join(HELP["Addons"][file])
                 elif file in HELP.get("VCBot", {}):
                     output += "".join(HELP["VCBot"][file])
-                output += "\n© @TeamUltroid"
+                output += "\n© @xteam_cloner"
                 await ult.eor(output)
         else:
             try:
