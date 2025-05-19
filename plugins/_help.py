@@ -65,10 +65,10 @@ async def _help(event):
                 await ult.eor(output)
         except BaseException as e:
             await event.eor(f"{e}")
-    else:
-        try:
-            results = await event.client.inline_query(asst.me.username, "help")
-        except BotInlineDisabledError:
-            return await event.eor(get_string("help_3"))
-        await results[0].click(chat.id, reply_to=event.reply_to_msg_id)
-        await event.delete()
+        else:
+            try:
+                results = await event.client.inline_query(asst.me.username, "help")
+            except BotInlineDisabledError:
+                return await event.eor(get_string("help_3"))
+                await results[0].click(chat.id, reply_to=event.reply_to_msg_id)
+                await event.delete()
