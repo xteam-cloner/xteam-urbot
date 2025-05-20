@@ -5,6 +5,8 @@ import asyncio
 from telethon.errors import FloodWaitError, UserAdminInvalidError, ChatAdminRequiredError
 from . import ultroid_cmd
 from . import *
+
+
 @ultroid_cmd(pattern="limited$")
 async def demn(ult):
     chat = "@SpamBot"
@@ -17,7 +19,7 @@ async def demn(ult):
         except YouBlockedUserError:
             await ult.reply("Boss! Please Unblock @SpamBot ")
             return
-        await eor(ult, response.message.message)
+        await eor(ult, f"<blockquote>{response.message.message}</blockquote>")
 
 
 @ultroid_cmd(pattern="banall(?: (.*))?")
