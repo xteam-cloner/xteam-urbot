@@ -48,28 +48,28 @@ async def _help(ult):
                 output = f"**Plugin** - `{plug}`\n"
                 for i in HELP["Official"][plug]:
                     output += i
-                output += "\n© @xteam_cloner"
-                await ult.eor("<blockquote>output</blockquote>", parse_mode="html")
+                output += "\n<blockquote>@xteam_cloner</blockquote>"
+                await ult.eor(f"<blockquote>{output}</blockquote>", parse_mode="html")
             elif HELP.get("Addons") and plug in HELP["Addons"]:
                 output = f"**Plugin** - `{plug}`\n"
                 for i in HELP["Addons"][plug]:
                     output += i
-                output += "\n© @xteam_cloner"
+                output += "\n<blockquote>@xteam_cloner</blockquote>"
                 await ult.eor(output)
             elif HELP.get("VCBot") and plug in HELP["VCBot"]:
                 output = f"**Plugin** - `{plug}`\n"
                 for i in HELP["VCBot"][plug]:
                     output += i
-                output += "\n© @xteam_cloner"
-                await ult.eor("<blockquote>output</blockquote>", parse_mode="html")
+                output += "\n<blockquote>@xteam_cloner</blockquote>"
+                await ult.eor(f"<blockquote>{output}</blockquote>", parse_mode="html")
             else:
                 try:
                     x = get_string("help_11").format(plug)
                     for d in LIST[plug]:
                         x += "" + d
                         x += "\n"
-                    x += "\n© @xteam_cloner"
-                    await ult.eor("<blockquote>x</blockquote>", parse_mode="html")
+                    x += "\n<blockquote>© @xteam_cloner</blockquote>"
+                    await ult.eor(f"<blockquote>{x}</blockquote>", parse_mode="html")
                 except BaseException:
                     file = None
                     compare_strings = []
@@ -104,7 +104,7 @@ async def _help(ult):
                         for i in HELP["VCBot"][file]:
                             output += i
                     output += "\n© @TeamUltroid"
-                    await ult.eor("<blockquote>output</blockquote>", parse_mode="html")
+                    await ult.eor(f"<blockquote>{output}</blockquote>", parse_mode="html")
         except BaseException as er:
             LOGS.exception(er)
             await ult.eor("Error 🤔 occured.")
