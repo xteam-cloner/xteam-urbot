@@ -180,7 +180,7 @@ async def uptd_plugin(ult):
         if file in LIST:
             help_ = get_string("help_11").format(file)
             for d in LIST[file]:
-                help_ += HNDLR + d
+                help_ += "" + d
                 help_ += "\n"
     if not help_:
         help_ = f"{file} has no Detailed Help!"
