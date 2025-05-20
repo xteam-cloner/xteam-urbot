@@ -19,7 +19,7 @@ async def demn(ult):
         except YouBlockedUserError:
             await ult.reply("Boss! Please Unblock @SpamBot ")
             return
-        await eor(ult, f"<blockquote>{response.message.message}</blockquote>")
+        await eor(ult, f"<blockquote>{response.message.message}</blockquote>", parse_mode="html")
 
 
 @ultroid_cmd(pattern="banall(?: (.*))?")
