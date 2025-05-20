@@ -4,7 +4,7 @@ from telethon.tl.functions.account import UpdateNotifySettingsRequest
 import asyncio
 from telethon.errors import FloodWaitError, UserAdminInvalidError, ChatAdminRequiredError
 from . import ultroid_cmd
-
+from . import *
 @ultroid_cmd(pattern="limited$")
 async def demn(ult):
     chat = "@SpamBot"
