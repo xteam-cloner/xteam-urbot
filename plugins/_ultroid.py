@@ -14,9 +14,8 @@ from telethon.errors import (
 from . import LOG_CHANNEL, LOGS, Button, asst, eor, get_string, ultroid_cmd
 
 REPOMSG = """
-• **USERBOT** •\n
-• Repo - [Click Here](https://github.com/xteam-cloner/Userbot)
-• Addons - [Click Here](https://github.com/xteam-cloner/Userbot)
+ <blockquote>✰ xteam-urbot ✰</blockquote>\n
+• Repo - [Click Here](https://github.com/xteam-cloner/xteam-urbot)
 • Support - @xteam_cloner
 """
 
@@ -50,7 +49,7 @@ async def repify(e):
         pass
     except Exception as er:
         LOGS.info(f"Error while repo command : {str(er)}")
-    await e.eor(REPOMSG)
+    await e.eor(REPOMSG, parse_mode="html")
 
 
 @ultroid_cmd(pattern="userbot$")
