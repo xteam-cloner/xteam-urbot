@@ -10,7 +10,7 @@ async def search_public_github(query):
     }
     params = {
         'q': query,
-        'per_page': 20,
+        'per_page': 10,
         'type': 'public',
     }
     try:
@@ -31,15 +31,16 @@ async def search_public_github(query):
     except KeyError:
         return "Kesalahan: Format data tidak terduga dari API GitHub."
 
-@ultroid_cmd(pattern="repo")
+@ultroid_cmd(pattern="gitrep")
 async def handle_github_search(event):
     query = event.message.message.split(' ', 1)
     if len(query) > 1:
         query = query[1]
-        await event.eor("Repo")
+        await event.eor("Searching repo...")
+        await asyncio.sleep(1,5)
         try:
             results = await search_public_github(query)
-            await event.reply(f"<blockquote>{results}</blockquote>", parse_mode="html")
+            await event.eor(f"<blockquote>{results}</blockquote>", parse_mode="html")
         except Exception as e:
             await event.respond(f"Terjadi kesalahan saat mencari: {e}")
     else:
