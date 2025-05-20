@@ -49,7 +49,7 @@ async def _help(ult):
                 for i in HELP["Official"][plug]:
                     output += i
                 output += "\n© @xteam_cloner"
-                await ult.eor(output)
+                await ult.eor("<blockquote>output</blockquote>", parse_mode="html")
             elif HELP.get("Addons") and plug in HELP["Addons"]:
                 output = f"**Plugin** - `{plug}`\n"
                 for i in HELP["Addons"][plug]:
@@ -61,7 +61,7 @@ async def _help(ult):
                 for i in HELP["VCBot"][plug]:
                     output += i
                 output += "\n© @xteam_cloner"
-                await ult.eor(output)
+                await ult.eor("<blockquote>output</blockquote>", parse_mode="html")
             else:
                 try:
                     x = get_string("help_11").format(plug)
@@ -69,7 +69,7 @@ async def _help(ult):
                         x += "" + d
                         x += "\n"
                     x += "\n© @xteam_cloner"
-                    await ult.eor(x)
+                    await ult.eor("<blockquote>x</blockquote>", parse_mode="html")
                 except BaseException:
                     file = None
                     compare_strings = []
@@ -104,7 +104,7 @@ async def _help(ult):
                         for i in HELP["VCBot"][file]:
                             output += i
                     output += "\n© @TeamUltroid"
-                    await ult.eor(output)
+                    await ult.eor("<blockquote>output</blockquote>", parse_mode="html")
         except BaseException as er:
             LOGS.exception(er)
             await ult.eor("Error 🤔 occured.")
