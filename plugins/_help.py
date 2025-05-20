@@ -93,7 +93,7 @@ async def _help(ult):
                         if best_match:
                             text += f"\nDid you mean `{best_match}`?"
                         return await ult.eor(text)
-                    output = f"<blockquote>Command {plug} found in plugin - {file}\n</blockquote>, parse_mode="html"
+                    output = f"Command {plug} found in plugin - {file}\n"
                     if file in HELP["Official"]:
                         for i in HELP["Official"][file]:
                             output += i
