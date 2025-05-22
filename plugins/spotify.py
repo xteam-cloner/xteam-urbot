@@ -65,8 +65,8 @@ async def spotify_dl(e):
     if not os.path.isdir(dls):
         os.makedirs(dls)
     eris = await e.eor("`Searching on spotify! pls wait`")
-    cmd = f"""spotdl "{args}" -o "{dls}" --ignore-ffmpeg-version --dt 20 --st 20"""
-    cmd += " --use-youtube" if chk_yt else "
+    cmd = f""spotdl "{args}" -o "{dls}" --ignore-ffmpeg-version --dt 20 --st 20""
+    cmd += " --use-youtube" if chk_yt else ""
     await bash(cmd)
     await asyncio.sleep(2)
     files = list_dir(dls)
