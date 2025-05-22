@@ -15,7 +15,7 @@ import os
 from uuid import uuid4
 import asyncio
 from telethon.tl.types import DocumentAttributeAudio
-from xteam.functions.tools import metadata
+from xteam.fns.tools import metadata
 from . import * # Assuming this imports ultroid_cmd, bash, LOGS, udB, humanbytes, and fast_uploader
 
 try:
