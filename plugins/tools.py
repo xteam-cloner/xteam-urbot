@@ -334,7 +334,7 @@ async def _(e):
     except MessageTooLongError:
         with io.BytesIO(str.encode(text)) as out_file:
             out_file.name = "output.txt"
-            await e.reply(f"`{e.text}`", file=out_file, thumb=ULTConfig.thumb)
+            await e.reply(f"<blockquote>{e.text}</blockquote>", file=out_file, thumb=ULTConfig.thumb, parse_mode="html")
         await e.delete()
 
 
