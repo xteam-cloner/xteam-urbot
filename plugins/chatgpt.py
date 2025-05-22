@@ -394,7 +394,7 @@ async def deepseek_ai(event):
             pass
 
 
-@in_pattern("gemini")
+@in_pattern("gemini( (.*)|$)")
 async def gemini_inline_query(event):
     """Inline query for Google Gemini"""
     prompt = event.pattern_match.group(1).strip()
@@ -418,7 +418,7 @@ async def gemini_inline_query(event):
     ], cache_time=0)
 
 
-@callback("gemini_ask_")
+@callback("gemini_ask_( (.*)|$)")
 async def gemini_callback_query(event):
     """Callback query for Google Gemini"""
     prompt = event.pattern_match.group(1)
