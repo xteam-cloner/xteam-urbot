@@ -17,7 +17,7 @@ import asyncio
 from telethon.tl.types import DocumentAttributeAudio
 from xteam.fns.tools import metadata
 from . import * # Assuming this imports ultroid_cmd, bash, LOGS, udB, humanbytes, and fast_uploader
-
+from xteam import *
 try:
     import spotdl
 except ImportError:
