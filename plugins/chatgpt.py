@@ -32,6 +32,7 @@ from . import LOGS, eor, get_string, udB, ultroid_cmd, async_searcher
 import aiohttp
 import asyncio
 from telethon import Button
+from . import *
 
 ENDPOINTS = {
     "gpt": "https://api.openai.com/v1/chat/completions",
@@ -393,7 +394,7 @@ async def deepseek_ai(event):
             pass
 
 
-@ultroid_cmd(pattern=r"^\gemini( (.*)|$)", outgoing=True)
+@in_pattern("gemini", outgoing=True)
 async def gemini_inline_query(event):
     """Inline query for Google Gemini"""
     prompt = event.pattern_match.group(1).strip()
@@ -416,7 +417,8 @@ async def gemini_inline_query(event):
         }
     ], cache_time=0)
 
-@ultroid_cmd(pattern="^gemini_ask_(.*)", incoming=True, func=lambda e: e.is_private)
+
+@callback("gemini_ask_", incoming=True, func=lambda e: e.is_private)
 async def gemini_callback_query(event):
     """Callback query for Google Gemini"""
     prompt = event.pattern_match.group(1)
