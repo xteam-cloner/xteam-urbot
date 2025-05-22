@@ -392,3 +392,51 @@ async def deepseek_ai(event):
         except Exception:
             pass
 
+
+@ultroid_cmd(pattern=r"^\gemini( (.*)|$)", outgoing=True)
+async def gemini_inline_query(event):
+    """Inline query for Google Gemini"""
+    prompt = event.pattern_match.group(1).strip()
+    if not prompt:
+        return await event.answer("❌ Please provide a prompt!", cache_time=0)
+
+    api_key = udB.get_key("GEMINI_API_KEY")
+    if not api_key:
+        return await event.answer("⚠️ Please set Gemini API key using `setdb GEMINI_API_KEY your_api_key`", cache_time=0)
+
+    await event.answer([
+        {
+            "title": "Ask Gemini",
+            "description": f"Ask Gemini: {prompt}",
+            "thumb": "https://telegra.ph/file/111059e7943d699e126e8.jpg", # Ganti dengan URL thumbnail yang sesuai
+            "input_message": f"<blockquote>🤔 Thinking...</blockquote>",
+            "reply_markup": [
+                [Button.inline("Get Gemini Response", data=f"gemini_ask_{prompt}")]
+            ]
+        }
+    ], cache_time=0)
+
+@ultroid_cmd(pattern="^gemini_ask_(.*)", incoming=True, func=lambda e: e.is_private)
+async def gemini_callback_query(event):
+    """Callback query for Google Gemini"""
+    prompt = event.pattern_match.group(1)
+    
+    api_key = udB.get_key("GEMINI_API_KEY")
+    if not api_key:
+        return await event.answer("⚠️ Please set Gemini API key using `setdb GEMINI_API_KEY your_api_key`", cache_time=0)
+
+    msg = await event.edit(f"<blockquote>🤔 Thinking...</blockquote>", parse_mode="html")
+    
+    header = (
+        f"<blockquote>🔍 Prompt:\n{prompt}</blockquote>\n"
+        "<blockquote>💡 Response:</blockquote>\n"
+    )
+    
+    response = ""
+    async for chunk in get_ai_response("gemini", prompt, api_key, stream=False):
+        response += chunk
+    
+    try:
+        await msg.edit(header + f"<blockquote>{response}</blockquote>", parse_mode="html")
+    except Exception:
+        pass
