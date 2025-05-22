@@ -111,8 +111,8 @@ async def alive(event):
     start = time.time()
     pro = await event.eor("🔥")
     await asyncio.sleep(1)
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
+    end = round((time.time() - start) * 1000000)
+    uptime = time_formatter((time.time() - start_time) * 1000000)
     message_text = format_message_text(uptime)
     await pro.edit(f"<blockquote expandable><b>✰ {asst.full_name} ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n" \
                      f"✵ Owner : {OWNER_NAME}\n" \
@@ -142,7 +142,7 @@ async def alive_video(event):
         pro = await event.eor("⚡")
         await asyncio.sleep(2)
         await pro.delete()
-        uptime = time_formatter((time.time() - start_time) * 1000)
+        uptime = time_formatter((time.time() - start_time) * 1000000)
         message_text = format_message_text(uptime)
         await client.send_file(
             event.chat.id,
