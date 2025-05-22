@@ -31,7 +31,7 @@ import json
 from . import LOGS, eor, get_string, udB, ultroid_cmd, async_searcher
 import aiohttp
 import asyncio
-
+from telethon import Button
 
 ENDPOINTS = {
     "gpt": "https://api.openai.com/v1/chat/completions",
