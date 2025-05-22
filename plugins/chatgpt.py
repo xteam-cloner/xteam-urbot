@@ -399,8 +399,17 @@ async def gemini_inline_query(event):
     """Inline query for Google Gemini"""
     prompt = event.pattern_match.group(1).strip()
     if not prompt:
-        return await event.answer("❌ Please provide a prompt!", cache_time=0)
-
+        return await event.answer(
+    [
+        InlineQueryResultArticle(
+            title="Error",  # Title for the inline result
+            description="Please provide a prompt!", # Description (optional, but good for context)
+            input_message_content=InputTextMessageContent("❌ Please provide a prompt!"), # The actual message sent when user selects this result
+        )
+    ],
+    cache_time=0
+        )
+        
     api_key = udB.get_key("GEMINI_API_KEY")
     if not api_key:
         return await event.answer("⚠️ Please set Gemini API key using `setdb GEMINI_API_KEY your_api_key`", cache_time=0)
