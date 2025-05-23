@@ -10,12 +10,10 @@ import os
 import time
 import datetime
 from random import choice
-#from ApiNyaEr.teks import ISLAMIC as QUOTES
 import requests
 from telethon import Button, events
 from telethon.tl import functions, types  # pylint:ignore
-#from assistant.start import _start, _settings
-from xteam import *
+#from xteam import *
 from xteam._misc._assistant import asst_cmd, callback, in_pattern
 from xteam._misc._decorators import ultroid_cmd
 from xteam._misc._wrappers import eod, eor
