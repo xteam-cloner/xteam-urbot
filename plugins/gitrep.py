@@ -1,7 +1,7 @@
 import asyncio
 from telethon import TelegramClient, events
 import requests
-from . import*
+from . import *
 
 
 async def search_public_github(query):
