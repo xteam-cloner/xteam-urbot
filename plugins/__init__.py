@@ -26,7 +26,7 @@ from xteam.version import __version__, ultroid_version
 from strings import get_help, get_string
 from xteam._misc._supporter import CMD_HNDLR
 from xteam.dB import stickers
-
+from xteam.startup.BaseClient import Client, PyTgCalls
 
 udB: Database
 
@@ -44,7 +44,7 @@ asst: UltroidClient
 
 LOG_CHANNEL = udB.get_key("LOG_CHANNEL")
 StartTime = time.time()
-
+Call = PyTgCalls
 xteam = ultroid_cmd
 
 def inline_pic():
