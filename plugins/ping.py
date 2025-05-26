@@ -207,7 +207,7 @@ from pyrogram.errors import FloodWait
 #     call_back,
 #     callback,
 # )
-from xteam.startup.BaseClient import PyrogramClient # Ini sudah diimpor sebagai Client dari pyrogram
+from xteam.startup.BaseClient import Client # Ini sudah diimpor sebagai Client dari pyrogram
 
 # Fungsi dummy untuk contoh, ganti dengan implementasi Anda yang sebenarnya
 def time_formatter(milliseconds: int) -> str:
