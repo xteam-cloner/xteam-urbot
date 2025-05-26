@@ -242,10 +242,10 @@ def time_formatter(milliseconds: int) -> str:
 # --- Perubahan utama untuk Pyrogram ---
 # Dekorator Pyrogram menggunakan filters.command dan filters.me (untuk userbot)
 
-@PyrogramClient.on_message(filters.command("Cpung", prefixes=".") & filters.me)
-async def cping_command(client, message):
+@PyrogramClient.on_message(filters.command("Cpung"))
+async def cping_command(Client, message):
     """
-    Handles the .Cping command for Pyrogram.
+    Handles the Cpung command for Pyrogram.
     """
     start = time.time()
     # Pyrogram menggunakan message.edit_text untuk mengedit pesan
