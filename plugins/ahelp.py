@@ -14,7 +14,7 @@ from re import compile as re_compile
 
 from bs4 import BeautifulSoup as bs
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputWebDocument
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import (
     BotInlineDisabled,
     BotMethodInvalid,
