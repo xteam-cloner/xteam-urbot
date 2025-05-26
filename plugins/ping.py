@@ -207,16 +207,7 @@ from pyrogram.errors import FloodWait
 #     call_back,
 #     callback,
 # )
-# from xteam.startup.BaseClient PyrogramClient # Ini sudah diimpor sebagai Client dari pyrogram
-
-# --- Asumsi Variabel Global ---
-# Anda perlu mendefinisikan variabel-variabel ini jika belum ada
-OWNER_NAME = "YourOwnerName"
-OWNER_ID = 123456789  # Ganti dengan ID pemilik Anda
-BOT_NAME = "YourBotName"
-OWNER_USERNAME = "YourOwnerUsername"
-start_time = time.time() # Waktu mulai bot
-# client = Client("my_account") # Ini akan diinisialisasi di startup Pyrogram
+from xteam.startup.BaseClient import PyrogramClient # Ini sudah diimpor sebagai Client dari pyrogram
 
 # Fungsi dummy untuk contoh, ganti dengan implementasi Anda yang sebenarnya
 def time_formatter(milliseconds: int) -> str:
@@ -246,12 +237,12 @@ def time_formatter(milliseconds: int) -> str:
 # app = Client("my_userbot", api_id=YOUR_ID, api_hash=YOUR_HASH)
 # Anda mungkin perlu menyesuaikan `client` dengan nama variabel instance Pyrogram Anda
 # Misalnya, jika Anda menggunakan `app`, ganti `client` menjadi `app` di decorator dan fungsi.
-client = Client("my_userbot", api_id=12345, api_hash="your_api_hash_here") # Ganti dengan kredensial Anda
+#client = Client("my_userbot", api_id=12345, api_hash="your_api_hash_here") # Ganti dengan kredensial Anda
 
 # --- Perubahan utama untuk Pyrogram ---
 # Dekorator Pyrogram menggunakan filters.command dan filters.me (untuk userbot)
 
-@client.on_message(filters.command("Cpung", prefixes=".") & filters.me)
+@PyrogramClient.on_message(filters.command("Cpung", prefixes=".") & filters.me)
 async def cping_command(client, message):
     """
     Handles the .Cping command for Pyrogram.
