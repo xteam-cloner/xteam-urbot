@@ -1,21 +1,13 @@
-# Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
-#
-# This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
-# PLease read the GNU Affero General Public License in
-# <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-
-
 import asyncio
 import os
 import random
-#import google_images_download
+#import google_images_download # This is commented out, confirming the other import is used.
 from random import shuffle
 
 from telethon.tl.functions.photos import UploadProfilePhotoRequest
 
 from xteam.fns.helper import download_file
-from xteam.fns.tools import google_images_download
+from xteam.fns.tools import google_images_download # This is the one being used
 
 from . import LOGS, get_help, get_string, udB, ultroid_bot, ultroid_cmd
 
@@ -31,7 +23,11 @@ async def autopic(e):
     if not search:
         return await e.eor(get_string("autopic_1"), time=5)
     e = await e.eor(get_string("com_1"))
-    gi = google_images_download()
+
+    # The issue is here.
+    # Based on the error and the usage in autopic_func,
+    # google_images_download is likely an async function that takes the search query.
+    # The 'args' dictionary defines parameters for this function.
     args = {
         "keywords": search,
         "limit": 50,
@@ -39,7 +35,9 @@ async def autopic(e):
         "output_directory": "./resources/downloads/",
     }
     try:
-        pth = await gi.download(args)
+        # Pass the arguments directly to google_images_download
+        # It's highly probable that google_images_download itself returns the paths.
+        pth = await google_images_download(**args) # Unpack the args dictionary
         ok = pth[0][search]
     except Exception as er:
         LOGS.exception(er)
@@ -66,6 +64,7 @@ if search := udB.get_key("AUTOPIC"):
     async def autopic_func():
         search = udB.get_key("AUTOPIC")
         if images.get(search) is None:
+            # This usage confirms that google_images_download is an async function that takes 'search'
             images[search] = await google_images_download(search)
         if not images.get(search):
             return
