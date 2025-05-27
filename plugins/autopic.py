@@ -66,7 +66,7 @@ if search := udB.get_key("AUTOPIC"):
     async def autopic_func():
         search = udB.get_key("AUTOPIC")
         if images.get(search) is None:
-            images[search] = await get_google_images(search)
+            images[search] = await google_images_download(search)
         if not images.get(search):
             return
         img = random.choice(images[search])
