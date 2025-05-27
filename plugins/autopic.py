@@ -9,13 +9,13 @@
 import asyncio
 import os
 import random
-import google_images_download
+#import google_images_download
 from random import shuffle
 
 from telethon.tl.functions.photos import UploadProfilePhotoRequest
 
 from xteam.fns.helper import download_file
-from xteam.fns.tools import get_google_images
+from xteam.fns.tools import google_images_download
 
 from . import LOGS, get_help, get_string, udB, ultroid_bot, ultroid_cmd
 
