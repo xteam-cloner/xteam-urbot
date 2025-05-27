@@ -40,7 +40,7 @@ import pytz
 from bs4 import BeautifulSoup as bs
 from telethon.tl.types import DocumentAttributeVideo
 
-from xteam.fns.tools import get_google_images, metadata
+from xteam.fns.tools import google_images_download, metadata
 
 from . import (
     HNDLR,
@@ -282,7 +282,7 @@ async def wall(event):
         return await event.eor("`Give me something to search..`")
     nn = await event.eor(get_string("com_1"))
     query = f"hd {inp}"
-    images = await get_google_images(query)
+    images = await google_images_download(query)
     for z in range(5):
         await event.client.send_file(event.chat_id, file=images[z]["original"])
     await nn.delete()
