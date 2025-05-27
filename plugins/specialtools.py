@@ -40,7 +40,7 @@ import pytz
 from bs4 import BeautifulSoup as bs
 from telethon.tl.types import DocumentAttributeVideo
 
-from xteam.fns.tools import google_images_download, metadata
+from xteam.fns.tools import get_google_images, metadata
 
 from . import (
     HNDLR,
@@ -150,7 +150,7 @@ async def hbd(event):
         name = nam.first_name
     else:
         name = ultroid_bot.me.first_name
-    zn = pytz.timezone("Asia/Kolkata")
+    zn = pytz.timezone("Asia/Jakarta")
     abhi = dt.now(zn)
     kk = match.split("/")
     p = kk[0]
@@ -282,7 +282,7 @@ async def wall(event):
         return await event.eor("`Give me something to search..`")
     nn = await event.eor(get_string("com_1"))
     query = f"hd {inp}"
-    images = await google_images_download(query)
+    images = await get_google_images(query)
     for z in range(5):
         await event.client.send_file(event.chat_id, file=images[z]["original"])
     await nn.delete()
@@ -345,7 +345,7 @@ async def quott_(event):
         )
     except Exception as er:
         return await msg.edit(str(er))
-    message = await reply.reply("Quotly by Ultroid", file=file)
+    message = await reply.reply("Quotly by xteam-urbot", file=file)
     os.remove(file)
     await msg.delete()
     return message
