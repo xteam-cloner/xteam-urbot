@@ -10,11 +10,11 @@ import asyncio
 import os
 import random
 from random import shuffle
-
+import google_images_download
 from telethon.tl.functions.photos import UploadProfilePhotoRequest
 
 from xteam.fns.helper import download_file
-from xteam.fns.tools import get_google_images
+#from xteam.fns.tools import get_google_images
 
 from . import LOGS, get_help, get_string, udB, ultroid_bot, ultroid_cmd
 
@@ -30,7 +30,7 @@ async def autopic(e):
     if not search:
         return await e.eor(get_string("autopic_1"), time=5)
     e = await e.eor(get_string("com_1"))
-    gi = googleimagesdownload()
+    gi = google_images_download()
     args = {
         "keywords": search,
         "limit": 50,
@@ -65,7 +65,7 @@ if search := udB.get_key("AUTOPIC"):
     async def autopic_func():
         search = udB.get_key("AUTOPIC")
         if images.get(search) is None:
-            images[search] = await get_google_images(search)
+            images[search] = await google_images_download(search)
         if not images.get(search):
             return
         img = random.choice(images[search])
