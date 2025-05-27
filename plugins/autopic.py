@@ -24,16 +24,20 @@ async def autopic(e):
     e = await e.eor(get_string("com_1"))
 
     try:
-        # Corrected: Pass only the search query string
-        # Assuming google_images_download handles its own internal configuration
         pth = await google_images_download(search)
-        ok = pth[0][search] # This line assumes pth has the same structure as before.
-                            # If it changes, you might need to adjust this.
+        # Corrected: Access the 'search' key directly from the dictionary
+        ok = pth.get(search) # Using .get() is safer, returns None if key not found
+        if ok is None: # If the key 'search' is not found in pth
+            # This indicates an unexpected structure from google_images_download.
+            # You might want to log pth to understand its actual structure.
+            LOGS.warning(f"Unexpected output from google_images_download for '{search}': {pth}")
+            return await e.eor(get_string("autopic_2").format(search), time=5)
+
     except Exception as er:
         LOGS.exception(er)
         return await e.eor(str(er))
 
-    if not ok:
+    if not ok: # Check if the list of paths is empty
         return await e.eor(get_string("autopic_2").format(search), time=5)
     await e.eor(get_string("autopic_3").format(search))
     udB.set_key("AUTOPIC", search)
@@ -55,11 +59,25 @@ if search := udB.get_key("AUTOPIC"):
     async def autopic_func():
         search = udB.get_key("AUTOPIC")
         if images.get(search) is None:
-            images[search] = await google_images_download(search)
+            # This usage confirms that google_images_download is an async function that takes 'search'
+            # And also implies that it returns something that can be directly assigned to images[search]
+            pth_result = await google_images_download(search)
+            # Assuming pth_result is a dictionary like {"query": [paths...]}
+            images[search] = pth_result.get(search)
+            if not images[search]:
+                LOGS.warning(f"No images found for '{search}' in autopic_func.")
+                return
+
         if not images.get(search):
             return
+        
+        # Add a check here for empty list, though it's already done above when assigning.
+        if not images[search]:
+            LOGS.warning(f"No images available for '{search}' to choose from.")
+            return
+
         img = random.choice(images[search])
-        filee = await download_file(img["original"], "resources/downloads/autopic.jpg")
+        filee = await download_file(img["original"], "resources/downloads/autopic.jpg") # This implies img is a dictionary with an "original" key, not just a path.
         file = await ultroid_bot.upload_file(filee)
         await ultroid_bot(UploadProfilePhotoRequest(file))
         os.remove(filee)
