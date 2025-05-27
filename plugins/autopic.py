@@ -1,13 +1,12 @@
 import asyncio
 import os
 import random
-#import google_images_download # This is commented out, confirming the other import is used.
 from random import shuffle
 
 from telethon.tl.functions.photos import UploadProfilePhotoRequest
 
 from xteam.fns.helper import download_file
-from xteam.fns.tools import google_images_download # This is the one being used
+from xteam.fns.tools import google_images_download
 
 from . import LOGS, get_help, get_string, udB, ultroid_bot, ultroid_cmd
 
@@ -24,24 +23,16 @@ async def autopic(e):
         return await e.eor(get_string("autopic_1"), time=5)
     e = await e.eor(get_string("com_1"))
 
-    # The issue is here.
-    # Based on the error and the usage in autopic_func,
-    # google_images_download is likely an async function that takes the search query.
-    # The 'args' dictionary defines parameters for this function.
-    args = {
-        "keywords": search,
-        "limit": 50,
-        "format": "jpg",
-        "output_directory": "./resources/downloads/",
-    }
     try:
-        # Pass the arguments directly to google_images_download
-        # It's highly probable that google_images_download itself returns the paths.
-        pth = await google_images_download(**args) # Unpack the args dictionary
-        ok = pth[0][search]
+        # Corrected: Pass only the search query string
+        # Assuming google_images_download handles its own internal configuration
+        pth = await google_images_download(search)
+        ok = pth[0][search] # This line assumes pth has the same structure as before.
+                            # If it changes, you might need to adjust this.
     except Exception as er:
         LOGS.exception(er)
         return await e.eor(str(er))
+
     if not ok:
         return await e.eor(get_string("autopic_2").format(search), time=5)
     await e.eor(get_string("autopic_3").format(search))
@@ -64,7 +55,6 @@ if search := udB.get_key("AUTOPIC"):
     async def autopic_func():
         search = udB.get_key("AUTOPIC")
         if images.get(search) is None:
-            # This usage confirms that google_images_download is an async function that takes 'search'
             images[search] = await google_images_download(search)
         if not images.get(search):
             return
