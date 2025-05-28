@@ -53,47 +53,6 @@ from . import (
     callback,
 )
 
-async def member_permissions(chat_id: int, user_id: int):
-    perms = []
-    member = (await ultroid_bot.get_chat_member(chat_id, user_id)).privileges
-    if not member:
-        return []
-    if member.can_post_messages:
-        perms.append("can_post_messages")
-    if member.can_edit_messages:
-        perms.append("can_edit_messages")
-    if member.can_delete_messages:
-        perms.append("can_delete_messages")
-    if member.can_restrict_members:
-        perms.append("can_restrict_members")
-    if member.can_promote_members:
-        perms.append("can_promote_members")
-    if member.can_change_info:
-        perms.append("can_change_info")
-    if member.can_invite_users:
-        perms.append("can_invite_users")
-    if member.can_pin_messages:
-        perms.append("can_pin_messages")
-    if member.can_manage_video_chats:
-        perms.append("can_manage_video_chats")
-    return perms
-
-PHOTO = [
-    "https://files.catbox.moe/fqx4vz.mp4"
-]
-
-Mukesh = [
-    [
-        Button.url("ɴᴏᴏʙ", url=f"https://t.me/{OWNER_USERNAME}"),
-        Button.url("ꜱᴜᴘᴘᴏʀᴛ", url=f"https://t.me/xteam_cloner"),
-    ],
-    [
-        Button.url("➕ᴀᴅᴅ ᴍᴇ ᴇʟsᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘ➕",
-            url=f"https://t.me/{BOT_USERNAME}?startgroup=true",
-        ),
-    ],
-]
-
 
 def format_message_text(uptime):
     return f"<blockquote expandable><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n" \
