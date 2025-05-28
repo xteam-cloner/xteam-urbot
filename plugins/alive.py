@@ -151,7 +151,7 @@ async def alive_video(event):
         if selected_video_message.video:
             print(f"Selected video attributes: {selected_video_message.video}")
             # Try to send the video directly
-            await asst.send_file(
+            await client.send_file(
                 event.chat.id,
                 file=selected_video_message.video, # Pass the video object
                 caption=message_text,
@@ -195,7 +195,7 @@ async def live_video(event):
         ]
 
         if selected_video_message.video:
-            await asst.send_message(
+            await client.send_message(
                 event.chat.id,
                 caption=message_text,
                 parse_mode="html",
