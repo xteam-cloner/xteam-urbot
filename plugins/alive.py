@@ -143,12 +143,23 @@ async def alive_video(event):
         await pro.delete()
         uptime = time_formatter((time.time() - start_time) * 1000000)
         message_text = format_message_text(uptime)
-        await asst.send_file(
-            event.chat.id,
-            file=random.choice(asupannya),
-            caption=message_text,
-            parse_mode="html",
-        )
+
+        selected_video_message = random.choice(asupannya)
+
+        # Print information about the selected video message for debugging
+        print(f"Selected video message ID: {selected_video_message.id}")
+        if selected_video_message.video:
+            print(f"Selected video attributes: {selected_video_message.video}")
+            # Try to send the video directly
+            await asst.send_file(
+                event.chat.id,
+                file=selected_video_message.video, # Pass the video object
+                caption=message_text,
+                parse_mode="html",
+            )
+        else:
+            await event.respond("Selected message does not contain a video.")
+
 
     except Exception as e:
         await event.respond(f"An error occurred: {e}")
