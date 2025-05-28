@@ -209,7 +209,7 @@ async def live_video(event):
         await event.respond(f"An error occurred: {e}")
 
 # --- You need a handler for the 'Close' button callback ---
-@callback(data="close_alive_message"))
+@callback(data="close_alive_message")
 async def close_message_callback(event):
     await event.delete() # Deletes the message where the button was pressed
     await event.answer("Message closed!") # Optional: show a small notification to the user
