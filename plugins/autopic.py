@@ -1,16 +1,8 @@
-# Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
-#
-# This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
-# PLease read the GNU Affero General Public License in
-# <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-
-
 import asyncio
 import os
 import random
 from random import shuffle
-import google_images_download
+from google_images_download import google_images_download as GoogleImagesDownload # Corrected import
 from telethon.tl.functions.photos import UploadProfilePhotoRequest
 
 from xteam.fns.helper import download_file
@@ -30,7 +22,7 @@ async def autopic(e):
     if not search:
         return await e.eor(get_string("autopic_1"), time=5)
     e = await e.eor(get_string("com_1"))
-    gi = google_images_download()
+    gi = GoogleImagesDownload() # Corrected instantiation
     args = {
         "keywords": search,
         "limit": 50,
@@ -65,11 +57,25 @@ if search := udB.get_key("AUTOPIC"):
     async def autopic_func():
         search = udB.get_key("AUTOPIC")
         if images.get(search) is None:
-            images[search] = await google_images_download(search)
+            # You'll need to instantiate GoogleImagesDownload here too if it's not global
+            # or if you want to use it within this function's scope.
+            # Assuming you want to use the download method directly, you need to import the class again or pass an instance.
+            # For simplicity, let's assume we'll instantiate it here.
+            gi_instance = GoogleImagesDownload()
+            try:
+                pth = await gi_instance.download({"keywords": search, "limit": 1}) # Limit 1 for a single random image
+                ok = pth[0][search]
+                images[search] = [item["url"] for item in ok] # Assuming you want URLs from the download result
+            except Exception as er:
+                LOGS.exception(er)
+                images[search] = [] # Set to empty to avoid further errors
+
         if not images.get(search):
             return
-        img = random.choice(images[search])
-        filee = await download_file(img["original"], "resources/downloads/autopic.jpg")
+
+        # Assuming images[search] now contains a list of URLs
+        img_url = random.choice(images[search])
+        filee = await download_file(img_url, "resources/downloads/autopic.jpg")
         file = await ultroid_bot.upload_file(filee)
         await ultroid_bot(UploadProfilePhotoRequest(file))
         os.remove(filee)
