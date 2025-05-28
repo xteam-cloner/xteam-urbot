@@ -195,7 +195,7 @@ async def live_video(event):
         ]
 
         if selected_video_message.video:
-            await asst.send_file(
+            await asst.send_message(
                 event.chat.id,
                 caption=message_text,
                 parse_mode="html",
