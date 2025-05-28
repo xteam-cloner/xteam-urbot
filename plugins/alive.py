@@ -96,15 +96,14 @@ Mukesh = [
 
 
 def format_message_text(uptime):
-    return f"<blockquote>┏──────────────────┓\n❍─┫ᴜʀʙᴏᴛ ɪꜱ ɴᴏᴡ ᴀʟɪᴠᴇ!┣─❍\n" \
-                     f"┣──────────────────┫\n\n" \
-                     f"❍ ᴏᴡɴᴇʀ : {OWNER_NAME}\n\n" \
-                     f"❍ ʟɪʙʀᴀʀʏ : {lver}\n\n" \
-                     f"❍ ᴜᴘᴛɪᴍᴇ : {uptime}\n\n" \
-                     f"❍ ᴛᴇʟᴇᴛʜᴏɴ : {tver}\n\n" \
-                     f"❍ ᴘʏʀᴏɢʀᴀᴍ :  {pver}\n\n" \
-                     f"❍ ᴘʏᴛʜᴏɴ : {pyver()}\n\n" \
-                     f"┗──────────────────┛\n</blockquote>"
+    return f"<blockquote expandable><b>✰ ᴧ‌ᴛʜᴇɴᴧ ᴍᴧꝛʟᴇʏ ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n" \
+                     f"✵ Owner : {OWNER_NAME}\n" \
+                     f"✵ Dc id : {ultroid_bot.dc_id}\n" \
+                     f"✵ Library : {lver}\n" \
+                     f"✵ Uptime : {uptime}\n" \
+                     f"✵ Telethon : {tver}\n" \
+                     f"✵ Pyrogram :  {pver}\n" \
+                     f"✵ Python : {pyver()}\n</blockquote>"
 
 @xteam_cmd(pattern="alive$")
 async def alive(event):
@@ -144,7 +143,7 @@ async def alive_video(event):
         await pro.delete()
         uptime = time_formatter((time.time() - start_time) * 1000000)
         message_text = format_message_text(uptime)
-        await client.send_file(
+        await asst.send_file(
             event.chat.id,
             file=random.choice(asupannya),
             caption=message_text,
