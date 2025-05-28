@@ -24,7 +24,7 @@ async def autopic(e):
     e = await e.eor(get_string("com_1"))
     gi = GoogleImagesDownload() # Corrected instantiation
     args = {
-        "keywords": search,
+        "keywords": "universe",
         "limit": 50,
         "format": "jpg",
         "output_directory": "./resources/downloads/",
