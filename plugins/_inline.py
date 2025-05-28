@@ -330,42 +330,6 @@ def page_num(index, key):
 
     return new_
 
-
-"""def page_num(index, key):
-    rows = udB.get_key("HELP_ROWS") or 5
-    cols = udB.get_key("HELP_COLUMNS") or 2
-    loaded = HELP.get(key, [])
-    emoji = udB.get_key("EMOJI_IN_HELP") or ""
-    List = [
-        Button.inline(f"{emoji} {x} {emoji}", data=f"uplugin_{key}_{x}|{index}")
-        for x in sorted(loaded)
-    ]
-    all_ = split_list(List, cols)
-    fl_ = split_list(all_, rows)
-    try:
-        new_ = fl_[index]
-    except IndexError:
-        new_ = fl_[0] if fl_ else []
-        index = 0
-    if index == 0 and len(fl_) == 1:
-        new_.append([Button.inline("×", data="close")])
-    else:
-        new_.append(
-            [
-                Button.inline(
-                    "<",
-                    data=f"uh_{key}_{index-1}",
-                ),
-                Button.inline("×", data="close"),
-                Button.inline(
-                    ">",
-                    data=f"uh_{key}_{index+1}",
-                ),
-            ]
-        )
-    return new_
-"""
-
 # --------------------------------------------------------------------------------- #
 
 
