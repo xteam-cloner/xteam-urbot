@@ -163,3 +163,53 @@ async def alive_video(event):
 
     except Exception as e:
         await event.respond(f"An error occurred: {e}")
+
+
+@xteam_cmd(pattern="live$")
+async def live_video(event):
+    try:
+        asupannya = [
+            asupan
+            async for asupan in event.client.iter_messages(
+                "@xcryasupan", filter=InputMessagesFilterVideo
+            )
+        ]
+
+        if not asupannya:
+            await event.respond("No video found in @xcryasupan.")
+            return
+
+        pro = await event.eor("⚡")
+        await asyncio.sleep(1)
+        await pro.delete()
+
+        # Assuming start_time and time_formatter are defined
+        uptime = time_formatter((time.time() - start_time) * 1000) # Assuming time_formatter expects milliseconds
+        message_text = format_message_text(uptime)
+
+        selected_video_message = random.choice(asupannya)
+
+        # Create the inline keyboard with a "Close" button
+        buttons = [
+            [Button.inline("Close", data="close_alive_message")]
+        ]
+
+        if selected_video_message.video:
+            await asst.send_file(
+                event.chat.id,
+                file=selected_video_message.video,
+                caption=message_text,
+                parse_mode="html",
+                buttons=buttons # Add the buttons here
+            )
+        else:
+            await event.respond("Selected message does not contain a video.")
+
+    except Exception as e:
+        await event.respond(f"An error occurred: {e}")
+
+# --- You need a handler for the 'Close' button callback ---
+@callback(data="close_alive_message"))
+async def close_message_callback(event):
+    await event.delete() # Deletes the message where the button was pressed
+    await event.answer("Message closed!") # Optional: show a small notification to the user
