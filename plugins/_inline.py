@@ -283,14 +283,10 @@ async def _(e):
 
 
 
-@callback(data="tutupbotol", owner=False)
-async def tutupbotol(event):
-    await event.delete()
-    
-    
-    """await event.edit(
-        buttons=Button.inline("🏡 Modules 🏡", data="uh_Official_"),
-    )"""
+@callback(data=re.compile(b"pmclose"))
+async def pmclose(event):
+    if event.query.user_id == OWNER_ID:
+        await event.delete()
 
 
 def page_num(index, key):
@@ -318,7 +314,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="ownr"))
+    nav_buttons.append(Button.inline("×", data="pmclose"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -330,7 +326,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="ownr")])
+        new_.append([Button.inline("×", data="pmclose")])
 
     return new_
 
