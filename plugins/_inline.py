@@ -282,13 +282,9 @@ async def _(e):
     await e.edit(buttons=button, link_preview=False)
 
 
-
 @callback(data="pmclose")
 async def pmclose(event):
-    if event.query.user_id == OWNER_ID:
-        await event.delete()
-    else:
-        await event.answer("You are not authorized to close this private message.", alert=True)
+    await event.delete()
 
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
