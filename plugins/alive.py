@@ -197,7 +197,6 @@ async def live_video(event):
         if selected_video_message.video:
             await asst.send_file(
                 event.chat.id,
-                file=selected_video_message.video,
                 caption=message_text,
                 parse_mode="html",
                 buttons=buttons # Add the buttons here
