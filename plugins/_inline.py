@@ -283,7 +283,7 @@ async def _(e):
 
 
 
-@callback(data=re.compile(b"pmclose"))
+@callback(data="pmclose")
 async def pmclose(event):
     if event.query.user_id == OWNER_ID:
         await event.delete()
