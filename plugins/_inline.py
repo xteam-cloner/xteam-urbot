@@ -19,7 +19,7 @@ from xteam._misc._assistant import callback, in_pattern
 from xteam.dB._core import HELP, LIST
 from xteam.fns.helper import gen_chlog, time_formatter, updater
 from xteam.fns.misc import split_list
-
+from . import OWNER_ID
 from . import (
     HNDLR,
     LOGS,
@@ -287,7 +287,8 @@ async def _(e):
 async def pmclose(event):
     if event.query.user_id == OWNER_ID:
         await event.delete()
-
+    else:
+        await event.answer("You are not authorized to close this private message.", alert=True)
 
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
