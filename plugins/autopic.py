@@ -6,7 +6,7 @@ from random import shuffle
 from telethon.tl.functions.photos import UploadProfilePhotoRequest
 
 from xteam.fns.helper import download_file
-from xteam.fns.tools import get_google_images # Assuming get_google_images needs a query
+from xteam.fns.tools import get_google_images # Assuming get_google_images needs a query and is async
 
 from . import LOGS, get_help, get_string, udB, ultroid_bot, ultroid_cmd
 
@@ -22,8 +22,8 @@ async def autopic(e):
     if not search:
         return await e.eor(get_string("autopic_1"), time=5)
     e = await e.eor(get_string("com_1"))
-    # Pass the 'search' query to get_google_images()
-    gi = get_google_images(search) # Corrected: passing 'search'
+    # AWAIT the call to get_google_images()
+    gi = await get_google_images(search) # Corrected: AWAITING the function call
     args = {
         "keywords": search,
         "limit": 50,
@@ -58,8 +58,8 @@ if search := udB.get_key("AUTOPIC"):
     async def autopic_func():
         search = udB.get_key("AUTOPIC")
         if images.get(search) is None:
-            # Pass the 'search' query to get_google_images() here as well
-            gi_instance = get_google_images(search) # Corrected: passing 'search'
+            # AWAIT the call to get_google_images() here as well
+            gi_instance = await get_google_images(search) # Corrected: AWAITING the function call
             try:
                 pth = await gi_instance.download({"keywords": search, "limit": 1}) # Limit 1 for a single random image
                 ok = pth[0][search]
@@ -86,4 +86,3 @@ if search := udB.get_key("AUTOPIC"):
         schedule.start()
     except ModuleNotFoundError as er:
         LOGS.error(f"autopic: '{er.name}' not installed.")
-                            
