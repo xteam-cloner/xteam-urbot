@@ -183,10 +183,7 @@ async def alive_inline_handler(ult):
     # Menggabungkan tombol dalam list of lists untuk 'buttons' parameter.
     buttons_markup = [
     [
-        Button.inline("🏡 Modules 🏡", data="uh_Official_"), # New data for modules
-    ],
-    [
-        Button.inline("❌ Close ❌", data="close_alive_message"), # Separate close button
+        Button.inline("🏡 Modules 🏡", data="b'delete_this_message"), # New data for modules
     ],
     ]
     
@@ -200,21 +197,23 @@ async def alive_inline_handler(ult):
     await ult.answer([result], cache_time=0)
 
 
-from telethon import events
-# ... (impor dan inisialisasi klien lainnya) ...
-
-@client.on(events.CallbackQuery(data=b'close_alive_message'))
-async def close_message_handler(event):
+@client.on(events.CallbackQuery(data=b'delete_this_message'))
+async def handle_delete_callback(event):
     """
-    Handler untuk tombol 'Close' pada pesan alive.
+    Menangani callback dari tombol 'Hapus Pesan Ini'.
     """
-    # Menjawab callback terlebih dahulu
-    await event.answer("Menutup pesan...", alert=False)
+    print(f"Callback diterima dari chat ID: {event.chat_id}, pesan ID: {event.message_id}")
 
-    # Mengedit pesan agar tidak lagi menampilkan status bot
-    # dan mungkin menghapus tombol.
-    await event.edit(
-        "Pesan status telah ditutup.",
-        buttons=None # Hapus semua tombol
-    )
-    print(f"Pesan ID {event.message.id} di chat {event.chat_id} telah diedit (ditutup).")
+    # Dapatkan ID pesan dan ID chat dari callback query
+    message_id_to_delete = event.message_id
+    chat_id_of_message = event.chat_id
+
+    try:
+        # Hapus pesan yang terkait dengan callback query
+        await client.delete_messages(chat_id_of_message, message_id_to_delete)
+        print(f"Pesan dengan ID {message_id_to_delete} di chat {chat_id_of_message} telah dihapus.")
+        # Opsional: Beri tahu pengguna bahwa pesan telah dihapus
+        await event.answer("Pesan berhasil dihapus!", alert=False)
+    except Exception as e:
+        print(f"Gagal menghapus pesan: {e}")
+        await event.answer("Gagal menghapus pesan.", alert=True)
