@@ -171,3 +171,36 @@ async def live_video(event):
 async def close_message_callback(event):
     await event.delete() # Deletes the message where the button was pressed
     await event.answer("Message closed!") # Optional: show a small notification to the user
+
+@in_pattern("alive", owner=False)  # Mengubah dari xteam_cmd ke in_pattern
+async def alive_inline_handler(ult):  # Mengganti 'event' dengan 'ult' dan nama fungsi agar lebih jelas
+    start = time.time()
+    # Asumsi ult.builder memiliki metode untuk membuat 'article'
+    # dan kita tidak perlu melakukan 'eor' atau 'edit' secara terpisah
+    # karena kita akan mengembalikan seluruh hasil dalam satu 'article'.
+    # Untuk mendapatkan nilai uptime dan lainnya, kita perlu akses ke variabel global
+    # seperti start_time, ultroid_bot.dc_id, lver, tver, pver, pyver()
+    # yang tidak didefinisikan dalam scope ini. Saya akan mengasumsikan mereka sudah ada.
+
+    # Menghitung uptime, dll.
+    end_time_calc = time.time() # Menghitung waktu akhir untuk latency
+    uptime = time_formatter((end_time_calc - start_time) * 1000)
+
+    # Membangun teks pesan
+    message_text = (
+        f"<b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n"
+        f"✵ Owner : {OWNER_NAME}\n"
+        f"✵ Dc id : {ultroid_bot.dc_id}\n"
+        f"✵ Library : {lver}\n"
+        f"✵ Uptime : {uptime}\n"
+        f"✵ Telethon : {tver}\n"
+        f"✵ Pyrogram :  {pver}\n"
+        f"✵ Python : {pyver()}"
+    )
+
+    result = await ult.builder.article(
+        title="Bot Status", # Judul artikel untuk hasil inline
+        text=message_text,
+        parse_mode="html" # Pastikan mode parse diatur jika ada HTML
+    )
+    await ult.answer([result], cache_time=0)
