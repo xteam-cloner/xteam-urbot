@@ -180,23 +180,22 @@ async def alive_inline_handler(ult):
     uptime = time_formatter((time.time() - start_time) * 1000)
     
     message_text = (
-        f"<b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n"
+        f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n"
         f"✵ Owner : {OWNER_NAME}\n"
         f"✵ Dc id : {ultroid_bot.dc_id}\n"
         f"✵ Library : {lver}\n"
         f"✵ Uptime : {uptime}\n"
         f"✵ Telethon : {tver}\n"
         f"✵ Pyrogram :  {pver}\n"
-        f"✵ Python : {pyver()}"
+        f"✵ Python : {pyver()}</blockquote>"
     )
-
-    # --- Perubahan di sini: Menggunakan kelas Button langsung ---
-    # Membuat objek Button dari Telethon
-    close_button = Button.inline("❌ Close", data="close_message")
 
     # Menggabungkan tombol dalam list of lists untuk 'buttons' parameter.
     buttons_markup = [
-        [close_button]
+    [
+        Button.inline("🏡 Modules 🏡", data="close_message"),
+    ],
+    
     ]
 
     result = await ult.builder.article(
@@ -211,7 +210,7 @@ async def alive_inline_handler(ult):
 @in_pattern(callback="close_message")
 async def close_message_handler(ult):
     try:
-        await ult.delete_message()
+        await ult.delete()
     except MessageDeleteForbiddenError:
         await ult.edit_message(text="Pesan ini telah ditutup.")
     except Exception as e:
