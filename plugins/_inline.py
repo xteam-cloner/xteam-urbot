@@ -14,7 +14,7 @@ from git import Repo
 from telethon import Button
 from telethon.tl.types import InputWebDocument, Message
 from telethon.utils import resolve_bot_file_id
-
+from assistant import *
 from xteam._misc._assistant import callback, in_pattern
 from xteam.dB._core import HELP, LIST
 from xteam.fns.helper import gen_chlog, time_formatter, updater
@@ -323,7 +323,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="pmclose")])
+        new_.append([Button.inline("×", data="closeit")])
 
     return new_
 
