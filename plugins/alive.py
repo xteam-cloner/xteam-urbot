@@ -183,7 +183,7 @@ async def alive_inline_handler(ult):
     # Menggabungkan tombol dalam list of lists untuk 'buttons' parameter.
     buttons_markup = [
     [
-        Button.inline("🏡 Modules 🏡", data="delete_this_message"), # New data for modules
+        Button.inline("🏡 Modules 🏡",b'delete_this_message'), # New data for modules
     ],
     ]
     
@@ -197,7 +197,7 @@ async def alive_inline_handler(ult):
     await ult.answer([result], cache_time=0)
 
 
-@client.on(events.CallbackQuery(data="delete_this_message"))
+@client.on(events.CallbackQuery(b'delete_this_message'))
 async def handle_delete_callback(event):
     """
     Menangani callback dari tombol 'Hapus Pesan Ini'.
