@@ -173,48 +173,34 @@ async def close_message_callback(event):
     await event.answer("Message closed!") # Optional: show a small notification to the user
 
 @in_pattern("aline", owner=False)
-async def alive_line_handler(ult):
-    start = time.time() # Waktu mulai eksekusi handler
+async def alive_inline_handler(ult):
+    start = time.time()
 
-    # Menghitung uptime dan informasi lainnya
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    # Membangun teks pesan status
+    end_time_calc = time.time()
+    uptime = time_formatter((end_time_calc - start_time) * 1000)
+
     message_text = (
         f"<b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n"
         f"✵ Owner : {OWNER_NAME}\n"
         f"✵ Dc id : {ultroid_bot.dc_id}\n"
-        f"✵ Library : {lver}\n"
+        f"✵ Library : {lver}\n" # Jika ini versi python-telegram-bot, bukan masalah
         f"✵ Uptime : {uptime}\n"
         f"✵ Telethon : {tver}\n"
         f"✵ Pyrogram :  {pver}\n"
         f"✵ Python : {pyver()}"
     )
 
-    # --- Menambahkan tombol "Close" ---
-    # Kita membuat satu baris tombol yang berisi tombol "Close"
-    # 'data="close_message"' adalah data callback yang akan diterima oleh handler callback
-    close_button_row = ult.builder.button_row(
-        ult.builder.button("❌ Close", data="close_message")
-    )
+    # --- Bagian yang Diubah untuk Tombol "Close" ---
+    # Membuat tombol "Close" menggunakan ult.builder.button
+    # Kemudian membungkusnya dalam list of lists untuk 'buttons' parameter.
+    buttons_markup = [
+        [ult.builder.button("❌ Close", data="close_message")]
+    ]
 
     result = await ult.builder.article(
         title="Bot Status",
         text=message_text,
         parse_mode="html",
-        buttons=[close_button_row] # Menambahkan tombol "Close" sebagai baris tombol
+        buttons=buttons_markup # Menyertakan tombol "Close"
     )
     await ult.answer([result], cache_time=0)
-
-# --- Handler untuk tombol "Close" ---
-# Anda perlu membuat handler ini agar tombol "Close" berfungsi.
-# Ini akan mendengarkan callback_data "close_message".
-@in_pattern(callback="close_message")
-async def close_message_handler(ult):
-    try:
-        await ult.delete_message() # Mencoba menghapus pesan asli yang memiliki tombol ini
-    except Exception as e:
-        print(f"Gagal menghapus pesan: {e}")
-        # Jika pesan tidak bisa dihapus (misalnya, bukan di obrolan pribadi bot),
-        # Anda bisa mengeditnya agar terlihat ditutup.
-        await ult.edit_message(text="Pesan status ditutup.")
