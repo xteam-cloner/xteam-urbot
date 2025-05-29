@@ -311,7 +311,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="pmclose"))
+    nav_buttons.append(Button.inline("×", data="closeit"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -327,6 +327,13 @@ def page_num(index, key):
 
     return new_
 
+
+@callback("closeit")
+async def closet(lol):
+    try:
+        await lol.delete()
+    except MessageDeleteForbiddenError:
+        await lol.answer("MESSAGE_TOO_OLD", alert=True)
 # --------------------------------------------------------------------------------- #
 
 
