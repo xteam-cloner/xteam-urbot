@@ -17,11 +17,6 @@ from xteam._misc import SUDO_M, owner_and_sudos
 from xteam.dB.base import KeyManager
 from xteam.fns.helper import inline_mention
 from strings import get_string
-
-from xteam._misc import SUDO_M, owner_and_sudos
-from xteam.dB.base import KeyManager
-from xteam.fns.helper import inline_mention
-
 from platform import python_version as pyver
 from pyrogram import __version__ as pver
 from telegram import __version__ as lver
@@ -205,6 +200,21 @@ async def alive_inline_handler(ult):
     await ult.answer([result], cache_time=0)
 
 
-@callback(data="close_alive_message")
-async def close_inline_handler(ult):
-    await ult.delete() # Deletes the message where the button was pressed
+from telethon import events
+# ... (impor dan inisialisasi klien lainnya) ...
+
+@client.on(events.CallbackQuery(data=b'close_alive_message'))
+async def close_message_handler(event):
+    """
+    Handler untuk tombol 'Close' pada pesan alive.
+    """
+    # Menjawab callback terlebih dahulu
+    await event.answer("Menutup pesan...", alert=False)
+
+    # Mengedit pesan agar tidak lagi menampilkan status bot
+    # dan mungkin menghapus tombol.
+    await event.edit(
+        "Pesan status telah ditutup.",
+        buttons=None # Hapus semua tombol
+    )
+    print(f"Pesan ID {event.message.id} di chat {event.chat_id} telah diedit (ditutup).")
