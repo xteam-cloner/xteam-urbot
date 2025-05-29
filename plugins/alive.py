@@ -166,11 +166,6 @@ async def live_video(event):
     except Exception as e:
         await event.respond(f"An error occurred: {e}")
 
-# --- You need a handler for the 'Close' button callback ---
-@callback(data="close_alive_message")
-async def close_message_callback(event):
-    await event.delete() # Deletes the message where the button was pressed
-    await event.answer("Message closed!") # Optional: show a small notification to the user
 
 @in_pattern("aline", owner=False)
 async def alive_inline_handler(ult):
@@ -206,12 +201,7 @@ async def alive_inline_handler(ult):
     )
     await ult.answer([result], cache_time=0)
 
-# --- Handler untuk tombol "Close" (tetap sama) ---
-@in_pattern(callback="close_message")
-async def close_message_handler(ult):
-    try:
-        await ult.delete()
-    except MessageDeleteForbiddenError:
-        await ult.edit_message(text="Pesan ini telah ditutup.")
-    except Exception as e:
-        print(f"Gagal menghapus/mengedit pesan: {e}")
+
+@callback(data="close_alive_message")
+async def close_inline_handler(ult):
+    await ult.delete() # Deletes the message where the button was pressed
