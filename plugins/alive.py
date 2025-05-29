@@ -176,25 +176,27 @@ async def close_message_callback(event):
 async def alive_inline_handler(ult):
     start = time.time()
 
-    end_time_calc = time.time()
-    uptime = time_formatter((end_time_calc - start_time) * 1000)
-
+    end = round((time.time() - start) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 1000)
+    
     message_text = (
         f"<b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n"
         f"✵ Owner : {OWNER_NAME}\n"
         f"✵ Dc id : {ultroid_bot.dc_id}\n"
-        f"✵ Library : {lver}\n" # Jika ini versi python-telegram-bot, bukan masalah
+        f"✵ Library : {lver}\n"
         f"✵ Uptime : {uptime}\n"
         f"✵ Telethon : {tver}\n"
         f"✵ Pyrogram :  {pver}\n"
         f"✵ Python : {pyver()}"
     )
 
-    # --- Bagian yang Diubah untuk Tombol "Close" ---
-    # Membuat tombol "Close" menggunakan ult.builder.button
-    # Kemudian membungkusnya dalam list of lists untuk 'buttons' parameter.
+    # --- Perubahan di sini: Menggunakan kelas Button langsung ---
+    # Membuat objek Button dari Telethon
+    close_button = Button.inline("❌ Close", data="close_message")
+
+    # Menggabungkan tombol dalam list of lists untuk 'buttons' parameter.
     buttons_markup = [
-        [ult.builder.button("❌ Close", data="close_message")]
+        [close_button]
     ]
 
     result = await ult.builder.article(
@@ -204,3 +206,13 @@ async def alive_inline_handler(ult):
         buttons=buttons_markup # Menyertakan tombol "Close"
     )
     await ult.answer([result], cache_time=0)
+
+# --- Handler untuk tombol "Close" (tetap sama) ---
+@in_pattern(callback="close_message")
+async def close_message_handler(ult):
+    try:
+        await ult.delete_message()
+    except MessageDeleteForbiddenError:
+        await ult.edit_message(text="Pesan ini telah ditutup.")
+    except Exception as e:
+        print(f"Gagal menghapus/mengedit pesan: {e}")
