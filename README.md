@@ -51,6 +51,10 @@ bash startup
 ✨ For getting out from screen session press
 • Ctrl+a and Ctrl+d
 
+<a href="https://heroku.com/deploy?template=https://github.com/xteam-cloner/xteam-urbot">
+  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
+</a>
+
 ✨ Termux Session Gen
 ```console
 apt update && apt upgrade -y && apt install python wget -y && pip install Telethon && wget https://raw.githubusercontent.com/xteam-cloner/Userbotx/dev/resources/session/ssgen.py && python ssgen.py
