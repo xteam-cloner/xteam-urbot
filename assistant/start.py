@@ -103,6 +103,74 @@ async def closet(lol):
         await lol.answer("MESSAGE_TOO_OLD", alert=True)
 
 
+"""@asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
+async def ultroid(event):
+    args = event.pattern_match.group(1).strip()
+    keym = KeyManager("BOT_USERS", cast=list)
+    if not keym.contains(event.sender_id) and event.sender_id not in owner_and_sudos():
+        keym.add(event.sender_id)
+        kak_uiw = udB.get_key("OFF_START_LOG")
+        if not kak_uiw or kak_uiw != True:
+            msg = f"{inline_mention(event.sender)} `[{event.sender_id}]` started your [Assistant bot](@{asst.me.username})."
+            buttons = [[Button.inline("Info", "itkkstyo")]]
+            if event.sender.username:
+                buttons[0].append(
+                    Button.mention(
+                        "User", await event.client.get_input_entity(event.sender_id)
+                    )
+                )
+            await event.client.send_message(
+                udB.get_key("LOG_CHANNEL"), msg, buttons=buttons
+            )
+    if event.sender_id not in SUDO_M.fullsudos:
+        ok = ""
+        me = inline_mention(ultroid_bot.me)
+        mention = inline_mention(event.sender)
+        if args and args != "set":
+            await get_stored_file(event, args)
+        if not udB.get_key("STARTMSG"):
+            if udB.get_key("PMBOT"):
+                ok = "You can contact my master using this bot!!\n\nSend your Message, I will Deliver it To Master."
+            await event.reply(
+                f"Hey there {mention}, this is Assistant of {me}!\n\n{ok}",
+                file=udB.get_key("STARTMEDIA"),
+                buttons=[Button.inline("Info.", data="ownerinfo")]
+                if Owner_info_msg
+                else None,
+            )
+        else:
+            await event.reply(
+                udB.get_key("STARTMSG").format(me=me, mention=mention),
+                file=udB.get_key("STARTMEDIA"),
+                buttons=[Button.inline("Info.", data="ownerinfo")]
+                if Owner_info_msg
+                else None,
+            )
+    else:
+        name = get_display_name(event.sender)
+        if args == "set":
+            await event.reply(
+                "Choose from the below options -",
+                buttons=_settings,
+            )
+        elif args:
+            await get_stored_file(event, args)
+        else:
+            await event.respond(
+                f"<blockquote>Hey {name}. Please browse through the options</blockquote>",
+                message_effect_id=5104841245755180586,
+                buttons=_start,
+                parse_mode="html",
+            )
+            await event.react("🔥")  # Add a thumbs-up emoji reaction
+"""
+
+# Assuming 'start_photo.jpg' is in a 'media' folder relative to your bot's root
+# You'll need to import os if you use relative paths
+import os 
+
+# ... (rest of your imports)
+
 @asst_cmd(pattern="start( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
 async def ultroid(event):
     args = event.pattern_match.group(1).strip()
@@ -128,89 +196,29 @@ async def ultroid(event):
         mention = inline_mention(event.sender)
         if args and args != "set":
             await get_stored_file(event, args)
-        if not udB.get_key("STARTMSG"):
-            if udB.get_key("PMBOT"):
-                ok = "You can contact my master using this bot!!\n\nSend your Message, I will Deliver it To Master."
-            await event.reply(
-                f"Hey there {mention}, this is Assistant of {me}!\n\n{ok}",
-                file=udB.get_key("STARTMEDIA"),
-                buttons=[Button.inline("Info.", data="ownerinfo")]
-                if Owner_info_msg
-                else None,
-            )
-        else:
-            await event.reply(
-                udB.get_key("STARTMSG").format(me=me, mention=mention),
-                file=udB.get_key("STARTMEDIA"),
-                buttons=[Button.inline("Info.", data="ownerinfo")]
-                if Owner_info_msg
-                else None,
-            )
-    else:
-        name = get_display_name(event.sender)
-        if args == "set":
-            await event.reply(
-                "Choose from the below options -",
-                buttons=_settings,
-            )
-        elif args:
-            await get_stored_file(event, args)
-        else:
-            await event.respond(
-                f"<blockquote>Hey {name}. Please browse through the options</blockquote>",
-                buttons=_start,
-                parse_mode="html",
-            )
-            await event.react("🔥")  # Add a thumbs-up emoji reaction
+        
+        # Define the path to your photo
+        # You can replace this with a direct file path, e.g., "path/to/your/photo.jpg"
+        # Or if you've uploaded it to Telegram and have its file ID, you can use that
+        photo_path = "https://files.catbox.moe/20rxet.jpg" # Example: Assuming 'media' folder
 
-@asst_cmd(pattern="startt( (.*)|$)", forwards=False, func=lambda x: not x.is_group)
-async def ultroid(event):
-    args = event.pattern_match.group(1).strip()
-    keym = KeyManager("BOT_USERS", cast=list)
-    if not keym.contains(event.sender_id) and event.sender_id not in owner_and_sudos():
-        keym.add(event.sender_id)
-        kak_uiw = udB.get_key("OFF_START_LOG")
-        if not kak_uiw or kak_uiw != True:
-            msg = f"{inline_mention(event.sender)} `[{event.sender_id}]` started your [Assistant bot](@{asst.me.username})."
-            buttons = [[Button.inline("Info", "itkkstyo")]]
-            if event.sender.username:
-                buttons[0].append(
-                    Button.mention(
-                        "User", await event.client.get_input_entity(event.sender_id)
-                    )
-                )
-            await event.client.send_message(
-                udB.get_key("LOG_CHANNEL"), msg, buttons=buttons
-            )
-    if event.sender_id not in SUDO_M.fullsudos:
-        ok = ""
-        me = inline_mention(ultroid_bot.me)
-        mention = inline_mention(event.sender)
-        if args and args != "set":
-            await get_stored_file(event, args)
         if not udB.get_key("STARTMSG"):
             if udB.get_key("PMBOT"):
                 ok = "You can contact my master using this bot!!\n\nSend your Message, I will Deliver it To Master."
             await event.reply(
                 f"Hey there {mention}, this is Assistant of {me}!\n\n{ok}",
-                file=udB.get_key("STARTMEDIA"),
+                file=photo_path,  # Use your photo path here
                 buttons=[Button.inline("Info.", data="ownerinfo")]
                 if Owner_info_msg
                 else None,
-                message_effect=MessageEffect(  # Tambahkan efek pesan di sini
-                    type="Popout"  # Contoh efek: Popout, другую efek bisa dicoba
-                )
             )
         else:
             await event.reply(
                 udB.get_key("STARTMSG").format(me=me, mention=mention),
-                file=udB.get_key("STARTMEDIA"),
+                file=photo_path,  # Use your photo path here
                 buttons=[Button.inline("Info.", data="ownerinfo")]
                 if Owner_info_msg
                 else None,
-                message_effect=MessageEffect(  # Tambahkan efek pesan di sini
-                    type="Popout"  # Contoh efek: Popout, другу efek bisa dicoba
-                )
             )
     else:
         name = get_display_name(event.sender)
@@ -218,24 +226,17 @@ async def ultroid(event):
             await event.reply(
                 "Choose from the below options -",
                 buttons=_settings,
-                message_effect=MessageEffect(  # Tambahkan efek pesan di sini
-                    type="Popout"  # Contoh efek: Popout, другу efek bisa dicoba
-                )
             )
         elif args:
             await get_stored_file(event, args)
         else:
             await event.respond(
                 f"<blockquote>Hey {name}. Please browse through the options</blockquote>",
+                message_effect_id=5104841245755180586,
                 buttons=_start,
                 parse_mode="html",
-                message_effect=MessageEffect(  # Tambahkan efek pesan di sini
-                    type="Popout"  # Contoh efek: Popout, другу efek bisa dicoba
-                )
             )
-            await event.react("🔥")  # Add a thumbs-up emoji reaction
             
-
 
 @callback("itkkstyo", owner=True)
 async def ekekdhdb(e):
@@ -247,6 +248,7 @@ async def ekekdhdb(e):
 async def ultroid(event):
     await event.edit(
         get_string("ast_3").format(OWNER_NAME),
+        message_effect_id=5104841245755180586,
         buttons=_start,
     )
 
