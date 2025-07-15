@@ -1,5 +1,6 @@
 # Important Requirements here.
-telethon==1.40.0
+#telethon==1.40.0
+telethon-patch
 aiofiles==24.1.0
 aiohttp==3.10.3
 asyncio==3.4.3
@@ -7,8 +8,9 @@ httpx==0.25.0
 motor==3.6.0
 numpy==2.2.5
 pillow==9.5.0
-ntgcalls==1.3.3
-py-tgcalls==2.1.1
+pytgcalls==3.0.0.dev24
+#ntgcalls==1.3.3
+#py-tgcalls==2.1.1
 python-dotenv==1.0.1
 tgcrypto==1.2.5
 python-decouple
@@ -49,6 +51,12 @@ telegraph
 tgcrypto
 youtube-search-python
 yt-dlp
+flask
+flask_restful
+wget
+catbox-uploader
+cloudscraper
+git+https://github.com/LonamiWebs/Telethon.git
 git+https://github.com/New-dev0/instagrapi.git@39df1b1#egg=instagrapi
 git+https://github.com/xteam-cloner/xteam.git
 git+https://github.com/buddhhu/img2html.git@c44170d#egg=img2html
