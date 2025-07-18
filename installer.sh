@@ -3,12 +3,12 @@
 REPO="https://github.com/xteam-cloner/xteam-urbot.git"
 CURRENT_DIR="$(pwd)"
 ENV_FILE_PATH=".env"
-DIR="/root/xteam_cloner"
+DIR="/root/xteam-cloner"
 
 while [ $# -gt 0 ]; do
     case "$1" in
     --dir=*)
-        DIR="${1#*=}" || DIR="/root/xteam_cloner"
+        DIR="${1#*=}" || DIR="/root/xteam-cloner"
         ;;
     --branch=*)
         BRANCH="${1#*=}" || BRANCH="main"
