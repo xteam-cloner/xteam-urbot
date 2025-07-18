@@ -11,7 +11,7 @@
     ],
     "repository": "https://github.com/xteam-cloner/xteam-urbot",
     "website": "https://ultroid.tech",
-    "success_url": "https://t.me/TeamUltroid",
+    "success_url": "https://t.me/xteam_cloner",
     "stack": "container",
     "env": {
         "API_ID": {
@@ -28,12 +28,8 @@
             "description": "Session String (telethon or pyrogram) for your telegram user account. The userbot will NOT work without a session string!!",
             "value": ""
         },
-        "REDIS_URI": {
+        "MONGO_URI": {
             "description": "Redis endpoint URL, from redislabs.com",
-            "value": ""
-        },
-        "REDIS_PASSWORD": {
-            "description": "Redis endpoint password, from redislabs.com",
             "value": ""
         },
         "HEROKU_API": {
