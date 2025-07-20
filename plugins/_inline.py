@@ -136,14 +136,8 @@ async def setting(event):
         link_preview=False,
         buttons=[
             [
-                Button.inline("•Pɪɴɢ•", data="pkng"),
-                Button.inline("•Uᴘᴛɪᴍᴇ•", data="upp"),
+                Button.inline("🏡 Modules 🏡", data="uh_Official_")
             ],
-            [
-                Button.inline("•Stats•", data="alive"),
-                Button.inline("•Uᴘᴅᴀᴛᴇ•", data="doupdate"),
-            ],
-            [Button.inline("🏡 Modules 🏡", data="uh_Official_")],
         ],
     )
 
