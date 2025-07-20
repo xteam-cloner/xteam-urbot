@@ -110,7 +110,7 @@ async def _help(ult):
             await ult.eor("Error 🤔 occured.")
     else:
         try:
-            results = await ult.client.inline_query(asst.me.username, "ownr")
+            results = await ult.client.inline_query(asst.me.username, "help")
         except BotMethodInvalidError:
             z = []
             for x in LIST.values():
