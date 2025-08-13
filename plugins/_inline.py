@@ -121,7 +121,7 @@ async def inline_handler(ult):
         len(key),
     )
     if inline_pic():
-        result = await event.builder.photo(
+        result = await ult.builder.photo(
             file=inline_pic(),
             link_preview=False,
             text=text,
