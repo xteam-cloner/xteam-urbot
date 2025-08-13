@@ -85,6 +85,30 @@ async def inline_alive(o):
         switch_pm_param="start",
     )
 
+@in_pattern("ultd", owner=True)
+async def inline_handler(event):
+    z = []
+    for x in LIST.values():
+        z.extend(x)
+    text = get_string("inline_4").format(
+        OWNER_NAME,
+        len(HELP.get("Official", [])),
+        len(HELP.get("Addons", [])),
+        len(z),
+    )
+    if inline_pic():
+        result = await event.builder.photo(
+            file=inline_pic(),
+            link_preview=False,
+            text=text,
+            buttons=_main_help_menu,
+        )
+    else:
+        result = await event.builder.article(
+            title="Ultroid Help Menu", text=text, buttons=_main_help_menu
+        )
+    await event.answer([result], private=True, cache_time=300, gallery=True)
+    
 
 @in_pattern("help", owner=False)
 async def inline_handler(ult):
@@ -96,12 +120,21 @@ async def inline_handler(ult):
         len(HELP.get("Addons", [])),
         len(key),
     )
-    result = await ult.builder.article(
-        title="Menu Help", text=text, buttons=page_num(count, key)
-    )
-    await ult.answer([result], cache_time=0)
+    if inline_pic():
+        result = await event.builder.photo(
+            file=inline_pic(),
+            link_preview=False,
+            text=text,
+            buttons=page_num(count, key),
+        )
+    else:
+        result = await ult.builder.article(
+            title="Menu Help", text=text, buttons=page_num(count, key)
+        )
+        await ult.answer([result], cache_time=0)
 
-    
+
+
 @in_pattern("pasta", owner=True)
 async def _(event):
     ok = event.text.split("-")[1]
