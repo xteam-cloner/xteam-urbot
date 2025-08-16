@@ -120,18 +120,10 @@ async def inline_handler(ult):
         len(HELP.get("Addons", [])),
         len(key),
     )
-    if inline_pic():
-        result = await ult.builder.photo(
-            file=inline_pic(),
-            link_preview=False,
-            text=text,
-            buttons=page_num(count, key),
-        )
-    else:
-        result = await ult.builder.article(
-            title="Menu Help", text=text, buttons=page_num(count, key)
-        )
-        await ult.answer([result], cache_time=0)
+    result = await ult.builder.article(
+        title="Menu Help", text=text, buttons=page_num(count, key)
+    )
+    await ult.answer([result], cache_time=0)
 
 
 
