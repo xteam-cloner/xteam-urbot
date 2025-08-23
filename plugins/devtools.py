@@ -385,3 +385,103 @@ async def doie(e):
         await eor(msg, o_cpp)
     os.remove("CppUltroid")
     os.remove("cpp-ultroid.cpp")
+
+@ultroid_cmd(pattern="bash", fullsudo=True, only_devs=True)
+async def _(event):
+    carb = False
+    rayso = False
+    yamlf = False
+    
+    try:
+        parts = event.text.split(" ", maxsplit=1)
+        if len(parts) < 2:
+            return await event.eor(get_string("devs_1"), time=10)
+        
+        cmd_parts = parts[1].split(maxsplit=1)
+        cmd_option = cmd_parts[0]
+        
+        if cmd_option in ["-c", "--carbon"]:
+            carb = True
+            cmd = cmd_parts[1]
+        elif cmd_option in ["-r", "--rayso"]:
+            rayso = True
+            cmd = cmd_parts[1]
+        else:
+            cmd = parts[1]
+            
+    except IndexError:
+        return await event.eor(get_string("devs_1"), time=10)
+
+    xx = await event.eor(get_string("com_1"))
+    reply_to_id = event.reply_to_msg_id or event.id
+    stdout, stderr = await bash(cmd, run_code=1)
+
+    OUT = f"**☞ BASH\n\n• COMMAND:**\n> `{cmd}` \n\n"
+
+    if stderr:
+        OUT += f"**• ERROR:** \n> `{stderr}`\n\n"
+    
+    if stdout:
+        use_visualizer = (carb or udB.get_key("CARBON_ON_BASH") or rayso or udB.get_key("RAYSO_ON_BASH"))
+        can_use_visualizer = (event.is_private or event.chat.admin_rights or event.chat.creator or event.chat.default_banned_rights.embed_links)
+        
+        if use_visualizer and can_use_visualizer:
+            is_rayso = rayso or udB.get_key("RAYSO_ON_BASH")
+            try:
+                li = await Carbon(
+                    code=stdout,
+                    file_name="bash",
+                    download=True,
+                    backgroundColor=choice(ATRA_COL),
+                    rayso=is_rayso,
+                )
+                if isinstance(li, dict):
+                    OUT += f"**• OUTPUT:**\nUnknown Response from Visualizer: `{li}`"
+                else:
+                    url = f"https://graph.org{uf(li)[-1]}"
+                    OUT = f"[\xad]({url}){OUT}"
+                    OUT += "**• OUTPUT:**"
+                    remove(li)
+            except Exception as e:
+                LOGS.exception(e)
+                stdout_formatted = f"> `{stdout}`"
+                OUT += f"**• OUTPUT:**\n{stdout_formatted}"
+        else:
+            if "pip" in cmd and all(":" in line for line in stdout.split("\n")):
+                try:
+                    load = safe_load(stdout)
+                    stdout_yaml = ""
+                    for data, res in load.items():
+                        res = res or ""
+                        res_fmt = f"`{res}`" if res and "http" not in str(res) else res
+                        stdout_yaml += f"**{data}** : {res_fmt}\n"
+                    stdout = stdout_yaml
+                    yamlf = True
+                except Exception as er:
+                    stdout = f"> `{stdout}`"
+                    LOGS.exception(er)
+            else:
+                stdout = f"> `{stdout}`"
+            
+            OUT += f"**• OUTPUT:**\n{stdout}"
+    
+    if not stderr and not stdout:
+        OUT += "**• OUTPUT:**\n> `Success`"
+
+    if len(OUT) > 4096:
+        ultd = f"**• ERROR:** \n> `{stderr}`\n\n" if stderr else ""
+        ultd += f"**• OUTPUT:**\n> `{stdout}`" if stdout else "**• OUTPUT:**\n> `Success`"
+        with BytesIO(str.encode(ultd)) as out_file:
+            out_file.name = "bash.txt"
+            await event.client.send_file(
+                event.chat_id,
+                out_file,
+                force_document=True,
+                thumb=ULTConfig.thumb,
+                allow_cache=False,
+                caption=f"`{cmd}`" if len(cmd) < 998 else None,
+                reply_to=reply_to_id,
+            )
+            await xx.delete()
+    else:
+        await xx.edit(OUT, link_preview=not yamlf)
