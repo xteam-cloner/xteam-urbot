@@ -66,13 +66,13 @@ async def mention_user(user_id):
         print(f"Failed to mention user: {e}")
 
 
-@xteam_cmd(pattern="Cping$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     start = time.time()
-    x = await event.edit("ping")
-    end = round((time.time() - start) * 1000)  # Corrected to milliseconds
-    uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
-    await x.edit(f"Pong !! {end}ms\nUptime - {uptime}")
+    x = await event.eor("Pong !")
+    end = round((time.time() - start) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 1000)
+    await x.edit(get_string("ping").format(end, uptime))
 
 @xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def _(event):
