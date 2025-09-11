@@ -85,10 +85,10 @@ async def writer(e):
     font = ImageFont.truetype("resources/fonts/DroidSansMono.ttf", 20)
     x, y = 150, 150
     lines = text_set(text)
-    line_height = font.getbbox("hg")[3] - font.getbbox("hg")[1]
+    line_height = font.getbbox("hg")[3] - font.getbbox("hg")[1] + 10
     for line in lines:
         draw.text((x, y), line, fill=(1, 22, 55), font=font)
-        y = y + line_height - 5
+        y = y + line_height
     file = "ult.jpg"
     img.save(file)
     await e.reply(file=file)
