@@ -88,7 +88,7 @@ async def writer(e):
     line_height = font.getbbox("hg")[3] - font.getbbox("hg")[1]
     for line in lines:
         draw.text((x, y), line, fill=(1, 22, 55), font=font)
-        y = y + line_height - 5
+        y = y + line_height - 10
     file = "ult.jpg"
     img.save(file)
     await e.reply(file=file)
