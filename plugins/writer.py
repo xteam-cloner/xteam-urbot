@@ -82,7 +82,7 @@ async def writer(e):
     k = await e.eor(get_string("com_1"))
     img = Image.open("resources/extras/template.jpg")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("resources/fonts/assfont.ttf", 40)
+    font = ImageFont.truetype("resources/fonts/DroidSansMono.ttf", 40)
     x, y = 150, 140
     lines = text_set(text)
     line_height = font.getbbox("hg")[3] - font.getbbox("hg")[1]
