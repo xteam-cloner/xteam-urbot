@@ -80,7 +80,7 @@ async def writer(e):
     else:
         return await eod(e, get_string("writer_1"))
     k = await e.eor(get_string("com_1"))
-    img = Image.open("resources/extras/template.jpg")
+    img = Image.open("resources/extras/—Pngtree—a plain notepad with flowers_13244509.jpg.png")
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("resources/fonts/assfont.ttf", 25)
     x, y = 150, 140
