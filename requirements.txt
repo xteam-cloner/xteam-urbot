@@ -19,6 +19,7 @@ ApiNyaEr
 youtube-dl
 youtube-search==2.1.0
 pyrofork
+kurigram
 ffmpeg
 python-dateutil
 deep-translator
