@@ -11,6 +11,11 @@ from . import *
 
 REGEXA = r"^(?:(?:https|tg):\/\/)?(?:www\.)?(?:t\.me\/|openmessage\?)(?:(?:c\/(\d+))|(\w+)|(?:user_id\=(\d+)))(?:\/|&message_id\=)(\d+)(?:\?single)?$"
 
+# The original DL_DIR can be kept as a base path
+DL_DIR = "resources/downloads"
+
+# ... (other imports and functions remain the same) ...
+
 @ultroid_cmd(
     pattern="cmedia(?: |$)((?:.|\n)*)",
 )
@@ -41,20 +46,37 @@ async def fwd_dl(e):
         return await ghomst.edit(f"**Error:** `{ex}`")
 
     start_ = dt.now()
-    if msg and msg.media:
-        await ghomst.edit("`Uploading to chat...`")
-        try:
-            # Gunakan event.chat_id untuk mendapatkan ID chat saat ini
-            chat_id_tujuan = e.chat_id
-            await e.client.send_file(chat_id_tujuan, file=msg.media, caption="File downloaded from a forward-restricted message.")
-            
-            end_ = dt.now()
-            ts = time_formatter(((end_ - start_).seconds) * 1000)
-            await ghomst.edit(f"**Successfully uploaded to chat in {ts} !!**")
-        except Exception as err:
-            LOGS.exception(err)
-            return await ghomst.edit(f"**Failed to upload:** `{err}`")
 
+    # --- MODIFIED CODE START ---
+    # Create a chat-specific download directory
+    chat_dir = os.path.join(DL_DIR, str(e.chat_id))
+    os.makedirs(chat_dir, exist_ok=True)
+    # --- MODIFIED CODE END ---
+    
+    if (msg and msg.media) and hasattr(msg.media, "photo"):
+        # --- MODIFIED CODE START ---
+        dls = await e.client.download_media(msg, chat_dir)
+        # --- MODIFIED CODE END ---
+    elif (msg and msg.media) and hasattr(msg.media, "document"):
+        fn = msg.file.name or f"{channel}_{msg_id}{msg.file.ext}"
+        # --- MODIFIED CODE START ---
+        filename = rnd_filename(os.path.join(chat_dir, fn))
+        # --- MODIFIED CODE END ---
+        try:
+            dlx = await downloader(
+                filename,
+                msg.document,
+                ghomst,
+                time.time(),
+                f"Downloading {filename}...",
+            )
+            dls = dlx.name
+        except MessageNotModifiedError as err:
+            LOGS.exception(err)
+            return await xx.edit(str(err))
     else:
         return await ghomst.edit("`Message doesn't contain any media to download.`")
-      
+
+    end_ = dt.now()
+    ts = time_formatter(((end_ - start_).seconds) * 1000)
+    await ghomst.edit(f"**Downloaded in {ts} !!**\n » `{dls}`")
