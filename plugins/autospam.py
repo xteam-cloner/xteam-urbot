@@ -1,7 +1,7 @@
 # plugin: autospam
 # usage: .autospam <Detik> <Jumlah> <Pesan>
 
-from xteam.fns.helper import edit_or_reply
+#from xteam.fns.helper import edit_or_reply
 import asyncio
 from . import eor
 from . import *
