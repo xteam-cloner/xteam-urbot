@@ -33,8 +33,8 @@ from telethon.tl.functions.phone import DiscardGroupCallRequest as stopvc
 from telethon.tl.functions.phone import EditGroupCallTitleRequest as settitle
 from telethon.tl.functions.phone import GetGroupCallRequest as getvc
 from telethon.tl.functions.phone import InviteToGroupCallRequest as invitetovc
-from telethon.tl.functions.phone import JoinGroupCallRequest as joinvc_request
-from telethon.tl.functions.phone import LeaveGroupCallRequest as leavevc_request
+from telethon.tl.functions.phone import JoinGroupCallRequest
+from telethon.tl.functions.phone import LeaveGroupCallRequest
 
 from . import get_string, ultroid_cmd
 
@@ -120,10 +120,20 @@ async def _(e):
 )
 async def _(e):
     try:
-        await e.client(joinvc_request(await get_call(e)))
+        call = await get_call(e)
+        
+        # 'join_as' biasanya adalah ID chat atau channel saat ini.
+        # 'params' dapat ditemukan dari objek 'call' yang didapat.
+        await e.client(JoinGroupCallRequest(
+            call=call,
+            join_as=e.chat.id,  # Menggunakan ID chat sebagai entitas yang bergabung
+            params=call.params, # Mengambil parameter dari objek panggilan
+        ))
+        
         await e.eor("`Berhasil bergabung ke Group Call.`")
     except Exception as ex:
         await e.eor(f"`{ex}`")
+        
 
 @ultroid_cmd(
     pattern="leavevc$",
@@ -131,7 +141,12 @@ async def _(e):
 )
 async def _(e):
     try:
-        await e.client(leavevc_request(await get_call(e)))
-        await e.eor("`Berhasil keluar dari Group Call.`")
+        call = await get_call(e)
+        
+        # Menggunakan LeaveGroupCallRequest untuk meninggalkan panggilan.
+        # Fungsi ini hanya membutuhkan objek 'call' sebagai argumen.
+        await e.client(LeaveGroupCallRequest(call=call))
+        
+        await e.eor("`Berhasil meninggalkan Group Call.`")
     except Exception as ex:
         await e.eor(f"`{ex}`")
