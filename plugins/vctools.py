@@ -19,6 +19,12 @@
 • `{i}vcinvite`
     Invite all members of group in Group Call.
     (You must be joined)
+
+• `{i}joinvc`
+    Join an ongoing Group Call.
+
+• `{i}leavevc`
+    Leave an ongoing Group Call.
 """
 
 from telethon.tl.functions.channels import GetFullChannelRequest as getchat
@@ -27,6 +33,8 @@ from telethon.tl.functions.phone import DiscardGroupCallRequest as stopvc
 from telethon.tl.functions.phone import EditGroupCallTitleRequest as settitle
 from telethon.tl.functions.phone import GetGroupCallRequest as getvc
 from telethon.tl.functions.phone import InviteToGroupCallRequest as invitetovc
+from telethon.tl.functions.phone import JoinGroupCallRequest as joinvc_request
+from telethon.tl.functions.phone import LeaveGroupCallRequest as leavevc_request
 
 from . import get_string, ultroid_cmd
 
@@ -101,5 +109,29 @@ async def _(e):
     try:
         await e.client(settitle(call=await get_call(e), title=title.strip()))
         await e.eor(get_string("vct_2").format(title))
+    except Exception as ex:
+        await e.eor(f"`{ex}`")
+
+
+
+@ultroid_cmd(
+    pattern="joinvc$",
+    groups_only=True,
+)
+async def _(e):
+    try:
+        await e.client(joinvc_request(await get_call(e)))
+        await e.eor("`Berhasil bergabung ke Group Call.`")
+    except Exception as ex:
+        await e.eor(f"`{ex}`")
+
+@ultroid_cmd(
+    pattern="leavevc$",
+    groups_only=True,
+)
+async def _(e):
+    try:
+        await e.client(leavevc_request(await get_call(e)))
+        await e.eor("`Berhasil keluar dari Group Call.`")
     except Exception as ex:
         await e.eor(f"`{ex}`")
