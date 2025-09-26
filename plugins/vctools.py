@@ -114,26 +114,41 @@ async def _(e):
 
 
 
+from telethon import functions
+from telethon.tl.types import DataJSON
+
 @ultroid_cmd(
     pattern="joinvc$",
     groups_only=True,
 )
 async def _(e):
     try:
-        call = await get_call(e)
-        
-        # 'join_as' biasanya adalah ID chat atau channel saat ini.
-        # 'params' dapat ditemukan dari objek 'call' yang didapat.
-        await e.client(JoinGroupCallRequest(
-            call=call,
-            join_as=e.chat.id,  # Menggunakan ID chat sebagai entitas yang bergabung
-            params=call.params, # Mengambil parameter dari objek panggilan
+        # Dapatkan objek GroupCall dari grup saat ini
+        call = await e.client(functions.phone.GetGroupCallRequest(
+            peer=e.chat.id
+        ))
+
+        # Jika panggilan tidak ditemukan, kembalikan pesan
+        if not call.call:
+            return await e.eor("`Tidak ada panggilan grup yang aktif.`")
+
+        # Buat objek DataJSON dengan invite_hash dari call.call
+        # Ini adalah solusi untuk error 'no attribute params'
+        params = DataJSON(data='{"invite_hash": "' + call.call.invite_hash + '"}')
+
+        # Bergabung ke panggilan dengan semua argumen yang diperlukan
+        await e.client(functions.phone.JoinGroupCallRequest(
+            call=call.call,
+            join_as=e.chat.id,
+            params=params,
+            join_as_self=True
         ))
         
         await e.eor("`Berhasil bergabung ke Group Call.`")
     except Exception as ex:
         await e.eor(f"`{ex}`")
-        
+
+from telethon import functions
 
 @ultroid_cmd(
     pattern="leavevc$",
@@ -141,12 +156,21 @@ async def _(e):
 )
 async def _(e):
     try:
-        call = await get_call(e)
+        # Dapatkan objek GroupCall dari grup saat ini
+        call = await e.client(functions.phone.GetGroupCallRequest(
+            peer=e.chat.id
+        ))
+
+        # Jika panggilan tidak ditemukan, kembalikan pesan
+        if not call.call:
+            return await e.eor("`Tidak ada panggilan grup yang aktif.`")
         
-        # Menggunakan LeaveGroupCallRequest untuk meninggalkan panggilan.
-        # Fungsi ini hanya membutuhkan objek 'call' sebagai argumen.
-        await e.client(LeaveGroupCallRequest(call=call))
+        # Menggunakan LeaveGroupCallRequest untuk meninggalkan panggilan
+        await e.client(functions.phone.LeaveGroupCallRequest(
+            call=call.call
+        ))
         
         await e.eor("`Berhasil meninggalkan Group Call.`")
     except Exception as ex:
         await e.eor(f"`{ex}`")
+    
