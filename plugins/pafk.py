@@ -30,12 +30,18 @@ from . import (
     ultroid_cmd,
 )
 
+button = [
+            [
+                Button.url("Who are you?"), url=f"https://t.me/{asst.me.username}?start=set"),
+            ],
+]
+
 old_afk_msg = []
 
 is_approved = KeyManager("PMPERMIT", cast=list).contains
 
 
-@ultroid_cmd(pattern="afkb( (.*)|$)", owner_only=True)
+@asst_cmd(pattern="afkb( (.*)|$)", owner_only=True)
 async def set_afk(event):
     if asst._bot or is_afk():
         return
@@ -72,7 +78,7 @@ async def set_afk(event):
             )
         else:
             msg1 = await asst.send_message(
-                event.chat_id, get_string("afk_5").format(text), file=media
+                event.chat_id, get_string("afk_5").format(text), file=media, buttons=button
             )
     elif media:
         if "sticker" in media_type:
@@ -80,7 +86,7 @@ async def set_afk(event):
             msg2 = await asst.send_message(event.chat_id, get_string("afk_6"))
         else:
             msg1 = await asst.send_message(
-                event.chat_id, get_string("afk_6"), file=media
+                event.chat_id, get_string("afk_6"), file=media, buttons=button
             )
     elif text:
         msg1 = await event.respond(get_string("afk_5").format(text))
