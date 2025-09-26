@@ -112,7 +112,7 @@ async def remove_afk(event):
         message_link = f"https://t.me/c/{event.chat_id}/{event.id}"
         button = [
             [
-                Button.url("Who are you?"), url=f"https://t.me/{asst.me.username}?start=set"),
+                Button.url("Who are you?"), url=f"https://t.me/{asst.me.username}?start=set"
             ],
         ]
         
