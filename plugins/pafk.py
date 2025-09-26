@@ -32,7 +32,7 @@ from . import (
 
 button = [
             [
-                Button.url("Who are you?"), url=f"https://t.me/{asst.me.username}?start=set"),
+                Button.url("Who are you?"), url=f"https://t.me/{asst.me.username}?start=set"
             ],
 ]
 
