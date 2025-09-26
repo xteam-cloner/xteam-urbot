@@ -15,7 +15,7 @@ import asyncio
 from telethon import events
 from telethon import Button
 from telegraph import upload_file as uf
-
+from telethon.tl.custom import Button
 from xteam.dB.afk_db import add_afk, del_afk, is_afk
 from xteam.dB.base import KeyManager
 
@@ -104,7 +104,12 @@ async def remove_afk(event):
         _, _, _, afk_time = is_afk()
         del_afk()
         message_link = f"https://t.me/c/{event.chat_id}/{event.id}"
-        button = Button.url("I'm back", message_link)
+        button = [
+            [
+                Button.url("Who are you?"), url=f"https://t.me/{asst.me.username}?start=set"),
+            ],
+        ]
+        
         off = await event.reply(
             get_string("afk_1").format(afk_time), buttons=button
         )
