@@ -14,7 +14,7 @@ py-tgcalls==2.1.1
 python-dotenv==1.0.1
 tgcrypto==1.2.5
 python-decouple
-python3-pymediainfo
+#python3-pymediainfo
 python-dotenv
 ApiNyaEr
 youtube-dl
