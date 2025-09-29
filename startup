@@ -18,5 +18,7 @@ echo "
       Visit @xteam_cloner for updates!!
 
 "
-if [ -f .env ] ; then  set -o allexport; source .env; set +o allexport ; fi
-if [ $SESSION1 ] ; then python3 -m multi_client.py ; else python3 -m xteam ; fi
+python3 -m xteam
+
+#if [ -f .env ] ; then  set -o allexport; source .env; set +o allexport ; fi
+#if [ $SESSION1 ] ; then python3 -m multi_client.py ; else python3 -m xteam ; fi
