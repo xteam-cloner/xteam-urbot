@@ -21,7 +21,8 @@ for z in range(5):
     fine, out = _check(str(z))
     if fine:
         subprocess.Popen(
-            [sys.executable, "-m", "xteam", out[0], out[1], out[2], out[3], out[4], n],
+            # Ubah baris ini untuk hanya memanggil out[0], out[1], dan out[2]
+            [sys.executable, "-m", "xteam", out[0], out[1], out[2], n],
             stdin=None,
             stderr=None,
             stdout=None,
@@ -36,3 +37,4 @@ except Exception as er:
     print(er)
 finally:
     loop.close()
+    
