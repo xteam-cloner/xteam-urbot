@@ -3,11 +3,7 @@
 from . import *
 from telethon import functions, types
 from telethon.tl.types import InputGroupCall, DataJSON, InputPeerEmpty, InputPeerChat, InputPeerChannel
-from telethon.errors import (
-    GroupcallAddParticipantsFailedError,
-    GroupcallSsrcDuplicateMuchError,
-    GroupCallNotFoundError # Tambahkan error yang mungkin terjadi
-)
+from telethon.errors import *
 
 # Sesuaikan dengan prefiks perintah Anda jika bukan '.'
 @ultroid_cmd(pattern="joincall(?: |$)(.*)")
