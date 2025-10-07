@@ -36,7 +36,7 @@ async def self_react(e):
         # PERUBAHAN UTAMA DI SINI
         ultroid_bot.add_event_handler(
             autoreact,
-            NewMessage(chats=e.chat_id,
+            NewMessage(
                 outgoing=False, # Reaksi pada pesan MASUK (dari orang lain)
                 func=lambda e: not (e.fwd_from or e.via_bot),
             )
