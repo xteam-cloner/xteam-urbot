@@ -12,7 +12,9 @@ EMO = ('🥱', '🤪', '🙉', '😍', '🦄', '🐳', '😘', '💘', '😈', '
 async def autoreact(e):
     try:
         emoji = choice(EMO)
-        await e.react([ReactionEmoji(emoji)])
+        # Pastikan event adalah pesan (NewMessage) dan bukan event lain
+        if isinstance(e, NewMessage.Event): 
+            await e.react([ReactionEmoji(emoji)])
     except Exception:
         pass
 
@@ -30,18 +32,22 @@ async def self_react(e):
     if args == "on":
         if autoreact_status():
             return await eris.edit("AutoReact is Already Enabled..")
+        
+        # PERUBAHAN UTAMA DI SINI
         ultroid_bot.add_event_handler(
             autoreact,
-            NewMessage(chats=e.chat_id,
-                outgoing=True,
+            NewMessage(
+                outgoing=False, # Reaksi pada pesan MASUK (dari orang lain)
                 func=lambda e: not (e.fwd_from or e.via_bot),
             )
         )
-        await eris.edit("AutoReact Enabled!")
+        await eris.edit("AutoReact Enabled for ALL INCOMING messages!")
+        
     elif args == "off":
         if not autoreact_status():
             return await eris.edit("AutoReact is Already Disabled..")
         ultroid_bot.remove_event_handler(autoreact)
         await eris.edit("AutoReact Disabled!")
+        
     else:
         await eris.edit("Usage: .autoreact on/off")
