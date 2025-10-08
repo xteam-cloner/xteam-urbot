@@ -113,8 +113,8 @@ from telethon.errors.rpcerrorlist import YouBlockedUserError
 # You would need to use a Telethon Client for a bot, not a user bot framework.
 
 # Example structure for an Inline Query Handler
-@client.on(events.InlineQuery(pattern=r"limit$"))
-async def limited_inline(query):
+@in_pattern("limit", owner=True)
+async def limit(query):
     # This structure is similar but uses a different event and response mechanism.
     # The interaction with @SpamBot still needs to be done via a separate conversation.
 
