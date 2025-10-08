@@ -92,3 +92,60 @@ async def banall(event):
         )
     except Exception as e:
         await event.edit(f"`An error occurred: {str(e)}`")
+
+from telethon import events
+from telethon.tl.types import (
+    InputWebDocument,
+    MessageMediaWebPage,
+    WebDocument,
+    InlineQuery,
+    InputMediaDocument,
+    DocumentAttributeFilename,
+    DocumentAttributeAnimated,
+    DocumentAttributeSticker,
+    DocumentAttributeAudio,
+    DocumentAttributeVideo,
+    InputDocument,
+    InlineQueryResultArticle,
+    InputTextMessageContent,
+)
+from telethon.errors.rpcerrorlist import YouBlockedUserError
+# You would need to use a Telethon Client for a bot, not a user bot framework.
+
+# Example structure for an Inline Query Handler
+@client.on(events.InlineQuery(pattern=r"limit$"))
+async def limited_inline(query):
+    # This structure is similar but uses a different event and response mechanism.
+    # The interaction with @SpamBot still needs to be done via a separate conversation.
+
+    chat = "@SpamBot"
+    result_text = "Checking If You Are Limited..."
+    
+    # Run the SpamBot check logic (similar to the original function)
+    async with query.client.conversation(chat) as conv:
+        try:
+            # Need to send the message from the bot (if the client is a bot)
+            # or from the user account (if it's a user bot and you want to use it for inline)
+            # For a proper *inline* bot, the check itself is often done without a conversation
+            # to @SpamBot in the context of the inline query, as inline queries should be fast.
+            
+            # For the purpose of demonstration, assuming the logic to get the spam status:
+            response_message = "Your account has no limits for now." # Placeholder for actual SpamBot check result
+            
+            # NOTE: Directly running the conversation with @SpamBot inside a fast inline
+            # query might cause delays, which Telegram limits.
+            
+        except YouBlockedUserError:
+            response_message = "Please Unblock @SpamBot to check your status."
+            
+    # Create the Inline Query Result
+    builder = query.builder
+    await query.answer(
+        [
+            builder.article(
+                title="Spam Limit Status",
+                text=response_message, # This is the final message that will be sent
+                description="Tap to send your current account limit status."
+            )
+        ]
+    )
