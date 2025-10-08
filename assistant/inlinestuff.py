@@ -621,3 +621,41 @@ InlinePlugin.update(
         "Tʟ Sᴇᴀʀᴄʜ": "tl",
     }
 )
+
+@in_pattern("limit", owner=True)
+async def limit(query):
+    chat = "@SpamBot"
+    
+    # Pesan default jika terjadi kesalahan
+    response_message = "⏳ Gagal mendapatkan status. Coba lagi atau pastikan @SpamBot tidak diblokir." 
+    
+    try:
+        # Menggunakan conv (conversation) untuk interaksi.
+        async with query.client.conversation(chat, timeout=5) as conv:
+            # 1. Kirim perintah /start
+            await conv.send_message("/start")
+            
+            # 2. Tunggu balasan dari SpamBot (maksimal 5 detik)
+            response = await conv.get_response()
+            
+            # 3. Ambil teks status yang sebenarnya
+            response_message = response.text 
+            
+    except YouBlockedUserError:
+        response_message = "⛔️ Harap Unblock @SpamBot untuk melakukan pengecekan status."
+    except TimeoutError:
+        response_message = "⚠️ Pengecekan status @SpamBot gagal (Timeout). Coba lagi."
+    except Exception as e:
+        response_message = f"❌ Terjadi kesalahan saat memeriksa: {e.__class__.__name__}"
+
+    # ... (Bagian builder.article di bawahnya sama) ...
+    builder = query.builder
+    await query.answer(
+        [
+            builder.article(
+                title="Spam Limit Status",
+                text=response_message,
+                description="Tap to send your current account limit status."
+            )
+        ]
+    )
