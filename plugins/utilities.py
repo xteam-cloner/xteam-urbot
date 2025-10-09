@@ -740,3 +740,98 @@ async def get_restriced_msg(event):
         await xx.delete()
         if thumb:
             os.remove(thumb)
+
+@ultroid_cmd(pattern="getallmedia(?: |$)(.*)")
+async def get_all_restricted_media(event):
+    """Mengambil semua media dari channel yang dibatasi penerusan."""
+    
+    match = event.pattern_match.group(1).strip()
+    if not match:
+        return await event.eor("`Sediakan username atau ID channel (contoh: @TeamUltroid atau 1313492028).`", time=7)
+
+    channel_entity = match
+    xx = await event.eor(f"`Mulai memproses media dari {channel_entity}...`")
+    
+    downloaded_count = 0
+    
+    # Batas pesan: 200 pesan terakhir (sesuaikan sesuai kebutuhan)
+    # Anda bisa tambahkan argumen limit opsional jika mau
+    try:
+        async for message in event.client.iter_messages(channel_entity, limit=200): 
+            # Cek apakah pesan memiliki media (foto, video, dokumen, dll.)
+            if message.media:
+                downloaded_count += 1
+                current_status = f"**Memproses media ke-{downloaded_count}...**\n"
+                
+                # --- Coba Kirim Langsung (untuk menguji apakah pembatasan berlaku) ---
+                try:
+                    await event.client.send_message(event.chat_id, message)
+                    await xx.edit(current_status + "`Berhasil dikirim tanpa perlu diunduh/unggah ulang.`")
+                    continue
+                except ChatForwardsRestrictedError:
+                    # --- Jika Penerusan Dibatasi, Lakukan Unduh-Unggah Ulang ---
+                    pass
+                except BaseException as e:
+                    # Error lain saat mencoba kirim langsung (misal: bot diblokir)
+                    await event.reply(f"❌ **Error saat mencoba kirim pesan ke-{downloaded_count}**\n`{e}`")
+                    LOGS.error(f"Error send_message: {e}")
+                    continue
+                
+                # Hanya dokumen (media yang dapat diunduh) yang diproses
+                if message.document:
+                    try:
+                        thumb = None
+                        # 1. Unduh Thumbnail
+                        if message.document.thumbs:
+                            await xx.edit(current_status + "`Mengunduh thumbnail...`")
+                            thumb = await message.download_media(thumb=-1)
+                        
+                        # 2. Unduh Media Utama
+                        await xx.edit(current_status + f"Mengunduh {message.file.name}...")
+                        media_file, _ = await event.client.fast_downloader(
+                            message.document,
+                            show_progress=True,
+                            event=xx,
+                        )
+
+                        # 3. Unggah Media ke Chat Tujuan
+                        await xx.edit(current_status + "`Mengunggah kembali...`")
+                        uploaded, _ = await event.client.fast_uploader(
+                            media_file.name, 
+                            event=xx, 
+                            show_progress=True, 
+                            to_delete=True
+                        )
+                        
+                        # Tentukan jenis file untuk streaming/force_document
+                        # Jika itu bukan video, paksa sebagai dokumen
+                        typ = not bool(message.video) 
+
+                        # 4. Kirim Pesan dengan Media yang Diunggah Ulang
+                        await event.reply(
+                            message.text or f"Media dari Channel Restricted ({channel_entity})",
+                            file=uploaded,
+                            supports_streaming=typ, # Hanya support streaming jika bukan force_document
+                            force_document=typ, 
+                            thumb=thumb,
+                            attributes=message.document.attributes,
+                        )
+
+                        # 5. Bersihkan File Lokal
+                        if thumb:
+                            os.remove(thumb)
+                        if os.path.exists(media_file.name):
+                            os.remove(media_file.name)
+                        
+                    except BaseException as e:
+                        LOGS.error(f"Gagal memproses media: {e}")
+                        await event.reply(f"❌ **Gagal memproses media ke-{downloaded_count}**\n`{e}`")
+                        continue
+    
+    except BaseException as final_er:
+        await xx.delete()
+        return await event.eor(f"**ERROR Fatal saat Iterasi Channel**\n`{final_er}`")
+
+
+    await xx.delete()
+    await event.eor(f"✅ **Selesai!**\nBerhasil memproses **{downloaded_count}** item media dari `{channel_entity}`.", time=10)
