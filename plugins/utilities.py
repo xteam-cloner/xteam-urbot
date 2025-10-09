@@ -47,6 +47,9 @@
 
 • `{i}getmsg <message link>`
   Get messages from chats with forward/copy restrictions.
+
+• `{i}copymedia <message link> <limit_count>`
+  Get media from channel/chats with restrictions.
 """
 
 import calendar
@@ -741,50 +744,62 @@ async def get_restriced_msg(event):
         if thumb:
             os.remove(thumb)
 
-@ultroid_cmd(pattern="getallmedia(?: |$)(.*)")
-async def get_all_restricted_media(event):
-    """Mengambil semua media dari channel yang dibatasi penerusan."""
-    
-    match = event.pattern_match.group(1).strip()
-    if not match:
-        return await event.eor("`Sediakan username atau ID channel (contoh: @TeamUltroid atau 1313492028).`", time=7)
 
-    channel_entity = match
-    xx = await event.eor(f"`Mulai memproses media dari {channel_entity}...`")
+@ultroid_cmd(pattern="copymedia(?: |$)(.*)")
+async def get_all_restricted_media(event):
+    """Mengambil semua media video dari channel yang dibatasi penerusan, dengan limit opsional."""
+    
+    # Memisahkan input menjadi entitas channel dan limit (jika ada)
+    # Contoh: 'getallmedia @channel_user 500' -> match = ['@channel_user', '500']
+    match = event.pattern_match.group(1).strip().split()
+    
+    if not match:
+        return await event.eor("`Sediakan username atau ID channel dan (opsional) batas pesan. (Contoh: @TeamUltroid 500)`", time=10)
+
+    # Menetapkan entitas channel (wajib)
+    channel_entity = match[0] 
+    
+    # Menetapkan limit (opsional). Jika ada dan berupa angka, gunakan; jika tidak, gunakan None (tanpa batas).
+    limit_count = int(match[1]) if len(match) > 1 and match[1].isdigit() else None
+    
+    # Membuat pesan status awal
+    limit_info = f"**{limit_count}** pesan terakhir" if limit_count else "SEMUA pesan"
+    xx = await event.eor(f"`Mulai memproses video dari {channel_entity} ({limit_info})...`")
     
     downloaded_count = 0
     
-    # Batas pesan: 200 pesan terakhir (sesuaikan sesuai kebutuhan)
-    # Anda bisa tambahkan argumen limit opsional jika mau
+    # Menggunakan limit_count (bisa berupa integer atau None)
     try:
-        async for message in event.client.iter_messages(channel_entity, limit=200): 
-            # Cek apakah pesan memiliki media (foto, video, dokumen, dll.)
-            if message.media:
-                downloaded_count += 1
-                current_status = f"**Memproses media ke-{downloaded_count}...**\n"
+        async for message in event.client.iter_messages(channel_entity, limit=limit_count): 
+            
+            # --- Hanya proses jika media adalah video ---
+            if message.video: 
                 
-                # --- Coba Kirim Langsung (untuk menguji apakah pembatasan berlaku) ---
+                downloaded_count += 1
+                current_status = f"**Memproses video ke-{downloaded_count}...**\n"
+                
+                # --- Coba Kirim Langsung ---
                 try:
                     await event.client.send_message(event.chat_id, message)
                     await xx.edit(current_status + "`Berhasil dikirim tanpa perlu diunduh/unggah ulang.`")
                     continue
                 except ChatForwardsRestrictedError:
-                    # --- Jika Penerusan Dibatasi, Lakukan Unduh-Unggah Ulang ---
+                    # Lanjut ke unduh-unggah ulang
                     pass
                 except BaseException as e:
-                    # Error lain saat mencoba kirim langsung (misal: bot diblokir)
                     await event.reply(f"❌ **Error saat mencoba kirim pesan ke-{downloaded_count}**\n`{e}`")
-                    LOGS.error(f"Error send_message: {e}")
+                    # LOGS.error(f"Error send_message: {e}") 
                     continue
                 
-                # Hanya dokumen (media yang dapat diunduh) yang diproses
+                # Hanya proses jika memiliki dokumen (media yang dapat diunduh)
                 if message.document:
                     try:
                         thumb = None
+                        
                         # 1. Unduh Thumbnail
                         if message.document.thumbs:
                             await xx.edit(current_status + "`Mengunduh thumbnail...`")
-                            thumb = await message.download_media(thumb=-1)
+                            thumb = await message.download_media(thumb=0) 
                         
                         # 2. Unduh Media Utama
                         await xx.edit(current_status + f"Mengunduh {message.file.name}...")
@@ -803,16 +818,15 @@ async def get_all_restricted_media(event):
                             to_delete=True
                         )
                         
-                        # Tentukan jenis file untuk streaming/force_document
-                        # Jika itu bukan video, paksa sebagai dokumen
-                        typ = not bool(message.video) 
+                        # Set konfigurasi pengiriman untuk video
+                        typ = bool(message.video) 
 
                         # 4. Kirim Pesan dengan Media yang Diunggah Ulang
                         await event.reply(
-                            message.text or f"Media dari Channel Restricted ({channel_entity})",
+                            message.text or f"Video dari Channel Restricted ({channel_entity})",
                             file=uploaded,
-                            supports_streaming=typ, # Hanya support streaming jika bukan force_document
-                            force_document=typ, 
+                            supports_streaming=typ, 
+                            force_document=False, # Video tidak boleh force_document
                             thumb=thumb,
                             attributes=message.document.attributes,
                         )
@@ -824,8 +838,8 @@ async def get_all_restricted_media(event):
                             os.remove(media_file.name)
                         
                     except BaseException as e:
-                        LOGS.error(f"Gagal memproses media: {e}")
-                        await event.reply(f"❌ **Gagal memproses media ke-{downloaded_count}**\n`{e}`")
+                        # LOGS.error(f"Gagal memproses media: {e}")
+                        await event.reply(f"❌ **Gagal memproses video ke-{downloaded_count}**\n`{e}`")
                         continue
     
     except BaseException as final_er:
@@ -834,4 +848,4 @@ async def get_all_restricted_media(event):
 
 
     await xx.delete()
-    await event.eor(f"✅ **Selesai!**\nBerhasil memproses **{downloaded_count}** item media dari `{channel_entity}`.", time=10)
+    await event.eor(f"✅ **Selesai!**\nBerhasil memproses **{downloaded_count}** item video dari `{channel_entity}`.", time=10)
