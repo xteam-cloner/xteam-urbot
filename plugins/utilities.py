@@ -51,7 +51,7 @@
 • `{i}copymedia <message link> <limit_count>`
   Get media from channel/chats with restrictions.
 """
-
+import asyncio
 import calendar
 import html
 import io
@@ -745,63 +745,50 @@ async def get_restriced_msg(event):
             os.remove(thumb)
 
 
+
 @ultroid_cmd(pattern="copymedia(?: |$)(.*)")
 async def get_all_restricted_media(event):
-    """Mengambil semua media video dari channel yang dibatasi penerusan, dengan limit opsional."""
-    
-    # Memisahkan input menjadi entitas channel dan limit (jika ada)
-    # Contoh: 'getallmedia @channel_user 500' -> match = ['@channel_user', '500']
     match = event.pattern_match.group(1).strip().split()
     
     if not match:
         return await event.eor("`Sediakan username atau ID channel dan (opsional) batas pesan. (Contoh: @TeamUltroid 500)`", time=10)
 
-    # Menetapkan entitas channel (wajib)
     channel_entity = match[0] 
-    
-    # Menetapkan limit (opsional). Jika ada dan berupa angka, gunakan; jika tidak, gunakan None (tanpa batas).
     limit_count = int(match[1]) if len(match) > 1 and match[1].isdigit() else None
     
-    # Membuat pesan status awal
     limit_info = f"**{limit_count}** pesan terakhir" if limit_count else "SEMUA pesan"
     xx = await event.eor(f"`Mulai memproses video dari {channel_entity} ({limit_info})...`")
     
     downloaded_count = 0
     
-    # Menggunakan limit_count (bisa berupa integer atau None)
     try:
         async for message in event.client.iter_messages(channel_entity, limit=limit_count): 
             
-            # --- Hanya proses jika media adalah video ---
             if message.video: 
                 
                 downloaded_count += 1
                 current_status = f"**Memproses video ke-{downloaded_count}...**\n"
                 
-                # --- Coba Kirim Langsung ---
                 try:
                     await event.client.send_message(event.chat_id, message)
                     await xx.edit(current_status + "`Berhasil dikirim tanpa perlu diunduh/unggah ulang.`")
+                    await asyncio.sleep(2)
                     continue
                 except ChatForwardsRestrictedError:
-                    # Lanjut ke unduh-unggah ulang
                     pass
                 except BaseException as e:
                     await event.reply(f"❌ **Error saat mencoba kirim pesan ke-{downloaded_count}**\n`{e}`")
-                    # LOGS.error(f"Error send_message: {e}") 
+                    await asyncio.sleep(2)
                     continue
                 
-                # Hanya proses jika memiliki dokumen (media yang dapat diunduh)
                 if message.document:
                     try:
                         thumb = None
                         
-                        # 1. Unduh Thumbnail
                         if message.document.thumbs:
                             await xx.edit(current_status + "`Mengunduh thumbnail...`")
                             thumb = await message.download_media(thumb=0) 
                         
-                        # 2. Unduh Media Utama
                         await xx.edit(current_status + f"Mengunduh {message.file.name}...")
                         media_file, _ = await event.client.fast_downloader(
                             message.document,
@@ -809,7 +796,6 @@ async def get_all_restricted_media(event):
                             event=xx,
                         )
 
-                        # 3. Unggah Media ke Chat Tujuan
                         await xx.edit(current_status + "`Mengunggah kembali...`")
                         uploaded, _ = await event.client.fast_uploader(
                             media_file.name, 
@@ -818,28 +804,27 @@ async def get_all_restricted_media(event):
                             to_delete=True
                         )
                         
-                        # Set konfigurasi pengiriman untuk video
                         typ = bool(message.video) 
 
-                        # 4. Kirim Pesan dengan Media yang Diunggah Ulang
                         await event.reply(
                             message.text or f"Video dari Channel Restricted ({channel_entity})",
                             file=uploaded,
                             supports_streaming=typ, 
-                            force_document=False, # Video tidak boleh force_document
+                            force_document=False,
                             thumb=thumb,
                             attributes=message.document.attributes,
                         )
 
-                        # 5. Bersihkan File Lokal
                         if thumb:
                             os.remove(thumb)
                         if os.path.exists(media_file.name):
                             os.remove(media_file.name)
                         
+                        await asyncio.sleep(2)
+                        
                     except BaseException as e:
-                        # LOGS.error(f"Gagal memproses media: {e}")
                         await event.reply(f"❌ **Gagal memproses video ke-{downloaded_count}**\n`{e}`")
+                        await asyncio.sleep(2)
                         continue
     
     except BaseException as final_er:
