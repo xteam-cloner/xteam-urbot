@@ -93,7 +93,7 @@ async def banall(event):
     except Exception as e:
         await event.edit(f"`An error occurred: {str(e)}`")
 
-from telethon import events
+"""from telethon import events
 from telethon.tl.types import (
     InputWebDocument,
     MessageMediaWebPage,
@@ -152,3 +152,4 @@ async def limit(query):
             )
         ]
     )
+"""
