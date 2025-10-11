@@ -47,14 +47,6 @@ from . import (
     callback,
 )
 
-PING = [
-    [  # First row of buttons (you can have multiple rows)
-        Button.inline("CLOSE", data="close"),
-    ]
-]
-
-# markup = ReplyInlineMarkup(PING)
-
 
 async def mention_user(user_id):
     try:
@@ -86,46 +78,16 @@ async def _(event):
         await x.edit(get_string("ping").format(end, uptime, f"{OWNER_NAME}"), file=pic)
     
 
-@xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="Ping$", chats=[], type=["official", "assistant"])
 async def _(event):
+    ultroid_bot.parse_mode = CustomMarkdown()
+    user_id = OWNER_ID
+    ment = await mention_user(user_id)
+    prem = event.pattern_match.group(1)
     start = time.time()
     x = await event.reply("Ping")
     end = round((time.time() - start) * 1000)  # Corrected to milliseconds
     uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
-    await x.edit(f"<blockquote>🏓 Pong • {end}ms\n⏰ Uptime • {uptime}\n👑 Owner • {OWNER_NAME}</blockquote>", parse_mode="html")
+    await x.reply(get_string("pping").format(end, uptime, OWNER_NAME))
+    #await x.edit(f"🏓 Pong • {end}ms\n⏰ Uptime • {uptime}\n👑 Owner • {OWNER_NAME}")
 
-
-@xteam_cmd(pattern="Aping")
-async def wping(e):
-    try:
-        asupannya = [
-            asupan
-            async for asupan in e.client.iter_messages(
-                "@xcryasupan", filter=InputMessagesFilterVideo
-            )
-        ]
-
-        if not asupannya:
-            await e.respond("No video found in @xcryasupan.")
-            return
-
-        start = time.time()
-        x = await e.eor("Pong!")  # Use respond instead of eor for initial message
-        end = round((time.time() - start) * 1000)  # Corrected to milliseconds
-        uptime = time_formatter((time.time() - start_time) * 1000)  # Corrected to milliseconds
-
-        await e.client.send_file(  # send_file is used for sending files with caption and buttons.
-            e.chat.id,
-            file=random.choice(asupannya),
-            caption=f"<blockquote> Ping : {end}ms\nUptime : {uptime}\nOwner :{OWNER_NAME}</blockquote>",
-            parse_mode="html",
-            buttons=Button.inline("• x •", "close"),
-        )
-
-        await x.delete()  # delete the "pong" message after sending the video with caption.
-
-    except Exception as ex:
-        try:
-            await x.edit(f"**Ping Error:** {ex}")
-        except:
-            await e.respond(f"**Ping Error:** {ex}")  # in case x was not defined.
