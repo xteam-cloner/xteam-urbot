@@ -29,7 +29,8 @@ from . import eor, get_string, udB, ultroid_cmd
 async def get_var(event):
     try:
         # Menghindari error jika tidak ada argumen sama sekali
-        opt = event.text.split(maxsplit=2)[1]
+        # Menggunakan maxsplit=1 agar argumen yang tersisa menjadi satu string
+        opt = event.text.split(maxsplit=1)[1].split()[0]
     except IndexError:
         return await event.eor(f"what to get?\nRead `{HNDLR}help variables`")
     
@@ -39,32 +40,53 @@ async def get_var(event):
     # Logic untuk perintah yang membutuhkan 'varname'
     if opt not in ["keys"]:
         try:
+            # Mengambil varname sebagai argumen kedua
             varname = event.text.split(maxsplit=2)[2]
         except IndexError:
             # Karena opt sudah diambil, error ini berarti varname hilang
-            return await eor(x, "Such a var doesn't exist!", time=5)
+            return await eor(x, "Var name is missing!", time=5) # Pesan diperjelas
 
     if opt == "var":
-        c = 0
-        # try redis
+        
+        # 1. Cek di Redis (udB.get_key)
         val = udB.get_key(varname)
-        if val is not None:
-            c += 1
-            await x.edit(
-                f"**Variable** - `{varname}`\n**Value**: `{val}`\n**Type**: Redis Key."
-            )
-        # try env vars
-        val = os.getenv(varname)
-        if val is not None:
-            c += 1
-            await x.edit(
-                f"**Variable** - `{varname}`\n**Value**: `{val}`\n**Type**: Env Var."
-            )
+        var_type = "Redis Key."
+        
+        # 2. Cek di Environment Variables jika tidak ditemukan di Redis
+        if val is None:
+            val = os.getenv(varname)
+            var_type = "Env Var."
 
-        if c == 0:
+        if val is not None:
+            # 3. Ubah nilai menjadi string dan terapkan penanganan pesan panjang
+            val_str = str(val)
+            
+            # --- START FIX: Penanganan MessageTooLongError ---
+            if len(val_str) > 4000:
+                # Jika terlalu panjang, kirim sebagai file .txt
+                with io.StringIO(f"Variable: {varname}\nType: {var_type}\n\nValue:\n{val_str}") as f:
+                    f.name = f"{varname}_value.txt"
+                    
+                    # Kirim file ke chat
+                    await event.client.send_file(
+                        event.chat_id, 
+                        f, 
+                        caption=f"**Variable** - `{varname}`\n**Type**: {var_type}\nNilai terlalu panjang, dikirim sebagai file."
+                    )
+                # Edit pesan awal menjadi pemberitahuan
+                await x.edit(f"**Variable** - `{varname}`\n**Type**: {var_type}\nNilai telah dikirim sebagai file `.txt`.")
+            else:
+                # Jika pendek, edit seperti biasa
+                await x.edit(
+                    f"**Variable** - `{varname}`\n**Value**: `{val_str}`\n**Type**: {var_type}"
+                )
+            # --- END FIX ---
+
+        else:
             await eor(x, "Such a var doesn't exist!", time=5)
 
     elif opt == "type":
+        # ... (Logika untuk 'type' tetap sama)
         c = 0
         # try redis
         val = udB.get_key(varname)
@@ -83,7 +105,7 @@ async def get_var(event):
     elif opt == "db":
         val = udB.get(varname)
         if val is not None:
-            # --- LOGIKA PENGECEKAN PANJANG UNTUK 'db' (Nilai Variabel) ---
+            # --- Logika penanganan pesan panjang untuk 'db' (Sudah Benar) ---
             val_str = str(val)
             if len(val_str) > 4000:
                 with io.StringIO(f"Key: {varname}\n\nValue:\n{val_str}") as f:
@@ -114,7 +136,7 @@ async def get_var(event):
             and not i.startswith("GBAN_REASON_")
         )
         
-        # --- LOGIKA PENGECEKAN PANJANG UNTUK 'keys' (Daftar Kunci) ---
+        # --- Logika penanganan pesan panjang untuk 'keys' (Sudah Benar) ---
         if len(msg) > 4000:
             # Buat file di memori (StringIO)
             with io.StringIO(f"List of DB Keys :\n\n{msg}") as f:
