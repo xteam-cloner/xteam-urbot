@@ -51,3 +51,48 @@ async def self_react(e):
         
     else:
         await eris.edit("Usage: .autoreact on/off")
+
+from random import choice
+from telethon import events, types
+from . import ultroid_bot
+
+# List of Premium Emoji IDs
+premium_emoji_ids = [
+    6170163662544707658,
+    6176905893616031802,
+    5276239041052828276,
+    6267298050205553492,
+    6267152480878990865,
+    6265037836550936046,
+    5330424644811901502,
+    5451975792701483896,
+    4963308045988791045,
+    5438496463044752972,
+    5456140674028019486,
+    5217822164362739968,
+    6172264674646559807,
+    5069103192252351318,
+    5276417256425805738,
+    5965025312839306409,
+    5965424233696726051,
+    5965343106059472334,
+    5965281048077012942,
+    5039661745489052379,
+    5042127383134470945,
+    5039834781131474002,
+    5231179572782847122,
+    5231019684035326678,
+    6194737030165959506,
+]
+
+@ultroid_bot.on(events.NewMessage)
+async def rootedcyber(event):
+    try:
+        # pick a random premium emoji ID
+        emoji_id = choice(premium_emoji_ids)
+        await event.react(
+            [types.ReactionCustomEmoji(document_id=emoji_id)],
+            big=choice((True, False))
+        )
+    except Exception as e:
+        print(f"Reaction failed: {e}")
