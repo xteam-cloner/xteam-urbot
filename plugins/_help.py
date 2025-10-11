@@ -124,6 +124,7 @@ async def _help(ult):
                     len(HELP["Official"]),
                     len(HELP["Addons"] if "Addons" in HELP else []),
                     cmd,
+                    parse_mode="html",
                 ),
                 file=inline_pic(),
                 buttons=_main_help_menu,
