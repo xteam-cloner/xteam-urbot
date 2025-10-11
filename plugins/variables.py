@@ -74,10 +74,10 @@ async def get_var(event):
                     await event.client.send_file(
                         event.chat_id, 
                         f, 
-                        caption=f"**Variable** - `{varname}`\n**Type**: {var_type}\nNilai terlalu panjang, dikirim sebagai file."
+                        caption=f"**Variable** - `{varname}`\n**Type**: {var_type}"
                     )
                 # Edit pesan awal menjadi pemberitahuan
-                await x.edit(f"**Variable** - `{varname}`\n**Type**: {var_type}\nNilai telah dikirim sebagai file `.txt`.")
+                await x.edit(f"**Variable** - `{varname}`\n**Type**: {var_type}")
             else:
                 # Jika pendek, edit seperti biasa
                 await x.edit(
@@ -95,12 +95,12 @@ async def get_var(event):
         val = udB.get_key(varname)
         if val is not None:
             c += 1
-            await x.edit(f"**Variable** - `{varname}`\n**Type**: Redis Key.")
+            await x.eor(f"**Variable** - `{varname}`\n**Type**: Redis Key.")
         # try env vars
         val = os.getenv(varname)
         if val is not None and c == 0:
             c += 1
-            await x.edit(f"**Variable** - `{varname}`\n**Type**: Env Var.")
+            await x.eor(f"**Variable** - `{varname}`\n**Type**: Env Var.")
 
         if c == 0:
             await eor(x, "Such a var doesn't exist!", time=5)
@@ -125,10 +125,10 @@ async def get_var(event):
                         caption=f"**Key** - `{varname}`\nNilai terlalu panjang, dikirim sebagai file."
                     )
                 # Edit pesan awal menjadi pemberitahuan
-                await x.edit(f"**Key** - `{varname}`\nNilai telah dikirim sebagai file `.txt`.")
+                await x.eor(f"**Key** - `{varname}`\nNilai telah dikirim sebagai file `.txt`.")
             else:
                 # Jika pendek, edit seperti biasa
-                await x.edit(f"**Key** - `{varname}`\n**Value**: `{val_str}`")
+                await x.eor(f"**Key** - `{varname}`\n**Value**: `{val_str}`")
         else:
             await eor(x, "No such key!", time=5)
 
