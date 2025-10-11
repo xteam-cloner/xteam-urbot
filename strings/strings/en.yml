@@ -180,7 +180,7 @@ lping: "**🏓 ᴘᴏɴɢ**  `{}ms`\n**🕑 ᴜᴘᴛɪᴍᴇ**  `{}`\n**👑 �
 pping: "🏓 Ping : {}ms\n⏰ Uptime : {}\n👑 Owner : {}\n"
 ping: "**[✔️](emoji/6255963511252322252) **Ping : {}ms\n[⏰](emoji/5215394081911351762) Uptime : {}\n"
 iping: "**Pong !!!\n** {}ms"
-pping: "[🥵](emoji/5373067498193166118)**Pinger !!** `{}ms`\n│ [🎆](emoji/5195100606250889609)**Uptɨmɛr** - `{}`"
+pjping: "[🥵](emoji/5373067498193166118)**Pinger !!** `{}ms`\n│ [🎆](emoji/5195100606250889609)**Uptɨmɛr** - `{}`"
 kping: "``` {}ms ```" 
 usage: "**⚙️ Dyno Usage ⚙️**:\n\n-> **Dyno usage for** `{}`:\n  •  **{}h**  **{}m |** `[{}%]`\n-> **Dyno hours quota remaining this month**:\n  •  **{}h**  **{}m |** `[{}%]`\n\n**Total Disk Space**: `{}`\n**Used**: `{}`\n**Free**: `{}`\n\n**📊 Data Usage 📊**\n**Upload**: `{}`\n**Down**: `{}`\n\n**CPU**: `{}%`\n**RAM**: `{}%`\n**DISK**: `{}%`"
 usage_simple: "**Total Disk Space**: `{}`\n**Used**: `{}`\n**Free**: `{}`\n\n**📊 Data Usage 📊**\n**Upload**: `{}`\n**Down**: `{}`\n\n**CPU**: `{}%`\n**RAM**: `{}%`\n**DISK**: `{}%`"
