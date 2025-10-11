@@ -25,10 +25,10 @@ import io
 from . import eor, get_string, udB, ultroid_cmd
 
 
+
 @ultroid_cmd(pattern="get($| (.*))", fullsudo=True)
 async def get_var(event):
     try:
-        # Menghindari error jika tidak ada argumen sama sekali
         # Menggunakan maxsplit=1 agar argumen yang tersisa menjadi satu string
         opt = event.text.split(maxsplit=1)[1].split()[0]
     except IndexError:
@@ -44,7 +44,7 @@ async def get_var(event):
             varname = event.text.split(maxsplit=2)[2]
         except IndexError:
             # Karena opt sudah diambil, error ini berarti varname hilang
-            return await eor(x, "Var name is missing!", time=5) # Pesan diperjelas
+            return await eor(x, "Var name is missing!", time=5)
 
     if opt == "var":
         
@@ -61,10 +61,13 @@ async def get_var(event):
             # 3. Ubah nilai menjadi string dan terapkan penanganan pesan panjang
             val_str = str(val)
             
-            # --- START FIX: Penanganan MessageTooLongError ---
+            # --- START FIX: Penanganan MessageTooLongError (Menggunakan io.BytesIO) ---
             if len(val_str) > 4000:
-                # Jika terlalu panjang, kirim sebagai file .txt
-                with io.StringIO(f"Variable: {varname}\nType: {var_type}\n\nValue:\n{val_str}") as f:
+                # Siapkan konten string
+                content_str = f"Variable: {varname}\nType: {var_type}\n\nValue:\n{val_str}"
+                
+                # Gunakan io.BytesIO dan encode konten ke bytes
+                with io.BytesIO(content_str.encode('utf-8')) as f:
                     f.name = f"{varname}_value.txt"
                     
                     # Kirim file ke chat
@@ -95,7 +98,7 @@ async def get_var(event):
             await x.edit(f"**Variable** - `{varname}`\n**Type**: Redis Key.")
         # try env vars
         val = os.getenv(varname)
-        if val is not None:
+        if val is not None and c == 0:
             c += 1
             await x.edit(f"**Variable** - `{varname}`\n**Type**: Env Var.")
 
@@ -105,10 +108,14 @@ async def get_var(event):
     elif opt == "db":
         val = udB.get(varname)
         if val is not None:
-            # --- Logika penanganan pesan panjang untuk 'db' (Sudah Benar) ---
             val_str = str(val)
+            # --- Logika penanganan pesan panjang untuk 'db' (Menggunakan io.BytesIO) ---
             if len(val_str) > 4000:
-                with io.StringIO(f"Key: {varname}\n\nValue:\n{val_str}") as f:
+                # Siapkan konten string
+                content_str = f"Key: {varname}\n\nValue:\n{val_str}"
+                
+                # Gunakan io.BytesIO dan encode konten ke bytes
+                with io.BytesIO(content_str.encode('utf-8')) as f:
                     f.name = f"{varname}_value.txt"
                     
                     # Kirim file ke chat
@@ -136,10 +143,13 @@ async def get_var(event):
             and not i.startswith("GBAN_REASON_")
         )
         
-        # --- Logika penanganan pesan panjang untuk 'keys' (Sudah Benar) ---
+        # --- Logika penanganan pesan panjang untuk 'keys' (Menggunakan io.BytesIO) ---
         if len(msg) > 4000:
-            # Buat file di memori (StringIO)
-            with io.StringIO(f"List of DB Keys :\n\n{msg}") as f:
+            # Siapkan konten string
+            content_str = f"List of DB Keys :\n\n{msg}"
+            
+            # Gunakan io.BytesIO dan encode konten ke bytes
+            with io.BytesIO(content_str.encode('utf-8')) as f:
                 f.name = "db_keys_list.txt"
                 
                 # Kirim file ke chat tempat perintah dipicu
