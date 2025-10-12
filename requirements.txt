@@ -9,8 +9,8 @@ motor==3.6.0
 numpy==2.2.5
 pillow
 #pytgcalls==3.0.0.dev24
-ntgcalls==2.0.5
-py-tgcalls==2.2.0rc3
+#ntgcalls==2.0.5
+py-tgcalls==2.2.8
 python-dotenv==1.0.1
 tgcrypto==1.2.5
 python-decouple
