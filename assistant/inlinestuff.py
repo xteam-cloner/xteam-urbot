@@ -622,46 +622,77 @@ InlinePlugin.update(
     }
 )
 
-@in_pattern("limit", owner=True)
-async def limit(query):
-    chat = "@SpamBot"
+# Berjalan pada klien Bot (asst)
+@asst.cmd(pattern="limit", owner=True) 
+async def limit_trigger(query):
+    # ID pengguna yang meminta status.
+    requester_id = query.sender_id
     
-    # Pesan default jika terjadi kesalahan
-    response_message = "⏳ Gagal mendapatkan status. Coba lagi atau pastikan @SpamBot tidak diblokir." 
+    # Perintah internal yang akan diterima oleh Userbot (ultroid_bot)
+    command_to_userbot = f"/ult_checkspam {requester_id}"
     
     try:
-        # Menggunakan conv (conversation) - Ini hanya berfungsi di Userbot (akun pengguna)
-        async with query.client.conversation(chat, timeout=5) as conv:
-            # 1. Kirim perintah /start
-            await conv.send_message("/start")
-            
-            # 2. Tunggu balasan dari SpamBot (maksimal 5 detik)
-            response = await conv.get_response()
-            
-            # 3. Ambil teks status yang sebenarnya
-            response_message = response.text 
-            
-    except YouBlockedUserError:
-        response_message = "⛔️ Harap **Unblock @SpamBot** untuk melakukan pengecekan status."
-    except TimeoutError:
-        response_message = "⚠️ Pengecekan status @SpamBot gagal (**Timeout**). Coba lagi."
+        # Mengirim perintah ke Userbot Utama ('me' merujuk pada Saved Messages/chat Userbot)
+        await ultroid_bot.send_message("me", command_to_userbot) 
+        
     except Exception as e:
-        error_name = e.__class__.__name__
-        if error_name == "UserIsBotError":
-             # Respons spesifik untuk masalah lingkungan Anda
-             response_message = "❌ **UserIsBotError**. Perintah ini hanya bisa dijalankan oleh **Klien Userbot** yang diinisialisasi dengan nomor telepon, bukan Bot Token. Pastikan Ultroid Anda dijalankan sebagai Userbot."
-        else:
-            response_message = f"❌ Terjadi kesalahan saat memeriksa: **{error_name}**"
+        response_message = f"❌ Gagal Memulai Pengecekan. Userbot tidak merespons: {e.__class__.__name__}"
+        
+        builder = query.builder
+        # Mengirim respons kegagalan melalui Inline Query Bot
+        return await query.answer([
+            builder.article(title="Status Gagal", text=response_message)
+        ])
 
-    # ... (Bagian builder.article di bawahnya sama) ...
+    # Mengirim respons awal ke pengguna
     builder = query.builder
     await query.answer(
         [
             builder.article(
-                title="Spam Limit Status",
-                text=response_message,
-                description="Tap to send your current account limit status."
+                title="Status Sedang Diproses",
+                text="⏳ Userbot sedang memeriksa status spam Anda. Hasil akan dikirimkan segera."
             )
         ]
     )
+
+
+# Berjalan pada klien Userbot (ultroid_bot)
+from telethon import events
+
+@ultroid_bot.on(events.NewMessage(pattern="Limit (\d+)", incoming=True, chats='me'))
+async def check_and_send_spam_status_userbot(event):
+    # Ekstrak ID pengguna dari pesan internal
+    requester_id = int(event.pattern_match.group(1))
+    chat = "@SpamBot"
     
+    response_message = "❌ Gagal mendapatkan status. Cek log Ultroid untuk detail." 
+    
+    try:
+        # **Bagian KRITIS**: Menggunakan conv (conversation) yang HANYA BERHASIL pada Userbot
+        async with event.client.conversation(chat, timeout=5) as conv:
+            await conv.send_message("/start")
+            response = await conv.get_response()
+            response_message = response.text 
+            
+    except Exception as e:
+        # Penanganan error (Anda bisa menambahkan lebih banyak)
+        error_name = e.__class__.__name__
+        if error_name == "YouBlockedUserError":
+            response_message = "⛔️ Harap **Unblock @SpamBot** di akun Userbot Anda."
+        elif error_name == "TimeoutError":
+            response_message = "⚠️ Pengecekan status @SpamBot gagal (**Timeout**)."
+        else:
+            response_message = f"❌ Terjadi kesalahan saat memeriksa: **{error_name}**"
+
+    # Kirim hasil AKHIR langsung ke Pengguna (menggunakan Userbot)
+    final_message = f"**— Hasil Pengecekan Spam —**\n\n{response_message}"
+    
+    try:
+        # Menggunakan event.client (yaitu ultroid_bot) untuk mengirim ke Requester ID
+        await event.client.send_message(requester_id, final_message)
+        # Hapus pesan perintah internal untuk menjaga kebersihan Saved Messages
+        await event.delete() 
+    except Exception as e:
+        # Jika gagal mengirim ke pengguna, beri tahu pemilik bot
+        await asst.send_message(OWNER_ID, f"⚠️ Gagal mengirim hasil ke user ID {requester_id}. Userbot error: {e.__class__.__name__}")
+                                             
