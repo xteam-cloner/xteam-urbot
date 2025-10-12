@@ -631,6 +631,7 @@ async def limit(query):
     
     try:
         # Menggunakan conv (conversation) untuk interaksi.
+        # **Catatan:** Fungsi ini HANYA berfungsi pada Userbot (akun pengguna biasa)
         async with query.client.conversation(chat, timeout=5) as conv:
             # 1. Kirim perintah /start
             await conv.send_message("/start")
@@ -642,13 +643,16 @@ async def limit(query):
             response_message = response.text 
             
     except YouBlockedUserError:
-        response_message = "⛔️ Harap Unblock @SpamBot untuk melakukan pengecekan status."
+        response_message = "⛔️ Harap **Unblock @SpamBot** untuk melakukan pengecekan status."
     except TimeoutError:
         response_message = "⚠️ Pengecekan status @SpamBot gagal (Timeout). Coba lagi."
     except Exception as e:
-        response_message = f"❌ Terjadi kesalahan saat memeriksa: {e.__class__.__name__}"
+        # Memberi tahu pengguna untuk beralih ke Userbot jika UserIsBotError muncul lagi
+        if e.__class__.__name__ == "UserIsBotError":
+             response_message = "❌ Terjadi kesalahan: **UserIsBotError**. Fungsi ini HANYA dapat dijalankan oleh **Akun Pengguna Biasa (Userbot)**, bukan Bot Telegram."
+        else:
+            response_message = f"❌ Terjadi kesalahan saat memeriksa: **{e.__class__.__name__}**"
 
-    # ... (Bagian builder.article di bawahnya sama) ...
     builder = query.builder
     await query.answer(
         [
@@ -658,4 +662,4 @@ async def limit(query):
                 description="Tap to send your current account limit status."
             )
         ]
-    )
+            )
