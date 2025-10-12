@@ -623,7 +623,7 @@ InlinePlugin.update(
 )
 
 # Berjalan pada klien Bot (asst)
-@asst.cmd(pattern="limit", owner=True) 
+@in_pattern(pattern="limit", owner=True) 
 async def limit_trigger(query):
     # ID pengguna yang meminta status.
     requester_id = query.sender_id
