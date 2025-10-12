@@ -21,4 +21,4 @@ echo "
 #python3 -m xteam
 
 #if [ -f .env ] ; then  set -o allexport; source .env; set +o allexport ; fi
-if [ $SESSION ] ; then python3 -m xteamji.py ; else python3 -m xteam ; fi
+if [ $SESSION ] ; then python3 -m xteamji ; else python3 -m xteam ; fi
