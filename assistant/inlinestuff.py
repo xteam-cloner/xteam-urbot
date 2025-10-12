@@ -630,8 +630,7 @@ async def limit(query):
     response_message = "⏳ Gagal mendapatkan status. Coba lagi atau pastikan @SpamBot tidak diblokir." 
     
     try:
-        # Menggunakan conv (conversation) untuk interaksi.
-        # **Catatan:** Fungsi ini HANYA berfungsi pada Userbot (akun pengguna biasa)
+        # Menggunakan conv (conversation) - Ini hanya berfungsi di Userbot (akun pengguna)
         async with query.client.conversation(chat, timeout=5) as conv:
             # 1. Kirim perintah /start
             await conv.send_message("/start")
@@ -645,14 +644,16 @@ async def limit(query):
     except YouBlockedUserError:
         response_message = "⛔️ Harap **Unblock @SpamBot** untuk melakukan pengecekan status."
     except TimeoutError:
-        response_message = "⚠️ Pengecekan status @SpamBot gagal (Timeout). Coba lagi."
+        response_message = "⚠️ Pengecekan status @SpamBot gagal (**Timeout**). Coba lagi."
     except Exception as e:
-        # Memberi tahu pengguna untuk beralih ke Userbot jika UserIsBotError muncul lagi
-        if e.__class__.__name__ == "UserIsBotError":
-             response_message = "❌ Terjadi kesalahan: **UserIsBotError**. Fungsi ini HANYA dapat dijalankan oleh **Akun Pengguna Biasa (Userbot)**, bukan Bot Telegram."
+        error_name = e.__class__.__name__
+        if error_name == "UserIsBotError":
+             # Respons spesifik untuk masalah lingkungan Anda
+             response_message = "❌ **UserIsBotError**. Perintah ini hanya bisa dijalankan oleh **Klien Userbot** yang diinisialisasi dengan nomor telepon, bukan Bot Token. Pastikan Ultroid Anda dijalankan sebagai Userbot."
         else:
-            response_message = f"❌ Terjadi kesalahan saat memeriksa: **{e.__class__.__name__}**"
+            response_message = f"❌ Terjadi kesalahan saat memeriksa: **{error_name}**"
 
+    # ... (Bagian builder.article di bawahnya sama) ...
     builder = query.builder
     await query.answer(
         [
@@ -662,4 +663,5 @@ async def limit(query):
                 description="Tap to send your current account limit status."
             )
         ]
-            )
+    )
+    
