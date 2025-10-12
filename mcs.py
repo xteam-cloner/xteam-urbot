@@ -19,7 +19,7 @@ DEFAULT_STREAM_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
 # ------------------------------------
 
 # Inisialisasi Klien Telethon menggunakan STRING_SESSION
-client = TelegramClient(SESSION, API_ID, API_HASH)
+client = TelegramClient(Var.SESSION, Var.API_ID, Var.API_HASH)
 
 # Inisialisasi PyTgCalls dengan Klien Telethon
 pytgcalls_app = PyTgCalls(client)
