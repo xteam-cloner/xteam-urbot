@@ -16,7 +16,7 @@ from gtts import gTTS
 from xteam._misc._decorators import ultroid_cmd
 from xteam._misc._wrappers import eod, eor 
 # from xteam.fns.helper import deEmojify # <--- Hapus atau Nonaktifkan ini
-from xteam.fns.misc import reply_id 
+from . import reply_id 
 
 plugin_category = "utils"
 
