@@ -37,7 +37,7 @@ from xteam.version import __version__, ultroid_version
 from strings import get_help, get_string
 from xteam._misc._supporter import CMD_HNDLR
 from xteam.dB import stickers
-#from xteam.startup.BaseClient import UltroidMusic
+from xteam._misc._supporter import Config
 
 udB: Database
 
