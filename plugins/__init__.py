@@ -4,7 +4,18 @@
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
+import base64
+import contextlib
 
+from telethon.errors import (
+    ChannelInvalidError,
+    ChannelPrivateError,
+    ChannelPublicGroupNaError,
+)
+from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.tl.functions.messages import GetFullChatRequest
+from telethon.tl.functions.messages import ImportChatInviteRequest as Get
+from telethon.tl.types import MessageEntityMentionName
 import asyncio
 import os
 import time
@@ -87,6 +98,14 @@ def get_readable_time(seconds: int) -> str:
 
     return readable_time
 
+async def reply_id(event):
+    reply_to_id = None
+    if event.sender_id in Config.SUDO_USERS:
+        reply_to_id = event.id
+    if event.reply_to_msg_id:
+        reply_to_id = event.reply_to_msg_id
+    return reply_to_id
+    
 
 Telegraph = telegraph_client()
 
