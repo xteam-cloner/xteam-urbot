@@ -24,7 +24,7 @@ from random import choice
 import requests
 from telethon import Button, events
 from telethon.tl import functions, types  # pylint:ignore
-#from xteam import *
+from xteam import udB
 from xteam._misc._assistant import asst_cmd, callback, in_pattern
 from xteam._misc._decorators import ultroid_cmd
 from xteam._misc._wrappers import eod, eor
@@ -100,7 +100,7 @@ def get_readable_time(seconds: int) -> str:
 
 async def reply_id(event):
     reply_to_id = None
-    if event.sender_id in Config.SUDO_USERS:
+    if event.sender_id in (udB.get_key("FULLSUDO") or []):
         reply_to_id = event.id
     if event.reply_to_msg_id:
         reply_to_id = event.reply_to_msg_id
