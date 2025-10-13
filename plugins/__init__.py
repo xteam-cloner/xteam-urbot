@@ -98,16 +98,6 @@ def get_readable_time(seconds: int) -> str:
 
     return readable_time
 
-async def reply_id(event):
-    reply_to_id = None
-full_sudo = udB.get_key("FULLSUDO")
-sudo_list = full_sudo if isinstance(full_sudo, list) else [full_sudo] if full_sudo else []
-if event.sender_id in sudo_list:
-    reply_to_id = event.id
-    if event.reply_to_msg_id:
-        reply_to_id = event.reply_to_msg_id
-        return reply_to_id
-    
 
 Telegraph = telegraph_client()
 
