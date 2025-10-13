@@ -7,7 +7,7 @@ Available Commands:
 
 import os
 import subprocess
-import re # <-- Tambahkan ini untuk regular expressions
+import re
 from datetime import datetime
 
 from gtts import gTTS
@@ -16,7 +16,7 @@ from gtts import gTTS
 from xteam._misc._decorators import ultroid_cmd
 from xteam._misc._wrappers import eod, eor 
 # from xteam.fns.helper import deEmojify # <--- Hapus atau Nonaktifkan ini
-from . import reply_id 
+# from . import reply_id # <--- DIHILANGKAN
 
 plugin_category = "utils"
 
@@ -66,7 +66,8 @@ async def tts_cmd(event):
     input_str = event.pattern_match.group(1)
     start = datetime.now()
     
-    reply_to_id = await reply_id(event) 
+    # PERUBAHAN: Menggunakan event.reply_to_msg_id secara langsung
+    reply_to_id = event.reply_to_msg_id
 
     lan = "en" 
     text = None
@@ -138,7 +139,7 @@ async def tts_cmd(event):
         await event.client.send_file(
             event.chat_id,
             final_file_name,
-            reply_to=reply_to_id,
+            reply_to=reply_to_id, # Menggunakan variabel yang diperbarui
             allow_cache=False,
             voice_note=True,  
         )
@@ -153,3 +154,4 @@ async def tts_cmd(event):
 
     except Exception as e:
         await eor(catevent, f"**Error during TTS process:**\n`{e}`\n\n*Check language code (`{lan}`) or `ffmpeg` installation.*", time=10)
+        
