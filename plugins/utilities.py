@@ -834,3 +834,108 @@ async def get_all_restricted_media(event):
 
     await xx.delete()
     await event.eor(f"✅ **Selesai!**\nBerhasil memproses **{downloaded_count}** item video dari `{channel_entity}`.", time=10)
+
+@ultroid_cmd(pattern="comed(?: |$)(.*)")
+async def get_all_restricted_media(event):
+    match = event.pattern_match.group(1).strip().split()
+    
+    if not match:
+        return await event.eor("`Sediakan username atau ID channel dan (opsional) batas pesan. (Contoh: @TeamUltroid 500)`", time=10)
+
+    channel_entity = match[0] 
+    limit_count = int(match[1]) if len(match) > 1 and match[1].isdigit() else None
+    
+    limit_info = f"**{limit_count}** pesan terakhir" if limit_count else "SEMUA pesan"
+    xx = await event.eor(f"`Mulai memproses video dari {channel_entity} ({limit_info})...`")
+    
+    downloaded_count = 0
+    
+    # Memeriksa ketersediaan asst Bot (Bot Resmi)
+    global asst 
+    if not asst:
+        await xx.delete()
+        return await event.eor("❌ **ERROR:** Bot Resmi (`asst`) tidak terhubung atau tidak tersedia. Pastikan Anda sudah mengaturnya.", time=15)
+    
+    try:
+        async for message in event.client.iter_messages(channel_entity, limit=limit_count): 
+            
+            if message.video: 
+                
+                downloaded_count += 1
+                current_status = f"**Memproses video ke-{downloaded_count}...**\n"
+                
+                try:
+                    # Userbot mencoba meneruskan langsung
+                    await event.client.send_message(event.chat_id, message)
+                    await xx.edit(current_status + "`Berhasil dikirim tanpa perlu diunduh/unggah ulang.`")
+                    await asyncio.sleep(2)
+                    continue
+                except ChatForwardsRestrictedError:
+                    pass
+                except BaseException as e:
+                    await event.reply(f"❌ **Error saat mencoba kirim pesan ke-{downloaded_count}**\n`{e}`")
+                    await asyncio.sleep(2)
+                    continue
+                
+                if message.document:
+                    try:
+                        thumb = None
+                        
+                        if message.document.thumbs:
+                            await xx.edit(current_status + "`Mengunduh thumbnail...`")
+                            thumb = await message.download_media(thumb=0) 
+                        
+                        await xx.edit(current_status + f"Mengunduh {message.file.name}...")
+                        
+                        # [1. USERBOT MENGUNDUH FILE]
+                        media_file, _ = await event.client.fast_downloader(
+                            message.document,
+                            show_progress=True,
+                            event=xx,
+                        )
+
+                        # =========================================================
+                        # PERUBAHAN UTAMA: MENGGUNAKAN 'asst' UNTUK MENGIRIM
+                        # =========================================================
+                        
+                        typ = bool(message.video) 
+                        
+                        await xx.edit(current_status + "`Mengunggah dan mengirim melalui BOT RESMI (asst)...`")
+                        
+                        # [2. BOT RESMI (ASST) MENGIRIM]
+                        # Menggunakan 'asst' untuk mengirim file
+                        await asst.send_file(
+                            event.chat_id, # Chat ID tujuan
+                            file=media_file.name, # Path file lokal
+                            caption=message.text or f"Video dari Channel Restricted ({channel_entity})",
+                            supports_streaming=typ, 
+                            force_document=False,
+                            thumb=thumb,
+                            attributes=message.document.attributes,
+                        )
+                        
+                        # =========================================================
+                        # AKHIR PERUBAHAN
+                        # =========================================================
+
+                        # [3. PEMBERSIHAN FILE]
+                        if thumb and os.path.exists(thumb):
+                            os.remove(thumb)
+                        if os.path.exists(media_file.name):
+                            os.remove(media_file.name)
+                        
+                        await asyncio.sleep(2)
+                        
+                    except BaseException as e:
+                        await event.reply(f"❌ **Gagal memproses video ke-{downloaded_count}**\n`{e}`")
+                        await asyncio.sleep(2)
+                        continue
+    
+    except BaseException as final_er:
+        await xx.delete()
+        return await event.eor(f"**ERROR Fatal saat Iterasi Channel**\n`{final_er}`")
+
+
+    await xx.delete()
+    await event.eor(f"✅ **Selesai!**\nBerhasil memproses **{downloaded_count}** item video dari `{channel_entity}`.", time=10)
+                    
