@@ -7,25 +7,47 @@ Available Commands:
 
 import os
 import subprocess
+import re # <-- Tambahkan ini untuk regular expressions
 from datetime import datetime
 
 from gtts import gTTS
 
 # Menggunakan impor spesifik dari Xteam/Ultroid yang Anda berikan
 from xteam._misc._decorators import ultroid_cmd
-from xteam._misc._wrappers import eod, eor # eod = edit_delete, eor = edit_or_reply
-from xteam.fns.helper import deEmojify # Mengasumsikan deEmojify ada di sini, atau di import *
-from xteam.fns.misc import reply_id # Mengasumsikan reply_id ada di sini, atau di import *
-
-# Jika deEmojify dan reply_id tidak ada di fns.helper/fns.misc:
-# Harap pastikan fungsi ini tersedia atau impor dari lokasi aslinya.
-# Jika Anda menggunakan core Ultroid, mungkin harus kembali ke:
-# from ultroid.core.helpers import deEmojify
-# from telethon.utils import get_reply_id as reply_id 
-# Namun, saya akan mengikuti struktur impor Xteam Anda.
+from xteam._misc._wrappers import eod, eor 
+# from xteam.fns.helper import deEmojify # <--- Hapus atau Nonaktifkan ini
+from xteam.fns.misc import reply_id 
 
 plugin_category = "utils"
 
+# ====================================================================
+# FUNGSI ALTERNATIF PENGGANTI deEmojify
+# ====================================================================
+
+def de_emojify_alt(text):
+    """Menghapus emoji dan karakter yang tidak dapat diucapkan TTS."""
+    # Pattern untuk menemukan sebagian besar emoji (Unicode)
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # Emoticons
+        "\U0001F300-\U0001F5FF"  # Symbols & Pictographs
+        "\U0001F680-\U0001F6FF"  # Transport & Map Symbols
+        "\U0001F700-\U0001F77F"  # Alchemical Symbols
+        "\U0001F780-\U0001F7FF"  # Geometric Shapes Extended
+        "\U0001F800-\U0001F8FF"  # Supplemental Arrows-C
+        "\U0001F900-\U0001F9FF"  # Supplemental Symbols and Pictographs
+        "\U0001FA00-\U0001FA6F"  # Chess Symbols
+        "\U0001FA70-\U0001FAFF"  # Symbols and Pictographs Extended-A
+        "\U00002702-\U000027B0"  # Dingbats
+        "\U000024C2-\U0001F251" 
+        "]+", flags=re.UNICODE
+    )
+    # Ganti emoji dengan spasi kosong atau hapus
+    return emoji_pattern.sub(r'', text)
+
+# ====================================================================
+# DEKORATOR DAN FUNGSI UTAMA
+# ====================================================================
 
 @ultroid_cmd(
     pattern="tts(?:\s|$)([\s\S]*)",
@@ -44,10 +66,9 @@ async def tts_cmd(event):
     input_str = event.pattern_match.group(1)
     start = datetime.now()
     
-    # Menggunakan reply_id yang diimpor dari fns.misc (sesuai struktur Xteam)
     reply_to_id = await reply_id(event) 
 
-    lan = "en"  # Default language
+    lan = "en" 
     text = None
 
     if ";" in input_str:
@@ -56,13 +77,11 @@ async def tts_cmd(event):
             lan = lan.strip()
             text = text.strip()
         except ValueError:
-            # Fallback jika split gagal
             text = input_str.strip()
             lan = "en"
     elif event.reply_to_msg_id:
         previous_message = await event.get_reply_message()
         text = previous_message.message
-        # Jika reply, input_str digunakan sebagai language code
         lan = input_str.strip() or "en"
     else:
         text = input_str.strip()
@@ -71,12 +90,11 @@ async def tts_cmd(event):
     if not text:
         return await eor(event, "Invalid Syntax. Please provide text or reply to a message.", time=5)
 
-    # Menggunakan eor (Edit or Reply)
     catevent = await eor(event, "`Recording......`")
     
     try:
-        # Menggunakan deEmojify yang diimpor (sesuai struktur Xteam)
-        text = deEmojify(text)
+        # PENGGANTIAN: Menggunakan fungsi alternatif yang kita buat
+        text = de_emojify_alt(text)
         
         if not os.path.isdir("./temp/"):
             os.makedirs("./temp/")
@@ -105,16 +123,13 @@ async def tts_cmd(event):
         ]
 
         try:
-            # Execute FFmpeg command (output diabaikan)
             subprocess.check_output(
                 command_to_execute, stderr=subprocess.STDOUT
             )
             os.remove(required_file_name)
             final_file_name = opus_file_name
         except (subprocess.CalledProcessError, NameError, FileNotFoundError) as exc:
-            # Jika FFmpeg gagal, gunakan file OGG mentah
             final_file_name = required_file_name
-            # Perlu diperhatikan, di userbot Xteam/Ultroid, logging harus digunakan di sini.
 
         # --- Send File and Cleanup ---
         end = datetime.now()
@@ -125,20 +140,16 @@ async def tts_cmd(event):
             final_file_name,
             reply_to=reply_to_id,
             allow_cache=False,
-            voice_note=True,  # Kirim sebagai voice note
+            voice_note=True,  
         )
         
-        # Cleanup
         os.remove(final_file_name)
-        if os.path.exists(required_file_name): # Pastikan file OGG mentah juga dihapus
+        if os.path.exists(required_file_name): 
              os.remove(required_file_name)
              
-        # Menggunakan eod (Edit or Delete)
         await eod(
             catevent, f"`Processed text {text[:30]}... into voice in {ms} seconds!`", time=5
         )
 
     except Exception as e:
-        # Menggunakan eor untuk melaporkan error
         await eor(catevent, f"**Error during TTS process:**\n`{e}`\n\n*Check language code (`{lan}`) or `ffmpeg` installation.*", time=10)
-                         
