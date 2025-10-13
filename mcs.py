@@ -5,7 +5,7 @@ from pytgcalls import PyTgCalls, idle
 from pytgcalls.exceptions import NoActiveGroupCall
 from pytgcalls.types import MediaStream
 from xteam.configs import Var 
-
+from xteam import asst
 # --- KONFIGURASI ---
 API_ID = Var.API_ID 
 API_HASH = Var.API_HASH 
@@ -19,10 +19,10 @@ DEFAULT_STREAM_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
 # ------------------------------------
 
 # Inisialisasi Klien Telethon menggunakan STRING_SESSION
-client = TelegramClient(Var.SESSION, Var.API_ID, Var.API_HASH)
+#client = TelegramClient(Var.SESSION, Var.API_ID, Var.API_HASH)
 
 # Inisialisasi PyTgCalls dengan Klien Telethon
-pytgcalls_app = PyTgCalls(client)
+pytgcalls_app = PyTgCalls(asst)
 
 # Dictionary untuk melacak status obrolan suara
 voice_chat_status = {}
