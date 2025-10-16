@@ -50,7 +50,7 @@ qrcode
 requests
 tabulate
 telegraph
-tgcrypto
+#tgcrypto
 youtube-search-python
 yt-dlp
 flask
