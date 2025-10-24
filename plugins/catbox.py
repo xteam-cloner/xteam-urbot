@@ -49,19 +49,19 @@ async def catbox_upload_plugin(event):
 import asyncio
 import os
 from . import ultroid_cmd, eor, ULTROID_IMAGES
-from catbox import CatboxUploader # Pastikan pustaka yang digunakan mendukung Litterbox
+from catbox import CatboxUploader 
 from random import choice
 
 
 # Inisialisasi CatboxUploader
 cat_uploader = CatboxUploader()
-# upload_file = cat_uploader.upload_file # Tidak diperlukan
+# upload_file = cat_uploader.upload_file 
 
 # Fungsi untuk mendapatkan gambar inline (opsional, dari kode Anda sebelumnya)
 def inline_pic():
     return choice(ULTROID_IMAGES)
 
-@ultroid_cmd(pattern="litterbox(?: |$)(.*)") # Ganti pattern command
+@ultroid_cmd(pattern="litterbox(?: |$)(.*)")
 async def litterbox_upload_plugin(event):
     """
     Plugin untuk mengunggah file ke Litterbox.catbox.moe (temporer).
@@ -75,11 +75,11 @@ async def litterbox_upload_plugin(event):
         return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Litterbox.catbox.moe.")
 
     # Ambil durasi kedaluwarsa dari argumen, jika ada. Default ke 72 jam.
-    # Contoh: .litterbox 12h
     expiry_time = event.pattern_match.group(1).strip()
     # Atur default jika tidak ada input atau input tidak valid
+    # Litterbox hanya menerima 1h, 12h, 24h, atau 72h
     if expiry_time not in ['1h', '12h', '24h', '72h']:
-        expiry_time = '72h' # Litterbox default atau 72h
+        expiry_time = '72h' 
 
     message = await eor(event, f"Mengunduh media untuk Litterbox (Kedaluwarsa: **{expiry_time}**)...")
     filePath = None
@@ -88,9 +88,9 @@ async def litterbox_upload_plugin(event):
 
         await message.edit("Mengunggah ke Litterbox.catbox.moe...")
 
-        # <<< --- PERUBAHAN UTAMA DI SINI --- >>>
-        # Gunakan cat_uploader.upload_to_litterbox(filepath, expire_time)
-        uploaded_url = cat_uploader.upload_to_litterbox(filePath, expiry_time=expiry_time)
+        # <<< --- PERBAIKAN DI SINI --- >>>
+        # Mengganti 'expiry_time=' menjadi 'time='
+        uploaded_url = cat_uploader.upload_to_litterbox(filePath, time=expiry_time)
 
         await message.edit(f"<blockquote>📤 Unggahan Litterbox Berhasil!\nURL: {uploaded_url}\nKedaluwarsa: {expiry_time}</blockquote>", parse_mode="html")
     except Exception as e:
@@ -99,4 +99,3 @@ async def litterbox_upload_plugin(event):
         # Hapus file lokal setelah diunggah
         if filePath and os.path.exists(filePath):
             os.remove(filePath)
-            
