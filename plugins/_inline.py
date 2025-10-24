@@ -271,7 +271,7 @@ async def _(event):
     start = datetime.now()
     end = datetime.now()
     ms = (end - start).microseconds
-    pin = f"🌋Pɪɴɢ = {ms} microseconds"
+    pin = f"🌋Pɪɴɢ = {ms} ms"
     await event.answer(pin, cache_time=0, alert=True)
 
 
@@ -304,8 +304,8 @@ async def pmclose(event):
     await event.delete()
 
 def page_num(index, key):
-    rows = udB.get_key("HELP_ROWS") or 2
-    cols = udB.get_key("HELP_COLUMNS") or 5
+    rows = udB.get_key("HELP_ROWS") or 5
+    cols = udB.get_key("HELP_COLUMNS") or 2
     loaded = HELP.get(key, [])
     emoji = udB.get_key("EMOJI_IN_HELP") or ""
     List = [
