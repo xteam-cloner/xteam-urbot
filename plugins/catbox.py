@@ -87,30 +87,29 @@ async def zeroxst_upload_plugin(event):
 
         await message.edit("Mengunggah ke 0x0.st...")
 
-        # --- FUNGSI UNGGAHAN DENGAN SOLUSI USER-AGENT (Dijalankan di thread terpisah) ---
+        # --- FUNGSI UNGGAHAN DENGAN USER-AGENT BARU (Dijalankan di thread terpisah) ---
         def upload_blocking(path):
-            # 💡 SOLUSI: Tentukan User-Agent untuk menghindari error 403
-            CUSTOM_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            # 💡 SOLUSI REVISI: Menggunakan User-Agent yang berbeda untuk Chrome 129 di Linux
+            # Jika ini gagal, coba User-Agent yang lain lagi!
+            CUSTOM_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
             
             headers = {
                 'User-Agent': CUSTOM_USER_AGENT
             }
 
             with open(path, 'rb') as file_handle:
-                # 0x0.st mengharapkan bidang file bernama 'file'
                 files = {'file': file_handle} 
                 
                 # Kirim permintaan POST dengan header User-Agent yang dimodifikasi
                 r = requests.post('https://0x0.st', files=files, headers=headers) 
                 
                 if r.status_code == 200:
-                    # 0x0.st mengembalikan URL sebagai teks biasa
                     return r.text.strip() 
                 else:
                     # Menangani kegagalan jika status bukan 200
                     raise Exception(f"Unggahan gagal (Status: {r.status_code}): {r.text.strip()}")
 
-        # Jalankan fungsi blocking di threadpool agar tidak memblokir event loop asyncio
+        # Jalankan fungsi blocking di threadpool
         uploaded_url = await asyncio.to_thread(upload_blocking, filePath)
 
         if uploaded_url and uploaded_url.startswith("http"):
@@ -122,11 +121,10 @@ async def zeroxst_upload_plugin(event):
         await message.edit(f"Terjadi kesalahan saat mengunggah ke 0x0.st: `{type(e).__name__}: {e}`")
         
     finally:
-        # Hapus file lokal di blok finally untuk pembersihan yang terjamin
         if filePath and os.path.exists(filePath):
             try:
                 os.remove(filePath)
             except Exception as clean_e:
-                # Menghindari kegagalan fatal karena masalah pembersihan
                 print(f"Peringatan: Gagal menghapus file lokal: {clean_e}")
                 pass
+                
