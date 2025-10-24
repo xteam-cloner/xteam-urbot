@@ -307,7 +307,7 @@ async def pmclose(event):
 
 def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 2
-    cols = udB.get_key("HELP_COLUMNS") or 2
+    cols = udB.get_key("HELP_COLUMNS") or 5
     loaded = HELP.get(key, [])
     emoji = udB.get_key("EMOJI_IN_HELP") or ""
     List = [
@@ -330,7 +330,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("×", data="ownr"))
+    nav_buttons.append(Button.inline("×", data="pkng"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -342,7 +342,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("×", data="ownr")])
+        new_.append([Button.inline("×", data="upp")])
 
     return new_
 
