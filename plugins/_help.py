@@ -120,7 +120,6 @@ async def _help(ult):
                 _main_help_menu[2:3] = [[Button.inline("• Manager Help •", "mngbtn")]]
             return await ult.reply(
                 get_string("inline_4").format(
-                    OWNER_NAME,
                     len(HELP["Official"]),
                     len(HELP["Addons"] if "Addons" in HELP else []),
                     cmd,
