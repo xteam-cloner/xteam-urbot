@@ -63,7 +63,7 @@ async def _(event):
     ultroid_bot.parse_mode = CustomMarkdown()
     user_id = OWNER_ID
     ment = await mention_user(user_id)
-    bot_header = f"<b>Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ</b>"
+    bot_header = f"```𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓```"
     prem = event.pattern_match.group(1)
     start = time.time()
     x = await event.reply("ping")
@@ -75,7 +75,7 @@ async def _(event):
         await x.reply(get_string("iping").format(end))
     else:
         pic = udB.get_key("PING_PIC")
-        await asyncio.sleep(1)
+        await asyncio.sleep(0,5)
         await x.edit(get_string("ping").format(bot_header, end, uptime, f"{OWNER_NAME}"), file=pic)
     
 
