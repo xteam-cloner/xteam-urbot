@@ -115,7 +115,6 @@ async def inline_handler(ult):
     key = "Official"
     count = 0
     text = get_string("inline_4", key).format(
-        OWNER_NAME,
         len(HELP.get("Official", [])),
         len(HELP.get("Addons", [])),
         len(key),
@@ -152,7 +151,6 @@ async def setting(event):
         z.extend(x)
     await event.edit(
         get_string("inline_4").format(
-            OWNER_NAME,
             len(HELP.get("Official", [])),
             len(HELP.get("Addons", [])),
             len(z),
