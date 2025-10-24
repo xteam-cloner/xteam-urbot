@@ -51,13 +51,13 @@ import os
 from . import ultroid_cmd, eor, ULTROID_IMAGES
 from catbox import CatboxUploader 
 from random import choice
-
+from telethon.tl.types import DocumentAttributeFilename # Import ini jika perlu untuk penamaan file yang lebih baik
+# Pastikan Anda sudah menginstal pustaka yang diperlukan: pip install catbox-uploader
 
 # Inisialisasi CatboxUploader
-cat_uploader = CatboxUploader()
-# upload_file = cat_uploader.upload_file 
+cat_uploader = CatboxUploader() 
 
-# Fungsi untuk mendapatkan gambar inline (opsional, dari kode Anda sebelumnya)
+# Fungsi untuk mendapatkan gambar inline (opsional)
 def inline_pic():
     return choice(ULTROID_IMAGES)
 
@@ -74,28 +74,55 @@ async def litterbox_upload_plugin(event):
     if not reply_message.media:
         return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Litterbox.catbox.moe.")
 
-    # Ambil durasi kedaluwarsa dari argumen, jika ada. Default ke 72 jam.
+    # Ambil durasi kedaluwarsa dari argumen. Default ke 72h.
     expiry_time = event.pattern_match.group(1).strip()
-    # Atur default jika tidak ada input atau input tidak valid
-    # Litterbox hanya menerima 1h, 12h, 24h, atau 72h
     if expiry_time not in ['1h', '12h', '24h', '72h']:
         expiry_time = '72h' 
 
     message = await eor(event, f"Mengunduh media untuk Litterbox (Kedaluwarsa: **{expiry_time}**)...")
     filePath = None
+    
     try:
-        filePath = await reply_message.download_media()
+        # Tentukan folder unduhan sementara
+        # Gunakan '.' untuk mendownload di direktori saat ini, atau '/tmp/' jika tersedia
+        download_dir = "./" 
+        
+        # <<< --- PERUBAHAN UTAMA 1: Unduh file dengan jalur yang eksplisit --- >>>
+        # reply_message.download_media(file=...) memastikan file benar-benar ditulis ke disk
+        # dan mengembalikan string jalur file.
+        filePath = await reply_message.download_media(file=download_dir)
+
+        # Pastikan filePath adalah string (jalur file)
+        if not isinstance(filePath, str):
+            # Jika Telethon mengembalikan objek File, kita coba ambil nama filenya
+            # Baris ini mungkin berbeda tergantung implementasi Telethon Anda.
+            filePath = reply_message.file.name if hasattr(reply_message.file, 'name') else None
+            # Jika masih gagal, buat kesalahan
+            if not filePath or not os.path.exists(filePath):
+                 raise Exception("Gagal mendapatkan jalur file unduhan yang valid.")
 
         await message.edit("Mengunggah ke Litterbox.catbox.moe...")
 
-        # <<< --- PERBAIKAN DI SINI --- >>>
-        # Mengganti 'expiry_time=' menjadi 'time='
+        # <<< --- PERUBAHAN UTAMA 2: Memanggil upload_to_litterbox dengan parameter 'time' --- >>>
+        # Perbaikan dari error sebelumnya: 'expiry_time' diganti menjadi 'time'
         uploaded_url = cat_uploader.upload_to_litterbox(filePath, time=expiry_time)
 
         await message.edit(f"<blockquote>📤 Unggahan Litterbox Berhasil!\nURL: {uploaded_url}\nKedaluwarsa: {expiry_time}</blockquote>", parse_mode="html")
+        
     except Exception as e:
-        await message.edit(f"Terjadi kesalahan saat mengunggah ke Litterbox: {e}")
-    finally:
-        # Hapus file lokal setelah diunggah
+        # Jika ada path, hapus saja untuk membersihkan
         if filePath and os.path.exists(filePath):
             os.remove(filePath)
+            
+        await message.edit(f"Terjadi kesalahan saat mengunggah ke Litterbox: `{type(e).__name__}: {e}`")
+        
+    finally:
+        # <<< --- PERUBAHAN UTAMA 3: Pastikan penghapusan di dalam finally setelah semua operasi I/O selesai --- >>>
+        # Hapus file lokal setelah diunggah, jika masih ada dan belum dihapus di blok except
+        if filePath and os.path.exists(filePath):
+            try:
+                os.remove(filePath)
+            except Exception as clean_e:
+                # Kesalahan saat menghapus mungkin tidak perlu dilaporkan ke pengguna
+                print(f"Peringatan: Gagal menghapus file lokal: {clean_e}")
+                pass
