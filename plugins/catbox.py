@@ -46,21 +46,6 @@ async def catbox_upload_plugin(event):
         if filePath and os.path.exists(filePath):
             os.remove(filePath)
 
-import asyncio
-import os
-from . import ultroid_cmd, eor, ULTROID_IMAGES
-from catbox import CatboxUploader 
-from random import choice
-from telethon.tl.types import DocumentAttributeFilename # Import ini jika perlu untuk penamaan file yang lebih baik
-# Pastikan Anda sudah menginstal pustaka yang diperlukan: pip install catbox-uploader
-
-# Inisialisasi CatboxUploader
-cat_uploader = CatboxUploader() 
-
-# Fungsi untuk mendapatkan gambar inline (opsional)
-def inline_pic():
-    return choice(ULTROID_IMAGES)
-
 @ultroid_cmd(pattern="litterbox(?: |$)(.*)")
 async def litterbox_upload_plugin(event):
     """
@@ -81,48 +66,49 @@ async def litterbox_upload_plugin(event):
 
     message = await eor(event, f"Mengunduh media untuk Litterbox (Kedaluwarsa: **{expiry_time}**)...")
     filePath = None
+    uploaded_url = None
     
     try:
-        # Tentukan folder unduhan sementara
-        # Gunakan '.' untuk mendownload di direktori saat ini, atau '/tmp/' jika tersedia
+        # Tentukan folder unduhan sementara. Gunakan './' atau '/tmp/' 
         download_dir = "./" 
         
-        # <<< --- PERUBAHAN UTAMA 1: Unduh file dengan jalur yang eksplisit --- >>>
-        # reply_message.download_media(file=...) memastikan file benar-benar ditulis ke disk
-        # dan mengembalikan string jalur file.
+        # --- PERUBAHAN 1: Unduh file. Sekarang kita yakin filePath adalah string. ---
+        # Telethon mengembalikan string jalur file ketika 'file' disetel.
         filePath = await reply_message.download_media(file=download_dir)
 
-        # Pastikan filePath adalah string (jalur file)
-        if not isinstance(filePath, str):
-            # Jika Telethon mengembalikan objek File, kita coba ambil nama filenya
-            # Baris ini mungkin berbeda tergantung implementasi Telethon Anda.
-            filePath = reply_message.file.name if hasattr(reply_message.file, 'name') else None
-            # Jika masih gagal, buat kesalahan
-            if not filePath or not os.path.exists(filePath):
-                 raise Exception("Gagal mendapatkan jalur file unduhan yang valid.")
+        if not isinstance(filePath, str) or not os.path.exists(filePath):
+            # Ini adalah penanganan kegagalan jika download_media tidak mengembalikan path string
+            # Walaupun jarang, ini untuk jaga-jaga.
+            raise Exception("Gagal mendapatkan jalur file unduhan yang valid.")
 
         await message.edit("Mengunggah ke Litterbox.catbox.moe...")
 
-        # <<< --- PERUBAHAN UTAMA 2: Memanggil upload_to_litterbox dengan parameter 'time' --- >>>
-        # Perbaikan dari error sebelumnya: 'expiry_time' diganti menjadi 'time'
-        uploaded_url = cat_uploader.upload_to_litterbox(filePath, time=expiry_time)
-
-        await message.edit(f"<blockquote>📤 Unggahan Litterbox Berhasil!\nURL: {uploaded_url}\nKedaluwarsa: {expiry_time}</blockquote>", parse_mode="html")
-        
-    except Exception as e:
-        # Jika ada path, hapus saja untuk membersihkan
-        if filePath and os.path.exists(filePath):
-            os.remove(filePath)
+        # --- PERUBAHAN UTAMA 2: Buka file secara eksplisit dan serahkan objek file ---
+        # Kita menggunakan 'with open' untuk menjamin file dibuka ('rb' = read binary) 
+        # selama proses upload dan ditutup secara otomatis setelahnya.
+        with open(filePath, 'rb') as file_handle:
+            # Pustaka catbox-uploader dapat menerima file handle (objek file)
+            # Anda juga perlu menyediakan nama file di sini untuk unggahan multipart yang benar
+            # Biasanya, argumen pertama upload_to_litterbox adalah file (path/handle).
             
+            # Kita panggil dengan file_handle DAN nama file (dari filePath)
+            # Beberapa library upload mengharapkan objek file, bukan path string.
+            uploaded_url = cat_uploader.upload_to_litterbox(file_handle, time=expiry_time, filename=os.path.basename(filePath))
+
+
+        if uploaded_url:
+            await message.edit(f"<blockquote>📤 Unggahan Litterbox Berhasil!\nURL: {uploaded_url}\nKedaluwarsa: {expiry_time}</blockquote>", parse_mode="html")
+        else:
+            await message.edit("Unggahan gagal: Server tidak mengembalikan URL.")
+
+    except Exception as e:
         await message.edit(f"Terjadi kesalahan saat mengunggah ke Litterbox: `{type(e).__name__}: {e}`")
         
     finally:
-        # <<< --- PERUBAHAN UTAMA 3: Pastikan penghapusan di dalam finally setelah semua operasi I/O selesai --- >>>
-        # Hapus file lokal setelah diunggah, jika masih ada dan belum dihapus di blok except
+        # Hapus file lokal di blok finally untuk pembersihan yang terjamin
         if filePath and os.path.exists(filePath):
             try:
                 os.remove(filePath)
             except Exception as clean_e:
-                # Kesalahan saat menghapus mungkin tidak perlu dilaporkan ke pengguna
                 print(f"Peringatan: Gagal menghapus file lokal: {clean_e}")
                 pass
