@@ -1,46 +1,123 @@
 import asyncio
 import os
+import aiohttp # <<< Perlu diimpor untuk permintaan HTTP Asinkron
+import json
 from . import ultroid_cmd, eor, ULTROID_IMAGES
-from catbox import CatboxUploader
 from random import choice
 
+# URL API untuk envs.sh
+ENVS_SH_API_URL = "https://envs.sh/"
 
-# Inisialisasi CatboxUploader
-cat_uploader = CatboxUploader()
-# upload_file = cat_uploader.upload_file # This line is problematic if upload_file is not async
-
-# Fungsi untuk mendapatkan gambar inline (opsional, dari kode Anda sebelumnya)
+# Fungsi untuk mendapatkan gambar inline (tetap)
 def inline_pic():
     return choice(ULTROID_IMAGES)
 
-@ultroid_cmd(pattern="catbox(?: |$)(.*)")
-async def catbox_upload_plugin(event):
+@ultroid_cmd(pattern="envs(?: |$)(.*)")
+async def envs_sh_upload_plugin(event):
     """
-    Plugin untuk mengunggah file ke Catbox.moe.
+    Plugin untuk mengunggah file ke envs.sh (atau memperpendek URL).
+    Sintaks: .envs [secret|expires=N|shorten=URL]
     """
+    # Mengurai argumen perintah
+    args = event.pattern_match.group(1).split()
+    
+    is_secret = 'secret' in args
+    expires = None
+    shorten_url = None
+    
+    for arg in args:
+        if arg.startswith("expires="):
+            try:
+                # Mengambil nilai N setelah 'expires='
+                expires = arg.split("=", 1)[1]
+                # Cek validitas, misalnya hanya menerima bilangan
+                if not expires.isdigit():
+                    return await eor(event, "❌ Nilai 'expires' harus berupa angka (jam) atau timestamp Epoch Milliseconds.")
+            except IndexError:
+                pass # Tetap None jika tidak ada nilai
+        elif arg.startswith("shorten="):
+            shorten_url = arg.split("=", 1)[1]
+
+    # --- Mode URL Shortener ---
+    if shorten_url:
+        message = await eor(event, "Memperpendek URL...")
+        payload = {'shorten': shorten_url}
+        if is_secret:
+            payload['secret'] = ''
+            
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(ENVS_SH_API_URL, data=payload) as response:
+                    
+                    if response.status == 200:
+                        uploaded_url = await response.text()
+                        await message.edit(
+                            f"<blockquote>🔗 Successful URL Shorten!\nOriginal: {shorten_url}\nShort URL: {uploaded_url.strip()}</blockquote>", 
+                            parse_mode="html"
+                        )
+                    else:
+                        error_text = await response.text()
+                        await message.edit(f"❌ Terjadi kesalahan saat memperpendek URL ({response.status}): {error_text.strip()}")
+        except Exception as e:
+            await message.edit(f"❌ Terjadi kesalahan koneksi: {e}")
+        return
+
+    # --- Mode Unggah File ---
     if not event.reply_to_msg_id:
-        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Catbox.moe.")
+        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke envs.sh. Gunakan `.envs shorten=URL` untuk memperpendek URL.")
 
     reply_message = await event.get_reply_message()
 
     if not reply_message.media:
-        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Catbox.moe.")
+        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke envs.sh.")
 
     message = await eor(event, "Mengunduh media...")
-    filePath = None  # Initialize filePath outside the try block
+    filePath = None  # Inisialisasi filePath
+    
     try:
+        # Unduh file, dapatkan jalur lokal
         filePath = await reply_message.download_media()
+        # Ambil nama file dari jalur unduhan
+        fileName = os.path.basename(filePath) 
 
-        await message.edit("Mengunggah ke Catbox.moe...")
+        await message.edit("Mengunggah ke envs.sh...")
+        
+        # Buka file dalam mode biner untuk diunggah
+        with open(filePath, 'rb') as file_data:
+            
+            # Buat aiohttp.FormData untuk mengirim multipart/form-data
+            data = aiohttp.FormData()
+            
+            # Tambahkan file ke form data. Kunci harus 'file'
+            data.add_field(
+                'file',
+                file_data,
+                filename=fileName,
+                content_type=reply_message.file.mime_type or 'application/octet-stream'
+            )
+            
+            # Tambahkan parameter opsional
+            if is_secret:
+                data.add_field('secret', '')
+            if expires:
+                data.add_field('expires', expires)
 
-        # <<< --- FIX IS HERE --- >>>
-        # Call upload_file directly without await, as it's a synchronous method.
-        # If it were an async method, it would be defined with 'async def'.
-        uploaded_url = cat_uploader.upload_file(filePath)
+            # Kirim permintaan POST asinkron
+            async with aiohttp.ClientSession() as session:
+                async with session.post(ENVS_SH_API_URL, data=data) as response:
+                    
+                    if response.status == 200:
+                        uploaded_url = await response.text()
+                        await message.edit(
+                            f"<blockquote>📤 Successful upload to envs.sh!\nFile: {fileName}\nURL: {uploaded_url.strip()}</blockquote>", 
+                            parse_mode="html"
+                        )
+                    else:
+                        error_text = await response.text()
+                        await message.edit(f"❌ Terjadi kesalahan saat mengunggah ({response.status}): {error_text.strip()}")
 
-        await message.edit(f"<blockquote>📤 Successful upload!\nURL: {uploaded_url}</blockquote>", parse_mode="html")
     except Exception as e:
-        await message.edit(f"Terjadi kesalahan saat mengunggah: {e}")
+        await message.edit(f"❌ Terjadi kesalahan saat memproses unggahan: {e}")
     finally:
         # Hapus file lokal setelah diunggah
         if filePath and os.path.exists(filePath):
