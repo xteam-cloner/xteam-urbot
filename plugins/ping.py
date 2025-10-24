@@ -76,7 +76,7 @@ async def _(event):
     else:
         pic = udB.get_key("PING_PIC")
         await asyncio.sleep(1)
-        await x.edit(get_string("ping").format(bot_header, end, uptime, f"{OWNER_NAME}"), file=pic, parse_mode="html")
+        await x.edit(get_string("ping").format(bot_header, end, uptime, f"{OWNER_NAME}"), file=pic)
     
 
 @xteam_cmd(pattern="Ping$", chats=[], type=["official", "assistant"])
