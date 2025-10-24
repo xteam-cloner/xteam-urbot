@@ -49,27 +49,21 @@ async def catbox_upload_plugin(event):
                 
 import asyncio
 import os
-import httpx # 🔥 NEW IMPORT
+import httpx 
 from . import ultroid_cmd, eor, ULTROID_IMAGES
 from random import choice
-
-
-# Hapus CatboxUploader dan inisialisasi yang tidak lagi diperlukan
-# from catbox import CatboxUploader
-# cat_uploader = CatboxUploader()
 
 
 # Fungsi untuk mendapatkan gambar inline (opsional, dari kode Anda sebelumnya)
 def inline_pic():
     return choice(ULTROID_IMAGES)
 
-@ultroid_cmd(pattern="litbox(?: |$)(.*)")
+@ultroid_cmd(pattern="litbox") # PERUBAHAN DI SINI: pattern hanya "catbox"
 async def litterbox_upload_plugin(event):
     """
     Plugin untuk mengunggah file ke Litterbox.catbox.moe.
-    Sintaks: .catbox [time]
-    Contoh: .catbox 24h
-    Waktu default: 12h (max: 72h/3d)
+    Waktu kedaluwarsa selalu 72 jam (3 hari).
+    Sintaks: .catbox (cukup balas media)
     """
     if not event.reply_to_msg_id:
         return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Litterbox.")
@@ -79,10 +73,10 @@ async def litterbox_upload_plugin(event):
     if not reply_message.media:
         return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Litterbox.")
 
-    # Ambil argumen waktu dari pengguna, default ke '12h'
-    expiry_time = event.pattern_match.group(1).strip() if event.pattern_match.group(1) else "12h"
+    # Tetapkan waktu kedaluwarsa secara permanen ke '72h'
+    expiry_time = "72h" 
     
-    # URL dan Data untuk Litterbox (berdasarkan konfigurasi JSON Anda)
+    # URL dan Data untuk Litterbox
     LITTERBOX_URL = "https://litterbox.catbox.moe/resources/internals/api.php"
     
     message = await eor(event, "Mengunduh media...")
@@ -92,9 +86,9 @@ async def litterbox_upload_plugin(event):
         # Unduh media
         filePath = await reply_message.download_media()
 
-        await message.edit("Mengunggah ke Litterbox.catbox.moe...")
+        await message.edit("Mengunggah ke Litterbox.catbox.moe (Expiry: 72h)...")
 
-        # --- 🔥 LOGIKA UNGGAH LITTERBOX DENGAN HTTPX 🔥 ---
+        # --- LOGIKA UNGGAH LITTERBOX DENGAN HTTPX ---
         
         # Buka file dalam mode binary untuk diunggah
         with open(filePath, 'rb') as f:
@@ -102,15 +96,16 @@ async def litterbox_upload_plugin(event):
             # Data form yang diperlukan oleh API
             data_payload = {
                 'reqtype': 'fileupload',
-                'time': expiry_time # Waktu kedaluwarsa dari input pengguna atau default
+                'time': expiry_time # Nilai kini selalu '72h'
             }
             
             # Bagian file untuk unggahan multipart/form-data
             files_payload = {
-                'fileToUpload': f # Sesuai dengan "FileFormName": "fileToUpload"
+                'fileToUpload': f 
             }
 
             # Gunakan httpx.AsyncClient untuk permintaan POST asinkron
+            # Timeout ditingkatkan untuk file besar
             async with httpx.AsyncClient(timeout=300.0) as client:
                 response = await client.post(
                     LITTERBOX_URL, 
@@ -129,9 +124,8 @@ async def litterbox_upload_plugin(event):
             await message.edit(f"Terjadi kesalahan saat mengunggah (Status: {response.status_code}): {response.text}")
 
     except Exception as e:
-        # Tambahkan logging yang lebih spesifik jika perlu
         await message.edit(f"Terjadi kesalahan saat mengunggah: <code>{type(e).__name__}: {e}</code>", parse_mode="html")
     finally:
-        # Hapus file lokal setelah diunggah (tetap penting)
+        # Hapus file lokal setelah diunggah
         if filePath and os.path.exists(filePath):
             os.remove(filePath)
