@@ -46,25 +46,36 @@ async def catbox_upload_plugin(event):
         if filePath and os.path.exists(filePath):
             os.remove(filePath)
 
-@ultroid_cmd(pattern="litterbox(?: |$)(.*)")
-async def litterbox_upload_plugin(event):
+import asyncio
+import os
+import requests # <-- BARU: Membutuhkan pustaka 'requests'
+from . import ultroid_cmd, eor, ULTROID_IMAGES
+from random import choice
+# Tidak perlu import CatboxUploader atau pustaka lainnya
+
+# Fungsi untuk mendapatkan gambar inline (opsional)
+def inline_pic():
+    return choice(ULTROID_IMAGES)
+
+@ultroid_cmd(pattern="zeroxst(?: |$)(.*)")
+async def zeroxst_upload_plugin(event):
     """
-    Plugin untuk mengunggah file ke Litterbox.catbox.moe (temporer).
+    Plugin untuk mengunggah file ke 0x0.st.
+    Sintaks: .zeroxst <durasi_kedaluwarsa_opsional>
+    0x0.st TIDAK mendukung durasi kedaluwarsa dari argumen.
     """
     if not event.reply_to_msg_id:
-        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Litterbox.catbox.moe.")
+        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke 0x0.st.")
 
     reply_message = await event.get_reply_message()
 
     if not reply_message.media:
-        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Litterbox.catbox.moe.")
+        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke 0x0.st.")
 
-    # Ambil durasi kedaluwarsa dari argumen. Default ke 72h.
-    expiry_time = event.pattern_match.group(1).strip()
-    if expiry_time not in ['1h', '12h', '24h', '72h']:
-        expiry_time = '72h' 
+    # 0x0.st tidak mendukung kedaluwarsa dari argumen. Kita bisa mengabaikannya.
+    # expiry_time = event.pattern_match.group(1).strip() # Baris ini tidak digunakan lagi.
 
-    message = await eor(event, f"Mengunduh media untuk Litterbox (Kedaluwarsa: **{expiry_time}**)...")
+    message = await eor(event, "Mengunduh media untuk 0x0.st...")
     filePath = None
     uploaded_url = None
     
@@ -72,40 +83,48 @@ async def litterbox_upload_plugin(event):
         # Tentukan folder unduhan sementara. Gunakan './' atau '/tmp/' 
         download_dir = "./" 
         
-        # --- PERUBAHAN 1: Unduh file. Sekarang kita yakin filePath adalah string. ---
-        # Telethon mengembalikan string jalur file ketika 'file' disetel.
+        # Unduh file.
         filePath = await reply_message.download_media(file=download_dir)
 
         if not isinstance(filePath, str) or not os.path.exists(filePath):
-            # Ini adalah penanganan kegagalan jika download_media tidak mengembalikan path string
-            # Walaupun jarang, ini untuk jaga-jaga.
             raise Exception("Gagal mendapatkan jalur file unduhan yang valid.")
 
-        await message.edit("Mengunggah ke Litterbox.catbox.moe...")
+        await message.edit("Mengunggah ke 0x0.st...")
 
-        # --- PERUBAHAN UTAMA 2: Buka file secara eksplisit dan serahkan objek file ---
-        # Kita menggunakan 'with open' untuk menjamin file dibuka ('rb' = read binary) 
-        # selama proses upload dan ditutup secara otomatis setelahnya.
-        with open(filePath, 'rb') as file_handle:
-            # Pustaka catbox-uploader dapat menerima file handle (objek file)
-            # Anda juga perlu menyediakan nama file di sini untuk unggahan multipart yang benar
-            # Biasanya, argumen pertama upload_to_litterbox adalah file (path/handle).
-            
-            # Kita panggil dengan file_handle DAN nama file (dari filePath)
-            # Beberapa library upload mengharapkan objek file, bukan path string.
-            uploaded_url = cat_uploader.upload_to_litterbox(file_handle, time=expiry_time, filename=os.path.basename(filePath))
+        # --- PERUBAHAN UTAMA: Unggah ke 0x0.st menggunakan requests ---
+        # 0x0.st mengharapkan unggahan multipart/form-data dengan nama bidang 'file'.
+        
+        # Karena ini adalah kode async (await message.edit), kita seharusnya 
+        # menjalankan permintaan blocking requests.post di dalam threadpool 
+        # (menggunakan asyncio.to_thread) untuk menghindari pemblokiran event loop.
+        
+        def upload_blocking(path):
+            # Buka file dan unggah
+            with open(path, 'rb') as file_handle:
+                files = {'file': file_handle} # Nama bidang harus 'file'
+                # Endpoint unggahan 0x0.st
+                r = requests.post('https://0x0.st', files=files) 
+                
+                # 0x0.st mengembalikan URL unggahan sebagai teks biasa.
+                if r.status_code == 200:
+                    # Hapus spasi kosong (seperti baris baru) dari respons
+                    return r.text.strip() 
+                else:
+                    raise Exception(f"Unggahan gagal (Status: {r.status_code}): {r.text.strip()}")
 
+        # Jalankan fungsi blocking di threadpool
+        uploaded_url = await asyncio.to_thread(upload_blocking, filePath)
 
-        if uploaded_url:
-            await message.edit(f"<blockquote>📤 Unggahan Litterbox Berhasil!\nURL: {uploaded_url}\nKedaluwarsa: {expiry_time}</blockquote>", parse_mode="html")
+        if uploaded_url and uploaded_url.startswith("http"):
+            await message.edit(f"<blockquote>📤 Unggahan 0x0.st Berhasil!\nURL: {uploaded_url}</blockquote>", parse_mode="html")
         else:
-            await message.edit("Unggahan gagal: Server tidak mengembalikan URL.")
+            await message.edit(f"Unggahan gagal: Server tidak mengembalikan URL yang valid.\nRespons: `{uploaded_url}`")
 
     except Exception as e:
-        await message.edit(f"Terjadi kesalahan saat mengunggah ke Litterbox: `{type(e).__name__}: {e}`")
+        await message.edit(f"Terjadi kesalahan saat mengunggah ke 0x0.st: `{type(e).__name__}: {e}`")
         
     finally:
-        # Hapus file lokal di blok finally untuk pembersihan yang terjamin
+        # Hapus file lokal di blok finally
         if filePath and os.path.exists(filePath):
             try:
                 os.remove(filePath)
