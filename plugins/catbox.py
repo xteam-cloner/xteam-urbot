@@ -46,85 +46,92 @@ async def catbox_upload_plugin(event):
         if filePath and os.path.exists(filePath):
             os.remove(filePath)
 
+                
 import asyncio
 import os
-import requests # Pustaka untuk permintaan HTTP
+import httpx # 🔥 NEW IMPORT
 from . import ultroid_cmd, eor, ULTROID_IMAGES
 from random import choice
-# CatboxUploader dan impor terkait telah dihapus
 
-# Fungsi untuk mendapatkan gambar inline (opsional)
+
+# Hapus CatboxUploader dan inisialisasi yang tidak lagi diperlukan
+# from catbox import CatboxUploader
+# cat_uploader = CatboxUploader()
+
+
+# Fungsi untuk mendapatkan gambar inline (opsional, dari kode Anda sebelumnya)
 def inline_pic():
     return choice(ULTROID_IMAGES)
 
-@ultroid_cmd(pattern="zeroxst(?: |$)(.*)")
-async def zeroxst_upload_plugin(event):
+@ultroid_cmd(pattern="litbox(?: |$)(.*)")
+async def litterbox_upload_plugin(event):
     """
-    Plugin untuk mengunggah file ke 0x0.st.
-    Sintaks: .zeroxst
-    0x0.st tidak mendukung durasi kedaluwarsa dari argumen.
+    Plugin untuk mengunggah file ke Litterbox.catbox.moe.
+    Sintaks: .catbox [time]
+    Contoh: .catbox 24h
+    Waktu default: 12h (max: 72h/3d)
     """
     if not event.reply_to_msg_id:
-        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke 0x0.st.")
+        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Litterbox.")
 
     reply_message = await event.get_reply_message()
 
     if not reply_message.media:
-        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke 0x0.st.")
+        return await eor(event, "Balas ke media atau file untuk mengunggahnya ke Litterbox.")
 
-    message = await eor(event, "Mengunduh media untuk 0x0.st...")
+    # Ambil argumen waktu dari pengguna, default ke '12h'
+    expiry_time = event.pattern_match.group(1).strip() if event.pattern_match.group(1) else "12h"
+    
+    # URL dan Data untuk Litterbox (berdasarkan konfigurasi JSON Anda)
+    LITTERBOX_URL = "https://litterbox.catbox.moe/resources/internals/api.php"
+    
+    message = await eor(event, "Mengunduh media...")
     filePath = None
-    uploaded_url = None
     
     try:
-        download_dir = "./" 
+        # Unduh media
+        filePath = await reply_message.download_media()
+
+        await message.edit("Mengunggah ke Litterbox.catbox.moe...")
+
+        # --- 🔥 LOGIKA UNGGAH LITTERBOX DENGAN HTTPX 🔥 ---
         
-        # Unduh file.
-        filePath = await reply_message.download_media(file=download_dir)
-
-        if not isinstance(filePath, str) or not os.path.exists(filePath):
-            raise Exception("Gagal mendapatkan jalur file unduhan yang valid.")
-
-        await message.edit("Mengunggah ke 0x0.st...")
-
-        # --- FUNGSI UNGGAHAN DENGAN USER-AGENT BARU (Dijalankan di thread terpisah) ---
-        def upload_blocking(path):
-            # 💡 SOLUSI REVISI: Menggunakan User-Agent yang berbeda untuk Chrome 129 di Linux
-            # Jika ini gagal, coba User-Agent yang lain lagi!
-            CUSTOM_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+        # Buka file dalam mode binary untuk diunggah
+        with open(filePath, 'rb') as f:
             
-            headers = {
-                'User-Agent': CUSTOM_USER_AGENT
+            # Data form yang diperlukan oleh API
+            data_payload = {
+                'reqtype': 'fileupload',
+                'time': expiry_time # Waktu kedaluwarsa dari input pengguna atau default
+            }
+            
+            # Bagian file untuk unggahan multipart/form-data
+            files_payload = {
+                'fileToUpload': f # Sesuai dengan "FileFormName": "fileToUpload"
             }
 
-            with open(path, 'rb') as file_handle:
-                files = {'file': file_handle} 
-                
-                # Kirim permintaan POST dengan header User-Agent yang dimodifikasi
-                r = requests.post('https://0x0.st', files=files, headers=headers) 
-                
-                if r.status_code == 200:
-                    return r.text.strip() 
-                else:
-                    # Menangani kegagalan jika status bukan 200
-                    raise Exception(f"Unggahan gagal (Status: {r.status_code}): {r.text.strip()}")
+            # Gunakan httpx.AsyncClient untuk permintaan POST asinkron
+            async with httpx.AsyncClient(timeout=300.0) as client:
+                response = await client.post(
+                    LITTERBOX_URL, 
+                    data=data_payload, 
+                    files=files_payload
+                )
 
-        # Jalankan fungsi blocking di threadpool
-        uploaded_url = await asyncio.to_thread(upload_blocking, filePath)
-
-        if uploaded_url and uploaded_url.startswith("http"):
-            await message.edit(f"<blockquote>📤 Unggahan 0x0.st Berhasil!\nURL: {uploaded_url}</blockquote>", parse_mode="html")
+        # Cek status respons dan ambil URL
+        if response.status_code == 200:
+            uploaded_url = response.text.strip()
+            await message.edit(
+                f"<blockquote>📤 Successful Litterbox upload!\n**Expiry:** {expiry_time}\nURL: {uploaded_url}</blockquote>", 
+                parse_mode="html"
+            )
         else:
-            await message.edit(f"Unggahan gagal: Server tidak mengembalikan URL yang valid.\nRespons: `{uploaded_url}`")
+            await message.edit(f"Terjadi kesalahan saat mengunggah (Status: {response.status_code}): {response.text}")
 
     except Exception as e:
-        await message.edit(f"Terjadi kesalahan saat mengunggah ke 0x0.st: `{type(e).__name__}: {e}`")
-        
+        # Tambahkan logging yang lebih spesifik jika perlu
+        await message.edit(f"Terjadi kesalahan saat mengunggah: <code>{type(e).__name__}: {e}</code>", parse_mode="html")
     finally:
+        # Hapus file lokal setelah diunggah (tetap penting)
         if filePath and os.path.exists(filePath):
-            try:
-                os.remove(filePath)
-            except Exception as clean_e:
-                print(f"Peringatan: Gagal menghapus file lokal: {clean_e}")
-                pass
-                
+            os.remove(filePath)
