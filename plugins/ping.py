@@ -63,7 +63,7 @@ async def _(event):
     ultroid_bot.parse_mode = CustomMarkdown()
     user_id = OWNER_ID
     ment = await mention_user(user_id)
-    bot_header = f"<blockquote>Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ</blockquote>"
+    bot_header = f"<b>Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ</b>"
     prem = event.pattern_match.group(1)
     start = time.time()
     x = await event.reply("ping")
