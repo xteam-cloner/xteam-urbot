@@ -137,7 +137,7 @@ async def _(event):
     await x.edit(ping_message, file=pic)
 
         
-@xteam_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     client = event.client 
     ultroid_bot.parse_mode = "html" 
@@ -166,11 +166,21 @@ async def _(event):
     
     pic = udB.get_key("PING_PIC")
     
-    # --- Modifikasi untuk emoji: Ambil dari DB atau gunakan default ---
-    # Jika tidak ada di DB, gunakan emoji default yang Anda berikan
-    emoji_ping = udB.get_key("EMOJI_PING", "🏓") + " "
-    emoji_uptime = udB.get_key("EMOJI_UPTIME", "⏰") + " "
-    emoji_owner = udB.get_key("EMOJI_OWNER", "👑") + " "
+    # --- PERBAIKAN: Gunakan Pengecekan Eksplisit (atau .get() jika database Anda mendukungnya) ---
+    
+    # Ambil nilai. Jika None, gunakan default "🏓"
+    emoji_ping_base = udB.get_key("EMOJI_PING") 
+    emoji_ping_html = (emoji_ping_base if emoji_ping_base else "🏓") + " "
+    
+    # Ambil nilai. Jika None, gunakan default "⏰"
+    emoji_uptime_base = udB.get_key("EMOJI_UPTIME")
+    emoji_uptime_html = (emoji_uptime_base if emoji_uptime_base else "⏰") + " "
+    
+    # Ambil nilai. Jika None, gunakan default "👑"
+    emoji_owner_base = udB.get_key("EMOJI_OWNER")
+    emoji_owner_html = (emoji_owner_base if emoji_owner_base else "👑") + " "
+    
+    # -----------------------------------------------------------------------------------------
     
     bot_header_text = "𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓" 
     
@@ -184,15 +194,15 @@ async def _(event):
     owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
     
     if is_owner:
-        user_role = "OWNER"
+        user_role = "<b>OWNER</b>"
         display_name = f"{user_role} : {owner_html_mention}" 
         
     elif is_full_sudo:
-        user_role = "FULLSUDO" 
+        user_role = "<b>FULLSUDO</b>" 
         display_name = f"{user_role} : {user_html_mention}"
         
     elif is_standard_sudo:
-        user_role = "SUDOUSER" 
+        user_role = "<b>SUDOUSER</b>" 
         display_name = f"{user_role} : {user_html_mention}"
         
     else:
@@ -202,10 +212,11 @@ async def _(event):
     ping_message = f"""
 <blockquote>
 <b>{bot_header_text}</b></blockquote>
-<blockquote>{emoji_ping} Ping : {end}ms
-{emoji_uptime} Uptime : {uptime}
-{emoji_owner} {display_name}
+<blockquote>{emoji_ping_html} Ping : {end}ms
+{emoji_uptime_html} Uptime : {uptime}
+{emoji_owner_html} {display_name}
 </blockquote>
-"""        
+"""
+        
     await asyncio.sleep(0.5)
     await x.edit(ping_message, file=pic, parse_mode='html')
