@@ -136,13 +136,13 @@ async def _(event):
     await asyncio.sleep(0.5)
     await x.edit(ping_message, file=pic)
 
-@xteam_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
+        
+@xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     # Dapatkan client dari event untuk mengambil detail user
     client = event.client 
     
     # --- 1. Ganti Parse Mode menjadi HTML ---
-    # Setting ini diabaikan oleh x.edit(parse_mode='html'), tapi biarkan jika framework butuh
     ultroid_bot.parse_mode = "html" 
     
     user_id = event.sender_id
@@ -170,7 +170,7 @@ async def _(event):
     
     # --- Dapatkan Objek Owner untuk Link HTML ---
     owner_entity = await client.get_entity(OWNER_ID)
-    owner_name = owner_entity.first_name or owner_entity.title # Ambil nama owner
+    owner_name = owner_entity.first_name or owner_entity.title
     
     # --- 2. Ambil ID Custom Emoji dari DB dan Tentukan Format ---
     pic = udB.get_key("PING_PIC")
@@ -179,67 +179,72 @@ async def _(event):
     EMOJI_UPTIME_ID = udB.get_key("EMOJI_UPTIME")
     EMOJI_OWNER_ID = udB.get_key("EMOJI_OWNER")
     
-    # Logika Custom Emoji (Sama seperti sebelumnya, sudah benar)
+    # 🟢 PERUBAHAN LOGIKA: Default (else) diatur ke string kosong ('')
+    
+    # Untuk PING (Placeholder: ✔️)
     if EMOJI_PING_ID:
-        EMOJI_PING_HTML = f'<a href="emoji/{EMOJI_PING_ID}">✔️</a>' 
+        EMOJI_PING_HTML = f'<a href="emoji/{EMOJI_PING_ID}">✔️</a> ' # Tambahkan spasi di akhir
     else:
-        EMOJI_PING_HTML = '✔️'
+        EMOJI_PING_HTML = '' # Kosong jika tidak ada ID
         
+    # Untuk UPTIME (Placeholder: ⏰)
     if EMOJI_UPTIME_ID:
-        EMOJI_UPTIME_HTML = f'<a href="emoji/{EMOJI_UPTIME_ID}">⏰</a>'
+        EMOJI_UPTIME_HTML = f'<a href="emoji/{EMOJI_UPTIME_ID}">⏰</a> ' # Tambahkan spasi di akhir
     else:
-        EMOJI_UPTIME_HTML = '⏰'
+        EMOJI_UPTIME_HTML = '' # Kosong jika tidak ada ID
         
+    # Untuk OWNER (Placeholder: 👑)
     if EMOJI_OWNER_ID:
-        EMOJI_OWNER_HTML = f'<a href="emoji/{EMOJI_OWNER_ID}">👑</a>'
+        EMOJI_OWNER_HTML = f'<a href="emoji/{EMOJI_OWNER_ID}">👑</a> ' # Tambahkan spasi di akhir
     else:
-        EMOJI_OWNER_HTML = '👑'
+        EMOJI_OWNER_HTML = '' # Kosong jika tidak ada ID
     
     bot_header_text = "𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓" 
     
     # Pengecekan peran dengan prioritas tertinggi ke terendah
-    # --- KOREKSI: Gunakan Link HTML Murni untuk Mentions ---
+    # --- Menggunakan Link HTML Murni untuk Mentions ---
+    
+    # 🟢 Dapatkan nama pengguna untuk yang sedang menggunakan perintah (untuk Sudo)
+    if is_full_sudo or is_standard_sudo:
+        current_user_entity = await client.get_entity(user_id)
+        current_user_name = current_user_entity.first_name or current_user_entity.title
+        user_html_mention = f"<a href='tg://user?id={user_id}'>{current_user_name}</a>"
+    else:
+        user_html_mention = f"{owner_name}" # Default fallback
+
+    # 🟢 Buat link HTML murni untuk owner (digunakan oleh semua peran, terutama default)
+    owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
+    
     if is_owner:
         user_role = "<b>OWNER</b>"
-        # 🟢 Buat link HTML murni untuk owner
-        owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
         display_name = f"{user_role} : {owner_html_mention}" 
         
     elif is_full_sudo:
         user_role = "<b>FULLSUDO</b>" 
-        # 🟢 Asumsikan 'mention_user' menghasilkan nama pengguna untuk link (atau perlu diubah juga)
-        sudo_ment = await client.get_entity(user_id) # Ambil entity untuk nama
-        sudo_name = sudo_ment.first_name or sudo_ment.title
-        sudo_html_mention = f"<a href='tg://user?id={user_id}'>{sudo_name}</a>"
-        display_name = f"{user_role} : {sudo_html_mention}"
+        display_name = f"{user_role} : {user_html_mention}"
         
     elif is_standard_sudo:
         user_role = "<b>SUDOUSER</b>" 
-        # 🟢 Sama, buat link HTML untuk Standard Sudo
-        sudo_ment = await client.get_entity(user_id)
-        sudo_name = sudo_ment.first_name or sudo_ment.title
-        sudo_html_mention = f"<a href='tg://user?id={user_id}'>{sudo_name}</a>"
-        display_name = f"{user_role} : {sudo_html_mention}"
+        display_name = f"{user_role} : {user_html_mention}"
         
     else:
         # Pengguna Biasa
         user_role = ""
-        # 🟢 Buat link HTML untuk Owner (tetap menampilkan link owner)
-        owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
-        display_name = f"{owner_html_mention}" # Hanya tampilkan link owner
+        # 🟢 Disini kita ingin outputnya hanya link owner, tanpa role jika bukan Sudo/Owner
+        display_name = f"{owner_html_mention}" 
         
     # --- 3. Format pesan akhir: Blockquote HTML (<blockquote>) ---
     ping_message = f"""
 <blockquote>
-<b>{bot_header_text}</b>
-{EMOJI_PING_HTML} Ping : {end}ms
-{EMOJI_UPTIME_HTML} Uptime : {uptime}
-{EMOJI_OWNER_HTML} {display_name}
+<b>{bot_header_text}</b></blockquote>
+<blockquote>{EMOJI_PING_HTML}Ping : {end}ms
+{EMOJI_UPTIME_HTML}Uptime : {uptime}
+{EMOJI_OWNER_HTML}{display_name}
 </blockquote>
 """
         
     await asyncio.sleep(0.5)
     
-    # Edit pesan dengan parse_mode='html' (Sudah benar)
+    # Edit pesan dengan parse_mode='html'
     await x.edit(ping_message, file=pic, parse_mode='html')
     
