@@ -125,19 +125,19 @@ async def _(event):
     
     # Pengecekan peran dengan prioritas tertinggi ke terendah
     if is_owner:
-        user_role = "**👑 OWNER**"
+        user_role = "**OWNER**"
         ment = await mention_user(OWNER_ID)
         display_name = f"{user_role} : {ment}"
         
     elif is_full_sudo:
         # Full Sudo (Tidak termasuk Owner, karena sudah dicek di atas)
-        user_role = "**💎 FULL SUDO**"
+        user_role = "**FULLSUDO**"
         sudo_ment = await mention_user(user_id)
         display_name = f"{user_role} : {sudo_ment}"
         
     elif is_standard_sudo:
         # Standard Sudo
-        user_role = "**⚙️ SUDO USER**"
+        user_role = "**SUDOUSER**"
         sudo_ment = await mention_user(user_id)
         display_name = f"{user_role} : {sudo_ment}"
         
