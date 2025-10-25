@@ -59,27 +59,6 @@ async def mention_user(user_id):
         print(f"Failed to mention user: {e}")
 
 
-@xteam_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
-async def _(event):
-    ultroid_bot.parse_mode = CustomMarkdown()
-    user_id = OWNER_ID
-    ment = await mention_user(user_id)
-    bot_header = f"```𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓```"
-    prem = event.pattern_match.group(1)
-    start = time.time()
-    x = await event.reply("ping")
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    if prem == "x":
-        await x.reply(get_string("pping").format(end, uptime))
-    elif prem == "s":
-        await x.reply(get_string("iping").format(end))
-    else:
-        pic = udB.get_key("PING_PIC")
-        await asyncio.sleep(0,5)
-        await x.edit(get_string("ping").format(bot_header, end, uptime, f"{OWNER_NAME}"), file=pic)
-    
-
 @xteam_cmd(pattern="Ping$", chats=[], type=["official", "assistant"])
 async def _(event):
     ultroid_bot.parse_mode = CustomMarkdown()
@@ -92,7 +71,7 @@ async def _(event):
     await x.reply(get_string("pping").format(end, uptime, OWNER_NAME))
     #await x.edit(f"🏓 Pong • {end}ms\n⏰ Uptime • {uptime}\n👑 Owner • {OWNER_NAME}")
 
-@xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     ultroid_bot.parse_mode = CustomMarkdown()
     user_id = event.sender_id
