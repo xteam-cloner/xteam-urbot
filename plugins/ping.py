@@ -243,9 +243,9 @@ async def _(event):
     ping_message = f"""
 <blockquote>
 <b>{bot_header_text}</b>
-{EMOJI_PING_HTML}Ping : {end}ms
-{EMOJI_UPTIME_HTML}Uptime : {uptime}
-{EMOJI_OWNER_HTML}{display_name}
+{EMOJI_PING_HTML} Ping : {end}ms
+{EMOJI_UPTIME_HTML} Uptime : {uptime}
+{EMOJI_OWNER_HTML} {display_name}
 </blockquote>
 """
         
