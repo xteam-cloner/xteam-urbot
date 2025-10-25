@@ -137,7 +137,7 @@ async def _(event):
     await x.edit(ping_message, file=pic)
 
         
-@xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     client = event.client 
     ultroid_bot.parse_mode = "html" 
@@ -166,21 +166,22 @@ async def _(event):
     
     pic = udB.get_key("PING_PIC")
     
-    # --- PERBAIKAN: Gunakan Pengecekan Eksplisit (atau .get() jika database Anda mendukungnya) ---
+    # --- PERBAIKAN: Selalu konversi nilai dari DB ke string (str()) ---
     
-    # Ambil nilai. Jika None, gunakan default "🏓"
+    # Ambil nilai. Jika ditemukan (bukan None/False), konversi ke str, jika tidak, gunakan default "🏓".
     emoji_ping_base = udB.get_key("EMOJI_PING") 
-    emoji_ping_html = (emoji_ping_base if emoji_ping_base else "🏓") + " "
+    emoji_ping_html = (str(emoji_ping_base) if emoji_ping_base else "🏓") + " "
     
-    # Ambil nilai. Jika None, gunakan default "⏰"
+    # Ambil nilai. Jika ditemukan, konversi ke str, jika tidak, gunakan default "⏰".
     emoji_uptime_base = udB.get_key("EMOJI_UPTIME")
-    emoji_uptime_html = (emoji_uptime_base if emoji_uptime_base else "⏰") + " "
+    emoji_uptime_html = (str(emoji_uptime_base) if emoji_uptime_base else "⏰") + " "
     
-    # Ambil nilai. Jika None, gunakan default "👑"
+    # Ambil nilai. Jika ditemukan, konversi ke str, jika tidak, gunakan default "👑".
+    # Ini memperbaiki baris yang menyebabkan error 'int' dan 'str'.
     emoji_owner_base = udB.get_key("EMOJI_OWNER")
-    emoji_owner_html = (emoji_owner_base if emoji_owner_base else "👑") + " "
+    emoji_owner_html = (str(emoji_owner_base) if emoji_owner_base else "👑") + " "
     
-    # -----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------
     
     bot_header_text = "𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓" 
     
@@ -211,8 +212,8 @@ async def _(event):
         
     ping_message = f"""
 <blockquote>
-<b>{bot_header_text}</b></blockquote>
-<blockquote>{emoji_ping_html} Ping : {end}ms
+<b>{bot_header_text}</b>
+{emoji_ping_html} Ping : {end}ms
 {emoji_uptime_html} Uptime : {uptime}
 {emoji_owner_html} {display_name}
 </blockquote>
@@ -220,3 +221,4 @@ async def _(event):
         
     await asyncio.sleep(0.5)
     await x.edit(ping_message, file=pic, parse_mode='html')
+        
