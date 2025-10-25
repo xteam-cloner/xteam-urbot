@@ -137,10 +137,6 @@ async def _(event):
     await x.edit(ping_message, file=pic)
 
         
-import time
-import asyncio
-from telethon.tl.types import MessageEntityCustomEmoji # Impor jika diperlukan untuk entitas emoji
-
 @xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     # Dapatkan client dari event untuk mengambil detail user
