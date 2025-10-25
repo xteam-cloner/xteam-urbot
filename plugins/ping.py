@@ -137,12 +137,17 @@ async def _(event):
     await x.edit(ping_message, file=pic)
 
         
+import time
+import asyncio
+from telethon.tl.types import MessageEntityCustomEmoji # Impor jika diperlukan untuk entitas emoji
+
 @xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     # Dapatkan client dari event untuk mengambil detail user
     client = event.client 
     
     # --- 1. Ganti Parse Mode menjadi HTML ---
+    # Walaupun di sini diatur, parse_mode di x.edit() lebih penting
     ultroid_bot.parse_mode = "html" 
     
     user_id = event.sender_id
@@ -157,7 +162,7 @@ async def _(event):
     is_full_sudo = user_id in SUDO_M.fullsudos 
     is_standard_sudo = user_id in sudoers()
     
-    # --- Output Singkat (pingx/pings) ---
+    # --- Output Singkat (pingx/pings) --- (Tetap sama)
     if prem == "x":
         await x.reply(get_string("pping").format(end, uptime))
         return
@@ -170,7 +175,8 @@ async def _(event):
     
     # --- Dapatkan Objek Owner untuk Link HTML ---
     owner_entity = await client.get_entity(OWNER_ID)
-    owner_name = owner_entity.first_name or owner_entity.title
+    # Gunakan .first_name karena biasanya lebih bersih daripada .title
+    owner_name = owner_entity.first_name 
     
     # --- 2. Ambil ID Custom Emoji dari DB dan Tentukan Format ---
     pic = udB.get_key("PING_PIC")
@@ -179,40 +185,41 @@ async def _(event):
     EMOJI_UPTIME_ID = udB.get_key("EMOJI_UPTIME")
     EMOJI_OWNER_ID = udB.get_key("EMOJI_OWNER")
     
-    # 🟢 PERUBAHAN LOGIKA: Default (else) diatur ke string kosong ('')
+    # 🟢 Logika Custom Emoji: Gunakan String Kosong ("") agar animasi bergerak jika ID ada.
     
-    # Untuk PING (Placeholder: ✔️)
+    # Untuk PING 
     if EMOJI_PING_ID:
-        EMOJI_PING_HTML = f'<a href="emoji/{EMOJI_PING_ID}">✔️</a> ' # Tambahkan spasi di akhir
+        EMOJI_PING_HTML = f'<a href="emoji/{EMOJI_PING_ID}"></a> ' 
     else:
-        EMOJI_PING_HTML = '' # Kosong jika tidak ada ID
+        EMOJI_PING_HTML = '' 
         
-    # Untuk UPTIME (Placeholder: ⏰)
+    # Untuk UPTIME 
     if EMOJI_UPTIME_ID:
-        EMOJI_UPTIME_HTML = f'<a href="emoji/{EMOJI_UPTIME_ID}">⏰</a> ' # Tambahkan spasi di akhir
+        EMOJI_UPTIME_HTML = f'<a href="emoji/{EMOJI_UPTIME_ID}"></a> ' 
     else:
-        EMOJI_UPTIME_HTML = '' # Kosong jika tidak ada ID
+        EMOJI_UPTIME_HTML = '' 
         
-    # Untuk OWNER (Placeholder: 👑)
+    # Untuk OWNER 
     if EMOJI_OWNER_ID:
-        EMOJI_OWNER_HTML = f'<a href="emoji/{EMOJI_OWNER_ID}">👑</a> ' # Tambahkan spasi di akhir
+        EMOJI_OWNER_HTML = f'<a href="emoji/{EMOJI_OWNER_ID}"></a> ' 
     else:
-        EMOJI_OWNER_HTML = '' # Kosong jika tidak ada ID
+        EMOJI_OWNER_HTML = '' 
     
     bot_header_text = "𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓" 
     
     # Pengecekan peran dengan prioritas tertinggi ke terendah
-    # --- Menggunakan Link HTML Murni untuk Mentions ---
+    # --- Solusi Link Owner/Sudo HTML Murni ---
     
-    # 🟢 Dapatkan nama pengguna untuk yang sedang menggunakan perintah (untuk Sudo)
+    # Dapatkan info pengguna saat ini untuk Sudo/FullSudo
     if is_full_sudo or is_standard_sudo:
         current_user_entity = await client.get_entity(user_id)
         current_user_name = current_user_entity.first_name or current_user_entity.title
         user_html_mention = f"<a href='tg://user?id={user_id}'>{current_user_name}</a>"
     else:
-        user_html_mention = f"{owner_name}" # Default fallback
+        # Fallback jika tidak terdefinisi
+        user_html_mention = f"{owner_name}" 
 
-    # 🟢 Buat link HTML murni untuk owner (digunakan oleh semua peran, terutama default)
+    # Link HTML untuk owner
     owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
     
     if is_owner:
@@ -228,16 +235,15 @@ async def _(event):
         display_name = f"{user_role} : {user_html_mention}"
         
     else:
-        # Pengguna Biasa
+        # Pengguna Biasa: Hanya tampilkan link owner
         user_role = ""
-        # 🟢 Disini kita ingin outputnya hanya link owner, tanpa role jika bukan Sudo/Owner
         display_name = f"{owner_html_mention}" 
         
     # --- 3. Format pesan akhir: Blockquote HTML (<blockquote>) ---
     ping_message = f"""
 <blockquote>
-<b>{bot_header_text}</b></blockquote>
-<blockquote>{EMOJI_PING_HTML}Ping : {end}ms
+<b>{bot_header_text}</b>
+{EMOJI_PING_HTML}Ping : {end}ms
 {EMOJI_UPTIME_HTML}Uptime : {uptime}
 {EMOJI_OWNER_HTML}{display_name}
 </blockquote>
