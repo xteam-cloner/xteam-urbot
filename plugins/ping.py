@@ -25,6 +25,7 @@ from telethon.tl.types import (
     InputMessagesFilterPhotos,
 )
 from xteam._misc import sudoers
+from xteam._misc import SUDO_M, sudoers 
 from xteam.fns.custom_markdown import CustomMarkdown
 from xteam.fns.helper import download_file, inline_mention
 from ._inline import *
@@ -91,83 +92,67 @@ async def _(event):
     await x.reply(get_string("pping").format(end, uptime, OWNER_NAME))
     #await x.edit(f"🏓 Pong • {end}ms\n⏰ Uptime • {uptime}\n👑 Owner • {OWNER_NAME}")
 
-# ... (Semua impor dan kode di atas tetap sama)
-
-# ... (Fungsi mention_user tetap sama)
-
 @xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     ultroid_bot.parse_mode = CustomMarkdown()
-    
-    # 1. Mendapatkan ID Pengguna yang Menjalankan Perintah
     user_id = event.sender_id
-    
-    # Menyiapkan variabel umum
     prem = event.pattern_match.group(1)
     start = time.time()
-    
-    # Memberikan respons "ping" awal untuk mengukur latency
     x = await event.reply("ping")
-    
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     
-    # Menentukan status pengguna untuk output yang berbeda
+    # --- Penentuan Status Pengguna ---
     is_owner = user_id == OWNER_ID
-    is_sudo = user_id in sudoers
+    # Gunakan SUDO_M.fullsudos untuk full sudo access (owner sudah termasuk di dalamnya)
+    is_full_sudo = user_id in SUDO_M.fullsudos 
+    # Gunakan sudoers() untuk standard sudo access
+    is_standard_sudo = user_id in sudoers()
     
-    # --- Pilihan ping yang berbeda (pingx/pings) ---
+    # --- Output Singkat (pingx/pings) ---
     if prem == "x":
-        # Output singkat untuk 'pingx'
         await x.reply(get_string("pping").format(end, uptime))
-        return # Keluar dari fungsi setelah mengirim
+        return
         
     elif prem == "s":
-        # Output latensi saja untuk 'pings'
         await x.reply(get_string("iping").format(end))
-        return # Keluar dari fungsi setelah mengirim
+        return
 
     # --- Output utama (ping) ---
     
-    # Variabel yang akan digunakan dalam pesan akhir
-    user_role = ""
     pic = udB.get_key("PING_PIC")
     bot_header = f"```𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓```"
     
+    # Pengecekan peran dengan prioritas tertinggi ke terendah
     if is_owner:
-        # PING untuk OWNER
         user_role = "**[👑 OWNER]**"
-        # Kita juga bisa mendapatkan mention untuk OWNER_ID
         ment = await mention_user(OWNER_ID)
-        ping_message = get_string("ping").format(
-            bot_header, 
-            end, 
-            uptime, 
-            f"{ment} {user_role}" # Menambahkan peran dan mention Owner
-        )
+        display_name = f"{ment} {user_role}"
         
-    elif is_sudo:
-        # PING untuk SUDO_USERS
+    elif is_full_sudo:
+        # Full Sudo (Tidak termasuk Owner, karena sudah dicek di atas)
+        user_role = "**[💎 FULL SUDO]**"
+        sudo_ment = await mention_user(user_id)
+        display_name = f"{sudo_ment} {user_role}"
+        
+    elif is_standard_sudo:
+        # Standard Sudo
         user_role = "**[⚙️ SUDO USER]**"
-        ping_message = get_string("ping").format(
-            bot_header, 
-            end, 
-            uptime, 
-            f"{OWNER_NAME} {user_role}" # Misalnya, hanya menampilkan nama Owner tapi menyebut peran eksekutor
-        )
-        # Anda mungkin ingin mendapatkan mention untuk sudo user, bukan owner:
-        # sudo_ment = await mention_user(user_id)
-        # ping_message = get_string("ping").format(bot_header, end, uptime, f"{sudo_ment} {user_role}")
+        sudo_ment = await mention_user(user_id)
+        display_name = f"{sudo_ment} {user_role}"
         
     else:
-        # PING untuk PENGGUNA BIASA (Non-Owner/Non-Sudo)
-        user_role = "" # Tidak perlu peran
-        ping_message = get_string("ping").format(
-            bot_header, 
-            end, 
-            uptime, 
-            f"{OWNER_NAME}" # Hanya menampilkan nama Owner
-        )
+        # Pengguna Biasa
+        user_role = ""
+        display_name = f"{OWNER_NAME}" # Default: tampilkan nama Owner
+        
+    # Format pesan akhir
+    ping_message = get_string("ping").format(
+        bot_header, 
+        end, 
+        uptime, 
+        display_name
+    )
         
     await asyncio.sleep(0.5)
     await x.edit(ping_message, file=pic)
