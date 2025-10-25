@@ -135,3 +135,97 @@ async def _(event):
         
     await asyncio.sleep(0.5)
     await x.edit(ping_message, file=pic)
+
+@xteam_cmd(pattern="xping(|x|s)$", chats=[], type=["official", "assistant"])
+async def _(event):
+    # --- 1. Ganti Parse Mode menjadi HTML ---
+    ultroid_bot.parse_mode = "html" 
+    
+    user_id = event.sender_id
+    prem = event.pattern_match.group(1)
+    start = time.time()
+    x = await event.reply("ping")
+    end = round((time.time() - start) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 1000)
+    
+    # --- Penentuan Status Pengguna ---
+    is_owner = user_id == OWNER_ID
+    is_full_sudo = user_id in SUDO_M.fullsudos 
+    is_standard_sudo = user_id in sudoers()
+    
+    # --- Output Singkat (pingx/pings) ---
+    if prem == "x":
+        await x.reply(get_string("pping").format(end, uptime))
+        return
+        
+    elif prem == "s":
+        await x.reply(get_string("iping").format(end))
+        return
+
+    # --- Output utama (ping) ---
+    
+    # --- 2. Ambil ID Custom Emoji dari DB dan Tentukan Format ---
+    pic = udB.get_key("PING_PIC")
+    
+    # Ambil ID dari DB (akan mengembalikan None/kosong jika tidak ada)
+    EMOJI_PING_ID = udB.get_key("EMOJI_PING") 
+    EMOJI_UPTIME_ID = udB.get_key("EMOJI_UPTIME")
+    EMOJI_OWNER_ID = udB.get_key("EMOJI_OWNER")
+    
+    # Logika Cek ID: Jika ID ada, gunakan format HTML Custom Emoji. Jika tidak, gunakan emoji Unicode.
+    
+    # Untuk PING (Default: ✔️)
+    if EMOJI_PING_ID:
+        EMOJI_PING_HTML = f'<a href="emoji/{EMOJI_PING_ID}">✔️</a>' 
+    else:
+        EMOJI_PING_HTML = '✔️'
+        
+    # Untuk UPTIME (Default: ⏰)
+    if EMOJI_UPTIME_ID:
+        EMOJI_UPTIME_HTML = f'<a href="emoji/{EMOJI_UPTIME_ID}">⏰</a>'
+    else:
+        EMOJI_UPTIME_HTML = '⏰'
+        
+    # Untuk OWNER (Default: 👑)
+    if EMOJI_OWNER_ID:
+        EMOJI_OWNER_HTML = f'<a href="emoji/{EMOJI_OWNER_ID}">👑</a>'
+    else:
+        EMOJI_OWNER_HTML = '👑'
+    
+    bot_header_text = "𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓" 
+    
+    # Pengecekan peran dengan prioritas tertinggi ke terendah
+    # Format role menggunakan tag <b> untuk HTML
+    if is_owner:
+        user_role = "<b>OWNER</b>" # Menggunakan <b> untuk HTML
+        ment = await mention_user(OWNER_ID)
+        display_name = f"{user_role} : {ment}"
+        
+    elif is_full_sudo:
+        user_role = "<b>FULLSUDO</b>" # Menggunakan <b> untuk HTML
+        sudo_ment = await mention_user(user_id)
+        display_name = f"{user_role} : {sudo_ment}"
+        
+    elif is_standard_sudo:
+        user_role = "<b>SUDOUSER</b>" # Menggunakan <b> untuk HTML
+        sudo_ment = await mention_user(user_id)
+        display_name = f"{user_role} : {sudo_ment}"
+        
+    else:
+        user_role = ""
+        display_name = f"{OWNER_NAME}"
+        
+    # --- 3. Format pesan akhir: Blockquote HTML (<blockquote>) ---
+    ping_message = f"""
+<blockquote>
+<b>{bot_header_text}</b>
+{EMOJI_PING_HTML} Ping : {end}ms
+{EMOJI_UPTIME_HTML} Uptime : {uptime}
+{EMOJI_OWNER_HTML} {display_name}
+</blockquote>
+"""
+        
+    await asyncio.sleep(0.5)
+    
+    # Edit pesan dengan parse_mode='html'
+    await x.edit(ping_message, file=pic, parse_mode='html')
