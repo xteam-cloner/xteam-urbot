@@ -404,12 +404,12 @@ async def _(event):
     stdout, stderr = await bash(cmd, run_code=1)
     
     # OUTPUT INPUT (Markup HTML)
-    OUT = f"<b>☞ INPUT:</b>\n<blockquote>{cmd}</blockquote> \n\n"
+    OUT = f"<b> INPUT:</b>\n<blockquote>{cmd}</blockquote>\n"
     
     err, out = "", ""
     if stderr:
         # ERROR (Markup HTML)
-        err = f"<b>• ERROR:</b>\n<blockquote>{stderr}</blockquote>\n\n"
+        err = f"<b> ERROR:</b>\n<blockquote>{stderr}</blockquote>\n"
         
     if stdout:
         if (carb or udB.get_key("CARBON_ON_BASH")) and (
@@ -432,7 +432,7 @@ async def _(event):
                 return
             url = f"https://graph.org{uf(li)[-1]}"
             OUT = f"[\xad]({url}){OUT}"
-            out = "<b>• OUTPUT:</b>"
+            out = "<b> OUTPUT:</b>"
             remove(li)
         elif (rayso or udB.get_key("RAYSO_ON_BASH")) and (
             event.is_private
@@ -454,7 +454,7 @@ async def _(event):
                 return
             url = f"https://graph.org{uf(li)[-1]}"
             OUT = f"[\xad]({url}){OUT}"
-            out = "<b>• OUTPUT:</b>"
+            out = "<b> OUTPUT:</b>"
             remove(li)
         else:
             if "pip" in cmd and all(":" in line for line in stdout.split("\n")):
@@ -475,10 +475,10 @@ async def _(event):
                 stdout = stdout 
             
             # Membungkus output dengan blockquote
-            out = f"<b>• OUTPUT:</b>\n<blockquote>{stdout}</blockquote>"
+            out = f"<b> OUTPUT:</b>\n<blockquote>{stdout}</blockquote>"
             
     if not stderr and not stdout:
-        out = "<b>• OUTPUT:</b>\n<blockquote>Success</blockquote>"
+        out = "<b> OUTPUT:</b>\n<blockquote>Success</blockquote>"
         
     OUT += err + out
     
