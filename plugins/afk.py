@@ -39,12 +39,12 @@ def get_string(key):
         "afk_status": (
             "Since   : <b>{start_time_str}</b>\n"
             "Timezone: <b>{timezone}</b>\n"
-            "Reason  : <b>{text}</b>"
+            "Reason  : <blockquote>{text}</blockquote>"
         ),
         # Menggunakan tag <code> untuk tampilan seperti bubble/code block
         "afk_back_msg": (
             "I'm back! I was AFK for:\n"
-            "<code>{afk_duration}</code>" 
+            "<blockquote>{afk_duration}</blockquote>" 
         ),
     }
     return strings.get(key, "String not found")
@@ -60,6 +60,9 @@ async def set_afk(event):
         return
     
     text, media, media_type = None, None, None
+    # Inisialisasi untuk menghindari UnboundLocalError
+    msg1, msg2 = None, None 
+    
     if event.pattern_match.group(1).strip():
         text = event.text.split(maxsplit=1)[1] 
     else:
@@ -102,20 +105,17 @@ async def set_afk(event):
     if media:
         if "sticker" in media_type:
             msg1 = await ultroid_bot.send_file(event.chat_id, file=media)
-            msg2 = await ultroid_bot.send_message(event.chat_id, f"<b>Away from Keyboard</b>\n\n{afk_status_msg}", parse_mode='html')
+            msg2 = await ultroid_bot.send_message(event.chat_id, f"<blockquote>Away from Keyboard</blockquote>\n\n{afk_status_msg}", parse_mode="html")
         else:
             msg1 = await ultroid_bot.send_message(
-                event.chat_id, f"<b>Away from Keyboard</b>\n\n{afk_status_msg}", file=media, parse_mode='html'
+                event.chat_id, f"<blockquote>Away from Keyboard</blockquote>\n\n{afk_status_msg}", file=media, parse_mode="html"
             )
     else:
-        msg1 = await event.respond(f"<b>Away from Keyboard</b>\n\n{afk_status_msg}", parse_mode='html')
+        msg1 = await event.respond(f"<blockquote>Away from Keyboard</blockquote>\n\n{afk_status_msg}", parse_mode="html")
         
     old_afk_msg.append(msg1)
-    if msg2:
-        old_afk_msg.append(msg2)
-        await asst.send_message(LOG_CHANNEL, msg2.text, parse_mode='html')
-    else:
-        await asst.send_message(LOG_CHANNEL, msg1.text, parse_mode='html')
+    
+    # Kode untuk logging (asst.send_message) telah dihapus dari sini
 
 
 async def remove_afk(event):
@@ -146,7 +146,8 @@ async def remove_afk(event):
         
         # Mengirim pesan kembali DENGAN parse_mode='html'
         off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode='html')
-        await asst.send_message(LOG_CHANNEL, f"AFK ended. Duration: {afk_duration}")
+        
+        # Kode untuk logging (asst.send_message) telah dihapus dari sini
         
         for x in old_afk_msg:
             try:
@@ -230,5 +231,5 @@ if udB.get_key("AFK_DB"):
         events.NewMessage(
             incoming=True, func=lambda e: bool(e.mentioned or e.is_private)
         ),
-                                    )
+    )
     
