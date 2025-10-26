@@ -1,10 +1,9 @@
 import asyncio
-from datetime import datetime, timedelta # Tambahkan timedelta
+from datetime import datetime, timedelta
 from telethon import events
 from telegraph import upload_file as uf
 import time
 import pytz
-# Asumsi import database dan variabel global lainnya sudah benar
 from xteam.dB.afk_db import add_afk, del_afk, is_afk
 from xteam.dB.base import KeyManager
 from . import (
@@ -21,21 +20,20 @@ from . import (
 
 # Fungsi utilitas untuk mendapatkan waktu mulai dan zona waktu
 def get_current_time_and_timezone():
-    # Gunakan nama zona waktu penuh untuk keandalan
     tz = pytz.timezone('Asia/Jakarta') 
     now = datetime.now(tz)
-    # Format string waktu yang lebih aman (tambahkan tahun untuk menghindari ambiguitas jika AFK melewati tahun baru)
-    start_time_str = now.strftime("%B %d, %I:%M %p")
+    # 👇 PERBAIKAN: Format sekarang harus menyertakan tahun (%Y)
+    start_time_str = now.strftime("%B %d, %Y, %I:%M %p") 
     return start_time_str, now, now.tzname() 
 
 def format_afk_duration(start_time_dt):
-    # 👇 PERBAIKAN UTAMA: Ambil waktu saat ini di zona waktu yang sama dengan waktu mulai
+    # PERBAIKAN: Mengambil waktu saat ini di zona waktu yang sama dengan waktu mulai
     now_dt = datetime.now(start_time_dt.tzinfo) 
     delta = now_dt - start_time_dt
     
     total_seconds = int(delta.total_seconds())
     
-    # Pencegahan jika delta negatif (total_seconds < 0)
+    # Mencegah hasil negatif/error
     if total_seconds < 0:
         total_seconds = 0
         
@@ -44,7 +42,7 @@ def format_afk_duration(start_time_dt):
     seconds = total_seconds % 60
     return f"{hours} Hours, {minutes} Minutes, {seconds} Seconds"
 
-# Pengganti untuk get_string (Tidak diubah, hanya ditambahkan)
+# Pengganti untuk get_string (Tetap sama)
 def get_string(key):
     strings = {
         "afk_status": (
@@ -52,7 +50,6 @@ def get_string(key):
             "Timezone: <b>{timezone}</b>\n"
             "Reason  : <b>{text}</b>"
         ),
-        # Menggunakan tag <code> untuk tampilan seperti bubble/code block
         "afk_back_msg": (
             "I'm back! I was AFK for:\n"
             "<blockquote>{afk_duration}</blockquote>" 
@@ -78,7 +75,6 @@ async def set_afk(event):
     else:
         text = "No reason specified" 
 
-    # start_time_dt yang dihasilkan di sini sudah 'aware'
     start_time_str, start_time_dt, timezone = get_current_time_and_timezone()
     
     reply = await event.get_reply_message()
@@ -96,7 +92,6 @@ async def set_afk(event):
                 
     await event.eor("`Done`", time=2)
     
-    # add_afk harus menyimpan 5 nilai: text, media_type, media, start_time_str, timezone
     add_afk(text, media_type, media, start_time_str, timezone) 
     
     ultroid_bot.add_handler(remove_afk, events.NewMessage(outgoing=True))
@@ -138,34 +133,28 @@ async def remove_afk(event):
     
     afk_data = is_afk()
     if afk_data:
-        # Memastikan mengambil 5 data yang disimpan
         try:
             text, media_type, media, start_time_str, timezone = afk_data
         except ValueError:
             text, media_type, media, _ = afk_data
-            start_time_str, timezone = "Unknown", "Unknown" # Fallback jika data tidak lengkap
+            start_time_str, timezone = "Unknown", "Unknown"
         
         # 👇 PERBAIKAN KONVERSI WAKTU DI SINI 👇
         try:
-            # 1. Tentukan zona waktu (Asumsi: WIB disimpan, gunakan 'Asia/Jakarta')
             tz = pytz.timezone('Asia/Jakarta')
             
-            # 2. Parsing string waktu ke objek datetime naive
-            # Gunakan format lama dari kode Anda:
-            naive_dt = datetime.strptime(start_time_str, "%B %d, %I:%M %p")
-            
-            # 3. Localize: membuat datetime aware
+            # Format baru harus mencakup tahun (%Y)
+            naive_dt = datetime.strptime(start_time_str, "%B %d, %Y, %I:%M %p") 
             start_time_dt = tz.localize(naive_dt)
         except Exception:
-            # Fallback yang aware: waktu saat ini dikurangi 1 detik agar durasi tidak 0
+            # Fallback jika gagal (menggunakan waktu saat ini dikurangi 1 detik)
             tz = pytz.timezone('Asia/Jakarta')
             start_time_dt = datetime.now(tz) - timedelta(seconds=1) 
             
         afk_duration = format_afk_duration(start_time_dt)
         del_afk()
         
-        # Mengirim pesan kembali DENGAN parse_mode='html'
-        off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode="html")
+        off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode='html')
         
         for x in old_afk_msg:
             try:
@@ -192,7 +181,6 @@ async def on_afk(event):
     afk_data = is_afk()
     if not afk_data: return
     
-    # Memastikan mengambil 5 data yang disimpan
     try:
         text, media_type, media, start_time_str, timezone = afk_data
     except ValueError:
@@ -202,8 +190,9 @@ async def on_afk(event):
     # 👇 PERBAIKAN KONVERSI WAKTU DI SINI 👇
     try:
         tz = pytz.timezone('Asia/Jakarta')
-        # Gunakan format lama dari kode Anda:
-        naive_dt = datetime.strptime(start_time_str, "%B %d, %I:%M %p")
+        
+        # Format baru harus mencakup tahun (%Y)
+        naive_dt = datetime.strptime(start_time_str, "%B %d, %Y, %I:%M %p")
         start_time_dt = tz.localize(naive_dt)
     except Exception:
         # Fallback
@@ -230,11 +219,11 @@ async def on_afk(event):
     if media:
         if "sticker" in media_type:
             msg1 = await event.reply(file=media)
-            msg2 = await event.reply(final_text, parse_mode="html")
+            msg2 = await event.reply(final_text, parse_mode='html')
         else:
-            msg1 = await event.reply(final_text, file=media, parse_mode="html")
+            msg1 = await event.reply(final_text, file=media, parse_mode='html')
     else:
-        msg1 = await event.reply(final_text, parse_mode="html")
+        msg1 = await event.reply(final_text, parse_mode='html')
         
     for x in old_afk_msg:
         try:
@@ -254,5 +243,5 @@ if udB.get_key("AFK_DB"):
         events.NewMessage(
             incoming=True, func=lambda e: bool(e.mentioned or e.is_private)
         ),
-                )
+        )
     
