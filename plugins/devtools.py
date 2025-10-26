@@ -61,109 +61,6 @@ async def _(e):
     remove("neo.txt")
 
 
-@ultroid_cmd(pattern="sh", fullsudo=True, only_devs=True)
-async def _(event):
-    carb, rayso, yamlf = None, None, False
-    try:
-        cmd = event.text.split(" ", maxsplit=1)[1]
-        if cmd.split()[0] in ["-c", "--carbon"]:
-            cmd = cmd.split(maxsplit=1)[1]
-            carb = True
-        if cmd.split()[0] in ["-r", "--rayso"]:
-            cmd = cmd.split(maxsplit=1)[1]
-            rayso = True
-    except IndexError:
-        return await event.eor(get_string("devs_1"), time=10)
-    xx = await event.eor(get_string("com_1"))
-    reply_to_id = event.reply_to_msg_id or event.id
-    stdout, stderr = await bash(cmd, run_code=1)
-    OUT = f"**☞ BASH\n\n• COMMAND:**\n> `{cmd}` \n\n"
-    err, out = "", ""
-    if stderr:
-        err = f"**• ERROR:** \n> `{stderr}`\n\n"
-    if stdout:
-        if (carb or udB.get_key("CARBON_ON_BASH")) and (
-            event.is_private
-            or event.chat.admin_rights
-            or event.chat.creator
-            or event.chat.default_banned_rights.embed_links
-        ):
-            li = await Carbon(
-                code=stdout,
-                file_name="bash",
-                download=True,
-                backgroundColor=choice(ATRA_COL),
-            )
-            if isinstance(li, dict):
-                await xx.edit(
-                    f"Unknown Response from Carbon: `{li}`\n\nstdout`:{stdout}`\nstderr: `{stderr}`"
-                )
-                return
-            url = f"https://graph.org{uf(li)[-1]}"
-            OUT = f"[\xad]({url}){OUT}"
-            out = "**• OUTPUT:**"
-            remove(li)
-        elif (rayso or udB.get_key("RAYSO_ON_BASH")) and (
-            event.is_private
-            or event.chat.admin_rights
-            or event.chat.creator
-            or event.chat.default_banned_rights.embed_links
-        ):
-            li = await Carbon(
-                code=stdout,
-                file_name="bash",
-                download=True,
-                backgroundColor=choice(ATRA_COL),
-                rayso=True,
-            )
-            if isinstance(li, dict):
-                await xx.edit(
-                    f"Unknown Response from Carbon: `{li}`\n\nstdout`:{stdout}`\nstderr: `{stderr}`"
-                )
-                return
-            url = f"https://graph.org{uf(li)[-1]}"
-            OUT = f"[\xad]({url}){OUT}"
-            out = "**• OUTPUT:**"
-            remove(li)
-        else:
-            if "pip" in cmd and all(":" in line for line in stdout.split("\n")):
-                try:
-                    load = safe_load(stdout)
-                    stdout = ""
-                    for data in list(load.keys()):
-                        res = load[data] or ""
-                        if res and "http" not in str(res):
-                            res = f"`{res}`"
-                        stdout += f"**{data}** :  {res}\n"
-                    yamlf = True
-                except Exception as er:
-                    stdout = f"`{stdout}`"
-                    LOGS.exception(er)
-            else:
-                stdout = f"> `{stdout}`"
-            out = f"**• OUTPUT:**\n{stdout}"
-    if not stderr and not stdout:
-        out = "**• OUTPUT:**\n> `Success`"
-    OUT += err + out
-    if len(OUT) > 4096:
-        ultd = err + out
-        with BytesIO(str.encode(ultd)) as out_file:
-            out_file.name = "bash.txt"
-            await event.client.send_file(
-                event.chat_id,
-                out_file,
-                force_document=True,
-                thumb=ULTConfig.thumb,
-                allow_cache=False,
-                caption=f"`{cmd}`" if len(cmd) < 998 else None,
-                reply_to=reply_to_id,
-            )
-
-            await xx.delete()
-    else:
-        await xx.edit(OUT, link_preview=not yamlf)
-
-
 pp = pprint  # ignore: pylint
 bot = ultroid = ultroid_bot
 
@@ -196,7 +93,7 @@ def _parse_eval(value=None):
     return str(value)
 
 
-@ultroid_cmd(pattern="eval", fullsudo=True, only_devs=True)
+@ultroid_cmd(pattern="eval", fullsudo=False, only_devs=True)
 async def _(event):
     try:
         cmd = event.text.split(maxsplit=1)[1]
@@ -386,7 +283,7 @@ async def doie(e):
     os.remove("CppUltroid")
     os.remove("cpp-ultroid.cpp")
 
-@ultroid_cmd(pattern="ssh", fullsudo=True, only_devs=True)
+@ultroid_cmd(pattern="sh", fullsudo=False, only_devs=True)
 async def _(event):
     carb, rayso, yamlf = None, None, False
     try:
