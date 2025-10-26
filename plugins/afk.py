@@ -5,18 +5,29 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 
+from . import get_help
+
+__doc__ = get_help("help_afk")
+
+
 import asyncio
 from datetime import datetime
 from telethon import events
 from telegraph import upload_file as uf
-import time # Diperlukan untuk time.time()
-import pytz # Diperlukan untuk manajemen zona waktu
-
-# --- ASUMSI IMPORT DAN FUNGSI PENGGANTI ---
-
-# Ganti dengan import/fungsi Anda yang sebenarnya
+import time
 from xteam.dB.afk_db import add_afk, del_afk, is_afk
 from xteam.dB.base import KeyManager
+from . import (
+    LOG_CHANNEL,
+    NOSPAM_CHAT,
+    Redis,
+    asst,
+    get_string,
+    mediainfo,
+    udB,
+    ultroid_bot,
+    ultroid_cmd,
+)
 
 # Anggap ini adalah fungsi utilitas untuk mendapatkan waktu mulai dan zona waktu
 def get_current_time_and_timezone():
