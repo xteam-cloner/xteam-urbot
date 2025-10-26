@@ -264,11 +264,11 @@ async def on_afk(event):
     if media:
         if "sticker" in media_type:
             msg1 = await event.reply(file=media)
-            msg2 = await event.reply(final_text, parse_mode='html')
+            msg2 = await event.reply(final_text, parse_mode="html")
         else:
-            msg1 = await event.reply(final_text, file=media, parse_mode='html')
+            msg1 = await event.reply(final_text, file=media, parse_mode="html")
     else:
-        msg1 = await event.reply(final_text, parse_mode='html')
+        msg1 = await event.reply(final_text, parse_mode="html")
 
     for x in old_afk_msg:
         try:
