@@ -164,8 +164,7 @@ async def remove_afk(event):
                 pass
         await asyncio.sleep(10)
         await off.delete()
-
----
+        
 
 @ultroid_cmd(pattern="unafk$")
 async def unafk(event):
