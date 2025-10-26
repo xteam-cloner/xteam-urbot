@@ -402,10 +402,15 @@ async def _(event):
     xx = await event.eor(get_string("com_1"))
     reply_to_id = event.reply_to_msg_id or event.id
     stdout, stderr = await bash(cmd, run_code=1)
-    OUT = f"**☞ INPUT:**\n<blockquote>`{cmd}`</blockquote> \n\n"
+    
+    # OUTPUT INPUT (Markup HTML)
+    OUT = f"<b>☞ INPUT:</b>\n<blockquote>{cmd}</blockquote> \n\n"
+    
     err, out = "", ""
     if stderr:
-        err = f"`{stderr}`\n\n"
+        # ERROR (Markup HTML)
+        err = f"<b>• ERROR:</b>\n<blockquote>{stderr}</blockquote>\n\n"
+        
     if stdout:
         if (carb or udB.get_key("CARBON_ON_BASH")) and (
             event.is_private
@@ -413,6 +418,7 @@ async def _(event):
             or event.chat.creator
             or event.chat.default_banned_rights.embed_links
         ):
+            # ... (Logika Carbon/Rayso tetap sama)
             li = await Carbon(
                 code=stdout,
                 file_name="bash",
@@ -421,12 +427,12 @@ async def _(event):
             )
             if isinstance(li, dict):
                 await xx.edit(
-                    f"Unknown Response from Carbon: `{li}`\n\nstdout`:{stdout}`\nstderr: `{stderr}`"
+                    f"Unknown Response from Carbon: <code>{li}</code>\n\nstdout<code>:{stdout}</code>\nstderr: <code>{stderr}</code>"
                 )
                 return
             url = f"https://graph.org{uf(li)[-1]}"
             OUT = f"[\xad]({url}){OUT}"
-            out = "**• OUTPUT:**"
+            out = "<b>• OUTPUT:</b>"
             remove(li)
         elif (rayso or udB.get_key("RAYSO_ON_BASH")) and (
             event.is_private
@@ -443,12 +449,12 @@ async def _(event):
             )
             if isinstance(li, dict):
                 await xx.edit(
-                    f"Unknown Response from Carbon: `{li}`\n\nstdout`:{stdout}`\nstderr: `{stderr}`"
+                    f"Unknown Response from Carbon: <code>{li}</code>\n\nstdout<code>:{stdout}</code>\nstderr: <code>{stderr}</code>"
                 )
                 return
             url = f"https://graph.org{uf(li)[-1]}"
             OUT = f"[\xad]({url}){OUT}"
-            out = "**• OUTPUT:**"
+            out = "<b>• OUTPUT:</b>"
             remove(li)
         else:
             if "pip" in cmd and all(":" in line for line in stdout.split("\n")):
@@ -457,19 +463,25 @@ async def _(event):
                     stdout = ""
                     for data in list(load.keys()):
                         res = load[data] or ""
+                        # Menggunakan <code> untuk code/data
                         if res and "http" not in str(res):
-                            res = f"`{res}`"
-                        stdout += f"**{data}** :  {res}\n"
+                            res = f"<code>{res}</code>"
+                        stdout += f"<b>{data}</b> :  {res}\n" 
                     yamlf = True
                 except Exception as er:
-                    stdout = f"`{stdout}`"
+                    stdout = f"<code>{stdout}</code>"
                     LOGS.exception(er)
             else:
-                stdout = f"`{stdout}`"
-            out = f"**• OUTPUT:**\n<blockquote>{stdout}</blockquote>"
+                stdout = stdout 
+            
+            # Membungkus output dengan blockquote
+            out = f"<b>• OUTPUT:</b>\n<blockquote>{stdout}</blockquote>"
+            
     if not stderr and not stdout:
-        out = "**• OUTPUT:**\n<blockquote>`Success`</blockquote>"
+        out = "<b>• OUTPUT:</b>\n<blockquote>Success</blockquote>"
+        
     OUT += err + out
+    
     if len(OUT) > 4096:
         ultd = err + out
         with BytesIO(str.encode(ultd)) as out_file:
@@ -480,10 +492,13 @@ async def _(event):
                 force_document=True,
                 thumb=ULTConfig.thumb,
                 allow_cache=False,
-                caption=f"`{cmd}`" if len(cmd) < 998 else None,
+                # Caption harus menggunakan markup HTML/Markdown yang sesuai
+                caption=f"<code>{cmd}</code>" if len(cmd) < 998 else None, 
                 reply_to=reply_to_id,
             )
 
             await xx.delete()
     else:
+        # Panggil fungsi edit (HARAP TAMBAHKAN parse_mode='html' JIKA TIDAK BERHASIL)
         await xx.edit(OUT, link_preview=not yamlf)
+    
