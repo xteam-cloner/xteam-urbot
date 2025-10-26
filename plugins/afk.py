@@ -32,7 +32,7 @@ def get_current_time_and_timezone():
     tz = pytz.timezone('Asia/Jakarta')
     now = datetime.now(tz)
     # 👇 PERBAIKAN: Format yang konsisten dan mencakup tahun (%Y)
-    START_TIME_FORMAT = "%B %d, %Y, %I:%M %p"
+    START_TIME_FORMAT = "%B %d, %Y, %H:%M %p"
     start_time_str = now.strftime(START_TIME_FORMAT)
     return start_time_str, now, now.tzname(), START_TIME_FORMAT
 
@@ -70,7 +70,7 @@ def get_string(key):
 def convert_afk_time(start_time_str):
     tz = pytz.timezone('Asia/Jakarta')
     # Format yang sama dengan yang digunakan di get_current_time_and_timezone
-    START_TIME_FORMAT = "%B %d, %Y, %I:%M %p"
+    START_TIME_FORMAT = "%B %d, %Y, %H:%M %p"
     
     try:
         # Mencoba mengkonversi dengan format yang benar
