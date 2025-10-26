@@ -500,5 +500,5 @@ async def _(event):
             await xx.delete()
     else:
         # Panggil fungsi edit (HARAP TAMBAHKAN parse_mode='html' JIKA TIDAK BERHASIL)
-        await xx.edit(OUT, link_preview=not yamlf)
+        await xx.edit(OUT, parse_mode="html", link_preview=not yamlf)
     
