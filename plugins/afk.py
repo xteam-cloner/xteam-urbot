@@ -1,15 +1,3 @@
-# Ultroid - UserBot
-# Copyright (C) 2021-2023 TeamUltroid
-#
-# This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
-# PLease read the GNU Affero General Public License in
-# <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-
-from . import get_help
-
-__doc__ = get_help("help_afk")
-
-
 import asyncio
 from datetime import datetime
 from telethon import events
@@ -30,44 +18,38 @@ from . import (
     ultroid_cmd,
 )
 
-# Anggap ini adalah fungsi utilitas untuk mendapatkan waktu mulai dan zona waktu
+# Fungsi utilitas untuk mendapatkan waktu mulai dan zona waktu
 def get_current_time_and_timezone():
-    # Mengambil zona waktu UTC+7 (WIB) seperti di gambar
     tz = pytz.timezone('Asia/Jakarta') 
     now = datetime.now(tz)
-    
-    # Format waktu mulai (misal: "October 26, 7:13 AM")
     start_time_str = now.strftime("%B %d, %I:%M %p")
-    
     return start_time_str, now, now.tzname() 
 
 def format_afk_duration(start_time_dt):
-    # start_time_dt adalah objek datetime dengan timezone
     delta = datetime.now(pytz.utc).astimezone(start_time_dt.tzinfo) - start_time_dt
-    
     total_seconds = int(delta.total_seconds())
-    
-    # Menghitung jam, menit, detik
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
-    
-    # Format sesuai gambar: "7 Hours, 33 Minutes, 41 Seconds"
     return f"{hours} Hours, {minutes} Minutes, {seconds} Seconds"
 
 # Pengganti untuk get_string
 def get_string(key):
     strings = {
         "afk_status": (
-            "Since   : **{start_time_str}**\n"
-            "Timezone: **{timezone}**\n"
-            "Reason  : **{text}**"
+            "Since   : <b>{start_time_str}</b>\n"
+            "Timezone: <b>{timezone}</b>\n"
+            "Reason  : <b>{text}</b>"
         ),
-        "afk_back_msg": "I'm back! I was AFK for:\n**`{afk_duration}`**",
+        # Menggunakan tag <code> untuk tampilan seperti bubble/code block
+        "afk_back_msg": (
+            "I'm back! I was AFK for:\n"
+            "<code>{afk_duration}</code>" 
+        ),
     }
     return strings.get(key, "String not found")
 
-# --- KODE INTI MODIFIKASI ---
+# --- KODE INTI ---
 
 old_afk_msg = []
 is_approved = KeyManager("PMPERMIT", cast=list).contains
@@ -79,13 +61,10 @@ async def set_afk(event):
     
     text, media, media_type = None, None, None
     if event.pattern_match.group(1).strip():
-        # Alasan AFK (misal: "turu")
         text = event.text.split(maxsplit=1)[1] 
     else:
-        text = "No reason specified" # Alasan default jika tidak ada
+        text = "No reason specified" 
 
-    # --- PERUBAHAN UTAMA DI SINI ---
-    # Mendapatkan waktu mulai dan zona waktu
     start_time_str, start_time_dt, timezone = get_current_time_and_timezone()
     
     reply = await event.get_reply_message()
@@ -103,8 +82,6 @@ async def set_afk(event):
                 
     await event.eor("`Done`", time=2)
     
-    # *ASUMSI*: add_afk sekarang menyimpan start_time_str dan timezone
-    # Anda harus memodifikasi afk_db.py untuk menerima parameter ini
     add_afk(text, media_type, media, start_time_str, timezone) 
     
     ultroid_bot.add_handler(remove_afk, events.NewMessage(outgoing=True))
@@ -115,34 +92,30 @@ async def set_afk(event):
         ),
     )
     
-    # Membuat pesan status AFK yang akan ditampilkan di log
     afk_status_msg = get_string("afk_status").format(
         start_time_str=start_time_str,
         timezone=timezone,
         text=text
     )
     
-    # Mengirim status AFK pertama
-    msg1, msg2 = None, None
-    
-    # Tampilkan status lengkap ke diri sendiri (dan log)
+    # Mengirim status AFK pertama DENGAN parse_mode='html'
     if media:
         if "sticker" in media_type:
             msg1 = await ultroid_bot.send_file(event.chat_id, file=media)
-            msg2 = await ultroid_bot.send_message(event.chat_id, f"**Away from Keyboard**\n\n{afk_status_msg}")
+            msg2 = await ultroid_bot.send_message(event.chat_id, f"<b>Away from Keyboard</b>\n\n{afk_status_msg}", parse_mode='html')
         else:
             msg1 = await ultroid_bot.send_message(
-                event.chat_id, f"**Away from Keyboard**\n\n{afk_status_msg}", file=media
+                event.chat_id, f"<b>Away from Keyboard</b>\n\n{afk_status_msg}", file=media, parse_mode='html'
             )
     else:
-        msg1 = await event.respond(f"**Away from Keyboard**\n\n{afk_status_msg}")
+        msg1 = await event.respond(f"<b>Away from Keyboard</b>\n\n{afk_status_msg}", parse_mode='html')
         
     old_afk_msg.append(msg1)
     if msg2:
         old_afk_msg.append(msg2)
-        await asst.send_message(LOG_CHANNEL, msg2.text)
+        await asst.send_message(LOG_CHANNEL, msg2.text, parse_mode='html')
     else:
-        await asst.send_message(LOG_CHANNEL, msg1.text)
+        await asst.send_message(LOG_CHANNEL, msg1.text, parse_mode='html')
 
 
 async def remove_afk(event):
@@ -155,28 +128,24 @@ async def remove_afk(event):
     
     afk_data = is_afk()
     if afk_data:
-        # *ASUMSI*: is_afk() mengembalikan (text, media_type, media, start_time_str, timezone)
         try:
             text, media_type, media, start_time_str, timezone = afk_data
         except ValueError:
-            # Fallback jika struktur database tidak dimodifikasi
             text, media_type, media, _ = afk_data
             start_time_str, timezone = "Unknown", "Unknown"
         
-        # Mengonversi kembali string waktu ke objek datetime untuk perhitungan
         try:
-            tz = pytz.timezone(timezone) # Gunakan timezone yang tersimpan
+            tz_name_for_pytz = 'Asia/Jakarta' if timezone == 'UTC+7' else timezone
+            tz = pytz.timezone(tz_name_for_pytz)
             start_time_dt = datetime.strptime(start_time_str, "%B %d, %I:%M %p").replace(tzinfo=tz)
-        except:
-            # Jika gagal, gunakan waktu saat ini sebagai waktu mulai (kurang akurat)
+        except Exception:
             start_time_dt = datetime.fromtimestamp(time.time(), pytz.UTC) 
             
         afk_duration = format_afk_duration(start_time_dt)
-        
         del_afk()
         
-        # Mengirim pesan kembali dengan durasi AFK dalam format bubble
-        off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration))
+        # Mengirim pesan kembali DENGAN parse_mode='html'
+        off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode='html')
         await asst.send_message(LOG_CHANNEL, f"AFK ended. Duration: {afk_duration}")
         
         for x in old_afk_msg:
@@ -204,45 +173,44 @@ async def on_afk(event):
     afk_data = is_afk()
     if not afk_data: return
     
-    # *ASUMSI*: is_afk() mengembalikan (text, media_type, media, start_time_str, timezone)
     try:
         text, media_type, media, start_time_str, timezone = afk_data
     except ValueError:
         text, media_type, media, _ = afk_data
         start_time_str, timezone = "Unknown", "Unknown"
 
-    # Mengonversi kembali string waktu ke objek datetime untuk perhitungan
     try:
-        tz = pytz.timezone(timezone) # Gunakan timezone yang tersimpan
+        tz_name_for_pytz = 'Asia/Jakarta' if timezone == 'UTC+7' else timezone
+        tz = pytz.timezone(tz_name_for_pytz)
         start_time_dt = datetime.strptime(start_time_str, "%B %d, %I:%M %p").replace(tzinfo=tz)
-    except:
-        start_time_dt = datetime.fromtimestamp(time.time(), pytz.UTC) # Fallback
+    except Exception:
+        start_time_dt = datetime.fromtimestamp(time.time(), pytz.UTC) 
 
-    # 1. Menghitung durasi AFK saat ini
     afk_duration = format_afk_duration(start_time_dt)
 
-    # 2. Membuat pesan status AFK (Since, Timezone, Reason)
     status_msg = get_string("afk_status").format(
         start_time_str=start_time_str,
         timezone=timezone,
         text=text if text else "None"
     )
 
+    # Format akhir dengan HTML <code>
     final_text = (
-        f"**Away from Keyboard**\n\n"
+        f"<b>Away from Keyboard</b>\n\n"
         f"{status_msg}\n\n"
-        f"`{afk_duration}`"
+        f"<code>{afk_duration}</code>" 
     )
 
+    # Mengirim pesan DENGAN parse_mode='html'
     msg1, msg2 = None, None
     if media:
         if "sticker" in media_type:
             msg1 = await event.reply(file=media)
-            msg2 = await event.reply(final_text)
+            msg2 = await event.reply(final_text, parse_mode='html')
         else:
-            msg1 = await event.reply(final_text, file=media)
+            msg1 = await event.reply(final_text, file=media, parse_mode='html')
     else:
-        msg1 = await event.reply(final_text)
+        msg1 = await event.reply(final_text, parse_mode='html')
         
     for x in old_afk_msg:
         try:
@@ -262,4 +230,5 @@ if udB.get_key("AFK_DB"):
         events.NewMessage(
             incoming=True, func=lambda e: bool(e.mentioned or e.is_private)
         ),
-    )
+                                    )
+    
