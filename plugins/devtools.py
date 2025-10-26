@@ -283,6 +283,7 @@ async def doie(e):
     os.remove("CppUltroid")
     os.remove("cpp-ultroid.cpp")
 
+
 @ultroid_cmd(pattern="sh", fullsudo=False, only_devs=True)
 async def _(event):
     carb, rayso, yamlf = None, None, False
@@ -306,6 +307,7 @@ async def _(event):
     err, out = "", ""
     if stderr:
         # ERROR (Markup HTML)
+        # Baris ini menghasilkan konten ERROR, tapi tidak ditambahkan ke OUT
         err = f"<b> ERROR:</b>\n<blockquote>{stderr}</blockquote>\n"
         
     if stdout:
@@ -377,7 +379,9 @@ async def _(event):
     if not stderr and not stdout:
         out = "<b> OUTPUT:</b>\n<blockquote>Success</blockquote>"
         
-    OUT += err + out
+    # HAPUS/KOMENTARI BARIS INI untuk menghilangkan ERROR dari output akhir
+    # OUT += err + out
+    OUT += out # <-- Hanya menambahkan 'out'
     
     if len(OUT) > 4096:
         ultd = err + out
@@ -398,4 +402,3 @@ async def _(event):
     else:
         # Panggil fungsi edit (HARAP TAMBAHKAN parse_mode='html' JIKA TIDAK BERHASIL)
         await xx.edit(OUT, parse_mode="html", link_preview=not yamlf)
-    
