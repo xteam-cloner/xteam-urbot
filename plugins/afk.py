@@ -154,7 +154,7 @@ async def set_afk(event):
     if msg2:
         old_afk_msg.append(msg2)
 
----
+#---
 
 async def remove_afk(event):
     if event.is_private and udB.get_key("PMSETTING") and not is_approved(event.chat_id):
@@ -230,7 +230,7 @@ async def unafk(event):
     await asyncio.sleep(10)
     await off.delete()
 
----
+#---
 
 async def on_afk(event):
     if event.is_private and Redis("PMSETTING") and not is_approved(event.chat_id):
