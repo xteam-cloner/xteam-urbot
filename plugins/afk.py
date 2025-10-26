@@ -4,6 +4,7 @@ from telethon import events
 from telegraph import upload_file as uf
 import time
 import pytz
+from xteam._misc._decorators import ultroid_cmd
 from xteam.dB.afk_db import add_afk, del_afk, is_afk
 from xteam.dB.base import KeyManager
 from . import (
@@ -15,7 +16,6 @@ from . import (
     mediainfo,
     udB,
     ultroid_bot,
-    ultroid_cmd,
 )
 
 # Fungsi utilitas untuk mendapatkan waktu mulai dan zona waktu
