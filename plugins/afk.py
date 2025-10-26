@@ -39,7 +39,7 @@ def get_string(key):
         "afk_status": (
             "Since   : <b>{start_time_str}</b>\n"
             "Timezone: <b>{timezone}</b>\n"
-            "Reason  : {text}"
+            "Reason  : <b>{text}</b>"
         ),
         # Menggunakan tag <code> untuk tampilan seperti bubble/code block
         "afk_back_msg": (
