@@ -19,7 +19,7 @@ from xteam.fns.helper import inline_mention
 from strings import get_string
 from platform import python_version as pyver
 from pyrogram import __version__ as pver
-from xteam.version import __version__ as xteam
+from xteam.version import __version__
 from xteam.version import ultroid_version
 from telegram import __version__ as lver
 from telethon import __version__ as tver
@@ -74,7 +74,7 @@ async def alive(event):
                      f"✵ Owner : {OWNER_NAME}\n" \
                      f"✵ Userbot : {ultroid_version}\n" \
                      f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
-                     f"✵ Library : {xteam}\n" \
+                     f"✵ Library : {__version__}\n" \
                      f"✵ Uptime : {uptime}\n" \
                      f"✵ Kurigram :  {pver}\n" \
                      f"✵ Python : {pyver()}\n",
