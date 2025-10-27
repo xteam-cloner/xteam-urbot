@@ -195,15 +195,15 @@ async def _(event):
     owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
     
     if is_owner:
-        user_role = "<b>OWNER</b>"
+        user_role = "OWNER"
         display_name = f"{user_role} : {owner_html_mention}" 
         
     elif is_full_sudo:
-        user_role = "<b>FULLSUDO</b>" 
+        user_role = "FULLSUDO" 
         display_name = f"{user_role} : {user_html_mention}"
         
     elif is_standard_sudo:
-        user_role = "<b>SUDOUSER</b>" 
+        user_role = "SUDOUSER" 
         display_name = f"{user_role} : {user_html_mention}"
         
     else:
