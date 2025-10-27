@@ -19,6 +19,8 @@ from xteam.fns.helper import inline_mention
 from strings import get_string
 from platform import python_version as pyver
 from pyrogram import __version__ as pver
+from xteam.version import __version__ as xteam
+from xteam.version import ultroid_version
 from telegram import __version__ as lver
 from telethon import __version__ as tver
 from pytgcalls import __version__ as pytver
@@ -50,12 +52,12 @@ from . import (
 
 
 def format_message_text(uptime):
-    return f"<blockquote expandable><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b>\n\n" \
+    return f"<blockquote expandable><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n\n" \
                      f"✵ Owner : {OWNER_NAME}\n" \
+                     f"✵ Userbot : {ultroid_version}\n" \
                      f"✵ Dc id : {ultroid_bot.dc_id}\n" \
-                     f"✵ Library : {lver}\n" \
+                     f"✵ Library : {xteam}\n" \
                      f"✵ Uptime : {uptime}\n" \
-                     f"✵ Telethon : {tver}\n" \
                      f"✵ Pyrogram :  {pver}\n" \
                      f"✵ Python : {pyver()}\n</blockquote>"
 
@@ -68,14 +70,14 @@ async def alive(event):
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
     pic = udB.get_key("ALIVE_PIC")
-    await pro.edit(f"<blockquote expandable><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
-                     f"<blockquote>✵ Owner : {OWNER_NAME}\n" \
-                     f"✵ Dc id : {ultroid_bot.dc_id}\n" \
-                     f"✵ Library : {lver}\n" \
+    await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
+                     f"✵ Owner : {OWNER_NAME}\n" \
+                     f"✵ Userbot : {ultroid_version}\n" \
+                     f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
+                     f"✵ Library : {xteam}\n" \
                      f"✵ Uptime : {uptime}\n" \
-                     f"✵ Telethon : {tver}\n" \
-                     f"✵ Pyrogram :  {pver}\n" \
-                     f"✵ Python : {pyver()}\n</blockquote>",
+                     f"✵ Kurigram :  {pver}\n" \
+                     f"✵ Python : {pyver()}\n",
                    parse_mode="html",
                    file=pic
                   )
