@@ -77,7 +77,8 @@ async def alive(event):
                      f"✵ Library : {__version__}\n" \
                      f"✵ Uptime : {uptime}\n" \
                      f"✵ Kurigram :  {pver}\n" \
-                     f"✵ Python : {pyver()}\n",
+                     f"✵ Python : {pyver()}\n" \
+                     f"<blockquote>✵ @xteam_cloner ✵</blockquote>\n",
                    parse_mode="html",
                    file=pic
                   )
