@@ -103,58 +103,41 @@ async def banall(event):
 import asyncio
 from telethon import events
 from telethon.errors.rpcerrorlist import YouBlockedUserError
-from telethon.errors import BotMethodInvalidError, BotResponseTimeoutError, BotInlineDisabledError
 
 # Asumsi impor internal yang diperlukan sudah ada:
-from . import HNDLR, LOGS, OWNER_NAME, asst, ultroid_cmd, eor, get_string 
+from . import ultroid_cmd, LOGS, eor 
 
-@ultroid_cmd(pattern="limit$")
+@ultroid_cmd(pattern="limit$") 
 async def demn(ult):
     """
-    Checks the user's account for Telegram limitations using @SpamBot 
-    and displays the result via an inline query.
+    Checks the user's account for Telegram limitations using @SpamBot.
+    Displays the result by editing the original message (most reliable method).
     """
     chat = "@SpamBot"
-    initial_text = "Checking If You Are Limited..."
-    await ult.edit(initial_text)
+    # Edit the message immediately to show activity
+    await ult.edit("Checking If You Are Limited... ⏳")
     
-    # 1. GET RESULT FROM SPAMBOT
+    # Start a conversation with SpamBot
     async with ult.client.conversation(chat) as conv:
         try:
+            # Prepare to wait for the bot's response (from ID 178220800)
             response = conv.wait_event(events.NewMessage(incoming=True, from_users=178220800))
+            
+            # Send the /start command
             await ult.client.send_message(chat, "/start")
-            response = await response
+            
+            # Wait for the bot's message
+            spambot_message = await response
+            
         except YouBlockedUserError:
-            return await ult.reply("Boss! Please Unblock @SpamBot ")
+            return await ult.reply("Boss! Please **Unblock @SpamBot** to run the check.")
         except BaseException as er:
             LOGS.exception(er)
-            return await ult.eor("Error when talking to @SpamBot.")
-
-    # Ambil pesan dari SpamBot
-    spambot_message = response.message.message
-    
-    # 2. DISPLAY RESULT VIA INLINE QUERY
-    try:
-        # Kirim pesan dari SpamBot sebagai query ke bot asisten
-        # (Asumsi bot asisten dapat memproses teks biasa dan mengembalikannya sebagai inline article)
-        results = await ult.client.inline_query(
-            asst.me.username, 
-            f"SPAMCHECK:{spambot_message}" # Gunakan format unik agar bot inline mengenali
-        )
-        
-    except BotMethodInvalidError:
-        # Fallback jika inline gagal atau bot tidak merespons
-        return await eor(
-            ult, 
-            f"**Error Inline Query. Here is the direct result:**\n\n<blockquote>{spambot_message}</blockquote>", 
-            parse_mode="html"
-        )
-    except BotResponseTimeoutError:
-        return await ult.eor(get_string("help_2").format(HNDLR)) # Menggunakan string error timeout dari help
-    except BotInlineDisabledError:
-        return await ult.eor(get_string("help_3")) # Menggunakan string error inline disabled dari help
-        
-    # 3. CLICK THE INLINE RESULT
-    chat_id = await ult.get_chat()
-    await results[0].click(chat_id.id, reply_to=ult.reply_to_msg_id, hide_via=True)
-    await ult.delete()
+            return await ult.eor("An **Error** occurred while communicating with @SpamBot.")
+            
+    # Use eor (edit or reply) to display the final result directly.
+    await eor(
+        ult, 
+        f"**@SpamBot Result:**\n\n<blockquote>{spambot_message.message}</blockquote>", 
+        parse_mode="html"
+    )
