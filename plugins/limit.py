@@ -93,63 +93,68 @@ async def banall(event):
     except Exception as e:
         await event.edit(f"`An error occurred: {str(e)}`")
 
-"""from telethon import events
-from telethon.tl.types import (
-    InputWebDocument,
-    MessageMediaWebPage,
-    WebDocument,
-    InlineQuery,
-    InputMediaDocument,
-    DocumentAttributeFilename,
-    DocumentAttributeAnimated,
-    DocumentAttributeSticker,
-    DocumentAttributeAudio,
-    DocumentAttributeVideo,
-    InputDocument,
-    InlineQueryResultArticle,
-    InputTextMessageContent,
-)
+# Ultroid - UserBot
+# Copyright (C) 2021-2023 TeamUltroid
+#
+# This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
+# PLease read the GNU Affero General Public License in
+# <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
+
+import asyncio
+from telethon import events
 from telethon.errors.rpcerrorlist import YouBlockedUserError
-# You would need to use a Telethon Client for a bot, not a user bot framework.
+from telethon.errors import BotMethodInvalidError, BotResponseTimeoutError, BotInlineDisabledError
 
-# Example structure for an Inline Query Handler
-# ... import statements ...
+# Asumsi impor internal yang diperlukan sudah ada:
+from . import HNDLR, LOGS, OWNER_NAME, asst, ultroid_cmd, eor, get_string 
 
-@in_pattern("limit", owner=True)
-async def limit(query):
+@ultroid_cmd(pattern="limit$")
+async def demn(ult):
+    """
+    Checks the user's account for Telegram limitations using @SpamBot 
+    and displays the result via an inline query.
+    """
     chat = "@SpamBot"
+    initial_text = "Checking If You Are Limited..."
+    await ult.edit(initial_text)
     
-    # Pesan default jika terjadi kesalahan
-    response_message = "⏳ Gagal mendapatkan status. Coba lagi atau pastikan @SpamBot tidak diblokir." 
-    
-    try:
-        # Menggunakan conv (conversation) untuk interaksi.
-        async with query.client.conversation(chat, timeout=5) as conv:
-            # 1. Kirim perintah /start
-            await conv.send_message("/start")
-            
-            # 2. Tunggu balasan dari SpamBot (maksimal 5 detik)
-            response = await conv.get_response()
-            
-            # 3. Ambil teks status yang sebenarnya
-            response_message = response.text 
-            
-    except YouBlockedUserError:
-        response_message = "⛔️ Harap Unblock @SpamBot untuk melakukan pengecekan status."
-    except TimeoutError:
-        response_message = "⚠️ Pengecekan status @SpamBot gagal (Timeout). Coba lagi."
-    except Exception as e:
-        response_message = f"❌ Terjadi kesalahan saat memeriksa: {e.__class__.__name__}"
+    # 1. GET RESULT FROM SPAMBOT
+    async with ult.client.conversation(chat) as conv:
+        try:
+            response = conv.wait_event(events.NewMessage(incoming=True, from_users=178220800))
+            await ult.client.send_message(chat, "/start")
+            response = await response
+        except YouBlockedUserError:
+            return await ult.reply("Boss! Please Unblock @SpamBot ")
+        except BaseException as er:
+            LOGS.exception(er)
+            return await ult.eor("Error when talking to @SpamBot.")
 
-    # ... (Bagian builder.article di bawahnya sama) ...
-    builder = query.builder
-    await query.answer(
-        [
-            builder.article(
-                title="Spam Limit Status",
-                text=response_message,
-                description="Tap to send your current account limit status."
-            )
-        ]
-    )
-"""
+    # Ambil pesan dari SpamBot
+    spambot_message = response.message.message
+    
+    # 2. DISPLAY RESULT VIA INLINE QUERY
+    try:
+        # Kirim pesan dari SpamBot sebagai query ke bot asisten
+        # (Asumsi bot asisten dapat memproses teks biasa dan mengembalikannya sebagai inline article)
+        results = await ult.client.inline_query(
+            asst.me.username, 
+            f"SPAMCHECK:{spambot_message}" # Gunakan format unik agar bot inline mengenali
+        )
+        
+    except BotMethodInvalidError:
+        # Fallback jika inline gagal atau bot tidak merespons
+        return await eor(
+            ult, 
+            f"**Error Inline Query. Here is the direct result:**\n\n<blockquote>{spambot_message}</blockquote>", 
+            parse_mode="html"
+        )
+    except BotResponseTimeoutError:
+        return await ult.eor(get_string("help_2").format(HNDLR)) # Menggunakan string error timeout dari help
+    except BotInlineDisabledError:
+        return await ult.eor(get_string("help_3")) # Menggunakan string error inline disabled dari help
+        
+    # 3. CLICK THE INLINE RESULT
+    chat_id = await ult.get_chat()
+    await results[0].click(chat_id.id, reply_to=ult.reply_to_msg_id, hide_via=True)
+    await ult.delete()
