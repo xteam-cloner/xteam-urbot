@@ -229,7 +229,11 @@ async def unafk(event):
 
     # 2. Kirim pesan kembali/konfirmasi
     off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode='html')
-
+        try:
+        await event.delete()  # <--- BARIS INI YANG DITAMBAHKAN
+    except Exception:
+        # Lewati jika gagal (misalnya, tidak ada hak admin)
+        pass
     # 3. Hapus pesan status AFK lama
     for x in old_afk_msg:
         try:
