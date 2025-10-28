@@ -52,14 +52,15 @@ from . import (
 
 
 def format_message_text(uptime):
-    return f"<blockquote expandable><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n\n" \
-                     f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
-                     f"✵ Userbot : {ultroid_version}\n" \
-                     f"✵ Dc id : {ultroid_bot.dc_id}\n" \
-                     f"✵ Library : {xteam}\n" \
-                     f"✵ Uptime : {uptime}\n" \
-                     f"✵ Pyrogram :  {pver}\n" \
-                     f"✵ Python : {pyver()}\n</blockquote>"
+    return f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
+                       f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
+                       f"✵ Userbot : {ultroid_version}\n" \
+                       f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
+                       f"✵ Library : {__version__}\n" \
+                       f"✵ Uptime : {uptime}\n" \
+                       f"✵ Kurigram :  {pver}\n" \
+                       f"✵ Python : {pyver()}\n" \
+                       f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n"
 
 @xteam_cmd(pattern="alive$")
 async def alive(event):
@@ -78,13 +79,13 @@ async def alive(event):
         pic = None
     # Jika disetel ke True (string "True" atau "true"), gunakan gambar default
     elif pic_setting and str(pic_setting).lower() in ["True", "1"]:
-        pic = "resources/extras/logo_readme.jpg"
+        pic = "resources/extras/IMG_20251027_112615_198.jpg"
     # Jika disetel dengan path ke file, gunakan path tersebut
     elif pic_setting:
         pic = pic_setting
     # Jika tidak disetel sama sekali (None), gunakan gambar default
     else:
-        pic = "resources/extras/logo_readme.jpg"
+        pic = "resources/extras/IMG_20251027_112615_198.jpg"
     # --- Akhir Logika penentuan file gambar ---
 
     # Menggunakan event.edit() jika tidak ada pic, dan event.eor() dengan file jika ada
