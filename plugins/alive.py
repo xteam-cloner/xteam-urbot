@@ -69,16 +69,16 @@ async def alive(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
-    pic = udB.get_key("ALIVE_PIC")
-    if pic_setting and str(pic_setting).lower() in ["false", "0"]:
-        pic = None
-    elif pic_setting and str(pic_setting).lower() in ["true", "1"]:
-        pic = "resources/alive_pic.jpg"
-    elif pic_setting:
-        pic = pic_setting  
+    xpic = udB.get_key("ALIVE_PIC")
+    if xpic and str(xpic).lower() in ["false", "0"]:
+        xpic = None
+    elif xpic and str(xpic).lower() in ["true", "1"]:
+        xpic = "resources/alive_pic.jpg"
+    elif xpic:
+        xpic = xpic  
     else:
-        pic = "resources/extras/logo_readme.jpg"
-    if pic:
+        xpic = "resources/extras/logo_readme.jpg"
+    if xpic:
         await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
                        f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
                        f"✵ Userbot : {ultroid_version}\n" \
