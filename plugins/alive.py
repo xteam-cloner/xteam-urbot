@@ -74,10 +74,10 @@ async def alive(event):
     pic_setting = udB.get_key("ALIVE_PIC")
 
     # Jika disetel ke False (string "False" atau "false"), tidak ada file yang dikirim
-    if pic_setting and str(pic_setting).lower() in ["false", "0"]:
+    if pic_setting and str(pic_setting).lower() in ["False", "0"]:
         pic = None
     # Jika disetel ke True (string "True" atau "true"), gunakan gambar default
-    elif pic_setting and str(pic_setting).lower() in ["true", "1"]:
+    elif pic_setting and str(pic_setting).lower() in ["True", "1"]:
         pic = "resources/extras/logo_readme.jpg"
     # Jika disetel dengan path ke file, gunakan path tersebut
     elif pic_setting:
