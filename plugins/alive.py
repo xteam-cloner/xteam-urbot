@@ -53,7 +53,7 @@ from . import (
 
 def format_message_text(uptime):
     return f"<blockquote expandable><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n\n" \
-                     f"✵ Owner : {OWNER_NAME}\n" \
+                     f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
                      f"✵ Userbot : {ultroid_version}\n" \
                      f"✵ Dc id : {ultroid_bot.dc_id}\n" \
                      f"✵ Library : {xteam}\n" \
@@ -71,14 +71,14 @@ async def alive(event):
     message_text = format_message_text(uptime)
     pic = udB.get_key("ALIVE_PIC")
     await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
-                     f"✵ Owner : {OWNER_NAME}\n" \
+                     f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
                      f"✵ Userbot : {ultroid_version}\n" \
                      f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
                      f"✵ Library : {__version__}\n" \
                      f"✵ Uptime : {uptime}\n" \
                      f"✵ Kurigram :  {pver}\n" \
                      f"✵ Python : {pyver()}\n" \
-                     f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xteam_cloner</a> ✵</blockquote>\n",
+                     f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n",
                    parse_mode="html",
                    file=pic
                   )
