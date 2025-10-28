@@ -119,8 +119,9 @@ async def set_afk(event):
     # Menyimpan data AFK ke database
     add_afk(text, media_type, media, start_time_str, timezone)
 
-    # Menambahkan Handler (untuk on_afk dan remove_afk)
-    ultroid_bot.add_handler(remove_afk, events.NewMessage(outgoing=True))
+    # Menambahkan Handler (Hanya untuk on_afk, handler remove_afk DIBUAT TERPISAH)
+    # >>> BARIS INI DIHAPUS: ultroid_bot.add_handler(remove_afk, events.NewMessage(outgoing=True)) 
+    
     ultroid_bot.add_handler(
         on_afk,
         events.NewMessage(
@@ -211,13 +212,25 @@ async def unafk(event):
 
     afk_duration = format_afk_duration(start_time_dt)
 
-    # Hapus status AFK dari database
+    # 1. Hapus status AFK dari database
     del_afk()
 
-    # Kirim pesan kembali/konfirmasi
+    # ======================================================
+    # ✨ LANGKAH PENTING: HAPUS HANDLER PENDENGAR PESAN MASUK ✨
+    # ======================================================
+    try:
+        # Panggil method remove_event_handler dari client bot Anda
+        # untuk menghapus fungsi on_afk dari daftar listener aktif.
+        ultroid_bot.remove_event_handler(on_afk)
+    except Exception as e:
+        # (Opsional) Log error jika handler gagal dihapus, 
+        # tetapi ini biasanya diabaikan jika handler sudah dihapus sebelumnya.
+        pass
+
+    # 2. Kirim pesan kembali/konfirmasi
     off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode='html')
 
-    # Hapus pesan status AFK lama
+    # 3. Hapus pesan status AFK lama
     for x in old_afk_msg:
         try:
             await x.delete()
@@ -226,9 +239,10 @@ async def unafk(event):
             
     old_afk_msg.clear() # Kosongkan list
 
-    # Hapus pesan konfirmasi setelah 10 detik
-    await asyncio.sleep(10)
+    # 4. Hapus pesan konfirmasi setelah 10 detik
+    await asyncio.sleep(5)
     await off.delete()
+
 
 #---
 
