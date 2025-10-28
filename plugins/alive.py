@@ -69,54 +69,40 @@ async def alive(event):
     await asyncio.sleep(1)
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    message_text = format_message_text(uptime)
+    message_text = format_message_text(uptime) # Variabel ini menghasilkan pesan utuh
 
-    # --- Logika penentuan file gambar ---
+    # --- Logika penentuan file gambar yang Diperbaiki ---
     pic_setting = udB.get_key("ALIVE_PIC")
 
-    # Jika disetel ke False (string "False" atau "false"), tidak ada file yang dikirim
-    if pic_setting and str(pic_setting).lower() in ["False", "0"]:
+    # Nilai-nilai yang berarti 'TIDAK ADA GAMBAR'
+    NO_PIC_VALUES = ["false", "0", "none"] 
+    DEFAULT_PIC_PATH = "resources/extras/IMG_20251027_112615_198.jpg"
+    
+    # Menghindari error saat ALIVE_PIC disetel ke string "false"
+    if pic_setting and str(pic_setting).lower() in NO_PIC_VALUES:
         pic = None
-    # Jika disetel ke True (string "True" atau "true"), gunakan gambar default
-    elif pic_setting and str(pic_setting).lower() in ["True", "1"]:
-        pic = "resources/extras/IMG_20251027_112615_198.jpg"
-    # Jika disetel dengan path ke file, gunakan path tersebut
+        
+    elif pic_setting and str(pic_setting).lower() in ["true", "1"]:
+        pic = DEFAULT_PIC_PATH
+        
     elif pic_setting:
         pic = pic_setting
-    # Jika tidak disetel sama sekali (None), gunakan gambar default
+        
     else:
-        pic = "resources/extras/IMG_20251027_112615_198.jpg"
+        pic = DEFAULT_PIC_PATH
     # --- Akhir Logika penentuan file gambar ---
 
-    # Menggunakan event.edit() jika tidak ada pic, dan event.eor() dengan file jika ada
-    # untuk menghindari error saat mengirim file
+    # Menggunakan message_text sebagai isi pesan utama
     if pic:
-        await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
-                       f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
-                       f"✵ Userbot : {ultroid_version}\n" \
-                       f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
-                       f"✵ Library : {__version__}\n" \
-                       f"✵ Uptime : {uptime}\n" \
-                       f"✵ Kurigram :  {pver}\n" \
-                       f"✵ Python : {pyver()}\n" \
-                       f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n",
+        await pro.edit(message_text, # <--- Isi pesan diganti dengan message_text
                        parse_mode="html",
                        file=pic
                       )
     else:
-        await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
-                       f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
-                       f"✵ Userbot : {ultroid_version}\n" \
-                       f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
-                       f"✵ Library : {__version__}\n" \
-                       f"✵ Uptime : {uptime}\n" \
-                       f"✵ Kurigram :  {pver}\n" \
-                       f"✵ Python : {pyver()}\n" \
-                       f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n",
+        await pro.edit(message_text, # <--- Isi pesan diganti dengan message_text
                        parse_mode="html"
-                      )
+                          )
         
-
 @xteam_cmd(pattern="Alive$")
 async def alive_video(event):
     try:
