@@ -66,42 +66,30 @@ def format_message_text(uptime):
 async def alive(event):
     start = time.time()
     pro = await event.eor("🔥")
-    await asyncio.sleep(1)
+    await asyncio.sleep(0,5)
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    message_text = format_message_text(uptime) # Variabel ini menghasilkan pesan utuh
-
-    # --- Logika penentuan file gambar yang Diperbaiki ---
-    pic_setting = udB.get_key("ALIVE_PIC")
-
-    # Nilai-nilai yang berarti 'TIDAK ADA GAMBAR'
-    NO_PIC_VALUES = ["false", "0", "none"] 
-    DEFAULT_PIC_PATH = "resources/extras/IMG_20251027_112615_198.jpg"
-    
-    # Menghindari error saat ALIVE_PIC disetel ke string "false"
-    if pic_setting and str(pic_setting).lower() in NO_PIC_VALUES:
-        pic = None
-        
-    elif pic_setting and str(pic_setting).lower() in ["true", "1"]:
-        pic = DEFAULT_PIC_PATH
-        
-    elif pic_setting:
-        pic = pic_setting
-        
+    message_text = format_message_text(uptime)
+    xpic = udB.get_key("ALIVE_PIC")
+    xnone = ["False", "0", "none"] 
+    xdefault = "resources/extras/IMG_20251027_112615_198.jpg"
+    if xpic and str(xpic).lower() in xnone:
+        pic = None    
+    elif xpic and str(xpic).lower() in ["True", "1"]:
+        pic = xdefault
+    elif xpic:
+        pic = xpic  
     else:
-        pic = DEFAULT_PIC_PATH
-    # --- Akhir Logika penentuan file gambar ---
-
-    # Menggunakan message_text sebagai isi pesan utama
+        pic = xdefault
     if pic:
-        await pro.edit(message_text, # <--- Isi pesan diganti dengan message_text
+        await pro.edit(message_text,
                        parse_mode="html",
                        file=pic
                       )
     else:
-        await pro.edit(message_text, # <--- Isi pesan diganti dengan message_text
+        await pro.edit(message_text,
                        parse_mode="html"
-                          )
+                      )
         
 @xteam_cmd(pattern="Alive$")
 async def alive_video(event):
