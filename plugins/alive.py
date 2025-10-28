@@ -71,11 +71,11 @@ async def alive(event):
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
     xpic = udB.get_key("ALIVE_PIC")
-    xnone = ["False", "0", "none"] 
+    xnone = ["false", "0", "none"] 
     xdefault = "resources/extras/IMG_20251027_112615_198.jpg"
     if xpic and str(xpic).lower() in xnone:
         pic = None    
-    elif xpic and str(xpic).lower() in ["True", "1"]:
+    elif xpic and str(xpic).lower() in ["true", "1"]:
         pic = xdefault
     elif xpic:
         pic = xpic  
