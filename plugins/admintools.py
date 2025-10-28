@@ -10,7 +10,7 @@ from . import get_help
 __doc__ = get_help("help_admintools")
 
 import asyncio
-
+import time
 from telethon.errors import BadRequestError
 from telethon.errors.rpcerrorlist import ChatNotModifiedError, UserIdInvalidError
 from telethon.tl.functions.channels import EditAdminRequest, GetFullChannelRequest
@@ -344,6 +344,8 @@ async def fastpurger(purg):
     pattern="purgeme( (.*)|$)",
 )
 async def fastpurgerme(purg):
+    start_time = time.time() # <<< Rekam waktu mulai
+
     if num := purg.pattern_match.group(1).strip():
         try:
             nnt = int(num)
@@ -356,7 +358,20 @@ async def fastpurgerme(purg):
         ):
             await mm.delete()
             mp += 1
-        await eor(purg, f"Purged {mp} Messages!", time=5)
+        
+        # Hitung waktu eksekusi dan format respons
+        end_time = time.time()
+        execution_time_sec = end_time - start_time
+        
+        # Konversi ke ms dan us
+        ms = int(execution_time_sec * 1000) # Milidetik (bagian bulat)
+        us = int((execution_time_sec * 1000 - ms) * 1000) # Mikrodetik
+        
+        # Format sesuai gambar: "498 ms, 572 µs"
+        time_str = f"{ms} ms, {us} µs"
+        
+        # Mengganti pesan respons akhir
+        await eor(purg, f"**{time_str}**\nPurged {mp} Messages!", time=5) # <<< Respons diubah
         return
     elif not purg.reply_to_msg_id:
         return await eod(
@@ -364,6 +379,8 @@ async def fastpurgerme(purg):
             "`Reply to a message to purge from or use it like ``purgeme <num>`",
             time=10,
         )
+    
+    # --- Logika untuk mode reply (belum termasuk penghitungan waktu) ---
     chat = await purg.get_input_chat()
     msgs = []
     async for msg in purg.client.iter_messages(
@@ -374,10 +391,24 @@ async def fastpurgerme(purg):
         msgs.append(msg)
     if msgs:
         await purg.client.delete_messages(chat, msgs)
+        
+    # Hitung waktu eksekusi dan format respons untuk mode reply
+    end_time = time.time()
+    execution_time_sec = end_time - start_time
+    
+    # Konversi ke ms dan us
+    ms = int(execution_time_sec * 1000) # Milidetik (bagian bulat)
+    us = int((execution_time_sec * 1000 - ms) * 1000) # Mikrodetik
+    
+    # Format sesuai gambar: "498 ms, 572 µs"
+    time_str = f"{ms} ms, {us} µs"
+
+    # Mengganti pesan respons akhir untuk mode reply
     await purg.eor(
-        "__Fast purge complete!__\n**Purged** `" + str(len(msgs)) + "` **messages.**",
+        f"**{time_str}**\n__Fast purge complete!__\n**Purged** `{str(len(msgs))}` **messages.**", # <<< Respons diubah
         time=5,
     )
+    
 
 
 @ultroid_cmd(
