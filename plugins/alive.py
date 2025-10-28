@@ -69,16 +69,27 @@ async def alive(event):
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
-    xpic = udB.get_key("ALIVE_PIC")
-    if xpic and str(xpic).lower() in ["false", "0"]:
-        xpic = None
-    elif xpic and str(xpic).lower() in ["true", "1"]:
-        xpic = "resources/alive_pic.jpg"
-    elif xpic:
-        xpic = xpic  
+
+    # --- Logika penentuan file gambar ---
+    pic_setting = udB.get_key("ALIVE_PIC")
+
+    # Jika disetel ke False (string "False" atau "false"), tidak ada file yang dikirim
+    if pic_setting and str(pic_setting).lower() in ["false", "0"]:
+        pic = None
+    # Jika disetel ke True (string "True" atau "true"), gunakan gambar default
+    elif pic_setting and str(pic_setting).lower() in ["true", "1"]:
+        pic = "resources/extras/logo_readme.jpg"
+    # Jika disetel dengan path ke file, gunakan path tersebut
+    elif pic_setting:
+        pic = pic_setting
+    # Jika tidak disetel sama sekali (None), gunakan gambar default
     else:
-        xpic = "resources/extras/logo_readme.jpg"
-    if xpic:
+        pic = "resources/extras/logo_readme.jpg"
+    # --- Akhir Logika penentuan file gambar ---
+
+    # Menggunakan event.edit() jika tidak ada pic, dan event.eor() dengan file jika ada
+    # untuk menghindari error saat mengirim file
+    if pic:
         await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
                        f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
                        f"✵ Userbot : {ultroid_version}\n" \
@@ -102,7 +113,8 @@ async def alive(event):
                        f"✵ Python : {pyver()}\n" \
                        f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n",
                        parse_mode="html"
-    )
+                      )
+        
 
 @xteam_cmd(pattern="Alive$")
 async def alive_video(event):
