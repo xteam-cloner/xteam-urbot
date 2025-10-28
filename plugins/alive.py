@@ -70,18 +70,39 @@ async def alive(event):
     uptime = time_formatter((time.time() - start_time) * 1000)
     message_text = format_message_text(uptime)
     pic = udB.get_key("ALIVE_PIC")
-    await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
-                     f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
-                     f"✵ Userbot : {ultroid_version}\n" \
-                     f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
-                     f"✵ Library : {__version__}\n" \
-                     f"✵ Uptime : {uptime}\n" \
-                     f"✵ Kurigram :  {pver}\n" \
-                     f"✵ Python : {pyver()}\n" \
-                     f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n",
-                   parse_mode="html",
-                   file=pic
-                  )
+    if pic_setting and str(pic_setting).lower() in ["false", "0"]:
+        pic = None
+    elif pic_setting and str(pic_setting).lower() in ["true", "1"]:
+        pic = "resources/alive_pic.jpg"
+    elif pic_setting:
+        pic = pic_setting  
+    else:
+        pic = "resources/extras/logo_readme.jpg"
+    if pic:
+        await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
+                       f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
+                       f"✵ Userbot : {ultroid_version}\n" \
+                       f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
+                       f"✵ Library : {__version__}\n" \
+                       f"✵ Uptime : {uptime}\n" \
+                       f"✵ Kurigram :  {pver}\n" \
+                       f"✵ Python : {pyver()}\n" \
+                       f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n",
+                       parse_mode="html",
+                       file=pic
+                      )
+    else:
+        await pro.edit(f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
+                       f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
+                       f"✵ Userbot : {ultroid_version}\n" \
+                       f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
+                       f"✵ Library : {__version__}\n" \
+                       f"✵ Uptime : {uptime}\n" \
+                       f"✵ Kurigram :  {pver}\n" \
+                       f"✵ Python : {pyver()}\n" \
+                       f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n",
+                       parse_mode="html"
+    )
 
 @xteam_cmd(pattern="Alive$")
 async def alive_video(event):
