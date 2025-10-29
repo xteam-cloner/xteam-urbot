@@ -56,9 +56,9 @@ def format_afk_duration(start_time_dt):
 def get_string(key):
     strings = {
         "afk_status": (
-            "Since   : <b>{start_time_str}</b>\n"
-            "Timezone: <b>{timezone}</b>\n"
-            "Reason  : <b>{text}</b>"
+            "<b><u>★ Since   : {start_time_str}</u></b>\n"
+            "<b><u>𖤓 Timezone: {timezone}</u></b>\n"
+            "<b><u>♨ Reason  : {text}</u></b>"
         ),
         "afk_back_msg": (
             "I'm back! I was AFK for:\n"
@@ -180,7 +180,7 @@ async def remove_afk(event):
         afk_duration = format_afk_duration(start_time_dt)
         del_afk() # Hapus status AFK
 
-        off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode='html')
+        off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode="html")
 
         for x in old_afk_msg:
             try:
@@ -228,7 +228,7 @@ async def unafk(event):
         pass
 
     # 2. Kirim pesan kembali/konfirmasi
-    off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode='html')
+    off = await event.reply(get_string("afk_back_msg").format(afk_duration=afk_duration), parse_mode="html")
     try:
         await event.delete()  # <--- BARIS INI YANG DITAMBAHKAN
     except Exception:
@@ -289,7 +289,7 @@ async def on_afk(event):
     final_text = (
         f"<b>Away from Keyboard</b>\n\n"
         f"{status_msg}\n\n"
-        f"<code>{afk_duration}</code>"
+        f"<blockquote>{afk_duration}</blockquote>"
     )
 
     # Hapus pesan AFK lama sebelum mengirim yang baru
