@@ -45,7 +45,7 @@ async def autoname_(event):
             return
         DM = time.strftime("%d-%m-%y")
         HM = time.strftime("%H:%M")
-        name = f"🕒{HM} ⚡{OWNER_NAME}⚡ {DM} 🗓️"
+        name = f"⏰{HM} {OWNER_NAME} {DM} 🗓️"
         await event.client(UpdateProfileRequest(first_name=name))
         await asyncio.sleep(60)
 
