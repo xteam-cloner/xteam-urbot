@@ -1,6 +1,6 @@
 # --- Bagian 1: Import yang Dibutuhkan ---
 from telethon import events
-from . import ultroid_cmd
+from . import ultroid_cmd 
 import os
 import aiohttp # Wajib untuk request HTTP asinkron
 
@@ -12,7 +12,7 @@ TEMP_DOWNLOAD_DIR = "downloads/" # Folder sementara
 if not os.path.isdir(TEMP_DOWNLOAD_DIR):
     os.makedirs(TEMP_DOWNLOAD_DIR)
 
-# --- Bagian 2: Fungsi Unduhan Media (.dld) ---
+# --- Bagian 2: Fungsi Unduhan Media (.dld) yang Diperbaiki ---
 @ultroid_cmd(pattern="dld (.*)")
 async def download_media(event):
     """
@@ -22,7 +22,6 @@ async def download_media(event):
         initial_msg = await event.edit("⏳ **Memproses permintaan unduhan...**")
         
         try:
-            # Ambil URL dari argumen perintah
             media_url = event.pattern_match.group(1).strip()
             if not media_url:
                 await initial_msg.edit("❌ **ERROR:** Mohon sertakan URL media (video/foto) yang valid setelah `.dld`")
@@ -33,10 +32,9 @@ async def download_media(event):
 
         full_api_url = DOWNLOAD_API + media_url
         temp_file_path = os.path.join(TEMP_DOWNLOAD_DIR, "downloaded_media")
-        final_temp_path = None # Definisikan di luar try
+        final_temp_path = None 
 
         try:
-            # 1. Mengirim Permintaan HTTP dan Menerima File
             await initial_msg.edit("🔗 **Mengirim permintaan ke API...** Menunggu respons file.")
             
             async with aiohttp.ClientSession() as session:
@@ -45,20 +43,23 @@ async def download_media(event):
                         await initial_msg.edit(f"❌ **ERROR API:** Gagal mendapatkan file. Status: `{resp.status}`")
                         return
                     
-                    # Coba dapatkan Content-Type untuk menentukan ekstensi
+                    # 💡 PERBAIKAN UTAMA: Pengecekan Ukuran Konten (Minimal 5KB)
+                    content_length = resp.headers.get("Content-Length")
+                    if content_length and int(content_length) < 5120: 
+                        error_text = await resp.text()
+                        await initial_msg.edit(f"❌ **GAGAL MENGUNDUH (0.0 MB):** API tidak mengembalikan media yang valid.\n**Pesan API (jika ada):** `{error_text.strip()[:100]}...`")
+                        return
+
+                    # Penentuan ekstensi file
                     content_type = resp.headers.get("Content-Type", "application/octet-stream")
-                    
-                    # Tentukan ekstensi file
                     if "video" in content_type:
                         ext = ".mp4"
                     elif "image" in content_type:
                         ext = ".jpg"
                     else:
-                        # Fallback: jika API menyediakan header nama file
-                        filename = resp.headers.get("Content-Disposition", "filename=downloaded_file.bin")
-                        ext = os.path.splitext(filename.split('=')[-1].strip('"'))[1] or ".bin"
-
-
+                        # Fallback yang lebih aman
+                        ext = ".mp4" # Asumsi default media adalah MP4, atau .bin jika gagal
+                        
                     final_temp_path = temp_file_path + ext
                     
                     # Tulis byte yang diterima ke file sementara
@@ -80,7 +81,6 @@ async def download_media(event):
                 f"**Ukuran:** {round(file_size / (1024*1024), 2)} MB"
             )
             
-            # Mengunggah file
             await event.client.send_file(
                 event.chat_id,
                 final_temp_path,
@@ -88,23 +88,18 @@ async def download_media(event):
                 force_document=False 
             )
             
-            # Hapus pesan 'Loading' awal dan file sementara
             await initial_msg.delete()
             os.remove(final_temp_path)
 
         except Exception as e:
-            # Penanganan error dan pembersihan file sementara
             if final_temp_path and os.path.exists(final_temp_path):
                 os.remove(final_temp_path)
             
             await initial_msg.edit(f"❌ **ERROR:** Terjadi kesalahan dalam proses: `{str(e)}`")
 
-# --- Bagian 3: Fungsi Info Bantuan (.mdlhelp) ---
+# --- Bagian 3: Fungsi Info Bantuan (.mdlhelp) (TIDAK BERUBAH) ---
 @ultroid_cmd(pattern="mdlhelp$")
 async def media_help(event):
-    """
-    Memberikan informasi tentang penggunaan modul multimedia.
-    """
     if not event.fwd_from:
         help_text = (
             "🎥 **Modul Multifungsi Multimedia** 🖼️\n\n"
@@ -119,7 +114,6 @@ async def media_help(event):
         await event.edit(help_text)
 
 # --- Bagian 4: Informasi Modul (Wajib) ---
-# Perhatikan perubahan nama perintah dari .dl menjadi .dld
 CMD_HELP = {
     "module": "Modul untuk unduh media dan bantuan.",
     "commands": {
