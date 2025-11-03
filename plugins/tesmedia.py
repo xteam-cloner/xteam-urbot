@@ -5,7 +5,11 @@ import os
 import aiohttp # Wajib untuk request HTTP asinkron
 
 # API Unduhan Anda
-DOWNLOAD_API = "http://38.92.25.205:63123/api/download?url="
+# API Unduhan Anda
+#DOWNLOAD_API = "http://38.92.25.205:63123/api/download?url="
+# MENJADI (jika &raw=true berfungsi):
+DOWNLOAD_API = "http://38.92.25.205:63123/api/download?url=&raw=true" 
+
 TEMP_DOWNLOAD_DIR = "downloads/" # Folder sementara
 
 # Buat folder download jika belum ada
