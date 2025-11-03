@@ -1,45 +1,103 @@
 # --- Bagian 1: Import yang Dibutuhkan ---
 from telethon import events
-from . import *
+from . import ultroid_cmd
 import os
+import aiohttp # Wajib untuk request HTTP asinkron
 
 # API Unduhan Anda
 DOWNLOAD_API = "http://38.92.25.205:63123/api/download?url="
+TEMP_DOWNLOAD_DIR = "downloads/" # Folder sementara
 
-# --- Bagian 2: Fungsi Unduhan Media (.dl) ---
+# Buat folder download jika belum ada
+if not os.path.isdir(TEMP_DOWNLOAD_DIR):
+    os.makedirs(TEMP_DOWNLOAD_DIR)
+
+# --- Bagian 2: Fungsi Unduhan Media (.dld) ---
 @ultroid_cmd(pattern="dld (.*)")
 async def download_media(event):
     """
     Mengunduh media (video/foto) dari URL yang diberikan menggunakan API eksternal.
     """
     if not event.fwd_from:
-        # Kirim pesan 'Loading' awal
-        await event.edit("⏳ **Memproses permintaan unduhan...**")
+        initial_msg = await event.edit("⏳ **Memproses permintaan unduhan...**")
         
-        # Ambil URL dari argumen perintah
         try:
+            # Ambil URL dari argumen perintah
             media_url = event.pattern_match.group(1).strip()
             if not media_url:
-                await event.edit("❌ **ERROR:** Mohon sertakan URL media (video/foto) yang valid setelah .dl")
+                await initial_msg.edit("❌ **ERROR:** Mohon sertakan URL media (video/foto) yang valid setelah `.dld`")
                 return
         except IndexError:
-            await event.edit("❌ **ERROR:** Format salah. Gunakan: `.dl https://dictionary.cambridge.org/us/dictionary/english/media`")
+            await initial_msg.edit("❌ **ERROR:** Format salah. Gunakan: `.dld https://dictionary.cambridge.org/us/dictionary/english/media`")
             return
 
-        # Buat URL lengkap untuk API
         full_api_url = DOWNLOAD_API + media_url
-        
-        # NOTE: Karena ini hanya contoh kerangka, kita TIDAK akan melakukan request HTTP
-        # yang sebenarnya. Dalam modul nyata, Anda akan menggunakan aiohttp 
-        # untuk melakukan request ke full_api_url dan mengunduh file.
-        
-        # Simulasikan hasil (GANTIKAN DENGAN LOGIKA DOWNLOAD ASLI)
-        await event.edit(
-            f"✅ **Permintaan Dikirim!**\n\n"
-            f"**URL Sumber:** `{media_url}`\n"
-            f"**URL API Digunakan:** `{full_api_url}`\n\n"
-            "⚠️ **CATATAN:** Modul ini hanya kerangka. Anda perlu menambahkan kode `aiohttp` untuk mengunduh file secara aktual dari API ini."
-        )
+        temp_file_path = os.path.join(TEMP_DOWNLOAD_DIR, "downloaded_media")
+        final_temp_path = None # Definisikan di luar try
+
+        try:
+            # 1. Mengirim Permintaan HTTP dan Menerima File
+            await initial_msg.edit("🔗 **Mengirim permintaan ke API...** Menunggu respons file.")
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(full_api_url) as resp:
+                    if resp.status != 200:
+                        await initial_msg.edit(f"❌ **ERROR API:** Gagal mendapatkan file. Status: `{resp.status}`")
+                        return
+                    
+                    # Coba dapatkan Content-Type untuk menentukan ekstensi
+                    content_type = resp.headers.get("Content-Type", "application/octet-stream")
+                    
+                    # Tentukan ekstensi file
+                    if "video" in content_type:
+                        ext = ".mp4"
+                    elif "image" in content_type:
+                        ext = ".jpg"
+                    else:
+                        # Fallback: jika API menyediakan header nama file
+                        filename = resp.headers.get("Content-Disposition", "filename=downloaded_file.bin")
+                        ext = os.path.splitext(filename.split('=')[-1].strip('"'))[1] or ".bin"
+
+
+                    final_temp_path = temp_file_path + ext
+                    
+                    # Tulis byte yang diterima ke file sementara
+                    with open(final_temp_path, 'wb') as f:
+                        while True:
+                            chunk = await resp.content.read(1024)
+                            if not chunk:
+                                break
+                            f.write(chunk)
+            
+            # 2. Mengunggah File ke Telegram
+            await initial_msg.edit("📤 **File berhasil diunduh.** Mengunggah ke Telegram...")
+            
+            file_size = os.path.getsize(final_temp_path)
+            
+            caption = (
+                f"✅ **Berhasil Diunduh!**\n\n"
+                f"**Sumber:** `{media_url}`\n"
+                f"**Ukuran:** {round(file_size / (1024*1024), 2)} MB"
+            )
+            
+            # Mengunggah file
+            await event.client.send_file(
+                event.chat_id,
+                final_temp_path,
+                caption=caption,
+                force_document=False 
+            )
+            
+            # Hapus pesan 'Loading' awal dan file sementara
+            await initial_msg.delete()
+            os.remove(final_temp_path)
+
+        except Exception as e:
+            # Penanganan error dan pembersihan file sementara
+            if final_temp_path and os.path.exists(final_temp_path):
+                os.remove(final_temp_path)
+            
+            await initial_msg.edit(f"❌ **ERROR:** Terjadi kesalahan dalam proses: `{str(e)}`")
 
 # --- Bagian 3: Fungsi Info Bantuan (.mdlhelp) ---
 @ultroid_cmd(pattern="mdlhelp$")
@@ -51,9 +109,9 @@ async def media_help(event):
         help_text = (
             "🎥 **Modul Multifungsi Multimedia** 🖼️\n\n"
             "**Fungsi 1: Unduh Media**\n"
-            "  • **Perintah:** `.dl <URL media>`\n"
-            "  • **Contoh:** `.dl https://www.youtube.com/watch?v=abcde123`\n"
-            "  • **Kegunaan:** Mengunduh video/foto dari URL sosial media yang didukung API.\n\n"
+            "  • **Perintah:** `.dld <URL media>`\n"
+            "  • **Contoh:** `.dld https://vt.tiktok.com/ZSySkQMsy/`\n"
+            "  • **Kegunaan:** Mengunduh video/foto dari URL sosial media (TikTok, YouTube, IG, dll.) melalui API eksternal.\n\n"
             "**Fungsi 2: Bantuan Modul**\n"
             "  • **Perintah:** `.mdlhelp`\n"
             "  • **Kegunaan:** Menampilkan pesan bantuan ini."
@@ -61,11 +119,12 @@ async def media_help(event):
         await event.edit(help_text)
 
 # --- Bagian 4: Informasi Modul (Wajib) ---
+# Perhatikan perubahan nama perintah dari .dl menjadi .dld
 CMD_HELP = {
     "module": "Modul untuk unduh media dan bantuan.",
     "commands": {
-        ".dl [URL]": "Mengunduh video/foto dari URL yang diberikan menggunakan API eksternal.",
+        ".dld [URL]": "Mengunduh video/foto dari URL yang diberikan menggunakan API eksternal.",
         ".mdlhelp": "Menampilkan bantuan untuk modul ini."
     },
-    "extra": "Perlu API unduhan eksternal agar `.dl` berfungsi penuh."
+    "extra": "Menggunakan aiohttp untuk permintaan API. Pastikan Anda sudah menginstal 'aiohttp'."
 }
