@@ -44,7 +44,7 @@ def get_url_from_message(event):
     return url
 
 # --- Main Handler ---
-@ultroid_cmd(pattern="dld")
+@ultroid_cmd(pattern="ddl")
 async def dl_handler(event):
     """Downloads a video using the external API and uploads it via Telethon."""
     
@@ -70,7 +70,9 @@ async def dl_handler(event):
     async with aiohttp.ClientSession(headers=headers, timeout=HTTP_TIMEOUT) as session:
         # 1. Fetch download information from the external API
         try:
-            async with session.get(API.format(url)) as resp:
+            # FIX: Changed from GET to POST request to resolve the 405 error,
+            # while keeping the URL in the query string as per the API's format.
+            async with session.post(API.format(url)) as resp:
                 if resp.status != 200:
                     return await status_msg.edit(f"❌ Server Error ({resp.status}): `{API.format(url)}`")
                 data = await resp.json()
@@ -80,7 +82,6 @@ async def dl_handler(event):
         if data.get("status") != "success":
             return await status_msg.edit(f"❌ API Reported Failure: `{data.get('message', data)}`")
 
-        # FIX: Added explicit check for 'download_url' to prevent KeyError
         dl_url = data.get("download_url")
         
         if not dl_url:
