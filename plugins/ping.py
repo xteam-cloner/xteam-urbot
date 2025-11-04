@@ -183,7 +183,7 @@ async def _(event):
     
     # ------------------------------------------------------------------
     
-    bot_header_text = "𖤓⋆Mʏꜱᴛᴇʀɪᴏᴜꜱ Gɪʀʟꜱ⋆𖤓" 
+    bot_header_text = "𖤓⋆<a href='https://github.com/xteam-cloner/xteam-urbot'>xᴛᴇᴀᴍ ᴜʀʙᴏᴛ</a>⋆𖤓" 
     
     if is_full_sudo or is_standard_sudo:
         current_user_entity = await client.get_entity(user_id)
