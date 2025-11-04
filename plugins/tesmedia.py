@@ -3,11 +3,13 @@ from telethon import events
 from . import ultroid_cmd 
 import httpx, asyncio, os, tempfile, urllib.parse
 
-# PERUBAHAN: Mengganti API sesuai permintaan pengguna.
-# Diasumsikan endpoint downloader ada di root dan menerima URL dalam payload JSON.
-API = "http://38.92.25.205:63123" 
+# PERBAIKAN: Mengembalikan API ke endpoint asli yang memungkinkan pengiriman URL melalui query string.
+# Diasumsikan endpoint ini menerima POST untuk pemrosesan.
+API_ENDPOINT = "/api/download?url={}"
+API_BASE_URL = "http://38.92.25.205:63123"
+API_FULL_URL = API_BASE_URL + API_ENDPOINT
 
-@ultroid_cmd(pattern="dld ?(.*)")
+@ultroid_cmd(pattern="^.dl ?(.*)")
 async def run(message):
     """
     Mengunduh media (video dan/atau audio) dari URL yang diberikan menggunakan API eksternal.
@@ -25,13 +27,14 @@ async def run(message):
             return await message.reply("Silakan berikan URL (`.dl <url>`) atau balas pesan yang berisi URL.")
     
     # Kirim pesan status awal
-    # Menggunakan message.reply() untuk kompatibilitas framework Ultroid
     status_msg = await message.reply("⏳ Memproses permintaan ke API...")
     
     if not url:
         return await status_msg.edit("❌ Tidak ada URL ditemukan.")
 
-    # Variabel encoded_url tidak lagi digunakan karena URL dikirim dalam payload JSON
+    # URL di-encode untuk dimasukkan ke dalam query string
+    encoded_url = urllib.parse.quote(url, safe="")
+    target_api_url = API_FULL_URL.format(encoded_url)
 
     headers = {
         "User-Agent": (
@@ -46,8 +49,8 @@ async def run(message):
 
     async with httpx.AsyncClient(timeout=90, headers=headers) as s:
         try:
-            # PERUBAHAN: Mengirim URL di JSON payload dengan key "url".
-            r = await s.post(API, json={"url": url}) 
+            # Menggunakan POST ke URL lengkap (termasuk query string)
+            r = await s.post(target_api_url) 
             r.raise_for_status()
             data = r.json()
         except httpx.HTTPStatusError as e:
@@ -82,8 +85,7 @@ async def run(message):
             try:
                 await status_msg.edit(f"⬇️ Mendownload {file_type}...")
                 
-                # Streaming download
-                # Catatan: URL download_video_url / download_audio_url diunduh menggunakan GET
+                # Streaming download menggunakan GET (untuk URL media hasil API)
                 async with s.stream("GET", url_file) as resp: 
                     resp.raise_for_status()
                     async for chunk in resp.aiter_bytes():
