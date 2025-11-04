@@ -12,10 +12,10 @@ import os
 import aiohttp
 import asyncio
 import tempfile
-import urllib.parse # Added for URL encoding
+import urllib.parse 
 
 # --- Configuration ---
-# API endpoint structure suggests the URL is passed via query parameter
+# API endpoint structure: Using the base endpoint and sending data via POST body
 BASE_API = "http://38.92.25.205:63123/api/download"
 HTTP_TIMEOUT = aiohttp.ClientTimeout(total=60)
 DOWNLOAD_TIMEOUT = aiohttp.ClientTimeout(total=3600) # Extended timeout for large files
@@ -56,16 +56,14 @@ async def dl_handler(event):
     # Edit the message to show processing status
     status_msg = await event.edit(f"⏳ Processing details for: `{url}`")
 
-    # URL-encode the target URL for safe transmission
-    encoded_url = urllib.parse.quote_plus(url)
-    api_url_with_query = f"{BASE_API}?url={encoded_url}"
-
+    # Target URL is now just the base API, as the URL parameter is moved to the JSON body
+    api_url = BASE_API 
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                       "AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/118.0.0.0 Safari/537.36",
-        # Explicitly set content type to JSON when sending data in the body
+        # Explicitly set content type to JSON
         "Content-Type": "application/json", 
         "Accept": "application/json",
         "Connection": "keep-alive",
@@ -80,8 +78,8 @@ async def dl_handler(event):
     async with aiohttp.ClientSession(headers=headers, timeout=HTTP_TIMEOUT) as session:
         # 1. Fetch download information from the external API
         try:
-            # Using POST request with encoded URL in query string AND URL in JSON body
-            async with session.post(api_url_with_query, json=json_data) as resp:
+            # FIX: Using POST request with data only in the JSON body, simplifying the request URL.
+            async with session.post(api_url, json=json_data) as resp:
                 if resp.status != 200:
                     try:
                         # Attempt to get error message from JSON body
@@ -90,7 +88,7 @@ async def dl_handler(event):
                     except:
                         error_message = f"HTTP Status {resp.status}"
                         
-                    return await status_msg.edit(f"❌ Server Error ({resp.status}): `{api_url_with_query}`\nDetails: `{error_message}`")
+                    return await status_msg.edit(f"❌ Server Error ({resp.status}): `{api_url}`\nDetails: `{error_message}`")
                 
                 # Check content type before parsing JSON
                 if 'application/json' not in resp.content_type:
