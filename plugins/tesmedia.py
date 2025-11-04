@@ -80,7 +80,15 @@ async def dl_handler(event):
         if data.get("status") != "success":
             return await status_msg.edit(f"❌ API Reported Failure: `{data.get('message', data)}`")
 
-        dl_url = data["download_url"]
+        # FIX: Added explicit check for 'download_url' to prevent KeyError
+        dl_url = data.get("download_url")
+        
+        if not dl_url:
+            return await status_msg.edit(
+                f"❌ Download URL not found in API response. "
+                f"The API reported success but missing the required URL. Full response: `{data}`"
+            )
+
         title = (data.get("title") or "Download").strip()
         uploader = data.get('uploader') or '-'
         duration = data.get('duration') or '-'
