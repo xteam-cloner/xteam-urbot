@@ -20,10 +20,12 @@ async def run(message):
         if message.reply_to_message and message.reply_to_message.text:
             url = message.reply_to_message.text.strip()
         else:
-            return await message.reply_text("Silakan berikan URL (`.dl <url>`) atau balas pesan yang berisi URL.")
+            # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+            return await message.reply("Silakan berikan URL (`.dl <url>`) atau balas pesan yang berisi URL.")
     
     # Kirim pesan status awal
-    status_msg = await message.reply_text("⏳ Memproses permintaan ke API...")
+    # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+    status_msg = await message.reply("⏳ Memproses permintaan ke API...")
     
     if not url:
         return await status_msg.edit("❌ Tidak ada URL ditemukan.")
@@ -48,12 +50,15 @@ async def run(message):
             r.raise_for_status()
             data = r.json()
         except httpx.HTTPStatusError as e:
-            return await status_msg.edit(f"❌ **Kesalahan Server API** (Kode {e.response.status_code}): {e.request.url}")
+            # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+            return await message.reply(f"❌ **Kesalahan Server API** (Kode {e.response.status_code}): {e.request.url}")
         except Exception as e:
-            return await status_msg.edit(f"❌ **Kesalahan Koneksi**: {e}")
+            # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+            return await message.reply(f"❌ **Kesalahan Koneksi**: {e}")
 
         if data.get("status") != "success":
-            return await status_msg.edit(f"❌ **Gagal dari API**: {data.get('msg', data)}")
+            # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+            return await message.reply(f"❌ **Gagal dari API**: {data.get('msg', data)}")
 
         # Persiapkan Caption
         title = (data.get("title") or "Download").strip()
@@ -88,7 +93,7 @@ async def run(message):
                 
                 await status_msg.edit(f"⬆️ Mengunggah {file_type}...")
                 
-                # Kirim file
+                # Kirim file (asumsi reply_audio/reply_video didukung framework Ultroid)
                 if is_audio:
                     await message.reply_audio(
                         ftmp.name, 
@@ -105,15 +110,16 @@ async def run(message):
                     )
                 
             except httpx.HTTPStatusError as e:
-                await message.reply_text(f"❌ Gagal mendownload {file_type}. Error {e.response.status_code}")
+                # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+                await message.reply(f"❌ Gagal mendownload {file_type}. Error {e.response.status_code}")
             except Exception as e:
-                await message.reply_text(f"❌ Error saat mendownload/mengunggah {file_type}: {e}")
+                # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+                await message.reply(f"❌ Error saat mendownload/mengunggah {file_type}: {e}")
             finally:
                 # Bersihkan file sementara
                 try:
                     os.remove(ftmp.name)
                 except Exception as e:
-                    # Log error jika gagal menghapus file
                     print(f"Error removing temp file: {e}")
 
         # Tambahkan tugas pengunduhan
@@ -124,10 +130,14 @@ async def run(message):
             download_tasks.append(download_and_send(audio_url, is_audio=True))
         
         if not download_tasks:
-            return await status_msg.edit("❌ API tidak mengembalikan URL media yang valid.")
+            await status_msg.edit("❌ API tidak mengembalikan URL media yang valid.")
 
         # Jalankan semua tugas secara bersamaan
-        await asyncio.gather(*download_tasks)
+        if download_tasks:
+            await asyncio.gather(*download_tasks)
         
         # Hapus pesan status jika semua berhasil
-        await status_msg.delete()
+        try:
+            await status_msg.delete()
+        except:
+            pass
