@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-#
 # Ultroid Plugin: Video Downloader
 # Command: .dl <url> (or reply to a message containing a URL)
-# Dependencies: aiohttp
+# Dependencies: aiohttp, urllib
 #
 # NOTE: This file assumes 'ultroid_cmd' is a decorator imported from a local
 # Ultroid utility file (. import ultroid_cmd) that registers a Telethon event handler.
@@ -14,9 +12,11 @@ import os
 import aiohttp
 import asyncio
 import tempfile
+import urllib.parse # Added for URL encoding
 
 # --- Configuration ---
-API = "http://38.92.25.205:63123/api/download?url={}"
+# API endpoint structure suggests the URL is passed via query parameter
+BASE_API = "http://38.92.25.205:63123/api/download"
 HTTP_TIMEOUT = aiohttp.ClientTimeout(total=60)
 DOWNLOAD_TIMEOUT = aiohttp.ClientTimeout(total=3600) # Extended timeout for large files
 
@@ -44,7 +44,7 @@ def get_url_from_message(event):
     return url
 
 # --- Main Handler ---
-@ultroid_cmd(pattern="ddl")
+@ultroid_cmd(pattern="dld")
 async def dl_handler(event):
     """Downloads a video using the external API and uploads it via Telethon."""
     
@@ -54,28 +54,50 @@ async def dl_handler(event):
         return await event.edit("❌ **Usage:** `.dl <video_url>` or reply to a message containing a URL.")
 
     # Edit the message to show processing status
-    status_msg = await event.edit(f"⏳ Downloading details for: `{url}`")
+    status_msg = await event.edit(f"⏳ Processing details for: `{url}`")
+
+    # URL-encode the target URL for safe transmission
+    encoded_url = urllib.parse.quote_plus(url)
+    api_url_with_query = f"{BASE_API}?url={encoded_url}"
+
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                       "AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/118.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
+        # Explicitly set content type to JSON when sending data in the body
+        "Content-Type": "application/json", 
+        "Accept": "application/json",
         "Connection": "keep-alive",
     }
     
+    # Data to be sent in the POST body as JSON
+    json_data = {"url": url}
+
     temp_file_path = None
 
     # Use aiohttp for the requests
     async with aiohttp.ClientSession(headers=headers, timeout=HTTP_TIMEOUT) as session:
         # 1. Fetch download information from the external API
         try:
-            # FIX: Changed from GET to POST request to resolve the 405 error,
-            # while keeping the URL in the query string as per the API's format.
-            async with session.post(API.format(url)) as resp:
+            # Using POST request with encoded URL in query string AND URL in JSON body
+            async with session.post(api_url_with_query, json=json_data) as resp:
                 if resp.status != 200:
-                    return await status_msg.edit(f"❌ Server Error ({resp.status}): `{API.format(url)}`")
+                    try:
+                        # Attempt to get error message from JSON body
+                        error_data = await resp.json()
+                        error_message = error_data.get('message', f"HTTP Status {resp.status}")
+                    except:
+                        error_message = f"HTTP Status {resp.status}"
+                        
+                    return await status_msg.edit(f"❌ Server Error ({resp.status}): `{api_url_with_query}`\nDetails: `{error_message}`")
+                
+                # Check content type before parsing JSON
+                if 'application/json' not in resp.content_type:
+                    return await status_msg.edit(f"❌ API returned non-JSON response. Status: {resp.status}")
+                
                 data = await resp.json()
+
         except Exception as e:
             return await status_msg.edit(f"❌ API Request Failed: `{e}`")
 
