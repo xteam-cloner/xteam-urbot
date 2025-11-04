@@ -1,128 +1,142 @@
-# --- Bagian 1: Import yang Dibutuhkan ---
+# -*- coding: utf-8 -*-
+#
+# Ultroid Plugin: Video Downloader
+# Command: .dl <url> (or reply to a message containing a URL)
+# Dependencies: aiohttp
+#
+# NOTE: This file assumes 'ultroid_cmd' is a decorator imported from a local
+# Ultroid utility file (. import ultroid_cmd) that registers a Telethon event handler.
+
 from telethon import events
+# Assuming the import below works within the Ultroid framework
 from . import ultroid_cmd 
 import os
-import aiohttp # Wajib untuk request HTTP asinkron
+import aiohttp
+import asyncio
+import tempfile
 
-# API Unduhan Anda
-# API Unduhan Anda
-#DOWNLOAD_API = "http://38.92.25.205:63123/api/download?url="
-# MENJADI (jika &raw=true berfungsi):
-DOWNLOAD_API = "http://38.92.25.205:63123/api/download?url=&raw=true" 
+# --- Configuration ---
+API = "http://38.92.25.205:63123/api/download?url={}"
+HTTP_TIMEOUT = aiohttp.ClientTimeout(total=60)
+DOWNLOAD_TIMEOUT = aiohttp.ClientTimeout(total=3600) # Extended timeout for large files
 
-TEMP_DOWNLOAD_DIR = "downloads/" # Folder sementara
+# --- Helper function for fetching URL ---
+def get_url_from_message(event):
+    """Extracts URL from command arguments or replied message."""
+    text = event.raw_text
+    
+    # 1. Check command arguments (e.g., .dl http://...)
+    parts = text.split(maxsplit=1)
+    url = parts[1].strip() if len(parts) > 1 and parts[1].startswith("http") else None
+    
+    # 2. Check reply (requires fetching the replied message content)
+    if not url and event.is_reply:
+        # We need the full message object for the reply_to_msg_id to get the content
+        reply_msg = asyncio.run(event.get_reply_message())
+        
+        if reply_msg and reply_msg.text:
+            # Find the first URL-like string in the replied message
+            for candidate in reply_msg.text.split():
+                 if candidate.startswith("http"):
+                     url = candidate
+                     break
+    
+    return url
 
-# Buat folder download jika belum ada
-if not os.path.isdir(TEMP_DOWNLOAD_DIR):
-    os.makedirs(TEMP_DOWNLOAD_DIR)
+# --- Main Handler ---
+@ultroid_cmd(pattern="dld")
+async def dl_handler(event):
+    """Downloads a video using the external API and uploads it via Telethon."""
+    
+    url = get_url_from_message(event)
 
-# --- Bagian 2: Fungsi Unduhan Media (.dld) yang Diperbaiki ---
-@ultroid_cmd(pattern="dld (.*)")
-async def download_media(event):
-    """
-    Mengunduh media (video/foto) dari URL yang diberikan menggunakan API eksternal.
-    """
-    if not event.fwd_from:
-        initial_msg = await event.edit("⏳ **Memproses permintaan unduhan...**")
+    if not url:
+        return await event.edit("❌ **Usage:** `.dl <video_url>` or reply to a message containing a URL.")
+
+    # Edit the message to show processing status
+    status_msg = await event.edit(f"⏳ Downloading details for: `{url}`")
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/118.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Connection": "keep-alive",
+    }
+    
+    temp_file_path = None
+
+    # Use aiohttp for the requests
+    async with aiohttp.ClientSession(headers=headers, timeout=HTTP_TIMEOUT) as session:
+        # 1. Fetch download information from the external API
+        try:
+            async with session.get(API.format(url)) as resp:
+                if resp.status != 200:
+                    return await status_msg.edit(f"❌ Server Error ({resp.status}): `{API.format(url)}`")
+                data = await resp.json()
+        except Exception as e:
+            return await status_msg.edit(f"❌ API Request Failed: `{e}`")
+
+        if data.get("status") != "success":
+            return await status_msg.edit(f"❌ API Reported Failure: `{data.get('message', data)}`")
+
+        dl_url = data["download_url"]
+        title = (data.get("title") or "Download").strip()
+        uploader = data.get('uploader') or '-'
+        duration = data.get('duration') or '-'
+        watch_url = data.get('watch_url') or url
+
+        caption = (
+            f"**{title}**\n\n"
+            f"👤 Uploader: `{uploader}`\n"
+            f"⏱️ Duration: `{duration}`\n"
+            f"🔗 Source: [Link]({watch_url})"
+        )
+
+        # 2. Stream and upload the video
+        # Create a temporary file path
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as ftmp:
+            temp_file_path = ftmp.name
         
         try:
-            media_url = event.pattern_match.group(1).strip()
-            if not media_url:
-                await initial_msg.edit("❌ **ERROR:** Mohon sertakan URL media (video/foto) yang valid setelah `.dld`")
-                return
-        except IndexError:
-            await initial_msg.edit("❌ **ERROR:** Format salah. Gunakan: `.dld https://dictionary.cambridge.org/us/dictionary/english/media`")
-            return
+            # Update status to reflect streaming process
+            await status_msg.edit(f"⚡ Streaming video file...")
 
-        full_api_url = DOWNLOAD_API + media_url
-        temp_file_path = os.path.join(TEMP_DOWNLOAD_DIR, "downloaded_media")
-        final_temp_path = None 
-
-        try:
-            await initial_msg.edit("🔗 **Mengirim permintaan ke API...** Menunggu respons file.")
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.get(full_api_url) as resp:
+            # Use a separate session/timeout for the streaming download
+            async with aiohttp.ClientSession(headers=headers, timeout=DOWNLOAD_TIMEOUT) as dl_session:
+                async with dl_session.get(dl_url) as resp:
                     if resp.status != 200:
-                        await initial_msg.edit(f"❌ **ERROR API:** Gagal mendapatkan file. Status: `{resp.status}`")
-                        return
+                        return await status_msg.edit(f"❌ Download Link Error ({resp.status}): `{dl_url}`")
                     
-                    # 💡 PERBAIKAN UTAMA: Pengecekan Ukuran Konten (Minimal 5KB)
-                    content_length = resp.headers.get("Content-Length")
-                    if content_length and int(content_length) < 5120: 
-                        error_text = await resp.text()
-                        await initial_msg.edit(f"❌ **GAGAL MENGUNDUH (0.0 MB):** API tidak mengembalikan media yang valid.\n**Pesan API (jika ada):** `{error_text.strip()[:100]}...`")
-                        return
-
-                    # Penentuan ekstensi file
-                    content_type = resp.headers.get("Content-Type", "application/octet-stream")
-                    if "video" in content_type:
-                        ext = ".mp4"
-                    elif "image" in content_type:
-                        ext = ".jpg"
-                    else:
-                        # Fallback yang lebih aman
-                        ext = ".mp4" # Asumsi default media adalah MP4, atau .bin jika gagal
-                        
-                    final_temp_path = temp_file_path + ext
-                    
-                    # Tulis byte yang diterima ke file sementara
-                    with open(final_temp_path, 'wb') as f:
-                        while True:
-                            chunk = await resp.content.read(1024)
-                            if not chunk:
-                                break
+                    # Write the content stream to the temporary file path
+                    with open(temp_file_path, 'wb') as f:
+                        async for chunk in resp.content.iter_chunked(1024 * 1024): # 1MB chunks
                             f.write(chunk)
             
-            # 2. Mengunggah File ke Telegram
-            await initial_msg.edit("📤 **File berhasil diunduh.** Mengunggah ke Telegram...")
-            
-            file_size = os.path.getsize(final_temp_path)
-            
-            caption = (
-                f"✅ **Berhasil Diunduh!**\n\n"
-                f"**Sumber:** `{media_url}`\n"
-                f"**Ukuran:** {round(file_size / (1024*1024), 2)} MB"
-            )
-            
+            # Update status for final upload
+            await status_msg.edit(f"⬆️ Uploading **{title}** to Telegram...")
+
+            # 3. Upload the file using Telethon's send_file
             await event.client.send_file(
                 event.chat_id,
-                final_temp_path,
+                temp_file_path,
                 caption=caption,
-                force_document=False 
+                force_document=False, # Send as video if possible
+                supports_streaming=True,
+                reply_to=event.reply_to_msg_id if event.is_reply else event.id
             )
             
-            await initial_msg.delete()
-            os.remove(final_temp_path)
+            # Delete the status message after successful upload
+            await status_msg.delete()
 
         except Exception as e:
-            if final_temp_path and os.path.exists(final_temp_path):
-                os.remove(final_temp_path)
-            
-            await initial_msg.edit(f"❌ **ERROR:** Terjadi kesalahan dalam proses: `{str(e)}`")
+            await status_msg.edit(f"❌ Video Download/Upload Failed: `{e}`")
 
-# --- Bagian 3: Fungsi Info Bantuan (.mdlhelp) (TIDAK BERUBAH) ---
-@ultroid_cmd(pattern="mdlhelp$")
-async def media_help(event):
-    if not event.fwd_from:
-        help_text = (
-            "🎥 **Modul Multifungsi Multimedia** 🖼️\n\n"
-            "**Fungsi 1: Unduh Media**\n"
-            "  • **Perintah:** `.dld <URL media>`\n"
-            "  • **Contoh:** `.dld https://vt.tiktok.com/ZSySkQMsy/`\n"
-            "  • **Kegunaan:** Mengunduh video/foto dari URL sosial media (TikTok, YouTube, IG, dll.) melalui API eksternal.\n\n"
-            "**Fungsi 2: Bantuan Modul**\n"
-            "  • **Perintah:** `.mdlhelp`\n"
-            "  • **Kegunaan:** Menampilkan pesan bantuan ini."
-        )
-        await event.edit(help_text)
-
-# --- Bagian 4: Informasi Modul (Wajib) ---
-CMD_HELP = {
-    "module": "Modul untuk unduh media dan bantuan.",
-    "commands": {
-        ".dld [URL]": "Mengunduh video/foto dari URL yang diberikan menggunakan API eksternal.",
-        ".mdlhelp": "Menampilkan bantuan untuk modul ini."
-    },
-    "extra": "Menggunakan aiohttp untuk permintaan API. Pastikan Anda sudah menginstal 'aiohttp'."
-}
+        finally:
+            # 4. Clean up the temporary file
+            try:
+                if temp_file_path and os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+            except Exception:
+                # Cleanup failed, ignore
+                pass
