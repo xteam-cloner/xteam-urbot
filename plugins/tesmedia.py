@@ -3,140 +3,108 @@ from telethon import events
 from . import ultroid_cmd 
 import httpx, asyncio, os, tempfile, urllib.parse
 
-# PERBAIKAN: Mengembalikan API ke endpoint asli yang memungkinkan pengiriman URL melalui query string.
-# Diasumsikan endpoint ini menerima POST untuk pemrosesan.
-API_ENDPOINT = "/api/download?url={}"
-API_BASE_URL = "http://38.92.25.205:63123"
-API_FULL_URL = API_BASE_URL + API_ENDPOINT
+from . import (
+    ultroid_cmd as xteam_cmd,
+    asst,
+    eor,
+)
+import httpx
+from urllib.parse import quote_plus
 
-@ultroid_cmd(pattern="^.dl ?(.*)")
-async def run(message):
+# --- Konfigurasi ---
+DOWNLOAD_API = "http://38.92.25.205:63123/api/download?url={}"
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
+    "Connection": "keep-alive",
+}
+# --------------------
+
+@xteam_cmd(pattern="d(?:ld|d) ?(.*)$")
+async def downloader(event):
     """
-    Mengunduh media (video dan/atau audio) dari URL yang diberikan menggunakan API eksternal.
-    Gunakan: .dl <url> atau balas pesan yang berisi url.
+    Menggunakan API kustom untuk mengunduh konten dari URL yang diberikan.
+    Sintaks: .dl <url> atau .download <url>
     """
     
-    # Ekstraksi URL dari argumen perintah atau pesan balasan
-    url = message.pattern_match.group(1).strip()
-    
-    if not url:
-        if message.reply_to_message and message.reply_to_message.text:
-            url = message.reply_to_message.text.strip()
-        else:
-            # Menggunakan message.reply() untuk kompatibilitas framework Ultroid
-            return await message.reply("Silakan berikan URL (`.dl <url>`) atau balas pesan yang berisi URL.")
-    
-    # Kirim pesan status awal
-    status_msg = await message.reply("⏳ Memproses permintaan ke API...")
-    
-    if not url:
-        return await status_msg.edit("❌ Tidak ada URL ditemukan.")
+    # Ambil URL dari argumen
+    url_to_download = event.pattern_match.group(1).strip()
 
-    # URL di-encode untuk dimasukkan ke dalam query string
-    encoded_url = urllib.parse.quote(url, safe="")
-    target_api_url = API_FULL_URL.format(encoded_url)
-
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/120.0.0.0 Safari/537.36"
-        ),
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "en-US,en;q=0.9,id;q;0.8",
-        "Connection": "keep-alive",
-    }
-
-    async with httpx.AsyncClient(timeout=90, headers=headers) as s:
-        try:
-            # Menggunakan POST ke URL lengkap (termasuk query string)
-            r = await s.post(target_api_url) 
-            r.raise_for_status()
-            data = r.json()
-        except httpx.HTTPStatusError as e:
-            return await message.reply(f"❌ **Kesalahan Server API** (Kode {e.response.status_code}): {e.request.url}")
-        except Exception as e:
-            return await message.reply(f"❌ **Kesalahan Koneksi**: {e}")
-
-        if data.get("status") != "success":
-            return await message.reply(f"❌ **Gagal dari API**: {data.get('msg', data)}")
-
-        # Persiapkan Caption
-        title = (data.get("title") or "Download").strip()
-        uploader = data.get("uploader") or "-"
-        duration = data.get("duration") or "-"
-        caption = (
-            f"**{title}**\n\n"
-            f"**Uploader**: {uploader}\n"
-            f"**Durasi**: {duration}\n\n"
-            f"**Source URL**: `{url}`"
+    if not url_to_download:
+        await eor(
+            event,
+            "**❌ Kesalahan:** Mohon berikan URL yang ingin diunduh.\n"
+            "**Contoh:** `.dl https://contoh.com/file.mp4`"
         )
+        return
 
-        video_url = data.get("download_video_url")
-        audio_url = data.get("download_audio_url")
+    # Kirim pesan tunggu (Loading/Processing)
+    msg = await eor(event, "**⏳ Memproses URL...**")
+
+    try:
+        # Encode URL agar aman dimasukkan ke dalam query parameter
+        encoded_url = quote_plus(url_to_download)
         
-        download_tasks = []
+        # Buat URL lengkap untuk API
+        api_url = DOWNLOAD_API.format(encoded_url)
 
-        async def download_and_send(url_file, is_audio=False):
-            ext = ".mp3" if is_audio else ".mp4"
-            file_type = "Audio" if is_audio else "Video"
-            ftmp = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
+        # Gunakan httpx untuk melakukan request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(api_url, headers=HEADERS, timeout=60) 
+            # Timeout diatur 60 detik (bisa disesuaikan)
+
+        # Cek status kode
+        if response.status_code != 200:
+            await asst.send_message(
+                event.chat_id,
+                f"**⚠️ API Mengembalikan Kesalahan:** Status **{response.status_code}**\n"
+                f"URL API: `{api_url}`"
+            )
+            await msg.delete()
+            return
+
+        # Cek tipe konten yang dikembalikan (asumsi API mengembalikan file/data mentah)
+        # Jika API mengembalikan file/media mentah (binary), coba kirimkan langsung
+        content_type = response.headers.get('Content-Type', '')
+        
+        if 'application/json' in content_type.lower():
+            # Jika response adalah JSON (mungkin API error atau memberikan link unduhan)
+            data = response.json()
+            await asst.send_message(
+                event.chat_id,
+                "**ℹ️ API Mengembalikan JSON.**\n"
+                f"```json\n{data}```\n"
+                "Mungkin API tidak mengembalikan file secara langsung."
+            )
+        else:
+            # Asumsi ini adalah file/media yang siap diunggah
             
-            try:
-                await status_msg.edit(f"⬇️ Mendownload {file_type}...")
-                
-                # Streaming download menggunakan GET (untuk URL media hasil API)
-                async with s.stream("GET", url_file) as resp: 
-                    resp.raise_for_status()
-                    async for chunk in resp.aiter_bytes():
-                        ftmp.write(chunk)
-                ftmp.close()
-                
-                await status_msg.edit(f"⬆️ Mengunggah {file_type}...")
-                
-                # Kirim file 
-                if is_audio:
-                    await message.reply_audio(
-                        ftmp.name, 
-                        caption=caption, 
-                        supports_streaming=True,
-                        parse_mode='md'
-                    )
-                else:
-                    await message.reply_video(
-                        ftmp.name, 
-                        caption=caption, 
-                        supports_streaming=True,
-                        parse_mode='md'
-                    )
-                
-            except httpx.HTTPStatusError as e:
-                await message.reply(f"❌ Gagal mendownload {file_type}. Error {e.response.status_code}")
-            except Exception as e:
-                await message.reply(f"❌ Error saat mendownload/mengunggah {file_type}: {e}")
-            finally:
-                # Bersihkan file sementara
-                try:
-                    os.remove(ftmp.name)
-                except Exception as e:
-                    print(f"Error removing temp file: {e}")
+            # Mendapatkan nama file, jika ada di header (Content-Disposition)
+            # Fallback ke nama default
+            filename = url_to_download.split('/')[-1] or "downloaded_file"
+            
+            # Kirim file sebagai bytes
+            await asst.send_file(
+                event.chat_id,
+                file=response.content,
+                caption=f"**✅ Berhasil Diunduh!**\n"
+                        f"**Sumber:** `{url_to_download}`",
+                file_name=filename,
+                force_document=True # Kirim sebagai dokumen untuk menghindari kompresi
+            )
 
-        # Tambahkan tugas pengunduhan
-        if video_url:
-            download_tasks.append(download_and_send(video_url, is_audio=False))
-        # Hanya unduh audio jika ada dan berbeda dari video
-        if audio_url and audio_url != video_url: 
-            download_tasks.append(download_and_send(audio_url, is_audio=True))
-        
-        if not download_tasks:
-            await status_msg.edit("❌ API tidak mengembalikan URL media yang valid.")
+        # Hapus pesan tunggu
+        await msg.delete()
 
-        # Jalankan semua tugas secara bersamaan
-        if download_tasks:
-            await asyncio.gather(*download_tasks)
-        
-        # Hapus pesan status jika semua berhasil
-        try:
-            await status_msg.delete()
-        except:
-            pass
+    except httpx.TimeoutException:
+        await eor(event, "**🚨 Kesalahan:** Permintaan ke API melebihi batas waktu (Timeout).")
+    except httpx.RequestError as e:
+        await eor(event, f"**❌ Kesalahan Request:** Gagal terhubung ke API.\nDetail: `{str(e)}`")
+    except Exception as e:
+        await eor(event, f"**🛑 Kesalahan Tak Terduga:** Terjadi kesalahan saat memproses unduhan.\nDetail: `{str(e)}`")
