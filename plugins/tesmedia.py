@@ -3,8 +3,9 @@ from telethon import events
 from . import ultroid_cmd 
 import httpx, asyncio, os, tempfile, urllib.parse
 
-# Endpoint API untuk mengunduh media
-API = "http://38.92.25.205:63123/api/download?url={}"
+# PERUBAHAN: Mengganti API sesuai permintaan pengguna.
+# Diasumsikan endpoint downloader ada di root dan menerima URL dalam payload JSON.
+API = "http://38.92.25.205:63123" 
 
 @ultroid_cmd(pattern="dld ?(.*)")
 async def run(message):
@@ -20,17 +21,17 @@ async def run(message):
         if message.reply_to_message and message.reply_to_message.text:
             url = message.reply_to_message.text.strip()
         else:
-            # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+            # Menggunakan message.reply() untuk kompatibilitas framework Ultroid
             return await message.reply("Silakan berikan URL (`.dl <url>`) atau balas pesan yang berisi URL.")
     
     # Kirim pesan status awal
-    # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
+    # Menggunakan message.reply() untuk kompatibilitas framework Ultroid
     status_msg = await message.reply("⏳ Memproses permintaan ke API...")
     
     if not url:
         return await status_msg.edit("❌ Tidak ada URL ditemukan.")
 
-    encoded_url = urllib.parse.quote(url, safe="")
+    # Variabel encoded_url tidak lagi digunakan karena URL dikirim dalam payload JSON
 
     headers = {
         "User-Agent": (
@@ -45,19 +46,16 @@ async def run(message):
 
     async with httpx.AsyncClient(timeout=90, headers=headers) as s:
         try:
-            # Panggil API
-            r = await s.get(API.format(encoded_url))
+            # PERUBAHAN: Mengirim URL di JSON payload dengan key "url".
+            r = await s.post(API, json={"url": url}) 
             r.raise_for_status()
             data = r.json()
         except httpx.HTTPStatusError as e:
-            # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
             return await message.reply(f"❌ **Kesalahan Server API** (Kode {e.response.status_code}): {e.request.url}")
         except Exception as e:
-            # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
             return await message.reply(f"❌ **Kesalahan Koneksi**: {e}")
 
         if data.get("status") != "success":
-            # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
             return await message.reply(f"❌ **Gagal dari API**: {data.get('msg', data)}")
 
         # Persiapkan Caption
@@ -85,7 +83,8 @@ async def run(message):
                 await status_msg.edit(f"⬇️ Mendownload {file_type}...")
                 
                 # Streaming download
-                async with s.stream("GET", url_file) as resp:
+                # Catatan: URL download_video_url / download_audio_url diunduh menggunakan GET
+                async with s.stream("GET", url_file) as resp: 
                     resp.raise_for_status()
                     async for chunk in resp.aiter_bytes():
                         ftmp.write(chunk)
@@ -93,7 +92,7 @@ async def run(message):
                 
                 await status_msg.edit(f"⬆️ Mengunggah {file_type}...")
                 
-                # Kirim file (asumsi reply_audio/reply_video didukung framework Ultroid)
+                # Kirim file 
                 if is_audio:
                     await message.reply_audio(
                         ftmp.name, 
@@ -110,10 +109,8 @@ async def run(message):
                     )
                 
             except httpx.HTTPStatusError as e:
-                # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
                 await message.reply(f"❌ Gagal mendownload {file_type}. Error {e.response.status_code}")
             except Exception as e:
-                # FIX: Mengganti message.reply_text() dengan message.reply() untuk teks
                 await message.reply(f"❌ Error saat mendownload/mengunggah {file_type}: {e}")
             finally:
                 # Bersihkan file sementara
