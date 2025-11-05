@@ -333,9 +333,6 @@ async def bluedevilsnake(snake):
 async def bluedevilded(cat):
     await eor(cat, M)
 
-@ultroid_cmd(pattern=r"bye")
-async def bluedevilbye(e):
-    await eor(e, N)
 
 @ultroid_cmd(pattern=r"shitos")
 async def bluedevilshitos(e):
@@ -344,6 +341,33 @@ async def bluedevilshitos(e):
 @ultroid_cmd(pattern=r"dislike")
 async def bluedevildislike(e):
     await eor(e, P)
+
+
+RANRES = [
+    "Jaga hati ya 💖",
+    "Sampai jumpa, cintaku 🥰",
+    "Dadah. Kamu kurindukan. ✨",
+    "Oke, I love you ♥️",
+    "Sampai nanti, Sayang.",
+    "Bye. Aku di sini 🤗",
+]
+
+@ultroid_cmd(pattern=r"(?i)bye")
+async def bluedevilbye(e):
+    response_msg = random.choice(RANRES)
+    await eor(e, response_msg)
+    
+RANJAROM = [
+    "dalem, ada apa sayang? 💖",
+    "dalem 🥰",
+    "dalem kesayanganku!  🤗",
+    "dalem, kenapa cintaku. ♥️",
+    ]
+
+@ultroid_cmd(pattern=r"(?i)jiyo|mas|jiyoo")
+async def bluedevilbye(e):
+    response_msg = random.choice(RANJAROM)
+    await eor(e, response_msg) 
 
 @ultroid_cmd(pattern="stupid$")
 async def snku(ult):
@@ -1658,4 +1682,5 @@ async def payf(e):
         paytext * 1,
     )
     await eor(e, pay)
+
 
