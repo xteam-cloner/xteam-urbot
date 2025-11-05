@@ -1,5 +1,6 @@
 import asyncio
 import random
+from random import choice
 from . import *
 from collections import deque
 
@@ -1685,6 +1686,7 @@ async def payf(e):
         paytext * 1,
     )
     await eor(e, pay)
+
 
 
 
