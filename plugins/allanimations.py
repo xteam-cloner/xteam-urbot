@@ -370,7 +370,7 @@ RANJAROM = [
 ]
 
 
-@ultroid_cmd(pattern="(Jiyo|jiyo|mas)")
+@ultroid_cmd(pattern="(?i)(Jiyo|mas)")
 async def evilby(e):
     response_msg = random.choice(RANJAROM)
     await eor(e, response_msg)
@@ -1688,6 +1688,7 @@ async def payf(e):
         paytext * 1,
     )
     await eor(e, pay)
+
 
 
 
