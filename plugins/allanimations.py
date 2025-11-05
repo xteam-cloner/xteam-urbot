@@ -370,15 +370,10 @@ RANJAROM = [
 ]
 
 
-@ultroid_cmd(pattern="(jiyo|mas|JIYO)")
-async def ranjarom_handler(e):
-    response_msg = "Dalem sayangku 🥰"    
-    try:
-        response_msg = random.choice(RANJAROM)
-        await e.reply(response_msg)      
-    except Exception as ex:
-        await e.reply("Dalem sayangku 🥰")
-                         
+@ultroid_cmd(pattern="(Jiyo|jiyo|mas)")
+async def evilby(e):
+    response_msg = random.choice(RANJAROM)
+    await eor(e, response_msg)
 
 @ultroid_cmd(pattern="stupid$")
 async def snku(ult):
@@ -1693,6 +1688,7 @@ async def payf(e):
         paytext * 1,
     )
     await eor(e, pay)
+
 
 
 
