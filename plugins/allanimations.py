@@ -353,25 +353,32 @@ RANRES = [
     "Bye. Aku di sini 🤗",
 ]
 
-@ultroid_cmd(pattern=r"([bB][yY][eE])(?: |$)")
+@ultroid_cmd(pattern="(Bye|bye|ILOYO)")
 async def bluedevilbye(e):
     response_msg = random.choice(RANRES)
     await eor(e, response_msg)
     
     
+    
+from ultroid import ultroid_cmd # Uncomment jika diperlukan impor eksplisit
+
 RANJAROM = [
     "dalem, ada apa sayang? 💖",
     "dalem 🥰",
-    "dalem kesayanganku!  🤗",
+    "dalem kesayanganku! 🤗",
     "dalem, kenapa cintaku. ♥️",
-    ]
+]
 
-# Pastikan semua opsi (jiyo, mas, jiyoo) terlingkup dalam grup dengan awalan :
-@ultroid_cmd(pattern=r":((?:[jJ][iI][yY][oO])|(?:[mM][aA][sS])|(?:[jJ][iI][yY][oO][oO]))")
-async def masji(e):
-    # random.choice dan eor adalah benar
-    response_msg = random.choice(RANJAROM)
-    await eor(e, response_msg)
+
+@ultroid_cmd(pattern="(jiyo|mas|JIYO)")
+async def ranjarom_handler(e):
+    response_msg = "Dalem sayangku 🥰"    
+    try:
+        response_msg = random.choice(RANJAROM)
+        await e.reply(response_msg)      
+    except Exception as ex:
+        await e.reply("Dalem sayangku 🥰")
+                         
 
 @ultroid_cmd(pattern="stupid$")
 async def snku(ult):
@@ -1686,6 +1693,7 @@ async def payf(e):
         paytext * 1,
     )
     await eor(e, pay)
+
 
 
 
