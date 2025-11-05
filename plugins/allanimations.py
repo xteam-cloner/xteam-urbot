@@ -352,7 +352,7 @@ RANRES = [
     "Bye. Aku di sini 🤗",
 ]
 
-@ultroid_cmd(pattern=r"(?i)bye")
+@ultroid_cmd(pattern=r"(?i)::bye")
 async def bluedevilbye(e):
     response_msg = random.choice(RANRES)
     await eor(e, response_msg)
@@ -364,8 +364,8 @@ RANJAROM = [
     "dalem, kenapa cintaku. ♥️",
     ]
 
-@ultroid_cmd(pattern=r"(?i)jiyo|mas|jiyoo")
-async def bluedevilbye(e):
+@ultroid_cmd(pattern=r"(?i)::jiyo|mas|jiyoo")
+async def masji(e):
     response_msg = random.choice(RANJAROM)
     await eor(e, response_msg) 
 
@@ -1682,5 +1682,6 @@ async def payf(e):
         paytext * 1,
     )
     await eor(e, pay)
+
 
 
