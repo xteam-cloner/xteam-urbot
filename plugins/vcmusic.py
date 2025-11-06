@@ -226,13 +226,13 @@ class VCManager:
                 api_hash = self.client.api_hash
                 session_string = self.client.session.save() # Sesi Telethon
                 
-                # Inisialisasi Klien Pyrogram. Menggunakan StringSession Telethon (t_session)
-                # seringkali berfungsi di Pyrogram untuk otentikasi.
+                # Inisialisasi Klien Pyrogram. Menggunakan StringSession Telethon.
+                # PERBAIKAN: Nama sesi (str(api_id)) harus menjadi argumen posisional pertama.
                 self.pyro_client = Client(
-                    session_name=str(api_id),
+                    str(api_id),  # <--- KODE DIPERBAIKI DI SINI
                     api_id=api_id,
                     api_hash=api_hash,
-                    session_string=session_string, # Coba gunakan sesi Telethon string
+                    session_string=session_string, 
                     in_memory=True
                 )
                 
@@ -472,4 +472,4 @@ async def vc_volume(e: Message):
         return await e.eor("Give a number 0-200.")
     _manager(e).state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
-    
+            
