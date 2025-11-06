@@ -1,4 +1,20 @@
-# (Kode header, impor, Queue/State, dan Resolver tetap sama seperti sebelumnya)
+# Ultroid VC Music Plugin using PyTgCalls + Bitflow/yt-dlp resolver
+# Drop this file into your Ultroid plugins folder as `vc_music.py`.
+#
+# Requirements (install globally or in venv used by Ultroid):
+#   pip install pyrogram tgshell pytgcalls yt-dlp httpx youtubesearchpython
+#
+# Commands (send from your user account):
+#   .vcjoin                      — init VC context (stream starts on first play)
+#   .vcleave                     — leave VC & clear state for this chat
+#   .vcplay <url|query>|(reply)  — download (via API/yt-dlp) & play audio
+#   .vcpause / .vcresume         — pause/resume stream
+#   .vcskip                      — skip current track
+#   .vcstop                      — stop playback & clear queue
+#   .vcnp                        — show now playing
+#   .vcqueue                     — show upcoming queue
+#   .vcvol <0-200>               — set volume (applies to next track)
+
 
 from __future__ import annotations
 
@@ -11,47 +27,52 @@ from typing import Dict, Optional, Tuple
 
 import httpx
 
-from telethon import events
+from telethon import events, TelegramClient
 from telethon.tl.types import Message
+from telethon.sessions import StringSession
 
-# ⚠️ BLOCK IMPOR PYTGCALLS YANG DIPERBARUI ⚠️
+# ⚠️ BLOCK IMPOR PYTGCALLS
 try:
     from pytgcalls import PyTgCalls
     from pytgcalls import filters as fl
     from ntgcalls import TelegramServerError
-    from pytgcalls.exceptions import NoActiveGroupCall # Exception baru
+    from pytgcalls.exceptions import NoActiveGroupCall
     from pytgcalls.types import (
-        ChatUpdate,
-        MediaStream, # Menggantikan AudioPiped
-        StreamEnded,
-        GroupCallConfig,
-        GroupCallParticipant,
-        UpdatedGroupCallParticipant,
-        AudioQuality,
+        ChatUpdate, MediaStream, StreamEnded, GroupCallConfig,
+        GroupCallParticipant, UpdatedGroupCallParticipant, AudioQuality,
         VideoQuality,
     )
-except Exception as e:
-    PyTgCalls = None  # type: ignore
-    MediaStream = None # type: ignore
-    NoActiveGroupCall = Exception # Fallback untuk tipe Exception
+except Exception:
+    PyTgCalls = None
+    MediaStream = None
+    NoActiveGroupCall = Exception
     class TelegramServerError(Exception): pass
-# ⚠️ END BLOCK IMPOR PYTGCALLS YANG DIPERBARUI ⚠️
+# ⚠️ END BLOCK IMPOR PYTGCALLS
+
+# ⚠️ BLOCK IMPOR PYROGRAM
+try:
+    from pyrogram import Client
+except Exception as e:
+    Client = None
+    # Jika gagal, pastikan pyrogram sudah terinstal
+# ⚠️ END BLOCK IMPOR PYROGRAM
+
 
 try:
     import yt_dlp
 except Exception:
-    yt_dlp = None  # type: ignore
+    yt_dlp = None
 
 try:
     from youtubesearchpython.__future__ import VideosSearch
 except Exception:
-    VideosSearch = None  # type: ignore
+    VideosSearch = None
 
 from . import ultroid_cmd
 
 YOUTUBE_REGEX = r"(?:youtube\.com|youtu\.be)"
 BITFLOW_API = "https://bitflow.in/api/youtube"
-BITFLOW_API_KEY = "youtube321bot"  # provided test key from your snippet
+BITFLOW_API_KEY = "youtube321bot"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
 # ─────────────────────────────────────────────────────────────
@@ -61,7 +82,7 @@ DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 @dataclass
 class Track:
     title: str
-    source: str  # local file path or direct stream URL
+    source: str
     requested_by: str
 
 class Queue:
@@ -85,7 +106,7 @@ class VCState:
         self.queue = Queue()
         self.now_playing: Optional[Track] = None
         self.lock = asyncio.Lock()
-        self.volume = 100  # % applied to *next* track via ffmpeg filter
+        self.volume = 100
 
 # ─────────────────────────────────────────────────────────────
 # Resolver: Bitflow API + yt-dlp
@@ -171,46 +192,57 @@ class VCManager:
     def __init__(self, client):
         if PyTgCalls is None:
             raise RuntimeError("pytgcalls is not installed. Run: pip install pytgcalls")
-        self.client = client
-        self.tgcalls = None  # Tunda inisialisasi PyTgCalls
+        if Client is None:
+            raise RuntimeError("pyrogram is not installed. Run: pip install pyrogram") # 🔑 Pengecekan Pyrogram
+
+        self.client = client # Klien Telethon Ultroid
+        self.pyro_client = None # Klien Pyrogram untuk PyTgCalls
+        self.tgcalls = None
         self.states: Dict[int, VCState] = {}
         self.started = False
         self.resolver = YouTubeResolver()
 
-        # Gunakan asyncio.create_task untuk menjalankan _on_client_ready secara asinkron
         asyncio.create_task(self._on_client_ready())
 
     async def _on_client_ready(self):
-        # 🔑 PERUBAHAN BARU: Memastikan koneksi Telethon secara eksplisit
-        if not self.client.is_connected():
-            print("Telethon client not yet connected. Attempting to connect...")
-            try:
-                # Coba start ulang klien (Ultroid seharusnya sudah melakukannya)
-                await self.client.start()
-            except Exception as e:
-                print(f"Failed to explicitly start client: {e}")
-                return
-
-        # Loop pengecekan koneksi yang lebih andal
+        # 1. Pastikan klien Telethon Ultroid terhubung penuh
         max_retries = 10
         for i in range(max_retries):
             try:
-                # Cek koneksi dengan get_me()
                 await self.client.get_me() 
-                break # Keluar dari loop jika berhasil mendapatkan info klien
-            except Exception as e:
-                print(f"Telethon client not fully ready (Attempt {i+1}/{max_retries}). Waiting...")
-                await asyncio.sleep(3) # Tunggu lebih lama: 3 detik
+                break
+            except Exception:
+                await asyncio.sleep(3) 
         else:
-            print("Failed to ensure Telethon client readiness after multiple attempts.")
+            print("Failed to ensure Telethon client readiness. Cannot proceed.")
             return
 
         if not self.started:
             try:
-                # Inisialisasi PyTgCalls ketika klien sudah siap
-                self.tgcalls = PyTgCalls(self.client) 
+                # 2. 🔑 PERUBAHAN UTAMA: Buat Klien Pyrogram dari Kredensial Telethon
                 
-                # Daftarkan handler on_stream_end setelah tgcalls dibuat
+                # Dapatkan kredensial dari klien Telethon yang sudah login
+                api_id = self.client.api_id
+                api_hash = self.client.api_hash
+                session_string = self.client.session.save() # Sesi Telethon
+                
+                # Inisialisasi Klien Pyrogram. Menggunakan StringSession Telethon (t_session)
+                # seringkali berfungsi di Pyrogram untuk otentikasi.
+                self.pyro_client = Client(
+                    session_name=str(api_id),
+                    api_id=api_id,
+                    api_hash=api_hash,
+                    session_string=session_string, # Coba gunakan sesi Telethon string
+                    in_memory=True
+                )
+                
+                # Koneksikan klien Pyrogram secara eksplisit
+                await self.pyro_client.start()
+
+                # 3. Meneruskan klien Pyrogram ke PyTgCalls
+                self.tgcalls = PyTgCalls(self.pyro_client) 
+                
+                # Daftarkan handler on_stream_end
                 @self.tgcalls.on_stream_end()
                 async def on_end(_, update):
                     chat_id = update.chat_id
@@ -218,9 +250,11 @@ class VCManager:
                 
                 await self.tgcalls.start()
                 self.started = True
-                print("PyTgCalls successfully started.")
+                print("PyTgCalls successfully started using Pyrogram client.")
+                
             except Exception as e:
-                print(f"Failed to start PyTgCalls: {e}")
+                # Jika masih gagal, mungkin ada masalah dengan sesi atau versi library
+                print(f"Failed to start PyTgCalls (using Pyrogram): {e}")
                 self.tgcalls = None
 
     def state(self, chat_id: int) -> VCState:
@@ -438,4 +472,4 @@ async def vc_volume(e: Message):
         return await e.eor("Give a number 0-200.")
     _manager(e).state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
-            
+    
