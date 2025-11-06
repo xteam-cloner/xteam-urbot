@@ -479,12 +479,12 @@ from telethon import Button
 # Asumsikan semua impor Ultroid lainnya sudah ada
 # Pastikan fungsi 'time_formatter', 'udB', 'OWNER_ID', dan 'start_time' tersedia.
 
-start_time = time.time() - 3600
+#start_time = time.time() - 3600
 
 def ping_buttons():
     # Mengganti tombol refresh dengan tombol tutup/hapus
     #close_data = "closeit" 
-    return [[Button.inline("❌ Tutup", data="closeit")]]
+    return [[Button.inline("❌", data="closeit")]]
 
 async def get_ping_message_and_buttons(client, latency_ms=None):
     uptime = time_formatter((time.time() - start_time) * 1000)
@@ -536,6 +536,6 @@ async def closet(lol):
     try:
         # Menghapus pesan inline
         await lol.delete()
-    except Exception:
+    #except Exception:
         # Memberi tahu pengguna jika pesan terlalu lama untuk dihapus
-        await lol.answer("MESSAGE_TOO_OLD", alert=True)
+        #await lol.answer("MESSAGE_TOO_OLD", alert=True)
