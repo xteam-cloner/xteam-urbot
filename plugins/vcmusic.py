@@ -219,24 +219,23 @@ class VCManager:
 
         if not self.started:
             try:
-                # 2. 🔑 PERUBAHAN UTAMA: Buat Klien Pyrogram dari Kredensial Telethon
+                # 2. 🔑 PERBAIKAN: Buat Klien Pyrogram terpisah menggunakan file sesi Pyrogram.
+                # String sesi Telethon TIDAK kompatibel.
                 
                 # Dapatkan kredensial dari klien Telethon yang sudah login
                 api_id = self.client.api_id
                 api_hash = self.client.api_hash
-                session_string = self.client.session.save() # Sesi Telethon
                 
-                # Inisialisasi Klien Pyrogram. Menggunakan StringSession Telethon.
-                # PERBAIKAN: Nama sesi (str(api_id)) harus menjadi argumen posisional pertama.
+                # Inisialisasi Klien Pyrogram baru. 
+                # Pyrogram akan membuat/menggunakan file sesi lokal bernama 'ultroid_vc_music.session'.
                 self.pyro_client = Client(
-                    str(api_id),  # <--- KODE DIPERBAIKI DI SINI
+                    "ultroid_vc_music", # Nama sesi Pyrogram (argumen posisional pertama)
                     api_id=api_id,
                     api_hash=api_hash,
-                    session_string=session_string, 
-                    in_memory=True
+                    # session_string dan in_memory dihilangkan
                 )
                 
-                # Koneksikan klien Pyrogram secara eksplisit
+                # Koneksikan klien Pyrogram secara eksplisit (Ini akan melakukan login/load sesi)
                 await self.pyro_client.start()
 
                 # 3. Meneruskan klien Pyrogram ke PyTgCalls
@@ -472,4 +471,4 @@ async def vc_volume(e: Message):
         return await e.eor("Give a number 0-200.")
     _manager(e).state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
-            
+    
