@@ -1,24 +1,4 @@
-# Ultroid VC Music Plugin using PyTgCalls + Bitflow/yt-dlp resolver
-# Drop this file into your Ultroid plugins folder as `vc_music.py`.
-#
-# Requirements (install globally or in venv used by Ultroid):
-#   pip install pytgcalls yt-dlp httpx youtubesearchpython ntgcalls
-#
-# Commands (send from your user account):
-#   .vcjoin                      — init VC context (stream starts on first play)
-#   .vcleave                     — leave VC & clear state for this chat
-#   .vcplay <url|query>|(reply)  — download (via API/yt-dlp) & play audio
-#   .vcpause / .vcresume         — pause/resume stream
-#   .vcskip                      — skip current track
-#   .vcstop                      — stop playback & clear queue
-#   .vcnp                        — show now playing
-#   .vcqueue                     — show upcoming queue
-#   .vcvol <0-200>               — set volume (applies to next track)
-#
-# Notes
-# • Prefers fetching a *local audio file path* using Bitflow API + yt-dlp; falls back to direct yt-dlp URL stream.
-# • Uses per-chat state (queue/now_playing/volume).
-# • Works alongside your existing `.startvc`, `.stopvc`, `.vctitle`, `.vcinvite` Ultroid plugins.
+# (Kode header dan impor tetap sama)
 
 from __future__ import annotations
 
@@ -51,7 +31,6 @@ try:
         VideoQuality,
     )
 except Exception as e:
-    # Ini akan menangkap kegagalan impor PyTgCalls atau ntgcalls
     PyTgCalls = None  # type: ignore
     MediaStream = None # type: ignore
     NoActiveGroupCall = Exception # Fallback untuk tipe Exception
@@ -76,7 +55,7 @@ BITFLOW_API_KEY = "youtube321bot"  # provided test key from your snippet
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
 # ─────────────────────────────────────────────────────────────
-# Queue/State
+# Queue/State (Tidak ada perubahan di sini)
 # ─────────────────────────────────────────────────────────────
 
 @dataclass
@@ -109,7 +88,7 @@ class VCState:
         self.volume = 100  # % applied to *next* track via ffmpeg filter
 
 # ─────────────────────────────────────────────────────────────
-# Resolver: Bitflow API + yt-dlp
+# Resolver: Bitflow API + yt-dlp (Tidak ada perubahan di sini)
 # ─────────────────────────────────────────────────────────────
 
 class YouTubeResolver:
@@ -131,7 +110,6 @@ class YouTubeResolver:
                 r = await cli.get(BITFLOW_API, params=params)
             if r.status_code == 200:
                 data = r.json()
-                # Expected keys: status, url, videoid, ext ...
                 if isinstance(data, dict) and data.get("status") in ("ok", True):
                     return data
         except Exception:
@@ -139,21 +117,13 @@ class YouTubeResolver:
         return None
 
     async def _search_to_url(self, query: str) -> str:
-        # If non-URL, use yt-dlp 'ytsearch1' to resolve a playable URL quickly.
         if re.search(r"^https?://", query):
             return query
-        # Fallbacks: prefer yt-dlp built-in search over extra dependency if VideosSearch is missing
         q = f"ytsearch1:{query.strip()}"
         return q
 
     async def download_audio_to_path(self, query_or_url: str) -> Tuple[str, bool]:
-        """Return (path_or_url, is_local)
-        Tries Bitflow to get a stable downloadable URL and saves with yt-dlp.
-        Falls back to yt-dlp direct stream URL if download fails.
-        """
         target = await self._search_to_url(query_or_url)
-
-        # Try Bitflow for direct audio/video URL meta
         bf = await self._bitflow(target, want_video=False)
         if bf and bf.get("url") and bf.get("videoid"):
             filename = os.path.join(DOWNLOAD_DIR, f"{bf['videoid']}.{bf.get('ext','m4a')}")
@@ -173,8 +143,6 @@ class YouTubeResolver:
                 await loop.run_in_executor(None, _dl)
             return filename, True
 
-        # Fallback: try to resolve a direct audio URL (no download)
-        # This uses external yt-dlp call to get a streamable URL
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp", "-g", "-f", "bestaudio/best", target,
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -184,12 +152,10 @@ class YouTubeResolver:
         if url:
             return url, False
 
-        # If everything fails, raise
         err = (stderr or b"unknown error").decode()
         raise RuntimeError(f"Failed to resolve audio: {err}")
 
     async def extract_title(self, query_or_url: str) -> str:
-        # Lightweight title fetch using yt-dlp metadata (no download)
         opts = {"quiet": True, "skip_download": True}
         with yt_dlp.YoutubeDL(opts) as y:
             info = y.extract_info(await self._search_to_url(query_or_url), download=False)
@@ -211,16 +177,28 @@ class VCManager:
         self.started = False
         self.resolver = YouTubeResolver()
 
-        # 🔑 PERBAIKAN: Gunakan asyncio.create_task untuk menjalankan _on_client_ready secara asinkron
-        # Ini meniru event ClientReady yang salah tanpa memblokir
+        # Gunakan asyncio.create_task untuk menjalankan _on_client_ready secara asinkron
         asyncio.create_task(self._on_client_ready())
 
     async def _on_client_ready(self):
-        # 🔑 PERBAIKAN: Pastikan klien sudah terhubung, ini penting untuk PyTgCalls
-        await self.client.get_me() 
-        
+        # 🔑 PERBAIKAN UTAMA: Loop pengecekan koneksi 
+        max_retries = 10
+        for i in range(max_retries):
+            try:
+                # Cek koneksi dengan memanggil get_me()
+                await self.client.get_me() 
+                break # Keluar dari loop jika berhasil
+            except Exception as e:
+                # Jika klien belum siap, tunggu sebentar dan coba lagi
+                print(f"Telethon client not ready yet (Attempt {i+1}/{max_retries}). Waiting...")
+                await asyncio.sleep(2)
+        else:
+            print("Failed to ensure Telethon client readiness after multiple attempts.")
+            return
+
         if not self.started:
             try:
+                # Sekarang kita yakin klien sudah siap, inisialisasi PyTgCalls
                 self.tgcalls = PyTgCalls(self.client) 
                 
                 # Daftarkan handler on_stream_end setelah tgcalls dibuat
@@ -231,10 +209,12 @@ class VCManager:
                 
                 await self.tgcalls.start()
                 self.started = True
+                print("PyTgCalls successfully started.")
             except Exception as e:
-                # Menangani kasus PyTgCalls gagal start
                 print(f"Failed to start PyTgCalls: {e}")
                 self.tgcalls = None
+
+    # (Fungsi-fungsi VCManager lainnya tetap sama)
 
     def state(self, chat_id: int) -> VCState:
         if chat_id not in self.states:
@@ -261,7 +241,6 @@ class VCManager:
                 st.queue.push(track)
 
     def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> MediaStream:
-        # volume via ffmpeg filter: 100%→0 dB; 200%→+6 dB; 50%→-6 dB
         gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
         
         return MediaStream(
@@ -272,7 +251,6 @@ class VCManager:
     async def _start_stream(self, chat_id: int, track: Track):
         st = self.state(chat_id)
         st.now_playing = track
-        # Determine if path is local
         is_local = os.path.exists(track.source)
         stream = self._build_stream(track.source, st.volume, is_local)
         try:
@@ -323,7 +301,6 @@ _vc: Optional[VCManager] = None
 def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
-        # Hanya inisialisasi VCManager
         _vc = VCManager(e.client) 
     return _vc
 
@@ -454,4 +431,3 @@ async def vc_volume(e: Message):
         return await e.eor("Give a number 0-200.")
     _manager(e).state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
-        
