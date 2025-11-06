@@ -476,18 +476,21 @@ async def something(e, msg, media, button, reply=True, chat=None):
 import time
 import re
 from telethon import Button
+# Asumsikan semua impor Ultroid lainnya sudah ada
+# Pastikan fungsi 'time_formatter', 'udB', 'OWNER_ID', dan 'start_time' tersedia.
 
 start_time = time.time() - 3600
 
 def ping_buttons():
-    refresh_data = "PING_STATUS_REFRESH" 
-    return [[Button.inline("🔄 Refresh Status", data=refresh_data)]]
+    # Mengganti tombol refresh dengan tombol tutup/hapus
+    close_data = "closeit" 
+    return [[Button.inline("❌ Tutup", data=close_data)]]
 
 async def get_ping_message_and_buttons(client, latency_ms=None):
     uptime = time_formatter((time.time() - start_time) * 1000)
     
     end = latency_ms if latency_ms is not None else 50
-    ping_label = "Ping" if latency_ms is not None else "Ping (API)"
+    ping_label = "Ping"
     
     owner_entity = await client.get_entity(OWNER_ID)
     owner_name = owner_entity.first_name 
@@ -521,27 +524,18 @@ async def inline_ping_handler(ult):
         title="Bot Status", 
         text=ping_message, 
         buttons=buttons, 
-        link_preview=bool(pic) 
+        link_preview=bool(pic),
+        parse_mode="html"
     )
     
     await ult.answer([result], cache_time=0)
 
-@callback(re.compile("PING_STATUS_REFRESH"), owner=False)
-async def refresh_ping_callback(ult):
-    
-    old_message = ult.query.message
-    
-    start = time.time()
-    x = await old_message.edit("🔄 Memperbarui status...") 
-    end = round((time.time() - start) * 1000)
-    
-    ping_message, buttons = await get_ping_message_and_buttons(ult.client, latency_ms=end)
-    
-    await x.edit(
-        ping_message, 
-        parse_mode='html',
-        buttons=buttons 
-    )
-    
-    await ult.answer(f"Status berhasil diperbarui! Ping: {end}ms", cache_time=0)
-    
+# Callback untuk tombol hapus (closeit)
+@callback("closeit")
+async def closet(lol):
+    try:
+        # Menghapus pesan inline
+        await lol.delete()
+    except Exception:
+        # Memberi tahu pengguna jika pesan terlalu lama untuk dihapus
+        await lol.answer("MESSAGE_TOO_OLD", alert=True)
