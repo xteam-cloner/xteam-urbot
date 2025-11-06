@@ -471,68 +471,72 @@ async def something(e, msg, media, button, reply=True, chat=None):
         LOGS.exception(er)
 
 
+#--------------------------------------
 
-start_time = time.time() - 3600 
+start_time = time.time() - 3600
 
-# --- FUNGSI page_num YANG DIPERBAIKI (Mengembalikan objek Button.inline) ---
-def page_num(count, key):
-    """
-    Mengembalikan daftar Button.inline Telethon yang valid.
-    Callback data harus di-encode ke bytes.
-    """
-    # Menggunakan waktu saat ini agar data callback unik (untuk 'refresh')
-    refresh_data = f"refresh_ping__{time.time()}".encode("utf-8")
-    
-    return [
-        [Button.inline("🔄 Refresh Status", data=refresh_data)]
-    ]
+def page_num(key):
+    refresh_data = "PINGREFRESH".encode("utf-8") 
+    return [[Button.inline("🔄 Refresh Status", data=refresh_data)]]
 
-# --- INLINE PING HANDLER ---
-@in_pattern("ping", owner=False) 
-async def inline_ping_handler(ult):
-    # --- Pengukuran Uptime & Simulasi Ping ---
-    end = 50 # Nilai ping simulasi/default untuk inline
+async def get_ping_message_and_buttons(client, latency_ms=None):
     uptime = time_formatter((time.time() - start_time) * 1000)
     
-    # --- Logika Role & Emoji ---
-    user_id = OWNER_ID 
-    client = ult.client
+    end = latency_ms if latency_ms is not None else 50
+    ping_label = "Ping" if latency_ms is not None else "Ping (API)"
+    
     owner_entity = await client.get_entity(OWNER_ID)
     owner_name = owner_entity.first_name 
-    pic = udB.get_key("PING_PIC")
     
-    # Ambil emoji dari DB atau gunakan default
     emoji_ping_html = (str(udB.get_key("EMOJI_PING")) if udB.get_key("EMOJI_PING") else "🏓") + " "
     emoji_uptime_html = (str(udB.get_key("EMOJI_UPTIME")) if udB.get_key("EMOJI_UPTIME") else "⏰") + " "
     emoji_owner_html = (str(udB.get_key("EMOJI_OWNER")) if udB.get_key("EMOJI_OWNER") else "👑") + " "
     
     bot_header_text = "<b><a href='https://github.com/xteam-cloner/xteam-urbot'>𖤓⋆xᴛᴇᴀᴍ ᴜʀʙᴏᴛ⋆𖤓</a></b>" 
-    
     owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
-    user_role = "OWNER"
-    display_name = f"{user_role} : {owner_html_mention}" 
-
-    # --- Pembentukan Pesan (TEXT) ---
-    key = "Ping"
+    display_name = f"OWNER : {owner_html_mention}" 
+    
     ping_message = f"""
 <blockquote>
 <b>{bot_header_text}</b></blockquote>
-<blockquote>{emoji_ping_html} Ping : {end}ms (API)
+<blockquote>{emoji_ping_html} {ping_label} : {end}ms
 {emoji_uptime_html} Uptime : {uptime}
 {emoji_owner_html} {display_name}
 </blockquote>
 """
     
-    # --- Membangun dan Menjawab Inline Result ---
-    # Memanggil page_num yang sudah diperbaiki
-    buttons = page_num(0, key) 
+    return ping_message, page_num("Ping")
+
+@in_pattern("ping", owner=False) 
+async def inline_ping_handler(ult):
+    
+    ping_message, buttons = await get_ping_message_and_buttons(ult.client)
+    pic = udB.get_key("PING_PIC")
         
     result = await ult.builder.article(
-        title="Bot Status", # Judul yang muncul di hasil pencarian Inline
+        title="Bot Status", 
         text=ping_message, 
-        buttons=buttons, # Menggunakan objek Button yang valid
+        buttons=buttons, 
         link_preview=bool(pic) 
     )
     
-    # Mengirim hasil ke Telegram
     await ult.answer([result], cache_time=0)
+
+@callback("PINGREFRESH", owner=False)
+async def refresh_ping_callback(ult):
+    
+    old_message = ult.query.message
+    
+    start = time.time()
+    x = await old_message.edit("🔄 Memperbarui status...") 
+    end = round((time.time() - start) * 1000)
+    
+    ping_message, buttons = await get_ping_message_and_buttons(ult.client, latency_ms=end)
+    
+    await x.edit(
+        ping_message, 
+        parse_mode='html',
+        buttons=buttons 
+    )
+    
+    await ult.answer(f"Status berhasil diperbarui! Ping: {end}ms", cache_time=0)
