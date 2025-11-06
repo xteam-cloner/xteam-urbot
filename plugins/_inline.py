@@ -470,55 +470,50 @@ async def something(e, msg, media, button, reply=True, chat=None):
     except Exception as er:
         LOGS.exception(er)
 
-from . import *
-# ASUMSI: fungsi dummy untuk page_num (sesuaikan dengan implementasi aktual Anda)
+
+
+start_time = time.time() - 3600 
+
+# --- FUNGSI page_num YANG DIPERBAIKI (Mengembalikan objek Button.inline) ---
 def page_num(count, key):
-    # Untuk ping, kita buat tombol Refresh dan Uptime info
+    """
+    Mengembalikan daftar Button.inline Telethon yang valid.
+    Callback data harus di-encode ke bytes.
+    """
+    # Menggunakan waktu saat ini agar data callback unik (untuk 'refresh')
+    refresh_data = f"refresh_ping__{time.time()}".encode("utf-8")
+    
     return [
-        [("🔄 Refresh Ping", f"refresh_ping__{time.time()}")]
-        # Tambahkan tombol lain jika diperlukan
+        [Button.inline("🔄 Refresh Status", data=refresh_data)]
     ]
 
-# Asumsi start_time sudah didefinisikan di tempat lain
-start_time = time.time() - 3600 # Contoh Uptime 1 jam
-
-# Mengganti @xteam_cmd dengan @in_pattern
+# --- INLINE PING HANDLER ---
 @in_pattern("ping", owner=False) 
 async def inline_ping_handler(ult):
-    # Catatan: Dalam Inline Handler, bot tidak memiliki latency yang diukur saat mengirim pesan.
-    # Nilai 'end' di sini akan mendekati 0. Kita bisa menggunakan nilai latency yang sudah disimpan atau simulasi.
-    
-    # --- 1. Lakukan Pengukuran Uptime & Simulasi Ping ---
-    # Karena ini Inline Query, tidak ada latency event.reply/edit, kita gunakan latency bot
-    # dari sudut pandang Telegram API (simulasi 50ms)
-    end = 50 
+    # --- Pengukuran Uptime & Simulasi Ping ---
+    end = 50 # Nilai ping simulasi/default untuk inline
     uptime = time_formatter((time.time() - start_time) * 1000)
     
-    # Kita tidak punya event.sender_id di sini, kita gunakan OWNER_ID untuk role display
+    # --- Logika Role & Emoji ---
     user_id = OWNER_ID 
-
-    # --- 2. Logika Role & Emoji (Dipertahankan) ---
-    client = ult.client # Ambil client dari ult
+    client = ult.client
     owner_entity = await client.get_entity(OWNER_ID)
     owner_name = owner_entity.first_name 
-    
     pic = udB.get_key("PING_PIC")
     
+    # Ambil emoji dari DB atau gunakan default
     emoji_ping_html = (str(udB.get_key("EMOJI_PING")) if udB.get_key("EMOJI_PING") else "🏓") + " "
     emoji_uptime_html = (str(udB.get_key("EMOJI_UPTIME")) if udB.get_key("EMOJI_UPTIME") else "⏰") + " "
     emoji_owner_html = (str(udB.get_key("EMOJI_OWNER")) if udB.get_key("EMOJI_OWNER") else "👑") + " "
     
     bot_header_text = "<b><a href='https://github.com/xteam-cloner/xteam-urbot'>𖤓⋆xᴛᴇᴀᴍ ᴜʀʙᴏᴛ⋆𖤓</a></b>" 
     
-    # Untuk tujuan Inline Query, kita fokus pada tampilan Owner
     owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
     user_role = "OWNER"
     display_name = f"{user_role} : {owner_html_mention}" 
 
-    # --- 3. Pembentukan Pesan (TEXT) ---
-    key = "Ping" # Key untuk page_num
-    
-    # Gunakan format blockquote dan HTML
+    # --- Pembentukan Pesan (TEXT) ---
+    key = "Ping"
     ping_message = f"""
 <blockquote>
 <b>{bot_header_text}</b></blockquote>
@@ -528,12 +523,15 @@ async def inline_ping_handler(ult):
 </blockquote>
 """
     
-    # --- 4. Membangun dan Menjawab Inline Result (Meniru Nomer 1) ---
+    # --- Membangun dan Menjawab Inline Result ---
+    # Memanggil page_num yang sudah diperbaiki
+    buttons = page_num(0, key) 
+        
     result = await ult.builder.article(
         title="Bot Status", # Judul yang muncul di hasil pencarian Inline
         text=ping_message, 
-        buttons=page_num(0, key), # Tambahkan tombol inline
-        link_preview=bool(pic) # Tampilkan link preview jika ada gambar
+        buttons=buttons, # Menggunakan objek Button yang valid
+        link_preview=bool(pic) 
     )
     
     # Mengirim hasil ke Telegram
