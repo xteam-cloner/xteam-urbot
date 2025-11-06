@@ -120,6 +120,7 @@ async def inline_handler(ult):
         len(HELP.get("Official", [])),
         len(HELP.get("Addons", [])),
         len(key),
+        PREFIX,
     )
     result = await ult.builder.article(
         title="Menu Help", text=text, buttons=page_num(count, key)
