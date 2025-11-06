@@ -112,7 +112,7 @@ async def inline_handler(event):
     await event.answer([result], private=True, cache_time=300, gallery=True)
     
 
-@in_pattern("help", owner=False)
+@in_pattern("helper", owner=False)
 async def inline_handler(ult):
     key = "Official"
     count = 0
@@ -127,6 +127,28 @@ async def inline_handler(ult):
     )
     await ult.answer([result], cache_time=0)
 
+@in_pattern("help", owner=False)
+async def inline_handler(ult):
+    key = "Official"
+    count = 0
+    
+    # HITUNG TOTAL MODULES (Optional, tapi lebih akurat daripada 0)
+    official_count = len(HELP.get("Official", []))
+    addon_count = len(HELP.get("Addons", []))
+    total_modules = official_count + addon_count
+    
+    # GANTI ARGUMEN DI SINI! 
+    # HNDLR menggantikan len(HELP.get("Official", []))
+    # total_modules menggantikan len(HELP.get("Addons", []))
+    text = get_string("inline_4", key).format(
+        HNDLR,              # Mengisi "❍ Prefix : {}"
+        total_modules,      # Mengisi "❍ Total Modules ~ {}"
+    )
+    
+    result = await ult.builder.article(
+        title="Menu Help", text=text, buttons=page_num(count, key)
+    )
+    await ult.answer([result], cache_time=0)
 
 
 @in_pattern("pasta", owner=True)
