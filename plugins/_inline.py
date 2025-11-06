@@ -39,6 +39,7 @@ from ._help import _main_help_menu
 helps = get_string("inline_1")
 
 add_ons = udB.get_key("ADDONS")
+PREFIX = udB.get_key("HNDLR")
 
 zhelps = get_string("inline_3") if add_ons is False else get_string("inline_2")
 PLUGINS = HELP.get("Official", [])
@@ -92,6 +93,7 @@ async def inline_handler(event):
         z.extend(x)
     text = get_string("inline_4").format(
         OWNER_NAME,
+        PREFIX,
         len(HELP.get("Official", [])),
         len(HELP.get("Addons", [])),
         len(z),
