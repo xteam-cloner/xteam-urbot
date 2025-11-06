@@ -483,8 +483,8 @@ start_time = time.time() - 3600
 
 def ping_buttons():
     # Mengganti tombol refresh dengan tombol tutup/hapus
-    close_data = "closeit" 
-    return [[Button.inline("❌ Tutup", data=close_data)]]
+    #close_data = "closeit" 
+    return [[Button.inline("❌ Tutup", data="closeit")]]
 
 async def get_ping_message_and_buttons(client, latency_ms=None):
     uptime = time_formatter((time.time() - start_time) * 1000)
