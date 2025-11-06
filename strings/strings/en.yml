@@ -141,8 +141,8 @@ autopic_5: "AUTOPIC Stopped!"
 inline_1: "**❍ 𝖒𝖆𝖘𝖙𝖊𝖗 𝖔𝖋 : {}.\n\n𝖒𝖔𝖉𝖚𝖑𝖊𝖘 ~ {}**"
 inline_2: "**❍ 𝖒𝖆𝖘𝖙𝖊𝖗 𝖔𝖋 : {}.\n\nAᴅᴅᴏɴs ~ {}**"
 inline_3: "** {}.\n\nAᴅᴅᴏɴs ~ {}\n\nDᴏ **`.setdb ADDONS True`** ᴀɴᴅ ʀᴇsᴛᴀʀᴛ ᴛᴏ ɢᴇᴛ ᴀᴅᴅᴏɴs.**"
-inline_4: "❍ 𝖕𝖗𝖊𝖋𝖎𝖝 : None\n❍ 𝖙𝖔𝖙𝖆𝖑 𝖒𝖔𝖉𝖚𝖑𝖊𝖘 ~ {}\n"
-inline_11: "**❍ 𝖕𝖗𝖊𝖋𝖎𝖝 : .\n\n❍ 𝖙𝖔𝖙𝖆𝖑 𝖒𝖔𝖉𝖚𝖑𝖊𝖘 ~ {}\n⁫\n**"
+inline_4: "❍ Prefix : {}\n❍ Total Modules ~ {}\n"
+inline_11: "**❍ Prefix : {}\n\n❍ Total Modules ~ {}\n⁫\n**"
 inline_5: "**❍**"
 inline_6: "**Voice Chat Help Menu for {}**\n**Available Commands:** `{}`\n\n@devaiu"
 inline_7: "Do .help {} to get the list of commands."
@@ -206,7 +206,7 @@ bd_8: "`Removing...`"
 bd_9: "Channel is already removed from database. "
 
 # calculator
-calc_1: "• AIU-USERBOT Inline Calculator •"
+calc_1: "• ᴜꜱᴇʀʙᴏᴛ Inline Calculator •"
 calc_2: "Open Calculator Again"
 
 # channel hacks
