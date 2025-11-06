@@ -473,26 +473,13 @@ async def something(e, msg, media, button, reply=True, chat=None):
 
 #--------------------------------------
 
-# Asumsi start_time sudah didefinisikan di global scope
 start_time = time.time() - 3600
 
-# --- FUNGSI HELPER BARU UNTUK TOMBOL PING ---
-# Fungsi ini menggantikan 'page_num' di konteks Ping
 def ping_buttons():
-    """Mengembalikan Button.inline untuk refresh dengan data callback 'PR'."""
-    # Data Callback yang pendek dan di-encode ke bytes
-    refresh_data = b"PR" 
-    
-    # Mengembalikan struktur yang sama seperti output page_num: [[Button]]
+    refresh_data = "PING_STATUS_REFRESH" 
     return [[Button.inline("🔄 Refresh Status", data=refresh_data)]]
 
-
-# --- FUNGSI HELPER UNTUK LOGIKA UTAMA (SAMA SEPERTI SEBELUMNYA) ---
 async def get_ping_message_and_buttons(client, latency_ms=None):
-    
-    # ... (Logika Uptime, Emoji, dll. Dihapus untuk fokus pada struktur) ...
-    # (Gunakan kode yang sudah Anda bersihkan sebelumnya)
-    
     uptime = time_formatter((time.time() - start_time) * 1000)
     
     end = latency_ms if latency_ms is not None else 50
@@ -518,11 +505,8 @@ async def get_ping_message_and_buttons(client, latency_ms=None):
 </blockquote>
 """
     
-    # Kembalikan pesan dan tombol PING
-    return ping_message, ping_buttons() # Menggunakan ping_buttons() baru
+    return ping_message, ping_buttons()
 
-
-# --- INLINE PING HANDLER ---
 @in_pattern("ping", owner=False) 
 async def inline_ping_handler(ult):
     
@@ -538,28 +522,21 @@ async def inline_ping_handler(ult):
     
     await ult.answer([result], cache_time=0)
 
-
-# --- CALLBACK HANDLER (Menggunakan data 'PR') ---
-@callback("PR", owner=False)
+@callback("PING_STATUS_REFRESH", owner=False)
 async def refresh_ping_callback(ult):
     
     old_message = ult.query.message
     
-    # Mulai pengukuran Ping
     start = time.time()
     x = await old_message.edit("🔄 Memperbarui status...") 
     end = round((time.time() - start) * 1000)
     
-    # Panggil helper
     ping_message, buttons = await get_ping_message_and_buttons(ult.client, latency_ms=end)
     
-    # Edit pesan
     await x.edit(
         ping_message, 
         parse_mode='html',
         buttons=buttons 
     )
     
-    # Kirim notifikasi pop-up
     await ult.answer(f"Status berhasil diperbarui! Ping: {end}ms", cache_time=0)
-    
