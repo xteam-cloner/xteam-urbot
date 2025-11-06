@@ -206,22 +206,32 @@ class VCManager:
         if PyTgCalls is None:
             raise RuntimeError("pytgcalls is not installed. Run: pip install pytgcalls")
         self.client = client
-        self.tgcalls = PyTgCalls(client)
+        self.tgcalls = None  # 🔑 INI PERUBAHAN: Tunda inisialisasi PyTgCalls
         self.states: Dict[int, VCState] = {}
         self.started = False
         self.resolver = YouTubeResolver()
 
-        @self.tgcalls.on_stream_end()
-        async def on_end(_, update):
-            chat_id = update.chat_id
-            await self._on_track_end(chat_id)
-
+        # Handler ClientReady didaftarkan di __init__
         self.client.add_event_handler(self._on_client_ready, events.ClientReady())
 
     async def _on_client_ready(self, _):
+        # 🔑 INI PERUBAHAN: Inisialisasi PyTgCalls di sini (ketika klien siap)
         if not self.started:
-            await self.tgcalls.start()
-            self.started = True
+            try:
+                self.tgcalls = PyTgCalls(self.client) 
+                
+                # Daftarkan handler on_stream_end setelah tgcalls dibuat
+                @self.tgcalls.on_stream_end()
+                async def on_end(_, update):
+                    chat_id = update.chat_id
+                    await self._on_track_end(chat_id)
+                
+                await self.tgcalls.start()
+                self.started = True
+            except Exception as e:
+                # Menangani kasus PyTgCalls gagal start (walaupun jarang)
+                print(f"Failed to start PyTgCalls: {e}")
+                self.tgcalls = None
 
     def state(self, chat_id: int) -> VCState:
         if chat_id not in self.states:
@@ -229,15 +239,17 @@ class VCManager:
         return self.states[chat_id]
 
     async def leave(self, chat_id: int):
+        if self.tgcalls is None: return
         try:
             await self.tgcalls.leave_group_call(chat_id)
-        except NoActiveGroupCall: # Menggunakan Exception baru
+        except NoActiveGroupCall: 
             pass
         except Exception:
             pass
         self.states.pop(chat_id, None)
 
     async def play(self, chat_id: int, track: Track):
+        if self.tgcalls is None: raise RuntimeError("VC Manager is not initialized. Try .vcjoin again.")
         st = self.state(chat_id)
         async with st.lock:
             if st.now_playing is None:
@@ -245,7 +257,6 @@ class VCManager:
             else:
                 st.queue.push(track)
 
-    # Menggunakan MediaStream yang baru diimpor
     def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> MediaStream:
         # volume via ffmpeg filter: 100%→0 dB; 200%→+6 dB; 50%→-6 dB
         gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
@@ -253,7 +264,6 @@ class VCManager:
         return MediaStream(
             src,
             audio_parameters=["-af", f"volume={gain_db}dB"],
-            # Tidak perlu stream_type di MediaStream yang baru
         )
 
     async def _start_stream(self, chat_id: int, track: Track):
@@ -268,6 +278,7 @@ class VCManager:
             await self.tgcalls.change_stream(chat_id, stream)
 
     async def _on_track_end(self, chat_id: int):
+        if self.tgcalls is None: return
         st = self.state(chat_id)
         async with st.lock:
             nxt = st.queue.pop()
@@ -277,24 +288,27 @@ class VCManager:
                 st.now_playing = None
                 try:
                     await self.tgcalls.leave_group_call(chat_id)
-                except NoActiveGroupCall: # Menggunakan Exception baru
+                except NoActiveGroupCall: 
                     pass
                 except Exception:
                     pass
 
     async def pause(self, chat_id: int):
+        if self.tgcalls is None: return
         await self.tgcalls.pause_stream(chat_id)
 
     async def resume(self, chat_id: int):
+        if self.tgcalls is None: return
         await self.tgcalls.resume_stream(chat_id)
 
     async def stop(self, chat_id: int):
+        if self.tgcalls is None: return
         st = self.state(chat_id)
         st.queue.clear()
         st.now_playing = None
         try:
             await self.tgcalls.leave_group_call(chat_id)
-        except NoActiveGroupCall: # Menggunakan Exception baru
+        except NoActiveGroupCall: 
             pass
         except Exception:
             pass
@@ -306,7 +320,8 @@ _vc: Optional[VCManager] = None
 def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
-        _vc = VCManager(e.client)
+        # Hanya inisialisasi VCManager, PyTgCalls akan dibuat setelah ClientReady
+        _vc = VCManager(e.client) 
     return _vc
 
 # ─────────────────────────────────────────────────────────────
@@ -320,8 +335,12 @@ def _cid(e: Message) -> int:
 
 @ultroid_cmd(pattern="vcjoin$", groups_only=True)
 async def vc_join(e: Message):
-    _ = _manager(e)
-    await e.eor("VC ready. Use `.vcplay <query|url>` or reply to media.")
+    mgr = _manager(e)
+    # 🔑 Tambahkan pemeriksaan untuk memastikan PyTgCalls sudah diinisialisasi
+    if mgr.tgcalls is None:
+        return await e.eor("VC Manager sedang inisialisasi... Tunggu sebentar atau pastikan klien Ultroid Anda sudah *login* dan siap.")
+        
+    await e.eor("VC ready. Gunakan `.vcplay <query|url>` atau *reply* ke media.")
 
 
 @ultroid_cmd(pattern="vcleave$", groups_only=True)
@@ -338,20 +357,24 @@ async def vc_play(e: Message):
     chat_id = _cid(e)
     arg = (e.pattern_match.group(1) or "").strip()
 
+    mgr = _manager(e)
+    if mgr.tgcalls is None:
+        return await e.eor("VC Manager belum siap. Coba lagi atau pastikan klien sudah *login*.")
+
     # If reply to media: download and play that file directly
     if e.is_reply and not arg:
         r = await e.get_reply_message()
         if r and (r.audio or r.voice or r.video or r.document):
             msg = await e.eor("Downloading replied media…")
             path = await e.client.download_media(r, file=DOWNLOAD_DIR)
-            await _manager(e).play(chat_id, Track(title=os.path.basename(path), source=path, requested_by=str(e.sender_id)))
+            await mgr.play(chat_id, Track(title=os.path.basename(path), source=path, requested_by=str(e.sender_id)))
             return await msg.edit("Queued replied media.")
 
     if not arg:
         return await e.eor("Usage: `.vcplay <url|query>` or reply to media.")
 
     msg = await e.eor("Resolving & downloading…")
-    mgr = _manager(e)
+    
     try:
         # Resolve and prefer local audio path
         src, is_local = await mgr.resolver.download_audio_to_path(arg)
@@ -428,4 +451,3 @@ async def vc_volume(e: Message):
         return await e.eor("Give a number 0-200.")
     _manager(e).state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
-  
