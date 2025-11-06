@@ -473,6 +473,10 @@ async def something(e, msg, media, button, reply=True, chat=None):
 
 #--------------------------------------
 
+import time
+import re
+from telethon import Button
+
 start_time = time.time() - 3600
 
 def ping_buttons():
@@ -522,7 +526,7 @@ async def inline_ping_handler(ult):
     
     await ult.answer([result], cache_time=0)
 
-@callback("PING_STATUS_REFRESH", owner=False)
+@callback(re.compile("PING_STATUS_REFRESH"), owner=False)
 async def refresh_ping_callback(ult):
     
     old_message = ult.query.message
@@ -540,3 +544,4 @@ async def refresh_ping_callback(ult):
     )
     
     await ult.answer(f"Status berhasil diperbarui! Ping: {end}ms", cache_time=0)
+    
