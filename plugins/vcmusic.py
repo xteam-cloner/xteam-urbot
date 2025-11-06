@@ -1,4 +1,4 @@
-# (Kode header dan impor tetap sama)
+# (Kode header, impor, Queue/State, dan Resolver tetap sama seperti sebelumnya)
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ BITFLOW_API_KEY = "youtube321bot"  # provided test key from your snippet
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
 # ─────────────────────────────────────────────────────────────
-# Queue/State (Tidak ada perubahan di sini)
+# Queue/State
 # ─────────────────────────────────────────────────────────────
 
 @dataclass
@@ -88,7 +88,7 @@ class VCState:
         self.volume = 100  # % applied to *next* track via ffmpeg filter
 
 # ─────────────────────────────────────────────────────────────
-# Resolver: Bitflow API + yt-dlp (Tidak ada perubahan di sini)
+# Resolver: Bitflow API + yt-dlp
 # ─────────────────────────────────────────────────────────────
 
 class YouTubeResolver:
@@ -181,24 +181,33 @@ class VCManager:
         asyncio.create_task(self._on_client_ready())
 
     async def _on_client_ready(self):
-        # 🔑 PERBAIKAN UTAMA: Loop pengecekan koneksi 
+        # 🔑 PERUBAHAN BARU: Memastikan koneksi Telethon secara eksplisit
+        if not self.client.is_connected():
+            print("Telethon client not yet connected. Attempting to connect...")
+            try:
+                # Coba start ulang klien (Ultroid seharusnya sudah melakukannya)
+                await self.client.start()
+            except Exception as e:
+                print(f"Failed to explicitly start client: {e}")
+                return
+
+        # Loop pengecekan koneksi yang lebih andal
         max_retries = 10
         for i in range(max_retries):
             try:
-                # Cek koneksi dengan memanggil get_me()
+                # Cek koneksi dengan get_me()
                 await self.client.get_me() 
-                break # Keluar dari loop jika berhasil
+                break # Keluar dari loop jika berhasil mendapatkan info klien
             except Exception as e:
-                # Jika klien belum siap, tunggu sebentar dan coba lagi
-                print(f"Telethon client not ready yet (Attempt {i+1}/{max_retries}). Waiting...")
-                await asyncio.sleep(2)
+                print(f"Telethon client not fully ready (Attempt {i+1}/{max_retries}). Waiting...")
+                await asyncio.sleep(3) # Tunggu lebih lama: 3 detik
         else:
             print("Failed to ensure Telethon client readiness after multiple attempts.")
             return
 
         if not self.started:
             try:
-                # Sekarang kita yakin klien sudah siap, inisialisasi PyTgCalls
+                # Inisialisasi PyTgCalls ketika klien sudah siap
                 self.tgcalls = PyTgCalls(self.client) 
                 
                 # Daftarkan handler on_stream_end setelah tgcalls dibuat
@@ -213,8 +222,6 @@ class VCManager:
             except Exception as e:
                 print(f"Failed to start PyTgCalls: {e}")
                 self.tgcalls = None
-
-    # (Fungsi-fungsi VCManager lainnya tetap sama)
 
     def state(self, chat_id: int) -> VCState:
         if chat_id not in self.states:
@@ -431,3 +438,4 @@ async def vc_volume(e: Message):
         return await e.eor("Give a number 0-200.")
     _manager(e).state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
+            
