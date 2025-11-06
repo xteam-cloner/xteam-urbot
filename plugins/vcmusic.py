@@ -206,16 +206,19 @@ class VCManager:
         if PyTgCalls is None:
             raise RuntimeError("pytgcalls is not installed. Run: pip install pytgcalls")
         self.client = client
-        self.tgcalls = None  # 🔑 INI PERUBAHAN: Tunda inisialisasi PyTgCalls
+        self.tgcalls = None  # Tunda inisialisasi PyTgCalls
         self.states: Dict[int, VCState] = {}
         self.started = False
         self.resolver = YouTubeResolver()
 
-        # Handler ClientReady didaftarkan di __init__
-        self.client.add_event_handler(self._on_client_ready, events.ClientReady())
+        # 🔑 PERBAIKAN: Gunakan asyncio.create_task untuk menjalankan _on_client_ready secara asinkron
+        # Ini meniru event ClientReady yang salah tanpa memblokir
+        asyncio.create_task(self._on_client_ready())
 
-    async def _on_client_ready(self, _):
-        # 🔑 INI PERUBAHAN: Inisialisasi PyTgCalls di sini (ketika klien siap)
+    async def _on_client_ready(self):
+        # 🔑 PERBAIKAN: Pastikan klien sudah terhubung, ini penting untuk PyTgCalls
+        await self.client.get_me() 
+        
         if not self.started:
             try:
                 self.tgcalls = PyTgCalls(self.client) 
@@ -229,7 +232,7 @@ class VCManager:
                 await self.tgcalls.start()
                 self.started = True
             except Exception as e:
-                # Menangani kasus PyTgCalls gagal start (walaupun jarang)
+                # Menangani kasus PyTgCalls gagal start
                 print(f"Failed to start PyTgCalls: {e}")
                 self.tgcalls = None
 
@@ -320,7 +323,7 @@ _vc: Optional[VCManager] = None
 def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
-        # Hanya inisialisasi VCManager, PyTgCalls akan dibuat setelah ClientReady
+        # Hanya inisialisasi VCManager
         _vc = VCManager(e.client) 
     return _vc
 
@@ -336,9 +339,9 @@ def _cid(e: Message) -> int:
 @ultroid_cmd(pattern="vcjoin$", groups_only=True)
 async def vc_join(e: Message):
     mgr = _manager(e)
-    # 🔑 Tambahkan pemeriksaan untuk memastikan PyTgCalls sudah diinisialisasi
+    # Pemeriksaan untuk memastikan PyTgCalls sudah diinisialisasi
     if mgr.tgcalls is None:
-        return await e.eor("VC Manager sedang inisialisasi... Tunggu sebentar atau pastikan klien Ultroid Anda sudah *login* dan siap.")
+        return await e.eor("VC Manager sedang inisialisasi. Tunggu sebentar atau pastikan klien Ultroid Anda sudah *login* dan siap.")
         
     await e.eor("VC ready. Gunakan `.vcplay <query|url>` atau *reply* ke media.")
 
@@ -451,3 +454,4 @@ async def vc_volume(e: Message):
         return await e.eor("Give a number 0-200.")
     _manager(e).state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
+        
