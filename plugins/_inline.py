@@ -536,6 +536,7 @@ async def closet(lol):
     try:
         # Menghapus pesan inline
         await lol.delete()
-    #except Exception:
+    except Exception:
+        pass
         # Memberi tahu pengguna jika pesan terlalu lama untuk dihapus
         #await lol.answer("MESSAGE_TOO_OLD", alert=True)
