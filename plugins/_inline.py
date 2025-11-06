@@ -530,13 +530,13 @@ async def inline_ping_handler(ult):
     
     await ult.answer([result], cache_time=0)
 
-# Callback untuk tombol hapus (closeit)
 @callback("closeit")
 async def closet(lol):
+    # Coba hapus
     try:
-        # Menghapus pesan inline
         await lol.delete()
-    except Exception:
-        pass
-        # Memberi tahu pengguna jika pesan terlalu lama untuk dihapus
-        #await lol.answer("MESSAGE_TOO_OLD", alert=True)
+    except Exception as e:
+        # Jika gagal, tampilkan notifikasi error umum (tanpa pesan "too old" spesifik)
+        # dan cetak error-nya ke konsol untuk debugging
+        print(f"Gagal menghapus pesan: {e}") 
+        await lol.answer("Gagal menghapus pesan. Periksa izin bot.", alert=True) 
