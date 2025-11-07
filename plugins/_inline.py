@@ -58,7 +58,7 @@ SUP_BUTTONS = [
 
 PING_BUTTONS = [
     [
-        Button.inline("🏡 Modules 🏡", data="aliv"),
+        Button.inline("🏡 Modules 🏡", data="alive"),
     ],
 
 ]
@@ -592,7 +592,7 @@ async def _(event):
         
 
 
-@in_pattern("aliv", owner=False)
+@in_pattern("alive", owner=False)
 async def inline_alive_handler(ult):
     # Hitung uptime (asumsi 'start_time' global tersedia)
     try:
@@ -610,7 +610,8 @@ async def inline_alive_handler(ult):
         text=message_text, 
         buttons=PING_BUTTONS,
         title="Userbot Alive", 
-        description=f"Uptime: {uptime}", 
+        description=f"Uptime: {uptime}",
+        parse_mode="html",
     )
     
     # Menjawab inline query
