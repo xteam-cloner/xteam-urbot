@@ -543,21 +543,27 @@ async def closet(lol):
         await lol.answer("Gagal menghapus pesan. Periksa izin bot.", alert=True) 
 
 # --- Handler Perintah Chat (/ping) ---
+# Menggunakan asst.me.username seperti pada kode /help
 @ultroid_cmd(pattern="sping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     client = event.client 
     
     try:
-        # PENGGUNAAN asst.me_username (Asumsi variabel 'asst' tersedia)
-        inline_result_object = await client.inline_query(asst.me.username, "ping")
+        # 1. Lakukan inline query
+        # CATATAN: Menggunakan asst.me.username seperti di kode /help
+        results = await client.inline_query(asst.me.username, "ping")
         
-        # 1. AKSES DAFTAR HASIL YANG DIPERBAIKI (.items)
-        # Ganti inline_result_object.results dengan:
-        results = inline_result_object.items 
-        
-        # 2. Kirim hasil inline query yang pertama sebagai balasan di chat
+        # 2. Kirim hasil inline query yang pertama (indeks [0]) ke chat
         if results:
-            await event.reply(results[0])
+            # Menggunakan .click() mirip dengan /help untuk mengirimkan hasil inline
+            # event.reply_to_msg_id mungkin perlu diganti dengan event.id jika ingin membalas pesan /ping
+            await results[0].click(
+                event.chat_id, 
+                reply_to=event.id, # Menggunakan event.id untuk membalas pesan perintah
+                hide_via=True
+            )
+            # Hapus pesan perintah asli jika berhasil (opsional)
+            await event.delete() 
         else:
             await event.reply("❌ Gagal mendapatkan hasil status bot melalui inline query. Tidak ada hasil ditemukan.")
 
