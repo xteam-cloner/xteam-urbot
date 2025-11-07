@@ -34,7 +34,7 @@ from . import (
 ultroid_cmd,
 )
 from ._help import _main_help_menu
-from .alive import format_message_text
+from . import format_message_text
 # ================================================#
 
 helps = get_string("inline_1")
