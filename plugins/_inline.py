@@ -56,6 +56,12 @@ SUP_BUTTONS = [
     ],
 ]
 
+PING_BUTTONS = [
+    [
+        Button.inline("🏡 Modules 🏡", data="uh_Official_"),
+    ],
+
+]
 # --------------------BUTTONS--------------------#
 
 
@@ -530,7 +536,7 @@ async def inline_ping_handler(ult):
     result = await ult.builder.article(
         title="Bot Status", 
         text=ping_message, 
-        buttons=buttons, 
+        buttons=PING_BUTTONS, 
         link_preview=bool(pic),
         parse_mode="html"
     )
