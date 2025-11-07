@@ -12,6 +12,13 @@ from os import remove
 import resources
 from git import Repo
 from telethon import Button
+from platform import python_version as pyver
+from pyrogram import __version__ as pver
+from xteam.version import __version__
+from xteam.version import ultroid_version
+from telegram import __version__ as lver
+from telethon import __version__ as tver
+from pytgcalls import __version__ as pytver
 from telethon.tl.types import InputWebDocument, Message
 from telethon.utils import resolve_bot_file_id
 from assistant import *
