@@ -58,7 +58,7 @@ SUP_BUTTONS = [
 
 PING_BUTTONS = [
     [
-        Button.inline("🏡 Alive 🏡", data="aliv"),
+        Button.inline("🏡 Alive 🏡", data="alivee"),
     ],
 
 ]
@@ -592,28 +592,51 @@ async def _(event):
         
 
 
-@in_pattern("aliv", owner=False)
+import time
+
+# Asumsi Anda sudah mengimpor: Button, in_pattern, callback, time_formatter, format_message_text
+# Asumsi 'start_time' dan 'ALIVE_BUTTONS' global sudah terdefinisi
+
+@in_pattern("alive", owner=False)
+@callback(data="alivee", owner=False)
 async def inline_alive_handler(ult):
-    # Hitung uptime (asumsi 'start_time' global tersedia)
+    
+    # 1. Hitung Uptime
     try:
-        # Asumsi time_formatter dan start_time tersedia
-        # Pastikan time.time() dan start_time sudah diimpor/didefinisikan
+        # Pastikan time.time() dan start_time sudah didefinisikan/diimpor
         uptime = time_formatter((time.time() - start_time) * 1000) 
     except NameError:
         uptime = "N/A" 
         
     message_text = format_message_text(uptime)
+
     
-    # --- Panggilan article Disederhanakan ---
-    # Hanya menggunakan argumen dasar: text, buttons, title, description
-    result = await ult.builder.article(
-        text=message_text, 
-        buttons=ALIVE_BUTTONS,
-        title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
-        description=f"Uptime: {uptime}",
-        parse_mode="html",
-    )
-    
-    # Menjawab inline query
-    await ult.answer([result], cache_time=0)
-    
+    # 2. Pengecekan Tipe Trigger (Tombol atau Ketikan)
+    if ult.is_callback:
+        # Aksi ketika dipicu oleh CALLBACK QUERY (Tekanan Tombol)
+        
+        # Mengedit pesan yang sudah ada (Mengganti teks pesan)
+        await ult.edit_message(
+            text=message_text, 
+            buttons=ALIVE_BUTTONS,
+            parse_mode="html",
+        )
+        
+        # Menutup notifikasi loading pada tombol
+        await ult.answer(cache_time=0) 
+        
+    else:
+        # Aksi ketika dipicu oleh INLINE QUERY (Ketikan @namabot aliv)
+        
+        # Membuat hasil article
+        result = await ult.builder.article(
+            text=message_text, 
+            buttons=ALIVE_BUTTONS,
+            title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
+            description=f"Uptime: {uptime}",
+            parse_mode="html",
+        )
+        
+        # Menjawab inline query dengan hasil article
+        await ult.answer([result], cache_time=0)
+            
