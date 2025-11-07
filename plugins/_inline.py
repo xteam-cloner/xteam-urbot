@@ -482,17 +482,17 @@ import time
 def ping_buttons():
     # Mengganti tombol refresh dengan tombol tutup/hapus
     #close_data = "closeit" 
-    return [[Button.inline("❌", data="closeit")]]
+    return [[Button.inline("🏡", data="help")]]
 
 async def get_ping_message_and_buttons(client): # Parameter latency_ms dihapus
     
     # --- KODE BARU UNTUK MENGUKUR PING ---
     start_time_ping = time.time()
     await client.get_me() # Mengirim permintaan ringan ke server untuk mengukur latency
-    latency_ms = round((time.time() - start_time_ping) * 1000)
+    latency_ms = round((time.time() - start_time_ping) * 100)
     # --- AKHIR KODE PENGUKURAN PING ---
     
-    uptime = time_formatter((time.time() - start_time) * 1000)
+    uptime = time_formatter((time.time() - start_time) * 100)
     
     # end sekarang menggunakan hasil pengukuran latency_ms
     end = latency_ms # Nilai 50 default dihilangkan
