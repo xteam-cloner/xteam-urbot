@@ -548,27 +548,22 @@ async def _(event):
     client = event.client 
     
     try:
-        bot_info = await client.get_me()
-        bot_username = bot_info.username
+        # PENGHILANGAN: Menghapus bot_info = await client.get_me() dan bot_username = ...
         
-        if not bot_username:
-            return await event.reply("❌ Bot tidak memiliki username untuk menjalankan inline query.")
-        
-        # 1. Lakukan inline query
-        # results di sini adalah objek InlineResult, BUKAN list.
+        # 1. Lakukan inline query menggunakan asst.me_username (sesuai permintaan)
+        # CATATAN: Asumsi 'asst' didefinisikan di luar fungsi ini dan dapat diakses.
         inline_result_object = await client.inline_query(asst.me_username, "ping")
         
         # 2. Akses daftar hasil di dalamnya (.results)
-        # Baris ini yang diperbaiki:
         results = inline_result_object.results 
         
         # 3. Kirim hasil inline query yang pertama sebagai balasan di chat
         if results:
-            # Sekarang results adalah list, sehingga results[0] sudah benar.
             await event.reply(results[0])
         else:
             await event.reply("❌ Gagal mendapatkan hasil status bot melalui inline query. Tidak ada hasil ditemukan.")
 
     except Exception as e:
         print(f"Error saat menjalankan ping command: {e}")
+        # Menampilkan jenis dan deskripsi error agar mudah di-debug
         await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
