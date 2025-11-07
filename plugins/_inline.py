@@ -65,14 +65,14 @@ SUP_BUTTONS = [
 
 PING_BUTTONS = [
     [
-        Button.inline("🏡 Alive 🏡", data="aliv"),
+        Button.inline("🏡 Modules 🏡", data="uh_Official_"),
     ],
 
 ]
 
 ALIVE_BUTTONS = [
     [
-        Button.inline("🏡 Modules 🏡", data="uh_Official_"),
+        Button.inline("🏡 PING 🏡", data="ping"),
     ],
 
 ]
