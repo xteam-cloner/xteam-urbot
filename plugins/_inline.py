@@ -34,7 +34,7 @@ from . import (
 ultroid_cmd,
 )
 from ._help import _main_help_menu
-from . import format_message_text
+
 # ================================================#
 
 helps = get_string("inline_1")
@@ -58,7 +58,7 @@ SUP_BUTTONS = [
 
 PING_BUTTONS = [
     [
-        Button.inline("🏡 Alive 🏡", data="alivee"),
+        Button.inline("🏡 Alive 🏡", data="aliv"),
     ],
 
 ]
@@ -591,44 +591,52 @@ async def _(event):
         await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
         
 
+import time 
 
-import time
+# ASUMSI: time_formatter, start_time, ALIVE_BUTTONS, OWNER_USERNAME, 
+# OWNER_NAME, ultroid_version, ultroid_bot, __version__, pver, pyver, dan OWNER_ID 
+# sudah diimpor/didefinisikan dengan benar dan tidak menyebabkan error NoneType di tempat lain.
 
-# Asumsi Anda sudah mengimpor: Button, in_pattern, callback, time_formatter, format_message_text
-# Asumsi 'start_time' dan 'ALIVE_BUTTONS' global sudah terdefinisi
-
-@in_pattern("alive", owner=False)
-@callback(data="alivee", owner=False)
+@in_pattern("aliv", owner=False)
+@callback(data="aliv", owner=False)
 async def inline_alive_handler(ult):
     
     # 1. Hitung Uptime
     try:
-        # Pastikan time.time() dan start_time sudah didefinisikan/diimpor
+        # PENTING: time_formatter dan start_time harus diimpor/didefinisikan dengan benar
         uptime = time_formatter((time.time() - start_time) * 1000) 
-    except NameError:
+    except (NameError, TypeError): 
+        # Menangkap NameError (start_time/time_formatter tidak dikenal) 
+        # dan TypeError (time_formatter adalah None)
         uptime = "N/A" 
-        
-    message_text = format_message_text(uptime)
+    
+    # 2. DEFINISI message_text (Diperbaiki Sintaksisnya)
+    # Menggunakan f-string multiline sederhana (tanpa backslash yang tidak perlu)
+    message_text = (
+        f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n"
+        f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n"
+        f"✵ Userbot : {ultroid_version}\n"
+        f"✵ Dc Id : {ultroid_bot.dc_id}\n"
+        f"✵ Library : {__version__}\n"
+        f"✵ Uptime : {uptime}\n"
+        f"✵ Kurigram :  {pver}\n"
+        f"✵ Python : {pyver()}\n"
+        f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n"
+    ) # <-- Tanda kurung penutup sudah benar
 
     
-    # 2. Pengecekan Tipe Trigger (Tombol atau Ketikan)
+    # 3. Pengecekan Tipe Trigger
     if ult.is_callback:
-        # Aksi ketika dipicu oleh CALLBACK QUERY (Tekanan Tombol)
-        
-        # Mengedit pesan yang sudah ada (Mengganti teks pesan)
+        # Jika dipicu oleh Tekanan Tombol
         await ult.edit_message(
             text=message_text, 
             buttons=ALIVE_BUTTONS,
-            parse_mode="html",
+            parse_mode="html", 
         )
-        
-        # Menutup notifikasi loading pada tombol
         await ult.answer(cache_time=0) 
         
     else:
-        # Aksi ketika dipicu oleh INLINE QUERY (Ketikan @namabot aliv)
-        
-        # Membuat hasil article
+        # Jika dipicu oleh Inline Query (Ketikan)
         result = await ult.builder.article(
             text=message_text, 
             buttons=ALIVE_BUTTONS,
@@ -636,7 +644,5 @@ async def inline_alive_handler(ult):
             description=f"Uptime: {uptime}",
             parse_mode="html",
         )
-        
-        # Menjawab inline query dengan hasil article
         await ult.answer([result], cache_time=0)
-            
+        
