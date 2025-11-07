@@ -540,3 +540,38 @@ async def closet(lol):
         # dan cetak error-nya ke konsol untuk debugging
         print(f"Gagal menghapus pesan: {e}") 
         await lol.answer("Gagal menghapus pesan. Periksa izin bot.", alert=True) 
+
+import time
+# Asumsikan 'xteam_cmd' dan 'Button' telah diimpor dari library bot Anda.
+
+# --- Handler Perintah Chat (/ping) ---
+@xteam_cmd(pattern="sping(|x|s)$", chats=[], type=["official", "assistant"])
+async def _(event):
+    """
+    Handler untuk perintah /ping, yang memanggil hasil dari handler inline.
+    """
+    client = event.client 
+    
+    try:
+        # 1. Dapatkan entitas bot untuk mendapatkan username
+        bot_info = await client.get_me()
+        bot_username = bot_info.username
+        
+        if not bot_username:
+            return await event.reply("❌ Bot tidak memiliki username untuk menjalankan inline query.")
+        
+        # 2. Lakukan inline query ke bot itu sendiri dengan kata kunci "ping"
+        # Ini akan memicu inline_ping_handler (fungsi pembantu Anda)
+        # dan menghasilkan status bot.
+        results = await client.inline_query(bot_username, "ping")
+        
+        # 3. Kirim hasil inline query yang pertama sebagai balasan di chat
+        if results:
+            # results[0] adalah Bot Status yang diformat oleh inline_ping_handler
+            await event.reply(results[0])
+        else:
+            await event.reply("❌ Gagal mendapatkan hasil status bot melalui inline query.")
+
+    except Exception as e:
+        print(f"Error saat menjalankan ping command: {e}")
+        await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{e}`")
