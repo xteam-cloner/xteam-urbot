@@ -563,7 +563,7 @@ async def _(event):
         # 2. Lakukan inline query ke bot itu sendiri dengan kata kunci "ping"
         # Ini akan memicu inline_ping_handler (fungsi pembantu Anda)
         # dan menghasilkan status bot.
-        results = await client.inline_query(bot_username, "ping")
+        results = await client.inline_query(asst.me.username, "ping")
         
         # 3. Kirim hasil inline query yang pertama sebagai balasan di chat
         if results:
