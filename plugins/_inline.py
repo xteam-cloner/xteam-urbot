@@ -34,7 +34,7 @@ from . import (
 ultroid_cmd,
 )
 from ._help import _main_help_menu
-
+from .alive import format_message_text
 # ================================================#
 
 helps = get_string("inline_1")
@@ -58,7 +58,7 @@ SUP_BUTTONS = [
 
 PING_BUTTONS = [
     [
-        Button.inline("🏡 Modules 🏡", data="alive"),
+        Button.inline("🏡 Modules 🏡", data="aliv"),
     ],
 
 ]
@@ -591,7 +591,7 @@ async def _(event):
         await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
         
 
-@in_pattern("alive", owner=False)
+@in_pattern("aliv", owner=False)
 async def inline_alive_handler(ult):
     # Hitung uptime (asumsi 'start_time' global tersedia)
     try:
