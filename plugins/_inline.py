@@ -591,10 +591,6 @@ async def _(event):
         await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
         
 
-# Asumsi: PING_BUTTONS dan fungsi terkait sudah didefinisikan/diimpor
-# Import yang dibutuhkan (jika belum ada):
-# from telethon.tl.types import InputWebDocument 
-# import os (jika Anda ingin cek path file)
 
 @in_pattern("alive", owner=False)
 async def inline_alive_handler(ult):
@@ -621,29 +617,28 @@ async def inline_alive_handler(ult):
     else:
         pic = xdefault
 
-    # --- Solusi menggunakan InputWebDocument ---
+    # --- Solusi Gambar/URL ---
     thumb_obj = None
+    content_obj = None
+    include_media = False
+    
+    # Hanya proses gambar jika itu adalah URL publik
     if pic and pic.startswith("http"):
-        # Jika 'pic' adalah URL, buat InputWebDocument untuk thumbnail dan content
+        # Membuat TLObject yang diperlukan
         thumb_obj = InputWebDocument(pic, 0, "image/jpg", [])
         content_obj = InputWebDocument(pic, 0, "image/jpg", [])
         include_media = True
-    else:
-        # Jika 'pic' adalah path file lokal, kita tidak bisa mengirimnya via inline.
-        # Kita harus mengirim pesan teks tanpa media/thumbnail.
-        content_obj = None
-        include_media = False
         
     # Membangun artikel inline
     result = await ult.builder.article(
-        type="photo" if include_media else "text", # Tetapkan tipe sesuai ketersediaan media
+        # Hapus 'type="photo" if include_media else "text"'
         text=message_text, 
         include_media=include_media,
         buttons=PING_BUTTONS,
         title="Userbot Alive", 
         description=f"Uptime: {uptime}", 
-        # Hanya sertakan thumb dan content jika itu adalah URL
-        url=pic if pic and pic.startswith("http") else None,
+        # Hanya sertakan ini jika media ada
+        url=pic if include_media else None,
         thumb=thumb_obj,
         content=content_obj,
     )
