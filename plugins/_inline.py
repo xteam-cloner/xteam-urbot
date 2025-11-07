@@ -592,55 +592,25 @@ async def _(event):
         
 
 
-@in_pattern("alive", owner=False)
+@in_pattern("aliv", owner=False)
 async def inline_alive_handler(ult):
     # Hitung uptime (asumsi 'start_time' global tersedia)
     try:
+        # Asumsi time_formatter dan start_time tersedia
+        # Pastikan time.time() dan start_time sudah diimpor/didefinisikan
         uptime = time_formatter((time.time() - start_time) * 1000) 
     except NameError:
         uptime = "N/A" 
         
     message_text = format_message_text(uptime)
     
-    # Logika untuk menentukan gambar (pic akan berisi URL atau path lokal)
-    xpic = udB.get_key("ALIVE_PIC")
-    xnone = ["false", "0", "none"] 
-    xdefault = "resources/extras/IMG_20251027_112615_198.jpg"
-    
-    pic = None
-    if xpic and str(xpic).lower() in xnone:
-        pic = None    
-    elif xpic and str(xpic).lower() in ["true", "1"]:
-        pic = xdefault
-    elif xpic:
-        pic = xpic  
-    else:
-        pic = xdefault
-
-    # --- Solusi Gambar/URL ---
-    thumb_obj = None
-    content_obj = None
-    include_media = False
-    
-    # Hanya proses gambar jika itu adalah URL publik
-    if pic and pic.startswith("http"):
-        # Membuat TLObject yang diperlukan
-        thumb_obj = InputWebDocument(pic, 0, "image/jpg", [])
-        content_obj = InputWebDocument(pic, 0, "image/jpg", [])
-        include_media = True
-        
-    # Membangun artikel inline
+    # --- Panggilan article Disederhanakan ---
+    # Hanya menggunakan argumen dasar: text, buttons, title, description
     result = await ult.builder.article(
-        # Hapus 'type="photo" if include_media else "text"'
         text=message_text, 
-        include_media=include_media,
         buttons=PING_BUTTONS,
         title="Userbot Alive", 
         description=f"Uptime: {uptime}", 
-        # Hanya sertakan ini jika media ada
-        url=pic if include_media else None,
-        thumb=thumb_obj,
-        content=content_obj,
     )
     
     # Menjawab inline query
