@@ -58,6 +58,13 @@ SUP_BUTTONS = [
 
 PING_BUTTONS = [
     [
+        Button.inline("🏡 Modules 🏡", data="alive"),
+    ],
+
+]
+
+ALIVE_BUTTONS = [
+    [
         Button.inline("🏡 Modules 🏡", data="uh_Official_"),
     ],
 
@@ -614,7 +621,7 @@ async def inline_alive_handler(ult):
         title="Userbot Alive", 
         text=message_text, 
         description=f"Uptime: {uptime}", 
-        buttons=PING_BUTTONS, # <-- **TAMBAHAN PENTING DI SINI**
+        buttons=ALIVE_BUTTONS, # <-- **TAMBAHAN PENTING DI SINI**
         thumb=pic if pic else None
     )
     
