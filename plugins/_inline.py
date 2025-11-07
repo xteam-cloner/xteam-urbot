@@ -474,23 +474,28 @@ async def something(e, msg, media, button, reply=True, chat=None):
 
 #--------------------------------------
 
-import time
-import re
-from telethon import Button
-# Asumsikan semua impor Ultroid lainnya sudah ada
-# Pastikan fungsi 'time_formatter', 'udB', 'OWNER_ID', dan 'start_time' tersedia.
+import time 
 
-#start_time = time.time() - 3600
+# Asumsi fungsi time_formatter, udB, dan class Button sudah diimpor/didefinisikan
+# Asumsi start_time dan OWNER_ID sudah didefinisikan
 
 def ping_buttons():
     # Mengganti tombol refresh dengan tombol tutup/hapus
     #close_data = "closeit" 
     return [[Button.inline("❌", data="closeit")]]
 
-async def get_ping_message_and_buttons(client, latency_ms=None):
+async def get_ping_message_and_buttons(client): # Parameter latency_ms dihapus
+    
+    # --- KODE BARU UNTUK MENGUKUR PING ---
+    start_time_ping = time.time()
+    await client.get_me() # Mengirim permintaan ringan ke server untuk mengukur latency
+    latency_ms = round((time.time() - start_time_ping) * 1000)
+    # --- AKHIR KODE PENGUKURAN PING ---
+    
     uptime = time_formatter((time.time() - start_time) * 1000)
     
-    end = latency_ms if latency_ms is not None else 50
+    # end sekarang menggunakan hasil pengukuran latency_ms
+    end = latency_ms # Nilai 50 default dihilangkan
     ping_label = "Ping"
     
     owner_entity = await client.get_entity(OWNER_ID)
@@ -502,7 +507,7 @@ async def get_ping_message_and_buttons(client, latency_ms=None):
     
     bot_header_text = "<b><a href='https://github.com/xteam-cloner/xteam-urbot'>𖤓⋆xᴛᴇᴀᴍ ᴜʀʙᴏᴛ⋆𖤓</a></b>" 
     owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
-    display_name = f"OWNER : {owner_html_mention}" 
+    display_name = f"OWNER : {owner_html_mention} | UB" # Menambahkan '| UB' agar sesuai gambar
     
     ping_message = f"""
 <blockquote>
@@ -514,6 +519,7 @@ async def get_ping_message_and_buttons(client, latency_ms=None):
 """
     
     return ping_message, ping_buttons()
+    
 
 @in_pattern("ping", owner=False) 
 async def inline_ping_handler(ult):
