@@ -58,6 +58,17 @@ StartTime = time.time()
 #Calls = UltroidMusic
 xteam = ultroid_cmd
 
+def format_message_text(uptime):
+    return f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
+                       f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
+                       f"✵ Userbot : {ultroid_version}\n" \
+                       f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
+                       f"✵ Library : {__version__}\n" \
+                       f"✵ Uptime : {uptime}\n" \
+                       f"✵ Kurigram :  {pver}\n" \
+                       f"✵ Python : {pyver()}\n" \
+                       f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n"
+
 def inline_pic():
     INLINE_PIC = udB.get_key("INLINE_PIC")
     if INLINE_PIC is None:
