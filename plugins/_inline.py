@@ -494,11 +494,6 @@ async def something(e, msg, media, button, reply=True, chat=None):
 
 #--------------------------------------
 
-import time 
-
-# Asumsi fungsi time_formatter, udB, dan class Button sudah diimpor/didefinisikan
-# Asumsi start_time dan OWNER_ID sudah didefinisikan
-
 def ping_buttons():
     # Mengganti tombol refresh dengan tombol tutup/hapus
     #close_data = "closeit" 
@@ -539,44 +534,11 @@ async def get_ping_message_and_buttons(client): # Parameter latency_ms dihapus
 """
     
     return ping_message, ping_buttons()
-    
-
-@in_pattern("ping", owner=False) 
-async def inline_ping_handler(ult):
-    
-    ping_message, buttons = await get_ping_message_and_buttons(ult.client)
-    pic = udB.get_key("PING_PIC")
-        
-    result = await ult.builder.article(
-        title="Bot Status", 
-        text=ping_message, 
-        buttons=PING_BUTTONS, 
-        link_preview=bool(pic),
-        parse_mode="html"
-    )
-    
-    await ult.answer([result], cache_time=0)
-
-@callback("closeit")
-async def closet(lol):
-    # Coba hapus
-    try:
-        await lol.delete()
-    except Exception as e:
-        # Jika gagal, tampilkan notifikasi error umum (tanpa pesan "too old" spesifik)
-        # dan cetak error-nya ke konsol untuk debugging
-        print(f"Gagal menghapus pesan: {e}") 
-        await lol.answer("Gagal menghapus pesan. Periksa izin bot.", alert=True) 
-
-# --- Handler Perintah Chat (/ping) ---
-# Menggunakan asst.me.username seperti pada kode /help
-@ultroid_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
+#------------------------------------------------------    
+@ultroid_cmd(pattern="ping$")
 async def _(event):
-    client = event.client 
-    
+    client = event.client     
     try:
-        # 1. Lakukan inline query
-        # CATATAN: Menggunakan asst.me.username seperti di kode /help
         results = await client.inline_query(asst.me.username, "ping")
         
         # 2. Kirim hasil inline query yang pertama (indeks [0]) ke chat
@@ -596,6 +558,52 @@ async def _(event):
     except Exception as e:
         print(f"Error saat menjalankan ping command: {e}")
         await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
+        
+
+@in_pattern("ping", owner=False) 
+async def inline_ping_handler(ult):
+    
+    ping_message, buttons = await get_ping_message_and_buttons(ult.client)
+    pic = udB.get_key("PING_PIC")
+        
+    result = await ult.builder.article(
+        title="Bot Status", 
+        text=ping_message, 
+        buttons=PING_BUTTONS, 
+        link_preview=bool(pic),
+        parse_mode="html"
+    )
+    
+    await ult.answer([result], cache_time=0)
+
+
+#--------------------------------------------
+
+@ultroid_cmd(pattern="alive$")
+async def alive(event):
+    client = event.client
+    
+    # Nilai "alive" digunakan secara langsung
+    
+    try:
+        # Menggunakan "alive" untuk inline query
+        results = await client.inline_query(asst.me.username, "aliv")
+        
+        if results:
+            await results[0].click(
+                event.chat_id, 
+                reply_to=event.id, 
+                hide_via=True
+            )
+            
+            await event.delete() 
+            
+        else:
+            await event.reply(f"❌ Gagal mendapatkan status **alive** melalui inline query. Tidak ada hasil ditemukan.")
+
+    except Exception as e:
+        print(f"Error saat menjalankan alive command (inline): {e}")
+        await event.reply(f"Terjadi kesalahan saat memanggil inline **alive**: `{type(e).__name__}: {e}`")
         
 
 
@@ -625,53 +633,3 @@ async def inline_alive_query_handler(ult):
     
     # Menjawab inline query (Seperti yang Anda inginkan di kode awal)
     await ult.answer([result], cache_time=0)
-
-
-from xteam._misc._assistant import callback 
-
-# Ganti ini dengan nama file Anda, asumsikan logika formatting sudah digabungkan di sini
-@callback(data="aliv", owner=False)
-async def inline_alive_button_handler(ult):
-    
-    # Variabel inisialisasi aman
-    uptime = "N/A"
-    current_python_version = "N/A"
-    
-    # 1. Hitung Uptime & Ambil Info Sistem (Dilindungi)
-    try:
-        # Panggil pyver() dan time_formatter() di dalam try block
-        current_python_version = pyver()
-        # PENTING: Jika time_formatter adalah None, error terjadi di sini.
-        uptime = time_formatter((time.time() - start_time) * 1000) 
-    except Exception:
-        # Tangkap semua exception (TypeError, NameError, dll.)
-        uptime = "ERROR IN CODE" 
-        current_python_version = "ERROR IN CODE"
-    
-    # 2. Logika message_text
-    # Variabel yang diimpor secara kolektif (`from . import ...`) akan disetel ke string "N/A"
-    # jika inisialisasi gagal, untuk mencegah crash saat f-string dievaluasi.
-    
-    message_text = (
-        f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n"
-        f"✵ Owner : <a href='https://t.me/{getattr(ult, 'OWNER_USERNAME', 'N/A')}'>{getattr(ult, 'OWNER_NAME', 'N/A')}</a>\n"
-        f"✵ Userbot : {getattr(ult, 'ultroid_version', 'N/A')}\n"
-        f"✵ Dc Id : {getattr(ult, 'ultroid_bot', 'N/A').dc_id if hasattr(getattr(ult, 'ultroid_bot', 'N/A'), 'dc_id') else 'N/A'}\n"
-        f"✵ Library : {getattr(ult, '__version__', 'N/A')}\n"
-        f"✵ Uptime : {uptime}\n"
-        f"✵ Kurigram :  {getattr(ult, 'pver', 'N/A')}\n"
-        f"✵ Python : {current_python_version}\n"
-        f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n"
-    ) # Catatan: Penggunaan getattr(ult, 'VAR', 'N/A') disarankan jika Anda tidak mengimpornya ke namespace fungsi
-
-    
-    # 3. Mengedit pesan yang sudah ada
-    await ult.edit_message(
-        text=message_text, 
-        buttons=ALIVE_BUTTONS, 
-        parse_mode="html",
-    )
-    
-    # Menjawab callback query (untuk menghilangkan notifikasi loading)
-    await ult.answer(cache_time=0)
-    
