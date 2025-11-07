@@ -31,6 +31,7 @@ from . import (
     split_list,
     start_time,
     udB,
+ultroid_cmd,
 )
 from ._help import _main_help_menu
 
