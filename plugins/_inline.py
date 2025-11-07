@@ -482,7 +482,7 @@ import time
 def ping_buttons():
     # Mengganti tombol refresh dengan tombol tutup/hapus
     #close_data = "closeit" 
-    return [[Button.inline("🏡", data="help")]]
+    return [[Button.inline("🏡", data="ultd")]]
 
 async def get_ping_message_and_buttons(client): # Parameter latency_ms dihapus
     
