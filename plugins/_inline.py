@@ -556,7 +556,7 @@ async def closet(lol):
 
 # --- Handler Perintah Chat (/ping) ---
 # Menggunakan asst.me.username seperti pada kode /help
-@ultroid_cmd(pattern="sping(|x|s)$", chats=[], type=["official", "assistant"])
+@ultroid_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     client = event.client 
     
@@ -583,3 +583,42 @@ async def _(event):
         print(f"Error saat menjalankan ping command: {e}")
         await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
         
+
+@in_pattern("alive", owner=False)
+async def inline_alive_handler(ult):
+    # Hitung uptime (asumsi 'start_time' global tersedia)
+    try:
+        uptime = time_formatter((time.time() - start_time) * 1000)
+    except NameError:
+        uptime = "N/A (Define start_time)" 
+        
+    message_text = format_message_text(uptime)
+    
+    # Logika untuk menentukan gambar (tetap sama)
+    xpic = udB.get_key("ALIVE_PIC")
+    xnone = ["false", "0", "none"] 
+    xdefault = "resources/extras/IMG_20251027_112615_198.jpg"
+    
+    pic = None
+    if xpic and str(xpic).lower() in xnone:
+        pic = None    
+    elif xpic and str(xpic).lower() in ["true", "1"]:
+        pic = xdefault
+    elif xpic:
+        pic = xpic  
+    else:
+        pic = xdefault
+        
+    # Membangun artikel inline, sekarang menyertakan tombol
+    result = await ult.builder.article(
+        title="Userbot Alive", 
+        text=message_text, 
+        description=f"Uptime: {uptime}", 
+        buttons=PING_BUTTONS, # <-- **TAMBAHAN PENTING DI SINI**
+        thumb=pic if pic else None
+    )
+    
+    # Menjawab inline query
+    await ult.answer([result], cache_time=0)
+
+# Catatan: Pastikan Anda juga mengimpor 'Button' dari library yang sesuai (misalnya, telethon.tl.custom)
