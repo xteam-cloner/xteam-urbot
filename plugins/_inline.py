@@ -545,7 +545,7 @@ import time
 # Asumsikan 'xteam_cmd' dan 'Button' telah diimpor dari library bot Anda.
 
 # --- Handler Perintah Chat (/ping) ---
-@xteam_cmd(pattern="sping(|x|s)$", chats=[], type=["official", "assistant"])
+@ultroid_cmd(pattern="sping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     """
     Handler untuk perintah /ping, yang memanggil hasil dari handler inline.
