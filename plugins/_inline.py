@@ -627,22 +627,48 @@ async def inline_alive_query_handler(ult):
     await ult.answer([result], cache_time=0)
 
 
+from xteam._misc._assistant import callback 
+
+# Ganti ini dengan nama file Anda, asumsikan logika formatting sudah digabungkan di sini
 @callback(data="aliv", owner=False)
 async def inline_alive_button_handler(ult):
-    # Hitung uptime
-    try:
-        # Masih perlu memastikan time_formatter dan start_time tidak None!
-        uptime = time_formatter((time.time() - start_time) * 1000) 
-    except NameError:
-        uptime = "N/A" 
-        
-    # Asumsikan format_message_text sudah Anda gabungkan atau dipindahkan ke __init__.py
-    message_text = format_message_text(uptime) # Ganti dengan logika yang sudah diperbaiki
     
-    # Mengedit pesan yang sudah ada
+    # Variabel inisialisasi aman
+    uptime = "N/A"
+    current_python_version = "N/A"
+    
+    # 1. Hitung Uptime & Ambil Info Sistem (Dilindungi)
+    try:
+        # Panggil pyver() dan time_formatter() di dalam try block
+        current_python_version = pyver()
+        # PENTING: Jika time_formatter adalah None, error terjadi di sini.
+        uptime = time_formatter((time.time() - start_time) * 1000) 
+    except Exception:
+        # Tangkap semua exception (TypeError, NameError, dll.)
+        uptime = "ERROR IN CODE" 
+        current_python_version = "ERROR IN CODE"
+    
+    # 2. Logika message_text
+    # Variabel yang diimpor secara kolektif (`from . import ...`) akan disetel ke string "N/A"
+    # jika inisialisasi gagal, untuk mencegah crash saat f-string dievaluasi.
+    
+    message_text = (
+        f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n"
+        f"✵ Owner : <a href='https://t.me/{getattr(ult, 'OWNER_USERNAME', 'N/A')}'>{getattr(ult, 'OWNER_NAME', 'N/A')}</a>\n"
+        f"✵ Userbot : {getattr(ult, 'ultroid_version', 'N/A')}\n"
+        f"✵ Dc Id : {getattr(ult, 'ultroid_bot', 'N/A').dc_id if hasattr(getattr(ult, 'ultroid_bot', 'N/A'), 'dc_id') else 'N/A'}\n"
+        f"✵ Library : {getattr(ult, '__version__', 'N/A')}\n"
+        f"✵ Uptime : {uptime}\n"
+        f"✵ Kurigram :  {getattr(ult, 'pver', 'N/A')}\n"
+        f"✵ Python : {current_python_version}\n"
+        f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n"
+    ) # Catatan: Penggunaan getattr(ult, 'VAR', 'N/A') disarankan jika Anda tidak mengimpornya ke namespace fungsi
+
+    
+    # 3. Mengedit pesan yang sudah ada
     await ult.edit_message(
         text=message_text, 
-        buttons=ALIVE_BUTTONS, # Menggunakan tombol ALIVE_BUTTONS untuk navigasi kembali ke Modules
+        buttons=ALIVE_BUTTONS, 
         parse_mode="html",
     )
     
