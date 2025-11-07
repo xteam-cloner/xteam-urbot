@@ -58,7 +58,7 @@ SUP_BUTTONS = [
 
 PING_BUTTONS = [
     [
-        Button.inline("🏡 Modules 🏡", data="alive"),
+        Button.inline("🏡 Alive 🏡", data="aliv"),
     ],
 
 ]
@@ -592,7 +592,7 @@ async def _(event):
         
 
 
-@in_pattern("alive", owner=False)
+@in_pattern("aliv", owner=False)
 async def inline_alive_handler(ult):
     # Hitung uptime (asumsi 'start_time' global tersedia)
     try:
