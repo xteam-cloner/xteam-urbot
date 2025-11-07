@@ -673,6 +673,7 @@ async def callback_alive_handler(ult):
         message_text, 
         buttons=ALIVE_BUTTONS, # Gunakan tombol ALIVE_BUTTONS yang sudah ada
         link_preview=False,
+        parse_mode="html"
     )
     
     # Opsional: Menjawab callback query (pop-up atau notifikasi)
