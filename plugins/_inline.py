@@ -591,17 +591,22 @@ async def _(event):
         await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
         
 
-@in_pattern("aliv", owner=False)
+# Asumsi: PING_BUTTONS dan fungsi terkait sudah didefinisikan/diimpor
+# Import yang dibutuhkan (jika belum ada):
+# from telethon.tl.types import InputWebDocument 
+# import os (jika Anda ingin cek path file)
+
+@in_pattern("alive", owner=False)
 async def inline_alive_handler(ult):
     # Hitung uptime (asumsi 'start_time' global tersedia)
     try:
-        uptime = time_formatter((time.time() - start_time) * 1000)
+        uptime = time_formatter((time.time() - start_time) * 1000) 
     except NameError:
-        uptime = "N/A (Define start_time)" 
+        uptime = "N/A" 
         
     message_text = format_message_text(uptime)
     
-    # Logika untuk menentukan gambar (tetap sama)
+    # Logika untuk menentukan gambar (pic akan berisi URL atau path lokal)
     xpic = udB.get_key("ALIVE_PIC")
     xnone = ["false", "0", "none"] 
     xdefault = "resources/extras/IMG_20251027_112615_198.jpg"
@@ -615,17 +620,34 @@ async def inline_alive_handler(ult):
         pic = xpic  
     else:
         pic = xdefault
+
+    # --- Solusi menggunakan InputWebDocument ---
+    thumb_obj = None
+    if pic and pic.startswith("http"):
+        # Jika 'pic' adalah URL, buat InputWebDocument untuk thumbnail dan content
+        thumb_obj = InputWebDocument(pic, 0, "image/jpg", [])
+        content_obj = InputWebDocument(pic, 0, "image/jpg", [])
+        include_media = True
+    else:
+        # Jika 'pic' adalah path file lokal, kita tidak bisa mengirimnya via inline.
+        # Kita harus mengirim pesan teks tanpa media/thumbnail.
+        content_obj = None
+        include_media = False
         
-    # Membangun artikel inline, sekarang menyertakan tombol
+    # Membangun artikel inline
     result = await ult.builder.article(
-        title="Userbot Alive", 
+        type="photo" if include_media else "text", # Tetapkan tipe sesuai ketersediaan media
         text=message_text, 
+        include_media=include_media,
+        buttons=PING_BUTTONS,
+        title="Userbot Alive", 
         description=f"Uptime: {uptime}", 
-        buttons=ALIVE_BUTTONS, # <-- **TAMBAHAN PENTING DI SINI**
-        thumb=pic if pic else None
+        # Hanya sertakan thumb dan content jika itu adalah URL
+        url=pic if pic and pic.startswith("http") else None,
+        thumb=thumb_obj,
+        content=content_obj,
     )
     
     # Menjawab inline query
     await ult.answer([result], cache_time=0)
-
-# Catatan: Pastikan Anda juga mengimpor 'Button' dari library yang sesuai (misalnya, telethon.tl.custom)
+    
