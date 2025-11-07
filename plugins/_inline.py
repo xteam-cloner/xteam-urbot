@@ -543,7 +543,7 @@ async def closet(lol):
         await lol.answer("Gagal menghapus pesan. Periksa izin bot.", alert=True) 
 
 # --- Handler Perintah Chat (/ping) ---
-@ultroid_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
+@ultroid_cmd(pattern="sping(|x|s)$", chats=[], type=["official", "assistant"])
 async def _(event):
     client = event.client 
     
@@ -552,7 +552,7 @@ async def _(event):
         
         # 1. Lakukan inline query menggunakan asst.me_username (sesuai permintaan)
         # CATATAN: Asumsi 'asst' didefinisikan di luar fungsi ini dan dapat diakses.
-        inline_result_object = await client.inline_query(asst.me_username, "ping")
+        inline_result_object = await client.inline_query(asst.me.username, "ping")
         
         # 2. Akses daftar hasil di dalamnya (.results)
         results = inline_result_object.results 
