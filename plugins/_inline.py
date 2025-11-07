@@ -608,8 +608,8 @@ async def inline_alive_handler(ult):
     # Hanya menggunakan argumen dasar: text, buttons, title, description
     result = await ult.builder.article(
         text=message_text, 
-        buttons=PING_BUTTONS,
-        title="Userbot Alive", 
+        buttons=ALIVE_BUTTONS,
+        title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
         description=f"Uptime: {uptime}",
         parse_mode="html",
     )
