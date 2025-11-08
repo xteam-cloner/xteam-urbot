@@ -801,67 +801,63 @@ async def spam_menu_inline_handler(ult):
     )
     
 
-@callback(re.compile("(spam_start|spam_stop)$"), owner=False)
-async def spam_callback_handler(ult):
-    
-    action = ult.data_match.group(1).decode("utf-8")
+@callback(re.compile("spam_start$"), owner=False)
+async def spam_start_handler(ult):
     chat_id = ult.chat_id
     
-    await ult.answer(f"Memproses aksi: {action.replace('spam_', '').upper()}...", alert=False)
+    await ult.answer("Memproses aksi: START...", alert=False)
     
-    # --- LOGIKA SPAM ---
+    # Cek chat terlarang (meniru Kode 2)
+    noU_list = [-1001212184059, -1001451324102] 
+    if chat_id in noU_list:
+        await ult.answer("Tidak diizinkan di chat ini!", alert=True)
+        return
+        
+    # Cek apakah task sudah berjalan
+    if chat_id in active_spam_tasks:
+        await ult.answer("Spam sudah AKTIF di chat ini!", alert=True)
+        return
 
-    if action == "spam_start":
+    # Ambil teks spam default
+    input_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀")
+    
+    # 1. Mulai proses spam (Set Status di DB)
+    udB.set_key("USPAM", True)
+    
+    # 2. **PENTING: JALANKAN BACKGROUND TASK**
+    task = asyncio.create_task(run_unlimited_spam(ult.client, chat_id, input_text))
+    active_spam_tasks[chat_id] = task # Simpan task
+    
+    # 3. Berikan Feedback
+    await ult.edit(
+        "**Spam dimulai.** Status diatur ke AKTIF.\n"
+        f"Teks Spam: `{input_text}`",
+        buttons=SPAM_BUTTONS,
+        link_preview=False,
+        parse_mode="markdown"
+    )
+
+
+@callback(re.compile("spam_stop$"), owner=False)
+async def spam_stop_handler(ult):
+    chat_id = ult.chat_id
+    
+    await ult.answer("Memproses aksi: STOP...", alert=False)
+    
+    # 1. Hentikan task jika ada
+    if chat_id in active_spam_tasks:
+        active_spam_tasks[chat_id].cancel()
+        del active_spam_tasks[chat_id]
         
-        # Cek chat terlarang
-        noU_list = [-1001212184059, -1001451324102] 
-        if chat_id in noU_list:
-            await ult.answer("Tidak diizinkan di chat ini!", alert=True)
-            return
-            
-        # Cek apakah spam sudah berjalan
-        if chat_id in active_spam_tasks:
-            await ult.answer("Spam sudah AKTIF di chat ini!", alert=True)
-            return
-            
-        # Ambil teks spam default
-        input_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀")
-        
-        # 1. Mulai proses spam (Set Status)
-        udB.set_key("USPAM", True)
-        
-        # 2. **PENTING: JALANKAN BACKGROUND TASK**
-        # ult.client adalah objek Client Telethon
-        # create_task akan menjalankan run_unlimited_spam() di latar belakang
-        task = asyncio.create_task(run_unlimited_spam(ult.client, chat_id, input_text))
-        active_spam_tasks[chat_id] = task # Simpan task untuk kontrol
-        
-        # 3. Berikan Feedback (handler selesai dengan cepat)
-        await ult.edit(
-            "**Spam dimulai.** Status diatur ke AKTIF.\n"
-            f"Teks Spam: `{input_text}`",
-            buttons=SPAM_BUTTONS,
-            link_preview=False,
-            parse_mode="markdown"
-        )
-        
-    elif action == "spam_stop":
-        
-        # 1. Hentikan task jika ada
-        if chat_id in active_spam_tasks:
-            # Membatalkan task
-            active_spam_tasks[chat_id].cancel()
-            # Hapus dari daftar aktif
-            del active_spam_tasks[chat_id]
-        
-        # 2. Hentikan spam (Hapus Status)
-        udB.del_key("USPAM")
-        
-        # 3. Berikan Feedback
-        await ult.edit(
-            "**Spam dihentikan.** Status diatur ke TIDAK AKTIF.",
-            buttons=SPAM_BUTTONS,
-            link_preview=False,
-            parse_mode="markdown"
-        )
-        
+    # 2. Hentikan spam (Hapus Status di DB)
+    # Ini juga penting agar loop di run_unlimited_spam berhenti
+    udB.del_key("USPAM")
+    
+    # 3. Berikan Feedback
+    await ult.edit(
+        "**Spam dihentikan.** Status diatur ke TIDAK AKTIF.",
+        buttons=SPAM_BUTTONS,
+        link_preview=False,
+        parse_mode="markdown"
+    )
+    
