@@ -682,51 +682,62 @@ async def callback_alive_handler(ult):
 
 #---------------------------------------------
 
-import time
-from asyncio import sleep
-# Asumsikan 'udB', 'FloodWaitError', 'ultroid_cmd', 'callback', 'Button' diimpor
-# Contoh:
-# from ultroid import ultroid_cmd, callback, udB
+# Import yang dibutuhkan (pastikan semua sudah ada di awal file)
+# from ultroid import ultroid_cmd, udB, callback
 # from telethon.tl.types import Button
+import re 
 
-# --- 1. Definisi Tombol Inline ---
-# Struktur data callback: "spam_start" atau "spam_stop"
+# --- Definisi Tombol Inline (Tetap Sama) ---
 SPAM_BUTTONS = [
     [
         Button.inline("🔴 Mulai Spam", data="spam_start"),
         Button.inline("⏹️ Hentikan Spam", data="spam_stop")
     ],
     [
-        Button.inline("🔄 Uptime Bot", data="alive_btn") # Contoh tombol lain
+        Button.inline("🔄 Uptime Bot", data="alive_btn")
     ]
 ]
 
-# --- 2. Command Handler untuk Memunculkan Menu Tombol ---
-@ultroid_cmd(pattern="spammenu$", fullsudo=True)
+# --- Command Handler untuk Memunculkan Menu Tombol ---
+# Pattern diperbaiki agar menerima /spammenu saja
+@ultroid_cmd(pattern="spammenu$", fullsudo=True) 
 async def send_spam_menu(ult):
     """
     Mengirim pesan dengan tombol untuk memulai/menghentikan spam via callback.
     """
+    
+    # Hapus pesan perintah asli jika memungkinkan
+    try:
+        await ult.delete()
+    except Exception:
+        pass 
+        
+    # --- LOGIKA ISI PESAN ---
+    
     message_text = "**Kontrol Unlimited Spam (via Callback)**\n\n"
     
-    # Ambil status saat ini dari DB
+    # Ambil status saat ini
     is_spamming = udB.get_key("USPAM", False)
     if is_spamming:
         message_text += "Status: 🟢 **AKTIF**"
     else:
         message_text += "Status: 🔴 **TIDAK AKTIF**"
         
-    # Asumsikan 'DEFAULT_SPAM_TEXT' adalah teks yang ingin di-spam.
-    # Di callback, teks harus disimpan di database atau ditentukan secara default.
     spam_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀") 
     message_text += f"\nTeks Spam: `{spam_text}`"
     
-    await ult.eor(
+    # --- Mengirim Pesan ---
+    # Gunakan ult.respond() untuk mengirim pesan baru tanpa balasan 
+    # atau ult.reply() untuk membalas pesan perintah
+    await ult.respond(
         message_text,
         buttons=SPAM_BUTTONS,
         link_preview=False,
         parse_mode="markdown"
     )
+
+# --- Callback Handler Utama (Tetap Sama) ---
+# ... (spam_callback_handler di bawah ini) ...
 
 
 # --- 3. Callback Handler Utama ---
