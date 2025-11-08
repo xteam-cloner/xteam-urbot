@@ -807,7 +807,7 @@ async def spam_start_handler(ult):
     
     await ult.answer("Memproses aksi: START...", alert=False)
     
-    # Cek chat terlarang (meniru Kode 2)
+    # Cek chat terlarang
     noU_list = [-1001212184059, -1001451324102] 
     if chat_id in noU_list:
         await ult.answer("Tidak diizinkan di chat ini!", alert=True)
@@ -821,21 +821,22 @@ async def spam_start_handler(ult):
     # Ambil teks spam default
     input_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀")
     
-    # 1. Mulai proses spam (Set Status di DB)
+    # 1. Mulai proses spam (Set Status)
     udB.set_key("USPAM", True)
     
-    # 2. **PENTING: JALANKAN BACKGROUND TASK**
+    # 2. **PENTING: JALANKAN BACKGROUND TASK** (Non-blocking)
     task = asyncio.create_task(run_unlimited_spam(ult.client, chat_id, input_text))
-    active_spam_tasks[chat_id] = task # Simpan task
+    active_spam_tasks[chat_id] = task 
     
-    # 3. Berikan Feedback
+    # 3. Berikan Feedback dan HAPUS TOMBOL
     await ult.edit(
         "**Spam dimulai.** Status diatur ke AKTIF.\n"
         f"Teks Spam: `{input_text}`",
-        buttons=SPAM_BUTTONS,
+        buttons=None, # Mengatur buttons=None akan menghapus inline keyboard
         link_preview=False,
         parse_mode="markdown"
     )
+    
 
 
 @callback(re.compile("spam_stop$"), owner=False)
@@ -847,16 +848,15 @@ async def spam_stop_handler(ult):
     # 1. Hentikan task jika ada
     if chat_id in active_spam_tasks:
         active_spam_tasks[chat_id].cancel()
-        del active_spam_tasks[chat_id]
+        # Cleanup active_spam_tasks akan terjadi di run_unlimited_spam setelah cancel
         
     # 2. Hentikan spam (Hapus Status di DB)
-    # Ini juga penting agar loop di run_unlimited_spam berhenti
     udB.del_key("USPAM")
     
-    # 3. Berikan Feedback
+    # 3. Berikan Feedback dan HAPUS TOMBOL
     await ult.edit(
         "**Spam dihentikan.** Status diatur ke TIDAK AKTIF.",
-        buttons=SPAM_BUTTONS,
+        buttons=None, # Mengatur buttons=None akan menghapus inline keyboard
         link_preview=False,
         parse_mode="markdown"
     )
