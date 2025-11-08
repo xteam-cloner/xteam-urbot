@@ -51,6 +51,8 @@ from . import udB, NOSPAM_CHAT as noU
 
 udB.del_key("USPAM")
 
+active_spam_tasks = {} 
+
 # ================================================#
 
 helps = get_string("inline_1")
@@ -101,6 +103,32 @@ SPAM_BUTTONS = [
     ]
 ]
 
+# Asumsikan ult.client adalah objek klien Telethon yang dapat Anda akses
+# Jika tidak, Anda mungkin perlu mencari cara Ultroid memberikan akses ke client utama.
+async def run_unlimited_spam(client, chat_id, text_spam):
+    
+    # Loop akan terus berjalan selama status "USPAM" ada di DB
+    while udB.get_key("USPAM", False):
+        try:
+            # Menggunakan metode Telethon/Ultroid untuk mengirim pesan
+            await client.send_message(chat_id, text_spam)
+            
+            # Sangat PENTING: Jeda untuk menghindari FloodWait dari Telegram
+            # Sesuaikan jeda ini (misalnya, 2 detik)
+            await asyncio.sleep(2) 
+            
+        except Exception as e:
+            # Tangani jika ada error (misalnya, di-kick dari grup atau FloodWait)
+            print(f"Error saat spam di {chat_id}: {e}")
+            break # Hentikan loop jika terjadi error fatal
+            
+    # Pastikan status task dihapus setelah loop berakhir (baik karena stop/error)
+    if chat_id in active_spam_tasks:
+        del active_spam_tasks[chat_id]
+    
+    # Hapus status di DB juga, jika ada error
+    udB.del_key("USPAM")
+    
 # --------------------BUTTONS--------------------#
 
 
@@ -776,36 +804,39 @@ async def spam_menu_inline_handler(ult):
 @callback(re.compile("(spam_start|spam_stop)$"), owner=False)
 async def spam_callback_handler(ult):
     
-    # 1. Ambil data callback: "spam_start" atau "spam_stop"
     action = ult.data_match.group(1).decode("utf-8")
+    chat_id = ult.chat_id
     
-    # Meniru ult.answer dari Kode 1 (pop-up notifikasi)
     await ult.answer(f"Memproses aksi: {action.replace('spam_', '').upper()}...", alert=False)
     
     # --- LOGIKA SPAM ---
 
     if action == "spam_start":
         
-        # Cek chat terlarang (meniru Kode 2)
+        # Cek chat terlarang
         noU_list = [-1001212184059, -1001451324102] 
-        if ult.chat_id in noU_list:
+        if chat_id in noU_list:
             await ult.answer("Tidak diizinkan di chat ini!", alert=True)
+            return
+            
+        # Cek apakah spam sudah berjalan
+        if chat_id in active_spam_tasks:
+            await ult.answer("Spam sudah AKTIF di chat ini!", alert=True)
             return
             
         # Ambil teks spam default
         input_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀")
         
-        # Mulai proses spam
+        # 1. Mulai proses spam (Set Status)
         udB.set_key("USPAM", True)
         
-        # Di callback, kita tidak bisa menjalankan loop tanpa batas 
-        # karena akan memblokir handler Telegram.
-        # Biasanya, handler hanya melakukan aksi 'start', dan loop dijalankan 
-        # di task terpisah (di luar handler ini).
+        # 2. **PENTING: JALANKAN BACKGROUND TASK**
+        # ult.client adalah objek Client Telethon
+        # create_task akan menjalankan run_unlimited_spam() di latar belakang
+        task = asyncio.create_task(run_unlimited_spam(ult.client, chat_id, input_text))
+        active_spam_tasks[chat_id] = task # Simpan task untuk kontrol
         
-        # Untuk meniru logika, kita hanya mengatur status dan memberikan feedback.
-        # Logika loop harus dipindahkan ke background task (misalnya, di main bot).
-        
+        # 3. Berikan Feedback (handler selesai dengan cepat)
         await ult.edit(
             "**Spam dimulai.** Status diatur ke AKTIF.\n"
             f"Teks Spam: `{input_text}`",
@@ -816,13 +847,21 @@ async def spam_callback_handler(ult):
         
     elif action == "spam_stop":
         
-        # Hentikan spam
+        # 1. Hentikan task jika ada
+        if chat_id in active_spam_tasks:
+            # Membatalkan task
+            active_spam_tasks[chat_id].cancel()
+            # Hapus dari daftar aktif
+            del active_spam_tasks[chat_id]
+        
+        # 2. Hentikan spam (Hapus Status)
         udB.del_key("USPAM")
         
-        # Meniru ult.edit dari Kode 1
+        # 3. Berikan Feedback
         await ult.edit(
             "**Spam dihentikan.** Status diatur ke TIDAK AKTIF.",
             buttons=SPAM_BUTTONS,
             link_preview=False,
             parse_mode="markdown"
         )
+        
