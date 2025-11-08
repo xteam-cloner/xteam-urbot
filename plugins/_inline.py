@@ -85,6 +85,22 @@ ALIVE_BUTTONS = [
     ],
 
 ]
+
+SPAM_DELAY = 1.5 # Jeda antar pesan spam (dalam detik)
+
+# Variabel Global/Konstanta yang digunakan
+noU = [-1001212184059, -1001451324102] # Daftar chat terlarang (asumsi dari kode 2 asli)
+
+SPAM_BUTTONS = [
+    [
+        Button.inline("🔴 Mulai Spam", data="spam_start"),
+        Button.inline("⏹️ Hentikan Spam", data="spam_stop")
+    ],
+    [
+        Button.inline("🔄 Uptime Bot", data="alive_btn")
+    ]
+]
+
 # --------------------BUTTONS--------------------#
 
 
@@ -719,46 +735,42 @@ async def send_spam_menu(ult):
         await eris.edit(f"Terjadi kesalahan saat memanggil inline spam menu: `{type(e).__name__}: {e}`")
 
 
-# Pastikan pattern tetap sederhana
+# Asumsikan 'in_pattern', 'udB', 'SPAM_BUTTONS', dan modul lainnya sudah diimpor.
+
 @in_pattern("spammenu", owner=False)
-async def send_spam_menu(ult):
-    """
-    Mengirim pesan dengan tombol untuk memulai/menghentikan spam via callback.
-    Menggunakan ult.eor untuk memastikan formatnya sesuai ekspektasi framework.
-    """
+async def spam_menu_inline_handler(ult):
     
-    # 1. KIRIM PESAN PLACEHOLDER AWAL DENGAN ult.eor()
-    # Ini memastikan bahwa ult.eor memiliki pesan untuk dikerjakan (memenuhi format)
-    # Jika ult.eor menerima input kosong, ia akan mengirim pesan ini.
-    try:
-        eris = await ult.eor("⏳ Memuat menu kontrol spam...")
-    except Exception as e:
-        # Jika bahkan langkah ini gagal, berarti ada masalah yang lebih dalam 
-        # dengan instalasi atau hak akses bot.
-        return await ult.eor(f"Gagal memuat menu: {e}") 
-        
     # --- LOGIKA ISI PESAN ---
+    
+    # PERBAIKAN: Menggunakan udB yang benar (bukan ult.udB)
+    is_spamming = udB.get_key("USPAM", False) 
+    
     message_text = "**Kontrol Unlimited Spam (via Callback)**\n\n"
     
-    is_spamming = ult.udB.get_key("USPAM", False) # Ganti udB dengan ult.udB jika itu yang benar
     if is_spamming:
         message_text += "Status: 🟢 **AKTIF**"
+        description_text = "Status: AKTIF"
     else:
         message_text += "Status: 🔴 **TIDAK AKTIF**"
+        description_text = "Status: TIDAK AKTIF"
         
-    spam_text = ult.udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀") # Ganti udB
+    # PERBAIKAN: Menggunakan udB yang benar (bukan ult.udB)
+    spam_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀") 
     message_text += f"\nTeks Spam: `{spam_text}`"
     
-    # --- 2. EDIT PESAN PLACEHOLDER DENGAN MENU ASLI ---
-    # Edit pesan yang sudah ada (eris) dengan menu tombol.
-    # Karena pesan sudah dibuat, pemanggilan ult.eor kedua ini akan berhasil
-    await ult.eor(
-        message_text,
-        buttons=SPAM_BUTTONS,
-        link_preview=False,
-        parse_mode="markdown"
+    # --- Mengembalikan Inline Result (MENGGANTIKAN SEMUA ult.eor) ---
+    await ult.answer(
+        results=[
+            await ult.client.inline.article(
+                title="⚙️ Menu Kontrol Spam",
+                text=message_text,
+                description=description_text,
+                buttons=SPAM_BUTTONS, 
+                parse_mode="markdown"
+            )
+        ]
     )
-
+    
 # --- CATATAN ---
 # Pastikan Anda telah mengganti 'udB' menjadi 'ult.udB' jika objek database 
 # diakses melalui instance 'ult' di Ultroid terbaru.
