@@ -690,8 +690,37 @@ async def callback_alive_handler(ult):
 
 #---------------------------------------------
 
-# Pastikan pattern tetap sederhana
+import asyncio
+from telethon.errors import FloodWaitError
+# Asumsikan 'ultroid_cmd', 'asst', dan modul lain sudah diimpor
+
 @ultroid_cmd(pattern="spammenu$", fullsudo=True) 
+async def send_spam_menu(ult):
+    
+    eris = await ult.eor("⏳ Mengambil menu kontrol spam...")
+    
+    try:
+        results = await asst.inline_query(asst.me.username, "spammenu")
+        
+        if results:
+            await results[0].click(
+                ult.chat_id,         
+                reply_to=ult.id,     
+                hide_via=True
+            )
+            
+            await ult.delete() 
+            
+        else:
+            await eris.edit("❌ Gagal mendapatkan menu kontrol spam melalui inline query. Tidak ada hasil ditemukan.")
+
+    except Exception as e:
+        print(f"Error saat menjalankan spammenu command (inline): {e}")
+        await eris.edit(f"Terjadi kesalahan saat memanggil inline spam menu: `{type(e).__name__}: {e}`")
+
+
+# Pastikan pattern tetap sederhana
+@in_pattern("spammenu", owner=False)
 async def send_spam_menu(ult):
     """
     Mengirim pesan dengan tombol untuk memulai/menghentikan spam via callback.
