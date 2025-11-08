@@ -735,15 +735,15 @@ async def send_spam_menu(ult):
         await eris.edit(f"Terjadi kesalahan saat memanggil inline spam menu: `{type(e).__name__}: {e}`")
 
 
-# Asumsikan 'in_pattern', 'udB', 'SPAM_BUTTONS', dan modul lainnya sudah diimpor.
-
 @in_pattern("spammenu", owner=False)
 async def spam_menu_inline_handler(ult):
     
     # --- LOGIKA ISI PESAN ---
     
-    # PERBAIKAN: Menggunakan udB yang benar (bukan ult.udB)
-    is_spamming = udB.get_key("USPAM", False) 
+    # PERBAIKAN: Menggunakan get_key tanpa nilai default di argumen
+    # dan menerapkan default value (False) secara eksternal.
+    # Jika udB.get_key("USPAM") adalah None/False/dll., maka False yang akan digunakan.
+    is_spamming = udB.get_key("USPAM") or False 
     
     message_text = "**Kontrol Unlimited Spam (via Callback)**\n\n"
     
@@ -754,8 +754,9 @@ async def spam_menu_inline_handler(ult):
         message_text += "Status: 🔴 **TIDAK AKTIF**"
         description_text = "Status: TIDAK AKTIF"
         
-    # PERBAIKAN: Menggunakan udB yang benar (bukan ult.udB)
-    spam_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀") 
+    # PERBAIKAN: Menggunakan get_key tanpa nilai default di argumen
+    # dan menerapkan default value secara eksternal.
+    spam_text = udB.get_key("DEFAULT_SPAM_TEXT") or "Spam Ulang Alik! 🚀"
     message_text += f"\nTeks Spam: `{spam_text}`"
     
     # --- Mengembalikan Inline Result (MENGGANTIKAN SEMUA ult.eor) ---
@@ -771,14 +772,7 @@ async def spam_menu_inline_handler(ult):
         ]
     )
     
-# --- CATATAN ---
-# Pastikan Anda telah mengganti 'udB' menjadi 'ult.udB' jika objek database 
-# diakses melalui instance 'ult' di Ultroid terbaru.
-# Dan pastikan semua import sudah benar (terutama 'Button', 'ultroid_cmd', dan 'ult.udB').
 
-
-
-# --- 3. Callback Handler Utama ---
 @callback(re.compile("(spam_start|spam_stop)$"), owner=False)
 async def spam_callback_handler(ult):
     
