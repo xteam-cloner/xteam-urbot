@@ -807,15 +807,15 @@ async def spam_menu_inline_handler(ult):
     )
     
 
-@callback(re.compile("spam_start$"), owner=False)
+@callback("spam_start", owner=False) # <--- DIUBAH!
 async def spam_start_handler(ult):
     chat_id = ult.chat_id
     
     await ult.answer("Memproses aksi: START...", alert=False)
     
-    # Cek chat terlarang (noU dari kode asli)
+    # Cek chat terlarang
     noU_list = [-1001212184059, -1001451324102] 
-    if chat_id in noU_list:
+    if ult.chat_id in noU_list:
         await ult.answer("Tidak diizinkan di chat ini!", alert=True)
         return
         
@@ -823,14 +823,13 @@ async def spam_start_handler(ult):
         await ult.answer("Spam sudah AKTIF di chat ini!", alert=True)
         return
 
-    # Ambil teks spam (Misalnya, dari key UD atau default)
-    # Anda harus memastikan teks spam sudah diset di suatu tempat (misalnya, /setspamtext)
+    # Ambil teks spam 
     input_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀")
     
     # 1. Set Status
     udB.set_key("USPAM", True)
     
-    # 2. **PENTING: JALANKAN BACKGROUND TASK** (Menggunakan ult.client)
+    # 2. **JALANKAN BACKGROUND TASK** (Non-blocking)
     task = asyncio.create_task(run_unlimited_spam(ult.client, chat_id, input_text))
     active_spam_tasks[chat_id] = task 
     
@@ -842,11 +841,9 @@ async def spam_start_handler(ult):
         link_preview=False,
         parse_mode="markdown"
     )
-    
-    
 
 
-@callback(re.compile("spam_stop$"), owner=False)
+@callback("spam_stop", owner=False) # <--- DIUBAH!
 async def spam_stop_handler(ult):
     chat_id = ult.chat_id
     
@@ -855,7 +852,6 @@ async def spam_stop_handler(ult):
     # 1. Hentikan task jika ada
     if chat_id in active_spam_tasks:
         active_spam_tasks[chat_id].cancel()
-        # Cleanup active_spam_tasks akan terjadi di run_unlimited_spam setelah cancel
         
     # 2. Hentikan spam (Hapus Status di DB)
     udB.del_key("USPAM")
@@ -863,8 +859,7 @@ async def spam_stop_handler(ult):
     # 3. Berikan Feedback dan HAPUS TOMBOL
     await ult.edit(
         "**Spam dihentikan.** Status diatur ke TIDAK AKTIF.",
-        buttons=None, # Mengatur buttons=None akan menghapus inline keyboard
+        buttons=None, 
         link_preview=False,
         parse_mode="markdown"
     )
-    
