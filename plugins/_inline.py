@@ -42,6 +42,7 @@ ultroid_cmd,
 )
 from ._help import _main_help_menu
 from .alive import format_message_text
+from .spam import *
 # ================================================#
 
 helps = get_string("inline_1")
@@ -678,3 +679,107 @@ async def callback_alive_handler(ult):
     
     # Opsional: Menjawab callback query (pop-up atau notifikasi)
     await ult.answer(f"Status ALIVE diperbarui. Uptime: {uptime}", alert=False)
+
+#---------------------------------------------
+
+import time
+from asyncio import sleep
+# Asumsikan 'udB', 'FloodWaitError', 'ultroid_cmd', 'callback', 'Button' diimpor
+# Contoh:
+# from ultroid import ultroid_cmd, callback, udB
+# from telethon.tl.types import Button
+
+# --- 1. Definisi Tombol Inline ---
+# Struktur data callback: "spam_start" atau "spam_stop"
+SPAM_BUTTONS = [
+    [
+        Button.inline("🔴 Mulai Spam", data="spam_start"),
+        Button.inline("⏹️ Hentikan Spam", data="spam_stop")
+    ],
+    [
+        Button.inline("🔄 Uptime Bot", data="alive_btn") # Contoh tombol lain
+    ]
+]
+
+# --- 2. Command Handler untuk Memunculkan Menu Tombol ---
+@ultroid_cmd(pattern="spammenu$", fullsudo=True)
+async def send_spam_menu(ult):
+    """
+    Mengirim pesan dengan tombol untuk memulai/menghentikan spam via callback.
+    """
+    message_text = "**Kontrol Unlimited Spam (via Callback)**\n\n"
+    
+    # Ambil status saat ini dari DB
+    is_spamming = udB.get_key("USPAM", False)
+    if is_spamming:
+        message_text += "Status: 🟢 **AKTIF**"
+    else:
+        message_text += "Status: 🔴 **TIDAK AKTIF**"
+        
+    # Asumsikan 'DEFAULT_SPAM_TEXT' adalah teks yang ingin di-spam.
+    # Di callback, teks harus disimpan di database atau ditentukan secara default.
+    spam_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀") 
+    message_text += f"\nTeks Spam: `{spam_text}`"
+    
+    await ult.eor(
+        message_text,
+        buttons=SPAM_BUTTONS,
+        link_preview=False,
+        parse_mode="markdown"
+    )
+
+
+# --- 3. Callback Handler Utama ---
+@callback(re.compile("(spam_start|spam_stop)$"), owner=False)
+async def spam_callback_handler(ult):
+    
+    # 1. Ambil data callback: "spam_start" atau "spam_stop"
+    action = ult.data_match.group(1).decode("utf-8")
+    
+    # Meniru ult.answer dari Kode 1 (pop-up notifikasi)
+    await ult.answer(f"Memproses aksi: {action.replace('spam_', '').upper()}...", alert=False)
+    
+    # --- LOGIKA SPAM ---
+
+    if action == "spam_start":
+        
+        # Cek chat terlarang (meniru Kode 2)
+        noU_list = [-1001212184059, -1001451324102] 
+        if ult.chat_id in noU_list:
+            await ult.answer("Tidak diizinkan di chat ini!", alert=True)
+            return
+            
+        # Ambil teks spam default
+        input_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀")
+        
+        # Mulai proses spam
+        udB.set_key("USPAM", True)
+        
+        # Di callback, kita tidak bisa menjalankan loop tanpa batas 
+        # karena akan memblokir handler Telegram.
+        # Biasanya, handler hanya melakukan aksi 'start', dan loop dijalankan 
+        # di task terpisah (di luar handler ini).
+        
+        # Untuk meniru logika, kita hanya mengatur status dan memberikan feedback.
+        # Logika loop harus dipindahkan ke background task (misalnya, di main bot).
+        
+        await ult.edit(
+            "**Spam dimulai.** Status diatur ke AKTIF.\n"
+            f"Teks Spam: `{input_text}`",
+            buttons=SPAM_BUTTONS,
+            link_preview=False,
+            parse_mode="markdown"
+        )
+        
+    elif action == "spam_stop":
+        
+        # Hentikan spam
+        udB.del_key("USPAM")
+        
+        # Meniru ult.edit dari Kode 1
+        await ult.edit(
+            "**Spam dihentikan.** Status diatur ke TIDAK AKTIF.",
+            buttons=SPAM_BUTTONS,
+            link_preview=False,
+            parse_mode="markdown"
+        )
