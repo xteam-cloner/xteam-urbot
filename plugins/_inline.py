@@ -42,7 +42,15 @@ ultroid_cmd,
 )
 from ._help import _main_help_menu
 from .alive import format_message_text
-from .spam import *
+import asyncio
+
+from . import *
+from asyncio import sleep
+from telethon.errors import FloodWaitError
+from . import udB, NOSPAM_CHAT as noU
+
+udB.del_key("USPAM")
+
 # ================================================#
 
 helps = get_string("inline_1")
@@ -682,62 +690,51 @@ async def callback_alive_handler(ult):
 
 #---------------------------------------------
 
-# Import yang dibutuhkan (pastikan semua sudah ada di awal file)
-# from ultroid import ultroid_cmd, udB, callback
-# from telethon.tl.types import Button
-import re 
-
-# --- Definisi Tombol Inline (Tetap Sama) ---
-SPAM_BUTTONS = [
-    [
-        Button.inline("🔴 Mulai Spam", data="spam_start"),
-        Button.inline("⏹️ Hentikan Spam", data="spam_stop")
-    ],
-    [
-        Button.inline("🔄 Uptime Bot", data="alive_btn")
-    ]
-]
-
-# --- Command Handler untuk Memunculkan Menu Tombol ---
-# Pattern diperbaiki agar menerima /spammenu saja
+# Pastikan pattern tetap sederhana
 @ultroid_cmd(pattern="spammenu$", fullsudo=True) 
 async def send_spam_menu(ult):
     """
     Mengirim pesan dengan tombol untuk memulai/menghentikan spam via callback.
+    Menggunakan ult.eor untuk memastikan formatnya sesuai ekspektasi framework.
     """
     
-    # Hapus pesan perintah asli jika memungkinkan
+    # 1. KIRIM PESAN PLACEHOLDER AWAL DENGAN ult.eor()
+    # Ini memastikan bahwa ult.eor memiliki pesan untuk dikerjakan (memenuhi format)
+    # Jika ult.eor menerima input kosong, ia akan mengirim pesan ini.
     try:
-        await ult.delete()
-    except Exception:
-        pass 
+        eris = await ult.eor("⏳ Memuat menu kontrol spam...")
+    except Exception as e:
+        # Jika bahkan langkah ini gagal, berarti ada masalah yang lebih dalam 
+        # dengan instalasi atau hak akses bot.
+        return await ult.eor(f"Gagal memuat menu: {e}") 
         
     # --- LOGIKA ISI PESAN ---
-    
     message_text = "**Kontrol Unlimited Spam (via Callback)**\n\n"
     
-    # Ambil status saat ini
-    is_spamming = udB.get_key("USPAM", False)
+    is_spamming = ult.udB.get_key("USPAM", False) # Ganti udB dengan ult.udB jika itu yang benar
     if is_spamming:
         message_text += "Status: 🟢 **AKTIF**"
     else:
         message_text += "Status: 🔴 **TIDAK AKTIF**"
         
-    spam_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀") 
+    spam_text = ult.udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀") # Ganti udB
     message_text += f"\nTeks Spam: `{spam_text}`"
     
-    # --- Mengirim Pesan ---
-    # Gunakan ult.respond() untuk mengirim pesan baru tanpa balasan 
-    # atau ult.reply() untuk membalas pesan perintah
-    await ult.respond(
+    # --- 2. EDIT PESAN PLACEHOLDER DENGAN MENU ASLI ---
+    # Edit pesan yang sudah ada (eris) dengan menu tombol.
+    # Karena pesan sudah dibuat, pemanggilan ult.eor kedua ini akan berhasil
+    await ult.eor(
         message_text,
         buttons=SPAM_BUTTONS,
         link_preview=False,
         parse_mode="markdown"
     )
 
-# --- Callback Handler Utama (Tetap Sama) ---
-# ... (spam_callback_handler di bawah ini) ...
+# --- CATATAN ---
+# Pastikan Anda telah mengganti 'udB' menjadi 'ult.udB' jika objek database 
+# diakses melalui instance 'ult' di Ultroid terbaru.
+# Dan pastikan semua import sudah benar (terutama 'Button', 'ultroid_cmd', dan 'ult.udB').
+
 
 
 # --- 3. Callback Handler Utama ---
