@@ -762,7 +762,7 @@ async def spam_menu_inline_handler(ult):
     # --- Mengembalikan Inline Result (MENGGANTIKAN SEMUA ult.eor) ---
     await ult.answer(
         results=[
-            await ult.client.inline.article(
+            await ult.builder.article(
                 title="⚙️ Menu Kontrol Spam",
                 text=message_text,
                 description=description_text,
