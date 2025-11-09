@@ -4,6 +4,9 @@ from . import *
 # ...
 import youtube_dl
 
+wrtc = NTgCalls()
+
+
 async def get_music_url(query):
     ydl = youtube_dl.YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'format': 'bestaudio'})
     info = ydl.extract_info(query, download=False)
