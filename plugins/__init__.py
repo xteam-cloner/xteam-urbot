@@ -38,6 +38,10 @@ from strings import get_help, get_string
 from xteam._misc._supporter import CMD_HNDLR
 from xteam.dB import stickers
 from xteam._misc._supporter import Config
+from pyrogram import __version__ as pver
+from telegram import __version__ as lver
+from telethon import __version__ as tver
+from pytgcalls import __version__ as pytver
 
 udB: Database
 
@@ -55,7 +59,6 @@ asst: UltroidClient
 
 LOG_CHANNEL = udB.get_key("LOG_CHANNEL")
 StartTime = time.time()
-#Calls = UltroidMusic
 xteam = ultroid_cmd
 
 def format_message_text(uptime):
