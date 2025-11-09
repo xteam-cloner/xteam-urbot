@@ -1,4 +1,4 @@
-from .. import *
+from . import *
 from telethon import events
 from youtube_dl import YoutubeDL
 
