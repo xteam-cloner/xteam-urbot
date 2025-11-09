@@ -42,6 +42,7 @@ from pyrogram import __version__ as pver
 from telegram import __version__ as lver
 from telethon import __version__ as tver
 from pytgcalls import __version__ as pytver
+from platform import python_version as pyver
 
 udB: Database
 
