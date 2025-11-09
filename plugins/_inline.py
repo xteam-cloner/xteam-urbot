@@ -7,27 +7,29 @@
 
 import re
 import time
-from datetime import datetime
+import asyncio
 from os import remove
-import resources
+from datetime import datetime
+from platform import python_version as pyver
 from git import Repo
 from telethon import Button
-from platform import python_version as pyver
+from telethon.tl.types import InputWebDocument, Message
+from telethon.utils import resolve_bot_file_id
+from telethon.errors import FloodWaitError
 from pyrogram import __version__ as pver
-from xteam.version import __version__
-from xteam.version import ultroid_version
 from telegram import __version__ as lver
 from telethon import __version__ as tver
 from pytgcalls import __version__ as pytver
-from telethon.tl.types import InputWebDocument, Message
-from telethon.utils import resolve_bot_file_id
+from asyncio import sleep
+import resources
 from assistant import *
-from xteam._misc._assistant import callback, in_pattern
+from xteam.version import __version__, ultroid_version
 from xteam.dB._core import HELP, LIST
 from xteam.fns.helper import gen_chlog, time_formatter, updater
 from xteam.fns.misc import split_list
-from . import OWNER_ID
+from xteam._misc._assistant import callback, in_pattern
 from . import (
+    OWNER_ID,
     HNDLR,
     LOGS,
     OWNER_NAME,
@@ -38,16 +40,12 @@ from . import (
     split_list,
     start_time,
     udB,
-ultroid_cmd,
+    ultroid_cmd,
+    format_message_text,
+    NOSPAM_CHAT as noU,
 )
 from ._help import _main_help_menu
-from .alive import format_message_text
-import asyncio
 
-from . import *
-from asyncio import sleep
-from telethon.errors import FloodWaitError
-from . import udB, NOSPAM_CHAT as noU
 
 udB.del_key("USPAM")
 
