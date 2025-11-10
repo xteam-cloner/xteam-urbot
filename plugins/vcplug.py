@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import re
-import tempfile
 import os
 import contextlib 
 from dataclasses import dataclass
@@ -20,7 +19,7 @@ from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient 
 from pytgcalls.types import (
-    StreamEnded, # <-- KOREKSI: Import StreamEnded untuk digunakan sebagai filter
+    StreamEnded, # Import StreamEnded untuk digunakan sebagai filter
 )
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
@@ -28,8 +27,6 @@ from youtubesearchpython.__future__ import VideosSearch
 from . import ultroid_cmd
 
 # --- ASUMSI GLOBAL YANG DIPERLUKAN UNTUK KOMPATIBILITAS ---
-# Karena fungsi eksternal dihapus, variabel ini tidak memiliki efek fungsional
-# namun dipertahankan untuk menghindari NameError jika diakses oleh logika yang tidak terpotong.
 class DummyConfig:
     AUTO_DOWNLOADS_CLEAR = "False"
 config = DummyConfig()
@@ -110,6 +107,8 @@ class YouTubeResolver:
     async def download_audio_to_path(self, query_or_url: str) -> Tuple[str, bool]:
         target = await self._search_to_url(query_or_url)
         bf = await self._bitflow(target, want_video=False)
+        
+        # 1. Pengecekan Bitflow (Local File)
         if bf and bf.get("url") and bf.get("videoid"):
             filename = os.path.join(DOWNLOAD_DIR, f"{bf['videoid']}.{bf.get('ext','m4a')}")
             if not os.path.exists(filename):
@@ -128,17 +127,20 @@ class YouTubeResolver:
                 await loop.run_in_executor(None, _dl)
             return filename, True
 
+        # 2. Pengecekan yt-dlp -g (Streaming URL)
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp", "-g", "-f", "bestaudio/best", target,
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
         stdout, stderr = await proc.communicate()
         url = stdout.decode().split("\n")[0].strip() if stdout else ""
+        
         if url:
             return url, False
 
+        # KOREKSI: Jika URL kosong, lempar RuntimeError yang akan ditangkap di command handler
         err = (stderr or b"unknown error").decode()
-        raise RuntimeError(f"Failed to resolve audio: {err}")
+        raise RuntimeError(f"Gagal mendapatkan URL stream media: {err.strip()}")
 
     async def extract_title(self, query_or_url: str) -> str:
         opts = {"quiet": True, "skip_download": True}
@@ -162,7 +164,6 @@ class VCManager:
         self.resolver = YouTubeResolver()
 
     async def ensure_initialized(self):
-        """Metode aman untuk inisialisasi PyTgCalls dengan Bot Client baru."""
         if self.tgcalls is None:
             
             if not self.vc_client.is_connected():
@@ -178,7 +179,6 @@ class VCManager:
             except InvalidMTProtoClient as e:
                 raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Masalah versi/dependensi.") from e
 
-            # KOREKSI: Menggunakan StreamEnded sebagai filter
             @self.tgcalls.on_update(StreamEnded) 
             async def on_end(_, update: StreamEnded):
                 chat_id = update.chat_id
@@ -203,9 +203,10 @@ class VCManager:
         self.states.pop(chat_id, None)
 
     def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> MediaStream:
-        """Menggunakan konstruktor MediaStream() universal."""
+        """Membuat MediaStream dengan kontrol volume."""
         gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
         
+        # PyTgCalls akan menggunakan src sebagai media_path
         stream = MediaStream(
             source=src,
             ffmpeg_parameters=[
@@ -220,7 +221,7 @@ class VCManager:
         st = self.state(chat_id)
         st.now_playing = track
         if not self.tgcalls:
-            raise RuntimeError("VCManager belum diinisialisasi. Coba jalankan .vcjoin terlebih dahulu.")
+            raise RuntimeError("VCManager belum diinisialisasi.")
             
         is_local = os.path.exists(track.source)
         stream = self._build_stream(track.source, st.volume, is_local)
@@ -228,7 +229,6 @@ class VCManager:
         try:
             await self.tgcalls.join_group_call(chat_id, stream)
         except Exception:
-            # Jika sudah dalam panggilan, coba change_stream
             await self.tgcalls.change_stream(chat_id, stream)
 
     async def play(self, chat_id: int, track: Track):
@@ -350,8 +350,11 @@ async def vc_play(e: Message):
         title = await mgr.resolver.extract_title(arg)
         await mgr.play(chat_id, Track(title=title, source=src, requested_by=str(e.sender_id)))
         await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
+    except RuntimeError as ex:
+        # Menangkap error spesifik dari resolver jika media_path kosong
+        await msg.edit(f"Gagal memutar: `{ex}`")
     except Exception as ex:
-        await msg.edit(f"`{ex}`")
+        await msg.edit(f"Error tak terduga: `{ex}`")
 
 
 @ultroid_cmd(pattern="vcpause$", groups_only=True)
@@ -450,6 +453,7 @@ async def vc_play_alias(e: Message):
         title = await mgr.resolver.extract_title(arg)
         await mgr.play(chat_id, Track(title=title, source=src, requested_by=str(e.sender_id)))
         await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
+    except RuntimeError as ex:
+        await msg.edit(f"Gagal memutar: `{ex}`")
     except Exception as ex:
-        await msg.edit(f"`{ex}`")
-                               
+        await msg.edit(f"Error tak terduga: `{ex}`")
