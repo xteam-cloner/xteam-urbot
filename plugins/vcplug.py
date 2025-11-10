@@ -11,7 +11,7 @@ import httpx
 from . import * # Asumsi utilitas bot
 from telethon import events, TelegramClient 
 from telethon.tl.types import Message
-from xteam.configs import Var # <-- Mengambil BOT_TOKEN dari configs
+# from xteam.configs import Var # <-- Dihapus karena tidak lagi menggunakan BOT_TOKEN
 
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream, GroupCallConfig
@@ -19,24 +19,24 @@ from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient 
 from pytgcalls.types import (
-    StreamEnded, # Import StreamEnded untuk digunakan sebagai filter
+    StreamEnded,
 )
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 
 from . import ultroid_cmd
 
-# --- ASUMSI GLOBAL YANG DIPERLUKAN UNTUK KOMPATIBILITAS ---
+# --- ASUMSI GLOBAL YANG DIPERLUKAN ---
 class DummyConfig:
     AUTO_DOWNLOADS_CLEAR = "False"
 config = DummyConfig()
-# --- AKHIR ASUMSI GLOBAL ---
 
 YOUTUBE_REGEX = r"(?:youtube\.com|youtu\.be)"
 BITFLOW_API = "https://bitflow.in/api/youtube"
 BITFLOW_API_KEY = "youtube321bot"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads") 
-VC_BOT_TOKEN = Var.BOT_TOKEN 
+# VC_BOT_TOKEN dihapus karena menggunakan klien utama
+# --- AKHIR ASUMSI GLOBAL ---
 
 # ─────────────────────────────────────────────────────────────
 # Queue/State
@@ -138,7 +138,6 @@ class YouTubeResolver:
         if url:
             return url, False
 
-        # KOREKSI: Jika URL kosong, lempar RuntimeError yang akan ditangkap di command handler
         err = (stderr or b"unknown error").decode()
         raise RuntimeError(f"Gagal mendapatkan URL stream media: {err.strip()}")
 
@@ -156,25 +155,26 @@ class YouTubeResolver:
 
 class VCManager:
     def __init__(self, main_client, vc_client):
+        # main_client dan vc_client sekarang adalah instance Userbot yang sama
         self.client = main_client
-        self.vc_client = vc_client
+        self.vc_client = vc_client 
         self.tgcalls: Optional[PyTgCalls] = None 
         self.states: Dict[int, VCState] = {}
         self.started = False
         self.resolver = YouTubeResolver()
 
     async def ensure_initialized(self):
+        """Memastikan PyTgCalls diinisialisasi pada klien Userbot."""
         if self.tgcalls is None:
             
-            if not self.vc_client.is_connected():
-                await self.vc_client.start(bot_token=VC_BOT_TOKEN)
-            
+            # Karena ini Userbot, tidak perlu memulai/memeriksa token bot
             try:
                 await self.vc_client.get_me() 
             except Exception as e:
-                raise RuntimeError(f"Klien Bot VC gagal melewati cek sesi: {e}")
+                raise RuntimeError(f"Klien Userbot gagal melewati cek sesi: {e}")
 
             try:
+                # Inisialisasi PyTgCalls dengan klien Userbot
                 self.tgcalls = PyTgCalls(self.vc_client) 
             except InvalidMTProtoClient as e:
                 raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Masalah versi/dependensi.") from e
@@ -206,7 +206,6 @@ class VCManager:
         """Membuat MediaStream dengan kontrol volume."""
         gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
         
-        # PyTgCalls akan menggunakan src sebagai media_path
         stream = MediaStream(
             source=src,
             ffmpeg_parameters=[
@@ -227,6 +226,7 @@ class VCManager:
         stream = self._build_stream(track.source, st.volume, is_local)
         
         try:
+            # Userbot seharusnya bisa bergabung
             await self.tgcalls.join_group_call(chat_id, stream)
         except Exception:
             await self.tgcalls.change_stream(chat_id, stream)
@@ -282,21 +282,15 @@ def _cid(e: Message) -> int:
 async def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
-        if not VC_BOT_TOKEN:
-            raise RuntimeError("BOT_TOKEN tidak ditemukan di configs.Var. Mohon setel BOT_TOKEN Ultroid.")
         
-        new_client = TelegramClient(
-            "vc_session", 
-            e.client.api_id, 
-            e.client.api_hash 
-        )
+        # Userbot client sudah ada di e.client
+        userbot_client = e.client 
         
-        try:
-            vc_client_instance = await new_client.start(bot_token=VC_BOT_TOKEN)
-        except Exception as err:
-            raise RuntimeError(f"Gagal memulai Klien Bot VC: {err}")
-        
-        _vc = VCManager(e.client, vc_client_instance) 
+        if not userbot_client.is_connected():
+            raise RuntimeError("Klien Userbot belum terhubung.")
+            
+        # Klien utama dan klien VC sama-sama menggunakan Userbot
+        _vc = VCManager(userbot_client, userbot_client) 
     
     return await _vc.ensure_initialized() 
 
@@ -351,7 +345,6 @@ async def vc_play(e: Message):
         await mgr.play(chat_id, Track(title=title, source=src, requested_by=str(e.sender_id)))
         await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
     except RuntimeError as ex:
-        # Menangkap error spesifik dari resolver jika media_path kosong
         await msg.edit(f"Gagal memutar: `{ex}`")
     except Exception as ex:
         await msg.edit(f"Error tak terduga: `{ex}`")
@@ -457,3 +450,4 @@ async def vc_play_alias(e: Message):
         await msg.edit(f"Gagal memutar: `{ex}`")
     except Exception as ex:
         await msg.edit(f"Error tak terduga: `{ex}`")
+            
