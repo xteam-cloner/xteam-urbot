@@ -3,24 +3,24 @@ from __future__ import annotations
 import asyncio
 import re
 import tempfile
+import os
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
 import httpx
-import os # Tetap diperlukan untuk DOWNLOAD_DIR
 from . import *
 from telethon import events, TelegramClient 
 from telethon.tl.types import Message
-from xteam.configs import Var # <-- IMPOR UTAMA
+from configs import Var # <-- Mengambil BOT_TOKEN dari configs
 
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream 
-from pytgcalls import filters as fl
+from pytgcalls import filters as fl # Alias untuk filters
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient 
 from pytgcalls.types import (
     ChatUpdate,
-    StreamEnded,
+    StreamEnded, # Kelas yang digunakan untuk event handler
     GroupCallConfig,
     GroupCallParticipant,
     UpdatedGroupCallParticipant,
@@ -36,7 +36,7 @@ YOUTUBE_REGEX = r"(?:youtube\.com|youtu\.be)"
 BITFLOW_API = "https://bitflow.in/api/youtube"
 BITFLOW_API_KEY = "youtube321bot"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads") 
-VC_BOT_TOKEN = Var.BOT_TOKEN # <-- MENGGUNAKAN BOT_TOKEN DARI CONFIGS
+VC_BOT_TOKEN = Var.BOT_TOKEN 
 
 # ─────────────────────────────────────────────────────────────
 # Queue/State
@@ -72,7 +72,7 @@ class VCState:
         self.volume = 100
 
 # ─────────────────────────────────────────────────────────────
-# Resolver: Bitflow API + yt-dlp (Tidak Berubah)
+# Resolver
 # ─────────────────────────────────────────────────────────────
 
 class YouTubeResolver:
@@ -146,7 +146,7 @@ class YouTubeResolver:
             return info.get("title") or "Unknown Title"
 
 # ─────────────────────────────────────────────────────────────
-# VC Manager
+# VC Manager (Bot Client & Event Handler Fix)
 # ─────────────────────────────────────────────────────────────
 
 class VCManager:
@@ -162,27 +162,29 @@ class VCManager:
         """Metode aman untuk inisialisasi PyTgCalls dengan Bot Client baru."""
         if self.tgcalls is None:
             
+            # 1. Pastikan Bot Client terhubung
             if not self.vc_client.is_connected():
-                # Klien sudah di-start di _manager, ini hanya cek dan start ulang jika perlu
                 await self.vc_client.start(bot_token=VC_BOT_TOKEN)
             
-            # Cek sesi agar terautentikasi (dummy call)
+            # 2. Cek sesi agresif
             try:
                 await self.vc_client.get_me() 
             except Exception as e:
                 raise RuntimeError(f"Klien Bot VC gagal melewati cek sesi: {e}")
 
-            # Inisialisasi PyTgCalls DENGAN klien Bot baru
+            # 3. Inisialisasi PyTgCalls
             try:
                 self.tgcalls = PyTgCalls(self.vc_client) 
             except InvalidMTProtoClient as e:
-                # Ini menunjukkan masalah versi yang mendalam
-                raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Masalah versi/dependensi (pytgcalls/telethon/ntgcalls).") from e
+                raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Masalah versi/dependensi.") from e
 
-            @self.tgcalls.on_stream_end()
+            # 4. KOREKSI EVENT HANDLER: Menggunakan on_update() dengan filter StreamEnded
+            @self.tgcalls.on_update(fl.UpdateType.STREAM_ENDED) 
             async def on_end(_, update):
-                chat_id = update.chat_id
-                await self._on_track_end(chat_id)
+                # Memastikan event yang diterima adalah StreamEnded sebelum mengakses chat_id
+                if isinstance(update, StreamEnded):
+                    chat_id = update.chat_id
+                    await self._on_track_end(chat_id)
 
             await self.tgcalls.start()
             self.started = True
@@ -277,7 +279,7 @@ _vc: Optional[VCManager] = None
 def _cid(e: Message) -> int:
     return e.chat_id
 
-# Fungsi _manager diubah untuk membuat dan menggunakan klien Bot baru dengan Var.BOT_TOKEN
+# Fungsi _manager membuat dan menggunakan klien Bot baru dengan Var.BOT_TOKEN
 async def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
@@ -287,7 +289,7 @@ async def _manager(e) -> VCManager:
         # 1. Inisialisasi Klien Bot Baru
         new_client = TelegramClient(
             "vc_session", 
-            e.client.api_id, # Re-use API ID/HASH dari klien utama Ultroid
+            e.client.api_id, 
             e.client.api_hash 
         )
         
@@ -303,9 +305,8 @@ async def _manager(e) -> VCManager:
     return await _vc.ensure_initialized() 
 
 # ─────────────────────────────────────────────────────────────
-# Commands (Tidak Berubah)
+# Commands
 # ─────────────────────────────────────────────────────────────
-
 
 @ultroid_cmd(pattern="vcjoin$", groups_only=True)
 async def vc_join(e: Message):
@@ -455,4 +456,3 @@ async def vc_play_alias(e: Message):
         await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
     except Exception as ex:
         await msg.edit(f"`{ex}`")
-    
