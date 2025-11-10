@@ -30,7 +30,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
 import httpx
-
+from . import *
 from telethon import events
 from telethon.tl.types import Message
 
@@ -403,3 +403,29 @@ async def vc_volume(e: Message):
         return await e.eor("Give a number 0-200.")
     _manager(e).state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
+
+@ultroid_cmd(pattern=r"play(?:\s+(.+))?$", groups_only=True)
+async def vc_play(e: Message):
+    chat_id = _cid(e)
+    arg = (e.pattern_match.group(1) or "").strip()
+    
+    if e.is_reply and not arg:
+        r = await e.get_reply_message()
+        if r and (r.audio or r.voice or r.video or r.document):
+            msg = await e.eor("Downloading replied media…")
+            path = await e.client.download_media(r, file=DOWNLOAD_DIR)
+            await _manager(e).play(chat_id, Track(title=os.path.basename(path), source=path, requested_by=str(e.sender_id)))
+            return await msg.edit("Queued replied media.")
+    
+    if not arg:
+        return await e.eor("Usage: `.vcplay <url|query>` or reply to media.")
+    
+    msg = await e.eor("Resolving & downloading…")
+    mgr = _manager(e)
+    try:
+        src, is_local = await mgr.resolver.download_audio_to_path(arg)
+        title = await mgr.resolver.extract_title(arg)
+        await mgr.play(chat_id, Track(title=title, source=src, requested_by=str(e.sender_id)))
+        await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
+    except Exception as ex:
+        await msg.edit(f"`{ex}`")
