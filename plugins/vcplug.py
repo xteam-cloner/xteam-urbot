@@ -11,7 +11,7 @@ import httpx
 from . import *
 from telethon import events, TelegramClient 
 from telethon.tl.types import Message
-from configs import Var # <-- Mengambil BOT_TOKEN dari configs
+from xteam.configs import Var # <-- Mengambil BOT_TOKEN dari configs
 
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream 
