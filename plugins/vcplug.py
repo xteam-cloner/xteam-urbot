@@ -8,12 +8,20 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
 import httpx
+# Pastikan semua impor Ultroid ini ada di dalam file vc_music.py Anda
 from . import *
 from telethon import events
 from telethon.tl.types import Message
+# Tambahkan impor vcClient dari pyUltroid sesuai struktur yang Anda berikan
+try:
+    from pyUltroid import vcClient
+except ImportError:
+    # Fallback jika struktur import Ultroid berbeda (sangat penting)
+    vcClient = None
+    pass 
 
 from pytgcalls import PyTgCalls
-from pytgcalls.types import MediaStream # DIKOREKSI: Menggunakan MediaStream
+from pytgcalls.types import MediaStream 
 from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient 
@@ -43,7 +51,7 @@ DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 @dataclass
 class Track:
     title: str
-    source: str  # local file path or direct stream URL
+    source: str
     requested_by: str
 
 class Queue:
@@ -67,7 +75,7 @@ class VCState:
         self.queue = Queue()
         self.now_playing: Optional[Track] = None
         self.lock = asyncio.Lock()
-        self.volume = 100  # % applied to *next* track via ffmpeg filter
+        self.volume = 100
 
 # ─────────────────────────────────────────────────────────────
 # Resolver: Bitflow API + yt-dlp
@@ -106,7 +114,6 @@ class YouTubeResolver:
         """Return (path_or_url, is_local)"""
         target = await self._search_to_url(query_or_url)
 
-        # Try Bitflow for direct audio/video URL meta
         bf = await self._bitflow(target, want_video=False)
         if bf and bf.get("url") and bf.get("videoid"):
             filename = os.path.join(DOWNLOAD_DIR, f"{bf['videoid']}.{bf.get('ext','m4a')}")
@@ -126,7 +133,6 @@ class YouTubeResolver:
                 await loop.run_in_executor(None, _dl)
             return filename, True
 
-        # Fallback: try to resolve a direct audio URL (no download)
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp", "-g", "-f", "bestaudio/best", target,
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -140,7 +146,6 @@ class YouTubeResolver:
         raise RuntimeError(f"Failed to resolve audio: {err}")
 
     async def extract_title(self, query_or_url: str) -> str:
-        # Lightweight title fetch using yt-dlp metadata (no download)
         opts = {"quiet": True, "skip_download": True}
         with yt_dlp.YoutubeDL(opts) as y:
             info = y.extract_info(await self._search_to_url(query_or_url), download=False)
@@ -149,37 +154,40 @@ class YouTubeResolver:
             return info.get("title") or "Unknown Title"
 
 # ─────────────────────────────────────────────────────────────
-# VC Manager (Perbaikan Inisialisasi dan MediaStream)
+# VC Manager (Perbaikan Inisialisasi menggunakan vcClient)
 # ─────────────────────────────────────────────────────────────
 
 class VCManager:
-    def __init__(self, client):
-        self.client = client
-        self.tgcalls: Optional[PyTgCalls] = None # Inisialisasi ditunda
+    # Menerima main_client (untuk pesan) dan vc_client (untuk voice chat)
+    def __init__(self, main_client, vc_client):
+        self.client = main_client
+        self.vc_client = vc_client # <-- Klien khusus PyTgCalls
+        self.tgcalls: Optional[PyTgCalls] = None 
         self.states: Dict[int, VCState] = {}
         self.started = False
         self.resolver = YouTubeResolver()
 
     async def ensure_initialized(self):
-        """Metode aman untuk inisialisasi PyTgCalls setelah klien Telethon siap."""
+        """Metode aman untuk inisialisasi PyTgCalls dengan vcClient."""
         if self.tgcalls is None:
-            # Pastikan klien Telethon terhubung
-            if not self.client.is_connected():
-                await self.client.start() 
-                
-            # Inisialisasi PyTgCalls (yang sering menyebabkan InvalidMTProtoClient)
-            try:
-                self.tgcalls = PyTgCalls(self.client)
-            except InvalidMTProtoClient as e:
-                raise RuntimeError(f"Gagal inisialisasi PyTgCalls. Coba perbarui pytgcalls/telethon.") from e
+            if not self.vc_client:
+                raise RuntimeError("vcClient tidak tersedia. Pastikan impor 'from pyUltroid import vcClient' berhasil.")
 
-            # Tambahkan Event Handler
+            # Pastikan vcClient sudah terhubung
+            if not self.vc_client.is_connected():
+                await self.vc_client.start()
+                
+            # Inisialisasi PyTgCalls DENGAN vcClient
+            try:
+                self.tgcalls = PyTgCalls(self.vc_client) 
+            except InvalidMTProtoClient as e:
+                raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Klien VC tidak valid. Coba perbarui pytgcalls/telethon/Ultroid.") from e
+
             @self.tgcalls.on_stream_end()
             async def on_end(_, update):
                 chat_id = update.chat_id
                 await self._on_track_end(chat_id)
 
-            # Mulai PyTgCalls
             await self.tgcalls.start()
             self.started = True
             
@@ -198,23 +206,13 @@ class VCManager:
             pass
         self.states.pop(chat_id, None)
 
-    async def play(self, chat_id: int, track: Track):
-        st = self.state(chat_id)
-        async with st.lock:
-            if st.now_playing is None:
-                await self._start_stream(chat_id, track)
-            else:
-                st.queue.push(track)
-
     def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> MediaStream:
         """Membangun objek MediaStream."""
         gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
         
         if is_local:
-            # Menggunakan MediaStream.file() untuk file lokal
             stream = MediaStream.file(src) 
         else:
-            # Menggunakan MediaStream.url() untuk URL stream
             stream = MediaStream.url(src)
 
         if hasattr(stream, 'additional_ffmpeg_parameters'):
@@ -236,6 +234,14 @@ class VCManager:
         except Exception:
             await self.tgcalls.change_stream(chat_id, stream)
 
+    async def play(self, chat_id: int, track: Track):
+        st = self.state(chat_id)
+        async with st.lock:
+            if st.now_playing is None:
+                await self._start_stream(chat_id, track)
+            else:
+                st.queue.push(track)
+                
     async def _on_track_end(self, chat_id: int):
         st = self.state(chat_id)
         async with st.lock:
@@ -275,11 +281,12 @@ _vc: Optional[VCManager] = None
 def _cid(e: Message) -> int:
     return e.chat_id
 
-# Fungsi _manager diubah menjadi async dan memanggil ensure_initialized
+# Fungsi _manager diubah menjadi async dan meneruskan vcClient
 async def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
-        _vc = VCManager(e.client)
+        # PENTING: Meneruskan klien Ultroid dan klien VC yang diimpor
+        _vc = VCManager(e.client, vcClient) 
     return await _vc.ensure_initialized() 
 
 # ─────────────────────────────────────────────────────────────
@@ -290,7 +297,6 @@ async def _manager(e) -> VCManager:
 @ultroid_cmd(pattern="vcjoin$", groups_only=True)
 async def vc_join(e: Message):
     try:
-        # Menjamin inisialisasi PyTgCalls yang aman
         _ = await _manager(e) 
         await e.eor("VC ready. Use `.vcplay <query|url>` or reply to media.")
     except Exception as ex:
@@ -436,4 +442,4 @@ async def vc_play_alias(e: Message):
         await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
     except Exception as ex:
         await msg.edit(f"`{ex}`")
-            
+    
