@@ -8,10 +8,9 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Union, Any
 
 import httpx
-from . import * # Asumsi utilitas bot
-from telethon import events, TelegramClient 
+from . import * from telethon import events, TelegramClient 
 from telethon.tl.types import Message
-# from xteam.configs import Var # <-- Dihapus karena tidak lagi menggunakan BOT_TOKEN
+from xteam.configs import Var # <-- Mengimpor Var sesuai permintaan
 
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream, GroupCallConfig
@@ -26,7 +25,7 @@ from youtubesearchpython.__future__ import VideosSearch
 
 from . import ultroid_cmd
 
-# --- ASUMSI GLOBAL YANG DIPERLUKAN ---
+# --- GLOBAL CONFIGS ---
 class DummyConfig:
     AUTO_DOWNLOADS_CLEAR = "False"
 config = DummyConfig()
@@ -35,11 +34,11 @@ YOUTUBE_REGEX = r"(?:youtube\.com|youtu\.be)"
 BITFLOW_API = "https://bitflow.in/api/youtube"
 BITFLOW_API_KEY = "youtube321bot"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads") 
-# VC_BOT_TOKEN dihapus karena menggunakan klien utama
-# --- AKHIR ASUMSI GLOBAL ---
+USER_SESSION = Var.SESSION # Menggunakan variabel Var.SESSION
+# --- AKHIR GLOBAL CONFIGS ---
 
 # ─────────────────────────────────────────────────────────────
-# Queue/State
+## 🎧 Queue and State Management
 # ─────────────────────────────────────────────────────────────
 
 @dataclass
@@ -72,7 +71,7 @@ class VCState:
         self.volume = 100
 
 # ─────────────────────────────────────────────────────────────
-# Resolver
+## 🔗 Media Resolver (YouTube/Stream)
 # ─────────────────────────────────────────────────────────────
 
 class YouTubeResolver:
@@ -150,32 +149,30 @@ class YouTubeResolver:
             return info.get("title") or "Unknown Title"
 
 # ─────────────────────────────────────────────────────────────
-# VC Manager
+## 📱 VC Manager (Single Client - STRING SESSION)
 # ─────────────────────────────────────────────────────────────
 
 class VCManager:
-    def __init__(self, main_client, vc_client):
-        # main_client dan vc_client sekarang adalah instance Userbot yang sama
-        self.client = main_client
-        self.vc_client = vc_client 
+    def __init__(self, client):
+        self.client = client
+        self.vc_client = client 
         self.tgcalls: Optional[PyTgCalls] = None 
         self.states: Dict[int, VCState] = {}
         self.started = False
         self.resolver = YouTubeResolver()
 
     async def ensure_initialized(self):
-        """Memastikan PyTgCalls diinisialisasi pada klien Userbot."""
+        """Memastikan PyTgCalls diinisialisasi pada klien Userbot (STRING SESSION)."""
         if self.tgcalls is None:
             
-            # Karena ini Userbot, tidak perlu memulai/memeriksa token bot
             try:
-                await self.vc_client.get_me() 
+                await self.client.get_me() 
             except Exception as e:
                 raise RuntimeError(f"Klien Userbot gagal melewati cek sesi: {e}")
 
             try:
-                # Inisialisasi PyTgCalls dengan klien Userbot
-                self.tgcalls = PyTgCalls(self.vc_client) 
+                # Inisialisasi PyTgCalls dengan klien Userbot (STRING SESSION)
+                self.tgcalls = PyTgCalls(self.client) 
             except InvalidMTProtoClient as e:
                 raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Masalah versi/dependensi.") from e
 
@@ -213,20 +210,18 @@ class VCManager:
                 f"volume={gain_db}dB"
             ]
         )
-        
         return stream
 
     async def _start_stream(self, chat_id: int, track: Track):
         st = self.state(chat_id)
         st.now_playing = track
         if not self.tgcalls:
-            raise RuntimeError("VCManager belum diinisialisasi.")
+            raise RuntimeError("VCManager belum diinisialisasi. Coba jalankan .vcjoin terlebih dahulu.")
             
         is_local = os.path.exists(track.source)
         stream = self._build_stream(track.source, st.volume, is_local)
         
         try:
-            # Userbot seharusnya bisa bergabung
             await self.tgcalls.join_group_call(chat_id, stream)
         except Exception:
             await self.tgcalls.change_stream(chat_id, stream)
@@ -279,23 +274,25 @@ _vc: Optional[VCManager] = None
 def _cid(e: Message) -> int:
     return e.chat_id
 
+# MANAGER KLIEN UTAMA (STRING SESSION)
 async def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
-        
-        # Userbot client sudah ada di e.client
-        userbot_client = e.client 
+        userbot_client = e.client # Klien STRING SESSION Anda
         
         if not userbot_client.is_connected():
-            raise RuntimeError("Klien Userbot belum terhubung.")
+            raise RuntimeError("Klien Userbot (STRING SESSION) belum terhubung.")
             
-        # Klien utama dan klien VC sama-sama menggunakan Userbot
-        _vc = VCManager(userbot_client, userbot_client) 
+        if not USER_SESSION:
+            raise RuntimeError("Variabel SESSION tidak ditemukan di configs.Var.")
+
+        # Inisialisasi VCManager dengan klien Userbot
+        _vc = VCManager(userbot_client) 
     
     return await _vc.ensure_initialized() 
 
 # ─────────────────────────────────────────────────────────────
-# Commands
+## ⚡ Commands (Ultroid Handlers)
 # ─────────────────────────────────────────────────────────────
 
 @ultroid_cmd(pattern="vcjoin$", groups_only=True)
@@ -420,7 +417,7 @@ async def vc_volume(e: Message):
     mgr.state(_cid(e)).volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
 
-@ultroid_cmd(pattern=r"play(?:\s+(.+))?$", groups_only=True)
+@ultroid_cmd(pattern=r"player(?:\s+(.+))?$", groups_only=True)
 async def vc_play_alias(e: Message):
     chat_id = _cid(e)
     arg = (e.pattern_match.group(1) or "").strip()
@@ -450,4 +447,4 @@ async def vc_play_alias(e: Message):
         await msg.edit(f"Gagal memutar: `{ex}`")
     except Exception as ex:
         await msg.edit(f"Error tak terduga: `{ex}`")
-            
+                              
