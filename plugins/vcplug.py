@@ -1,31 +1,27 @@
 from __future__ import annotations
+
 import asyncio
 import re
 import tempfile
 import os
+import contextlib # Dipertahankan karena digunakan di force_stop_stream (jika ada)
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union, Any
 
 import httpx
-from . import *
+from . import * # Asumsi utilitas bot
 from telethon import events, TelegramClient 
 from telethon.tl.types import Message
 from xteam.configs import Var # <-- Mengambil BOT_TOKEN dari configs
 
 from pytgcalls import PyTgCalls
-from pytgcalls.types import MediaStream 
-from pytgcalls.types.input_stream import AudioPiped, AudioStream # <--- KOREKSI: Tambahkan import untuk stream audio
-from pytgcalls import filters as fl # Alias untuk filters
+from pytgcalls.types import MediaStream, GroupCallConfig
+from pytgcalls import filters as fl
+# Menghapus impor yang tidak digunakan di VCManager dasar
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient 
 from pytgcalls.types import (
-    ChatUpdate,
-    StreamEnded, # Kelas yang digunakan untuk event handler
-    GroupCallConfig,
-    GroupCallParticipant,
-    UpdatedGroupCallParticipant,
-    AudioQuality,
-    VideoQuality,
+    StreamEnded,
 )
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
@@ -146,7 +142,7 @@ class YouTubeResolver:
             return info.get("title") or "Unknown Title"
 
 # ─────────────────────────────────────────────────────────────
-# VC Manager (Bot Client & Event Handler Fix)
+# VC Manager
 # ─────────────────────────────────────────────────────────────
 
 class VCManager:
@@ -162,26 +158,21 @@ class VCManager:
         """Metode aman untuk inisialisasi PyTgCalls dengan Bot Client baru."""
         if self.tgcalls is None:
             
-            # 1. Pastikan Bot Client terhubung
             if not self.vc_client.is_connected():
                 await self.vc_client.start(bot_token=VC_BOT_TOKEN)
             
-            # 2. Cek sesi agresif
             try:
                 await self.vc_client.get_me() 
             except Exception as e:
                 raise RuntimeError(f"Klien Bot VC gagal melewati cek sesi: {e}")
 
-            # 3. Inisialisasi PyTgCalls
             try:
                 self.tgcalls = PyTgCalls(self.vc_client) 
             except InvalidMTProtoClient as e:
                 raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Masalah versi/dependensi.") from e
 
-            # 4. KOREKSI EVENT HANDLER: Menggunakan on_update() dengan filter StreamEnded
             @self.tgcalls.on_update(fl.UpdateType.STREAM_ENDED) 
             async def on_end(_, update):
-                # Memastikan event yang diterima adalah StreamEnded sebelum mengakses chat_id
                 if isinstance(update, StreamEnded):
                     chat_id = update.chat_id
                     await self._on_track_end(chat_id)
@@ -205,16 +196,16 @@ class VCManager:
         self.states.pop(chat_id, None)
 
     def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> MediaStream:
+        """Menggunakan konstruktor MediaStream() universal."""
         gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
         
-        # KOREKSI: Menggunakan AudioPiped untuk file lokal dan AudioStream untuk URL
-        if is_local:
-            stream = AudioPiped(src) 
-        else:
-            stream = AudioStream(src)
-
-        if hasattr(stream, 'additional_ffmpeg_parameters'):
-            stream.additional_ffmpeg_parameters = ["-af", f"volume={gain_db}dB"]
+        stream = MediaStream(
+            source=src,
+            ffmpeg_parameters=[
+                "-af", 
+                f"volume={gain_db}dB"
+            ]
+        )
         
         return stream
 
@@ -280,27 +271,23 @@ _vc: Optional[VCManager] = None
 def _cid(e: Message) -> int:
     return e.chat_id
 
-# Fungsi _manager membuat dan menggunakan klien Bot baru dengan Var.BOT_TOKEN
 async def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
         if not VC_BOT_TOKEN:
             raise RuntimeError("BOT_TOKEN tidak ditemukan di configs.Var. Mohon setel BOT_TOKEN Ultroid.")
         
-        # 1. Inisialisasi Klien Bot Baru
         new_client = TelegramClient(
             "vc_session", 
             e.client.api_id, 
             e.client.api_hash 
         )
         
-        # 2. Mulai klien sebagai bot
         try:
             vc_client_instance = await new_client.start(bot_token=VC_BOT_TOKEN)
         except Exception as err:
             raise RuntimeError(f"Gagal memulai Klien Bot VC: {err}")
         
-        # 3. Teruskan klien Bot yang sudah siap ke VCManager
         _vc = VCManager(e.client, vc_client_instance) 
     
     return await _vc.ensure_initialized() 
@@ -457,3 +444,4 @@ async def vc_play_alias(e: Message):
         await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
     except Exception as ex:
         await msg.edit(f"`{ex}`")
+            
