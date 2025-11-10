@@ -11,7 +11,7 @@ pillow
 pydantic
 #pytgcalls==3.0.0.dev24
 #ntgcalls==2.0.5
-py-tgcalls==2.2.8
+py-tgcalls==1.0.9
 python-dotenv==1.0.1
 #tgcrypto==1.2.5
 python-decouple
