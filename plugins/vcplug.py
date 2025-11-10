@@ -36,7 +36,7 @@ from telethon.tl.types import Message
 
 # Menghapus blok try...except dari imports
 from pytgcalls import PyTgCalls
-from pytgcalls.types import MediaStream, AudioStream 
+from pytgcalls.types import MediaStream 
 from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall
