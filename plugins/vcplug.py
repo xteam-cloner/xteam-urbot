@@ -4,7 +4,7 @@ import asyncio
 import re
 import tempfile
 import os
-import contextlib # Dipertahankan karena digunakan di force_stop_stream (jika ada)
+import contextlib 
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Union, Any
 
@@ -17,16 +17,23 @@ from xteam.configs import Var # <-- Mengambil BOT_TOKEN dari configs
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream, GroupCallConfig
 from pytgcalls import filters as fl
-# Menghapus impor yang tidak digunakan di VCManager dasar
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient 
 from pytgcalls.types import (
-    StreamEnded,
+    StreamEnded, # <-- KOREKSI: Import StreamEnded untuk digunakan sebagai filter
 )
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 
 from . import ultroid_cmd
+
+# --- ASUMSI GLOBAL YANG DIPERLUKAN UNTUK KOMPATIBILITAS ---
+# Karena fungsi eksternal dihapus, variabel ini tidak memiliki efek fungsional
+# namun dipertahankan untuk menghindari NameError jika diakses oleh logika yang tidak terpotong.
+class DummyConfig:
+    AUTO_DOWNLOADS_CLEAR = "False"
+config = DummyConfig()
+# --- AKHIR ASUMSI GLOBAL ---
 
 YOUTUBE_REGEX = r"(?:youtube\.com|youtu\.be)"
 BITFLOW_API = "https://bitflow.in/api/youtube"
@@ -171,11 +178,11 @@ class VCManager:
             except InvalidMTProtoClient as e:
                 raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Masalah versi/dependensi.") from e
 
-            @self.tgcalls.on_update(fl.UpdateType.STREAM_ENDED) 
-            async def on_end(_, update):
-                if isinstance(update, StreamEnded):
-                    chat_id = update.chat_id
-                    await self._on_track_end(chat_id)
+            # KOREKSI: Menggunakan StreamEnded sebagai filter
+            @self.tgcalls.on_update(StreamEnded) 
+            async def on_end(_, update: StreamEnded):
+                chat_id = update.chat_id
+                await self._on_track_end(chat_id)
 
             await self.tgcalls.start()
             self.started = True
@@ -221,6 +228,7 @@ class VCManager:
         try:
             await self.tgcalls.join_group_call(chat_id, stream)
         except Exception:
+            # Jika sudah dalam panggilan, coba change_stream
             await self.tgcalls.change_stream(chat_id, stream)
 
     async def play(self, chat_id: int, track: Track):
@@ -444,4 +452,4 @@ async def vc_play_alias(e: Message):
         await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
     except Exception as ex:
         await msg.edit(f"`{ex}`")
-            
+                               
