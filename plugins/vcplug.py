@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import asyncio
 import re
 import tempfile
@@ -15,6 +14,7 @@ from xteam.configs import Var # <-- Mengambil BOT_TOKEN dari configs
 
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream 
+from pytgcalls.types.input_stream import AudioPiped, AudioStream # <--- KOREKSI: Tambahkan import untuk stream audio
 from pytgcalls import filters as fl # Alias untuk filters
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient 
@@ -207,10 +207,11 @@ class VCManager:
     def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> MediaStream:
         gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
         
+        # KOREKSI: Menggunakan AudioPiped untuk file lokal dan AudioStream untuk URL
         if is_local:
-            stream = MediaStream.file(src) 
+            stream = AudioPiped(src) 
         else:
-            stream = MediaStream.url(src)
+            stream = AudioStream(src)
 
         if hasattr(stream, 'additional_ffmpeg_parameters'):
             stream.additional_ffmpeg_parameters = ["-af", f"volume={gain_db}dB"]
