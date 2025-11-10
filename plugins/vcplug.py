@@ -1,24 +1,17 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import re
 import tempfile
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
 import httpx
-# Pastikan semua impor Ultroid ini ada di dalam file vc_music.py Anda
+import os # Tetap diperlukan untuk DOWNLOAD_DIR
 from . import *
-from telethon import events
+from telethon import events, TelegramClient 
 from telethon.tl.types import Message
-# Tambahkan impor vcClient dari pyUltroid sesuai struktur yang Anda berikan
-try:
-    from xteam import vcClient
-except ImportError:
-    # Fallback jika struktur import Ultroid berbeda (sangat penting)
-    vcClient = None
-    pass 
+from xteam.configs import Var # <-- IMPOR UTAMA
 
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream 
@@ -43,6 +36,7 @@ YOUTUBE_REGEX = r"(?:youtube\.com|youtu\.be)"
 BITFLOW_API = "https://bitflow.in/api/youtube"
 BITFLOW_API_KEY = "youtube321bot"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads") 
+VC_BOT_TOKEN = Var.BOT_TOKEN # <-- MENGGUNAKAN BOT_TOKEN DARI CONFIGS
 
 # ─────────────────────────────────────────────────────────────
 # Queue/State
@@ -78,7 +72,7 @@ class VCState:
         self.volume = 100
 
 # ─────────────────────────────────────────────────────────────
-# Resolver: Bitflow API + yt-dlp
+# Resolver: Bitflow API + yt-dlp (Tidak Berubah)
 # ─────────────────────────────────────────────────────────────
 
 class YouTubeResolver:
@@ -111,9 +105,7 @@ class YouTubeResolver:
         return q
 
     async def download_audio_to_path(self, query_or_url: str) -> Tuple[str, bool]:
-        """Return (path_or_url, is_local)"""
         target = await self._search_to_url(query_or_url)
-
         bf = await self._bitflow(target, want_video=False)
         if bf and bf.get("url") and bf.get("videoid"):
             filename = os.path.join(DOWNLOAD_DIR, f"{bf['videoid']}.{bf.get('ext','m4a')}")
@@ -154,34 +146,38 @@ class YouTubeResolver:
             return info.get("title") or "Unknown Title"
 
 # ─────────────────────────────────────────────────────────────
-# VC Manager (Perbaikan Inisialisasi menggunakan vcClient)
+# VC Manager
 # ─────────────────────────────────────────────────────────────
 
 class VCManager:
-    # Menerima main_client (untuk pesan) dan vc_client (untuk voice chat)
     def __init__(self, main_client, vc_client):
         self.client = main_client
-        self.vc_client = vc_client # <-- Klien khusus PyTgCalls
+        self.vc_client = vc_client
         self.tgcalls: Optional[PyTgCalls] = None 
         self.states: Dict[int, VCState] = {}
         self.started = False
         self.resolver = YouTubeResolver()
 
     async def ensure_initialized(self):
-        """Metode aman untuk inisialisasi PyTgCalls dengan vcClient."""
+        """Metode aman untuk inisialisasi PyTgCalls dengan Bot Client baru."""
         if self.tgcalls is None:
-            if not self.vc_client:
-                raise RuntimeError("vcClient tidak tersedia. Pastikan impor 'from pyUltroid import vcClient' berhasil.")
-
-            # Pastikan vcClient sudah terhubung
+            
             if not self.vc_client.is_connected():
-                await self.vc_client.start()
-                
-            # Inisialisasi PyTgCalls DENGAN vcClient
+                # Klien sudah di-start di _manager, ini hanya cek dan start ulang jika perlu
+                await self.vc_client.start(bot_token=VC_BOT_TOKEN)
+            
+            # Cek sesi agar terautentikasi (dummy call)
+            try:
+                await self.vc_client.get_me() 
+            except Exception as e:
+                raise RuntimeError(f"Klien Bot VC gagal melewati cek sesi: {e}")
+
+            # Inisialisasi PyTgCalls DENGAN klien Bot baru
             try:
                 self.tgcalls = PyTgCalls(self.vc_client) 
             except InvalidMTProtoClient as e:
-                raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Klien VC tidak valid. Coba perbarui pytgcalls/telethon/Ultroid.") from e
+                # Ini menunjukkan masalah versi yang mendalam
+                raise RuntimeError(f"Gagal inisialisasi PyTgCalls: Masalah versi/dependensi (pytgcalls/telethon/ntgcalls).") from e
 
             @self.tgcalls.on_stream_end()
             async def on_end(_, update):
@@ -207,7 +203,6 @@ class VCManager:
         self.states.pop(chat_id, None)
 
     def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> MediaStream:
-        """Membangun objek MediaStream."""
         gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
         
         if is_local:
@@ -274,6 +269,7 @@ class VCManager:
             except Exception:
                 pass
 
+
 # Singleton manager
 _vc: Optional[VCManager] = None
 
@@ -281,16 +277,33 @@ _vc: Optional[VCManager] = None
 def _cid(e: Message) -> int:
     return e.chat_id
 
-# Fungsi _manager diubah menjadi async dan meneruskan vcClient
+# Fungsi _manager diubah untuk membuat dan menggunakan klien Bot baru dengan Var.BOT_TOKEN
 async def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
-        # PENTING: Meneruskan klien Ultroid dan klien VC yang diimpor
-        _vc = VCManager(e.client, vcClient) 
+        if not VC_BOT_TOKEN:
+            raise RuntimeError("BOT_TOKEN tidak ditemukan di configs.Var. Mohon setel BOT_TOKEN Ultroid.")
+        
+        # 1. Inisialisasi Klien Bot Baru
+        new_client = TelegramClient(
+            "vc_session", 
+            e.client.api_id, # Re-use API ID/HASH dari klien utama Ultroid
+            e.client.api_hash 
+        )
+        
+        # 2. Mulai klien sebagai bot
+        try:
+            vc_client_instance = await new_client.start(bot_token=VC_BOT_TOKEN)
+        except Exception as err:
+            raise RuntimeError(f"Gagal memulai Klien Bot VC: {err}")
+        
+        # 3. Teruskan klien Bot yang sudah siap ke VCManager
+        _vc = VCManager(e.client, vc_client_instance) 
+    
     return await _vc.ensure_initialized() 
 
 # ─────────────────────────────────────────────────────────────
-# Commands (Semua memanggil _manager(e) dengan await)
+# Commands (Tidak Berubah)
 # ─────────────────────────────────────────────────────────────
 
 
