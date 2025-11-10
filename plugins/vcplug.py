@@ -14,7 +14,7 @@ from telethon import events
 from telethon.tl.types import Message
 # Tambahkan impor vcClient dari pyUltroid sesuai struktur yang Anda berikan
 try:
-    from pyUltroid import vcClient
+    from xteam import vcClient
 except ImportError:
     # Fallback jika struktur import Ultroid berbeda (sangat penting)
     vcClient = None
