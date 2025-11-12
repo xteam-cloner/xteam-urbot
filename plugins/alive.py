@@ -62,7 +62,7 @@ def format_message_text(uptime):
                        f"✵ Python : {pyver()}\n" \
                        f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n"
 
-@xteam_cmd(pattern="alive$")
+@xteam_cmd(pattern="live$")
 async def alive(event):
     start = time.time()
     pro = await event.eor("🔥")
