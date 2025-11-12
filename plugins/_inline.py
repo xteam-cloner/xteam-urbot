@@ -81,7 +81,7 @@ PING_BUTTONS = [
 
 ALIVE_BUTTONS = [
     [
-        Button.inline("🏡 PING 🏡", data="ping"),
+        Button.inline("🏡 PING 🏡", data="ping_btn"),
     ],
 
 ]
@@ -634,6 +634,27 @@ async def inline_ping_handler(ult):
     await ult.answer([result], cache_time=0)
 
 
+@callback(re.compile("ping_btn(.*)"), owner=False) 
+async def callback_ping_handler(ult):
+    
+    match_data = ult.data_match.group(1).decode("utf-8") if ult.data_match.group(1) else ""
+    
+    try:
+        uptime = time_formatter((time.time() - start_time) * 1000) 
+    except NameError:
+        uptime = "N/A" 
+        
+    message_text = format_message_text(uptime) 
+
+    await ult.edit(
+        message_text, 
+        buttons=PING_BUTTONS, 
+        link_preview=False,
+        parse_mode="html"
+    )
+    
+    await ult.answer(f"Status Bot berhasil diperbarui. Uptime: {uptime}", alert=False)
+    
 #--------------------------------------------
 
 @ultroid_cmd(pattern="alive$")
