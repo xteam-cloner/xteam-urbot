@@ -38,7 +38,7 @@ async def buat_gambar(event):
 
 
 import requests
-from .. import *
+from . import *
 from telethon import events
 
 @ultroid_cmd(pattern="meta")
