@@ -1,93 +1,190 @@
-# Nama File: joincall.py
+import asyncio
+from telethon import TelegramClient, events
+from pytgcalls import PyTgCalls
+from pytgcalls.exceptions import NoActiveGroupCall
+from pytgcalls.types import MediaStream
+from telethon.tl.types import User
 
-from . import *
-from telethon import functions, types
-from telethon.tl.types import InputGroupCall, DataJSON, InputPeerEmpty, InputPeerChat, InputPeerChannel
-from telethon.errors import *
+# ✅ Mengambil konfigurasi dan fungsi YouTube dari framework Ultroid
+from xteam.configs import Var 
+from xteam.fns.ytdl import download_yt, get_yt_link
 
-# Sesuaikan dengan prefiks perintah Anda jika bukan '.'
-@ultroid_cmd(pattern="joincall(?: |$)(.*)")
-async def join_group_call_cmd(event):
-    """
-    Bergabung ke Panggilan Grup.
-    Contoh Penggunaan: .joincall <call_id> <access_hash> <join_as_id_atau_username> <params_json> [muted|unmuted] [video_stopped|video_on] [invite_hash]
-    CATATAN: Fungsi ini membutuhkan Data JSON WebRTC (params) yang valid untuk koneksi penuh.
-    """
-    if event.fwd_from:
-        return
+# --- KONFIGURASI ---
+OWNER_ID = Var.OWNER_ID 
+ASST_SESSION = Var.STRING_SESSION
+API_ID = Var.API_ID 
+API_HASH = Var.API_HASH 
 
-    # Ambil argumen dari perintah
-    args = event.pattern_match.group(1).split()
+DEFAULT_STREAM_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' 
+voice_chat_status = {}
+
+# --- KLIEN ASISTEN & PYTGCALLS (SESUAI PERMINTAAN) ---
+
+# Inisialisasi Klien Asisten (asst diganti jadi app)
+app = TelegramClient(
+    session=ASST_SESSION,
+    api_id=API_ID,
+    api_hash=API_HASH
+)
+
+# Inisialisasi PyTgCalls (pytgcalls_app diganti jadi Call_py)
+Call_py = PyTgCalls(app)
+
+# --- FUNGSI PENGELOLAAN ASISTEN ---
+
+async def start_assistant():
+    """Memastikan klien asisten dimulai dan PyTgCalls aktif."""
+    try:
+        # Menggunakan 'app'
+        if not await app.is_user_authorized():
+            print("Memulai Klien Asisten...")
+            await app.start()
+        
+        # Menggunakan 'Call_py'
+        if not Call_py.is_running:
+            print("Memulai PyTgCalls...")
+            await Call_py.start()
+        
+        print("Asisten Voice Chat siap.")
+
+    except Exception as e:
+        print(f"❌ ERROR: Gagal memulai klien asisten/PyTgCalls. Cek konfigurasi: {e}")
+
+# Panggil fungsi startup saat plugin dimuat
+asyncio.create_task(start_assistant())
+
+# --- FILTER PERINTAH ---
+
+def is_user_command(event):
+    """Memastikan pengirim adalah akun yang memiliki OWNER_ID."""
+    return isinstance(event.sender, User) and event.sender.id == OWNER_ID
+
+# --- HANDLER PERINTAH ULTROID (CLIENT UTAMA) ---
+
+@client.on(events.NewMessage(pattern=r"[.!/](?:joinvc|join)"))
+async def joinvc_handler(event):
+    """Bergabung ke obrolan suara saat ini dan putar stream default."""
     
-    if len(args) < 4:
-        await event.edit(
-            "**Penggunaan:** `.joincall <call_id> <access_hash> <join_as_id_atau_username> <params_json> [muted|unmuted] [video_stopped|video_on] [invite_hash]`\n"
-            "**Contoh:** `.joincall 12345 67890 @join_entity '{\"data\": \"webrtc_payload\"}' muted video_stopped`"
-        )
+    if not is_user_command(event):
         return
+
+    chat_id = event.chat_id
+    await event.edit("`Mencoba bergabung ke obrolan suara...`")
 
     try:
-        call_id = int(args[0])
-        call_access_hash = int(args[1])
-        join_as_peer_str = args[2]
-        params_json = args[3]
-        
-        # Optional Arguments
-        muted = True
-        video_stopped = True
-        invite_hash = None
-        
-        # Parse optional arguments
-        if len(args) > 4:
-            muted = args[4].lower() == 'muted'
-        if len(args) > 5:
-            video_stopped = args[5].lower() == 'video_stopped'
-        if len(args) > 6:
-            invite_hash = args[6]
-
-        await event.edit("Memproses... Mendapatkan entitas...")
-
-        # Dapatkan entitas untuk join_as
-        try:
-            join_as_peer = await event.client.get_input_entity(join_as_peer_str)
-        except Exception:
-            await event.edit("⚠️ Tidak dapat menemukan entitas `join_as` yang valid.")
-            return
-
-        # Buat objek TypeInputGroupCall dan TypeDataJSON
-        input_call = InputGroupCall(
-            id=call_id, 
-            access_hash=call_access_hash
+        # Menggunakan 'Call_py'
+        await Call_py.join(
+            chat_id,
+            MediaStream(DEFAULT_STREAM_URL)
         )
-        input_params = DataJSON(data=params_json)
-
-        await event.edit(f"Mencoba bergabung ke Panggilan Grup (ID: `{call_id}`)...")
-
-        # Panggil fungsi Telethon
-        result = await event.client(
-            functions.phone.JoinGroupCallRequest(
-                call=input_call,
-                join_as=join_as_peer,
-                params=input_params,
-                muted=muted,
-                video_stopped=video_stopped,
-                invite_hash=invite_hash,
-            )
-        )
-
-        # Proses hasil
-        await event.edit("✅ Berhasil mengirim permintaan bergabung ke Panggilan Grup.")
-        # Anda bisa menampilkan detail hasil, misalnya:
-        # await event.edit(f"✅ Berhasil bergabung!\n**Updates:** ```{result.stringify()}```")
-
-    except GroupCallNotFoundError:
-        await event.edit("❌ Panggilan Grup tidak ditemukan atau sudah berakhir.")
-    except GroupcallAddParticipantsFailedError:
-        await event.edit("❌ Gagal menambahkan partisipan (mungkin tidak ada izin).")
-    except GroupcallSsrcDuplicateMuchError:
-        await event.edit("❌ Error SSRC. Coba lagi dengan SSRC baru.")
-    except ValueError:
-        await event.edit("❌ Masukkan `call_id` dan `access_hash` sebagai angka.")
+        voice_chat_status[chat_id] = True
+        await event.edit(f"🎶 **Berhasil bergabung** ke obrolan suara dan mulai memutar URL default.")
+    
+    except NoActiveGroupCall:
+        await event.edit("⚠️ **Gagal:** Tidak ada Obrolan Suara aktif di grup ini.")
     except Exception as e:
-        await event.edit(f"❌ Terjadi kesalahan: `{e}`")
+        await event.edit(f"❌ **Terjadi Kesalahan** saat mencoba bergabung: `{e}`")
 
+
+@client.on(events.NewMessage(pattern=r"[.!/](?:play|playurl) (.*)"))
+async def play_url_handler(event):
+    """Mulai memutar URL yang diberikan (mengasumsikan input adalah URL)."""
+    
+    if not is_user_command(event):
+        return
+        
+    chat_id = event.chat_id
+    url_to_play = event.pattern_match.group(1).strip()
+    
+    await event.edit(f"`Mencoba memutar: {url_to_play}`...")
+
+    try:
+        if voice_chat_status.get(chat_id):
+            # Menggunakan 'Call_py'
+            await Call_py.change_stream(
+                chat_id,
+                MediaStream(url_to_play)
+            )
+            await event.edit(f"🔄 **Stream diperbarui** ke: {url_to_play}")
+        else:
+            # Menggunakan 'Call_py'
+            await Call_py.join(
+                chat_id,
+                MediaStream(url_to_play)
+            )
+            voice_chat_status[chat_id] = True
+            await event.edit(f"🎶 **Berhasil bergabung** dan mulai memutar: {url_to_play}")
+            
+    except NoActiveGroupCall:
+        await event.edit("⚠️ **Gagal:** Tidak ada Obrolan Suara aktif di grup ini.")
+    except Exception as e:
+        await event.edit(f"❌ **Terjadi Kesalahan** saat mencoba memutar: `{e}`")
+
+
+## 🎶 PERINTAH YPLAY (Pencarian YouTube menggunakan fungsi Ultroid)
+@client.on(events.NewMessage(pattern=r"[.!/]yplay (.*)"))
+async def yplay_handler(event):
+    """Mencari di YouTube (get_yt_link) dan memutar hasil pertama."""
+    
+    if not is_user_command(event):
+        return
+        
+    chat_id = event.chat_id
+    search_query = event.pattern_match.group(1).strip()
+    
+    if not search_query:
+        await event.edit("⚠️ Harap berikan kata kunci pencarian. Format: `[.]yplay <judul lagu>`")
+        return
+        
+    await event.edit(f"`Mencari {search_query} di YouTube menggunakan internal Ultroid...`")
+
+    try:
+        url_to_play = await get_yt_link(search_query) 
+        
+        if not url_to_play:
+            await event.edit("❌ **Gagal:** Video tidak ditemukan.")
+            return
+            
+        if voice_chat_status.get(chat_id):
+            # Menggunakan 'Call_py'
+            await Call_py.change_stream(
+                chat_id,
+                MediaStream(url_to_play)
+            )
+            await event.edit(f"🔄 **Stream diperbarui** ke: [{search_query}]({url_to_play})")
+        else:
+            # Menggunakan 'Call_py'
+            await Call_py.join(
+                chat_id,
+                MediaStream(url_to_play)
+            )
+            voice_chat_status[chat_id] = True
+            await event.edit(f"🎶 **Berhasil bergabung** dan mulai memutar: [{search_query}]({url_to_play})")
+            
+    except NoActiveGroupCall:
+        await event.edit("⚠️ **Gagal:** Tidak ada Obrolan Suara aktif di grup ini.")
+    except Exception as e:
+        await event.edit(f"❌ **Terjadi Kesalahan** saat memutar/mencari: `{e}`")
+
+
+@client.on(events.NewMessage(pattern=r"[.!/](?:leave|stop)"))
+async def leave_handler(event):
+    """Tinggalkan obrolan suara saat ini."""
+    
+    if not is_user_command(event):
+        return
+        
+    chat_id = event.chat_id
+    await event.edit("`Mencoba meninggalkan obrolan suara...`")
+    
+    try:
+        # Menggunakan 'Call_py'
+        await Call_py.leave(chat_id)
+        voice_chat_status[chat_id] = False
+        await event.edit("👋 **Berhasil meninggalkan** obrolan suara.")
+        
+    except NoActiveGroupCall:
+        await event.edit("⚠️ **Gagal:** Bot tidak ada di Obrolan Suara aktif di grup ini.")
+    except Exception as e:
+        await event.edit(f"❌ **Terjadi Kesalahan** saat mencoba meninggalkan: `{e}`")
+            
