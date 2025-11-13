@@ -10,37 +10,41 @@ from xteam.configs import Var
 from xteam.fns.ytdl import download_yt, get_yt_link
 
 # --- KONFIGURASI ---
-#OWNER_ID = Var.OWNER_ID 
-ASST_SESSION = Var.VC_SESSION
+# Catatan: Berdasarkan kode inti Ultroid yang Anda tunjukkan, 
+# variabel sesi klien asisten adalah VC_SESSION.
+OWNER_ID = OWNER_ID 
+VC_SESSION = Var.VC_SESSION # Session string akun asisten (Wajib format Telethon)
 API_ID = Var.API_ID 
 API_HASH = Var.API_HASH 
 
 DEFAULT_STREAM_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' 
 voice_chat_status = {}
+my_handler_id = None 
 
-# --- KLIEN ASISTEN & PYTGCALLS (SESUAI PERMINTAAN) ---
+# --- KLIEN ASISTEN & PYTGCALLS ---
 
-# Inisialisasi Klien Asisten (asst diganti jadi app)
+# Inisialisasi Klien Asisten (app)
 app = TelegramClient(
-    session=ASST_SESSION,
+    session=VC_SESSION,
     api_id=API_ID,
     api_hash=API_HASH
 )
 
-# Inisialisasi PyTgCalls (pytgcalls_app diganti jadi Call_py)
+# Inisialisasi PyTgCalls (Call_py)
 Call_py = PyTgCalls(app)
 
-# --- FUNGSI PENGELOLAAN ASISTEN ---
+# --- FUNGSI STARTUP (SOLUSI RUNTIME ERROR) ---
 
-async def start_assistant():
+async def start_assistant(event): 
     """Memastikan klien asisten dimulai dan PyTgCalls aktif."""
+    global my_handler_id
     try:
-        # Menggunakan 'app'
+        # 1. Menjalankan klien asisten ('app')
         if not await app.is_user_authorized():
             print("Memulai Klien Asisten...")
             await app.start()
         
-        # Menggunakan 'Call_py'
+        # 2. Menjalankan PyTgCalls
         if not Call_py.is_running:
             print("Memulai PyTgCalls...")
             await Call_py.start()
@@ -49,9 +53,9 @@ async def start_assistant():
 
     except Exception as e:
         print(f"❌ ERROR: Gagal memulai klien asisten/PyTgCalls. Cek konfigurasi: {e}")
-
-# Panggil fungsi startup saat plugin dimuat
-asyncio.create_task(start_assistant())
+        
+    # 3. Hapus handler setelah dijalankan agar tidak terpicu lagi (Penting!)
+    client.remove_event_handler(start_assistant, events.NewMessage(pattern=None))
 
 # --- FILTER PERINTAH ---
 
@@ -72,7 +76,6 @@ async def joinvc_handler(event):
     await event.edit("`Mencoba bergabung ke obrolan suara...`")
 
     try:
-        # Menggunakan 'Call_py'
         await Call_py.join(
             chat_id,
             MediaStream(DEFAULT_STREAM_URL)
@@ -88,7 +91,7 @@ async def joinvc_handler(event):
 
 @client.on(events.NewMessage(pattern=r"[.!/](?:play|playurl) (.*)"))
 async def play_url_handler(event):
-    """Mulai memutar URL yang diberikan (mengasumsikan input adalah URL)."""
+    """Mulai memutar URL yang diberikan (langsung)."""
     
     if not is_user_command(event):
         return
@@ -100,14 +103,12 @@ async def play_url_handler(event):
 
     try:
         if voice_chat_status.get(chat_id):
-            # Menggunakan 'Call_py'
             await Call_py.change_stream(
                 chat_id,
                 MediaStream(url_to_play)
             )
             await event.edit(f"🔄 **Stream diperbarui** ke: {url_to_play}")
         else:
-            # Menggunakan 'Call_py'
             await Call_py.join(
                 chat_id,
                 MediaStream(url_to_play)
@@ -121,7 +122,6 @@ async def play_url_handler(event):
         await event.edit(f"❌ **Terjadi Kesalahan** saat mencoba memutar: `{e}`")
 
 
-## 🎶 PERINTAH YPLAY (Pencarian YouTube menggunakan fungsi Ultroid)
 @client.on(events.NewMessage(pattern=r"[.!/]yplay (.*)"))
 async def yplay_handler(event):
     """Mencari di YouTube (get_yt_link) dan memutar hasil pertama."""
@@ -136,9 +136,10 @@ async def yplay_handler(event):
         await event.edit("⚠️ Harap berikan kata kunci pencarian. Format: `[.]yplay <judul lagu>`")
         return
         
-    await event.edit(f"`Mencari {search_query} di YouTube menggunakan internal Ultroid...`")
+    await event.edit(f"`Mencari {search_query} di YouTube...`")
 
     try:
+        # Fungsi internal Ultroid
         url_to_play = await get_yt_link(search_query) 
         
         if not url_to_play:
@@ -146,14 +147,12 @@ async def yplay_handler(event):
             return
             
         if voice_chat_status.get(chat_id):
-            # Menggunakan 'Call_py'
             await Call_py.change_stream(
                 chat_id,
                 MediaStream(url_to_play)
             )
             await event.edit(f"🔄 **Stream diperbarui** ke: [{search_query}]({url_to_play})")
         else:
-            # Menggunakan 'Call_py'
             await Call_py.join(
                 chat_id,
                 MediaStream(url_to_play)
@@ -178,7 +177,6 @@ async def leave_handler(event):
     await event.edit("`Mencoba meninggalkan obrolan suara...`")
     
     try:
-        # Menggunakan 'Call_py'
         await Call_py.leave(chat_id)
         voice_chat_status[chat_id] = False
         await event.edit("👋 **Berhasil meninggalkan** obrolan suara.")
@@ -187,4 +185,11 @@ async def leave_handler(event):
         await event.edit("⚠️ **Gagal:** Bot tidak ada di Obrolan Suara aktif di grup ini.")
     except Exception as e:
         await event.edit(f"❌ **Terjadi Kesalahan** saat mencoba meninggalkan: `{e}`")
+
+
+# --- PANGGIL FUNGSI STARTUP PADA EVENT LOOP (SETELAH KLIEN SIAP) ---
+
+# Handler ini berjalan segera setelah Ultroid dimulai (dan event loop berjalan), 
+# memicu fungsi 'start_assistant' sekali saja.
+client.add_event_handler(start_assistant, events.NewMessage(pattern=None)) 
             
