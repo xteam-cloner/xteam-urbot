@@ -11,7 +11,7 @@ from xteam.fns.ytdl import download_yt, get_yt_link
 
 # --- KONFIGURASI ---
 #OWNER_ID = Var.OWNER_ID 
-ASST_SESSION = Var.STRING_SESSION
+ASST_SESSION = Var.VC_SESSION
 API_ID = Var.API_ID 
 API_HASH = Var.API_HASH 
 
