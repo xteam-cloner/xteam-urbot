@@ -4,13 +4,13 @@ from pytgcalls import PyTgCalls
 from pytgcalls.exceptions import NoActiveGroupCall
 from pytgcalls.types import MediaStream
 from telethon.tl.types import User
-
+from . import OWNER_ID
 # ✅ Mengambil konfigurasi dan fungsi YouTube dari framework Ultroid
 from xteam.configs import Var 
 from xteam.fns.ytdl import download_yt, get_yt_link
 
 # --- KONFIGURASI ---
-OWNER_ID = Var.OWNER_ID 
+#OWNER_ID = Var.OWNER_ID 
 ASST_SESSION = Var.STRING_SESSION
 API_ID = Var.API_ID 
 API_HASH = Var.API_HASH 
