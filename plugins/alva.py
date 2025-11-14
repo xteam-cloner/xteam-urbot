@@ -9,7 +9,7 @@ from platform import python_version as pyver
 
 # --- IMPORTS DARI INTI ULTROID (DIAMBIL DARI DAFTAR ANDA) ---
 from . import ultroid_cmd
-from telethon import event
+
 from . import (
     OWNER_NAME,
     OWNER_USERNAME,
