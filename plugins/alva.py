@@ -1,11 +1,11 @@
 """
 Plugin Name: Alive Checker
 Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720) 
-             dengan kotak bersinar di sekitar teks, menggunakan font default PIL.
+             dengan kotak bersinar di sekitar teks, menggunakan font default PIL. Teks status bersih tanpa simbol.
 """
 import os
 from datetime import datetime
-from PIL import ImageDraw, Image, ImageFont, ImageFilter # Import ImageFilter untuk blur
+from PIL import ImageDraw, Image, ImageFont, ImageFilter
 from platform import python_version as pyver
 
 # --- IMPORTS DARI INTI ULTROID ---
@@ -25,12 +25,12 @@ from xteam.version import ultroid_version
 
 def get_alive_data(uptime):
     """
-    Mengumpulkan data status alive dalam format yang siap dicetak ke gambar (Teks Inti tanpa simbol).
+    Mengumpulkan data status alive dalam format yang siap dicetak ke gambar (Teks Inti tanpa simbol/pembingkai).
     """
     python_version = pyver() 
     
     return [
-        "XTEAM URBOT IS ALIVE",
+        "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰",
         f"Owner : {OWNER_NAME}",
         f"Userbot : {ultroid_version}",
         f"Dc Id : {ultroid_bot.dc_id}",
@@ -38,7 +38,7 @@ def get_alive_data(uptime):
         f"Uptime : {uptime}",
         f"Kurigram : {pver}",
         f"Python : {python_version}",
-        "XTEAM CLONER"
+        "✵ xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ ✵"
     ]
 
 # --- FUNGSI PEMBUAT GAMBAR ALIVE ---
@@ -65,12 +65,18 @@ def alive(alive_data):
     # 2. Tentukan Font (MENGGUNAKAN DEFAULT PIL)
     detail_font = ImageFont.load_default() 
 
-    # Fungsi pembantu untuk mengukur teks (menggunakan draw.textsize)
+    # Fungsi pembantu untuk mengukur teks (Perbaikan untuk Pillow modern)
     def get_text_size(text, font):
-        return draw.textsize(text, font=font) 
+        try:
+            # Cara modern (textbbox)
+            bbox = draw.textbbox((0, 0), text, font=font)
+            return bbox[2] - bbox[0], bbox[3] - bbox[1]
+        except AttributeError:
+            # Fallback (textsize)
+            return draw.textsize(text, font=font) 
 
     # --- Hitung posisi dan ukuran blok teks ---
-    start_x_detail = 150 
+    start_x_detail = 150 # Margin kiri (geser ke kanan)
 
     total_text_height = 0
     line_heights = []
@@ -80,7 +86,7 @@ def alive(alive_data):
         w, h = get_text_size(line, detail_font)
         line_heights.append(h)
         text_widths.append(w)
-        total_text_height += h + 10 # Padding 10px 
+        total_text_height += h + 10 
 
     max_text_width = max(text_widths) if text_widths else 0
     start_y_detail = (H - total_text_height) / 2
@@ -91,10 +97,9 @@ def alive(alive_data):
 
     box_left = start_x_detail - padding_x
     box_top = start_y_detail - padding_y
-    box_right = start_x_detail + max_text_width + padding_x + 10 # Tambah 10px ekstra
+    box_right = start_x_detail + max_text_width + padding_x + 10 
     box_bottom = start_y_detail + total_text_height + padding_y
 
-    # Batasi kotak agar tidak keluar dari batas gambar
     box_left = max(0, box_left)
     box_top = max(0, box_top)
     box_right = min(W, box_right)
@@ -102,16 +107,13 @@ def alive(alive_data):
     
     # --- GAMBAR KOTAK BERSINAR ---
     
-    # 3. Buat kanvas sementara untuk efek glow (RGBA)
     glow_canvas = Image.new('RGBA', background.size, (0, 0, 0, 0))
     glow_draw = ImageDraw.Draw(glow_canvas)
 
-    # Warna glow (Biru Neon)
-    glow_color_outer = (100, 200, 255, 100) 
-    glow_color_inner = (150, 220, 255, 150) 
-    main_color = (200, 240, 255, 255)       
+    glow_color_outer = (100, 200, 255, 100) # Biru Muda Transparan
+    main_color = (200, 240, 255, 255)       # Biru Sangat Terang (Inti)
     
-    # Lapisan terluar (lebih tebal, lebih transparan)
+    # Lapisan terluar (Glow)
     for i in range(3): 
         glow_draw.rectangle(
             (box_left - i*2, box_top - i*2, box_right + i*2, box_bottom + i*2),
@@ -119,14 +121,14 @@ def alive(alive_data):
             width=2
         )
     
-    # Lapisan inti (paling terang, paling tipis)
+    # Lapisan inti
     glow_draw.rectangle(
         (box_left, box_top, box_right, box_bottom),
         outline=main_color,
         width=2
     )
 
-    # 4. Terapkan blur dan tempelkan ke background
+    # Terapkan Blur
     glow_canvas = glow_canvas.filter(ImageFilter.GaussianBlur(radius=5)) 
     background.paste(glow_canvas, (0, 0), glow_canvas)
 
@@ -167,7 +169,7 @@ async def alive_handler(event):
         days = diff.days
         hours = diff.seconds // 3600
         minutes = (diff.seconds % 3600) // 60
-        uptime_str = f"{days}d, {hours}h, {minutes}s"
+        uptime_str = f"{days}d, {hours}h, {minutes}m"
         
         # 3. Ambil data alive untuk gambar
         alive_data_list = get_alive_data(uptime_str)
@@ -192,4 +194,4 @@ async def alive_handler(event):
         # 7. Hapus file gambar
         if 'image_path' in locals() and os.path.exists(image_path):
             os.remove(image_path)
-  
+          
