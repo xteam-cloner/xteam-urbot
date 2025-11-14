@@ -1,39 +1,43 @@
-# plugins/groupcall_plugin.py
-# Implementasi Join/Leave VC menggunakan TL Request langsung, tanpa patch eksternal.
+# plugins/vc.py
+# Implementasi Join/Leave VC menggunakan TL Request langsung.
 
-from xteam import *
+from . import *
 from telethon.tl import functions, types
 from telethon.tl.functions.phone import (
-    JoinGroupCallRequest, LeaveGroupCallRequest, GetGroupCallRequest
+    JoinGroupCallRequest, LeaveGroupCallRequest
 )
-#from telethon.errors import InvalidArgumentError
-import logging
-from . import *
+from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.errors import FloodWaitError, UserNotParticipantError
+import logging 
+
 # --- HELPER FUNCTION: Konversi GroupCall ke InputGroupCall ---
-# Diambil dari kode Anda, dengan penanganan error yang disempurnakan.
+# Menggunakan ValueError sebagai pengganti InvalidArgumentError.
 def _raise_cast_fail(entity, target_type):
-    """Raises an InvalidArgumentError when entity casting fails."""
-    raise InvalidArgumentError(
+    """Raises a ValueError when entity casting fails."""
+    # Menggunakan ValueError sebagai pengganti InvalidArgumentError
+    raise ValueError(
         f'Could not convert {type(entity).__name__} to {target_type}.'
     )
 
 def get_input_group_call(call):
-    """Similar to get_input_peer, but for input calls."""
+    """Mendapatkan InputGroupCall dari objek panggilan."""
     
     # ID CRC32 untuk pengecekan tipe objek
     INPUT_GROUP_CALL_ID = 0x58611ab1 
     GROUP_CALL_ID = 0x20b4f320        
     
     try:
+        # Cek apakah sudah berupa InputGroupCall
         if call.SUBCLASS_OF_ID == INPUT_GROUP_CALL_ID:
             return call
+        # Cek apakah berupa GroupCall, lalu konversi
         elif call.SUBCLASS_OF_ID == GROUP_CALL_ID:
             return types.InputGroupCall(id=call.id, access_hash=call.access_hash)
         else:
             _raise_cast_fail(call, 'InputGroupCall')
 
     except AttributeError:
-        # Menangkap error jika objek tidak memiliki SUBCLASS_OF_ID
+        # Menangkap error jika objek tidak memiliki SUBCLASS_OF_ID (misalnya jika None atau int)
         _raise_cast_fail(call, 'InputGroupCall')
 # ------------------------------------------------------------
 
@@ -45,20 +49,19 @@ async def join_voice_chat_in_current_chat(event):
     client = event.client
     
     target_peer = await client.get_input_entity(event.to_id)
-    await event.eor("`Mencoba bergabung ke Voice Chat di grup ini...`")
+    
+    await event.eor("`Mencoba bergabung ke Voice Chat...`")
     
     try:
-        # 1. Dapatkan objek Group Call menggunakan TL Request langsung
-        # Note: GetGroupCallRequest menerima TypeInputPeer di argumen 'call'
-        call_info_result = await client(GetGroupCallRequest(call=target_peer, limit=1))
+        # 1. Dapatkan objek Group Call menggunakan GetFullChannelRequest
+        full_info = await client(GetFullChannelRequest(target_peer))
+        active_call = full_info.full_chat.call 
         
-        if not hasattr(call_info_result, 'call') or call_info_result.call is None:
+        if not active_call:
              return await event.eor("`❌ Tidak ada Voice Chat yang aktif di grup ini.`")
         
-        my_call_input = call_info_result.call
-        
-        # 2. Konversi objek ke InputGroupCall (Mencegah TypeError)
-        my_call_input = get_input_group_call(my_call_input)
+        # 2. Konversi objek GroupCall menjadi InputGroupCall (Mencegah TypeError)
+        my_call_input = get_input_group_call(active_call)
         
         join_as = await client.get_input_entity("me") 
         media_params = types.DataJSON(data='{}') 
@@ -76,8 +79,10 @@ async def join_voice_chat_in_current_chat(event):
         
         await event.eor(f"`✅ Berhasil bergabung ke Voice Chat di grup ini!`")
 
-    except InvalidArgumentError as e:
-        await event.eor(f"**❌ Gagal Konversi!**\n`Kesalahan: {e}`")
+    except ValueError as e:
+        await event.eor(f"**❌ Gagal Konversi Objek!**\n`Kesalahan: {e}`")
+    except (UserNotParticipantError, FloodWaitError) as e:
+        await event.eor(f"**❌ Gagal!** Bot tidak memiliki akses atau sedang dibatasi. `{e}`")
     except Exception as e:
         logging.exception("Error during joinvc")
         await event.eor(f"**❌ Gagal bergabung!**\n`Kesalahan: {type(e).__name__}: {e}`")
@@ -93,15 +98,14 @@ async def leave_voice_chat_in_current_chat(event):
     
     try:
         # 1. Dapatkan objek Group Call
-        call_info_result = await client(GetGroupCallRequest(call=target_peer, limit=1))
+        full_info = await client(GetFullChannelRequest(target_peer))
+        active_call = full_info.full_chat.call
         
-        if not hasattr(call_info_result, 'call') or call_info_result.call is None:
+        if not active_call:
              return await event.eor("`❌ Tidak ada Voice Chat yang aktif di grup ini untuk ditinggalkan.`")
         
-        my_call_input = call_info_result.call
-        
-        # 2. Konversi objek ke InputGroupCall (Mencegah TypeError)
-        my_call_input = get_input_group_call(my_call_input)
+        # 2. Konversi objek ke InputGroupCall
+        my_call_input = get_input_group_call(active_call)
         
         source_id = 0 
         
@@ -115,9 +119,9 @@ async def leave_voice_chat_in_current_chat(event):
         
         await event.eor(f"`👋 Berhasil meninggalkan Voice Chat di grup ini!`")
 
-    except InvalidArgumentError as e:
-        await event.eor(f"**❌ Gagal Konversi!**\n`Kesalahan: {e}`")
+    except ValueError as e:
+        await event.eor(f"**❌ Gagal Konversi Objek!**\n`Kesalahan: {e}`")
     except Exception as e:
         logging.exception("Error during leavevc")
         await event.eor(f"**❌ Gagal meninggalkan VC!**\n`Kesalahan: {type(e).__name__}: {e}`")
-    
+        
