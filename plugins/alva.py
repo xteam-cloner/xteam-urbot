@@ -47,9 +47,10 @@ def alive(alive_data):
     """
     Membuat dan menyimpan gambar sederhana yang berisi teks status bot pada background kustom (1280x720).
     """
-    ASSETS_DIR = "resources" 
+    ASSETS_DIR = "resources"
+    FONT_DIR = "resources/fonts"
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "bg2.jpg")
-    FONT_PATH = os.path.join(ASSETS_DIR, "font.ttf")
+    FONT_PATH = os.path.join(FONT_DIR, "default.ttf")
 
     # 1. Buka Background (dengan fallback 1280x720)
     TARGET_SIZE = (1280, 720) 
@@ -66,7 +67,7 @@ def alive(alive_data):
 
     # 2. Tentukan Font
     try:
-        detail_font = ImageFont.truetype(FONT_PATH, size=40) 
+        detail_font = ImageFont.truetype(FONT_PATH, size=50) 
     except FileNotFoundError:
         detail_font = ImageFont.load_default()
 
