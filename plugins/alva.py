@@ -147,7 +147,7 @@ def alive(alive_data):
 
 # --- HANDLER ULTROID ---
 
-@ultroid_cmd(pattern="Alive$") 
+@ultroid_cmd(pattern="alva$") 
 async def alive_handler(event):
     """
     Handler untuk perintah .alive
