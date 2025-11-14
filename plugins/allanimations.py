@@ -360,7 +360,7 @@ async def bluedevilbye(e):
     
     
     
-from ultroid import ultroid_cmd # Uncomment jika diperlukan impor eksplisit
+from . import ultroid_cmd # Uncomment jika diperlukan impor eksplisit
 
 RANJAROM = [
     "dalem, ada apa sayang? 💖",
@@ -1688,6 +1688,7 @@ async def payf(e):
         paytext * 1,
     )
     await eor(e, pay)
+
 
 
 
