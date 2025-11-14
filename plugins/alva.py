@@ -30,7 +30,7 @@ def get_alive_data(uptime):
     python_version = pyver() 
     
     return [
-        "✵ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✵",
+        "✵ xteam-urbot is Alive ✵",
         f"Owner : {OWNER_NAME}",
         f"Userbot : {ultroid_version}",
         f"Dc Id : {ultroid_bot.dc_id}",
@@ -38,7 +38,6 @@ def get_alive_data(uptime):
         f"Uptime : {uptime}",
         f"Kurigram : {pver}",
         f"Python : {python_version}",
-        "✵ xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ ✵"
     ]
 
 # --- FUNGSI PEMBUAT GAMBAR ALIVE ---
@@ -49,7 +48,7 @@ def alive(alive_data):
     """
     ASSETS_DIR = "resources"
     FONT_DIR = "resources/fonts"
-    BACKGROUND_PATH = os.path.join(ASSETS_DIR, "SCJjZ2.gif")
+    BACKGROUND_PATH = os.path.join(ASSETS_DIR, "IMG_20251115_011736_203.jpg")
     FONT_PATH = os.path.join(ASSETS_DIR, "sfont.ttf")
 
     # 1. Buka Background (dengan fallback 1280x720)
@@ -67,7 +66,7 @@ def alive(alive_data):
 
     # 2. Tentukan Font
     try:
-        detail_font = ImageFont.truetype(FONT_PATH, size=60) 
+        detail_font = ImageFont.truetype(FONT_PATH, size=40) 
     except FileNotFoundError:
         detail_font = ImageFont.load_default()
 
