@@ -7,15 +7,14 @@ from datetime import datetime
 from PIL import ImageDraw, Image, ImageFont
 from platform import python_version as pyver
 
-# --- IMPORTS DARI INTI ULTROID (DIAMBIL DARI DAFTAR ANDA) ---
+# --- IMPORTS DARI INTI ULTROID ---
 from . import ultroid_cmd
-
 from . import (
     OWNER_NAME,
     OWNER_USERNAME,
-    start_time,     # Waktu bot pertama kali dijalankan
+    start_time,     # Waktu bot pertama kali dijalankan (bisa float atau datetime)
     ultroid_bot,    # Objek bot/client (untuk dc_id dan send_file)
-    eor, # Alias untuk edit/reply
+    eor as ultroid_edit_or_reply, # Alias untuk edit/reply
 )
 from pyrogram import __version__ as pver       # Versi Pyrogram (Kurigram)
 from xteam.version import __version__ as xteam_lib_ver # Versi Library xteam/internal
@@ -25,7 +24,7 @@ from xteam.version import ultroid_version      # Versi Userbot
 
 def format_message_text(uptime):
     """
-    Memformat teks status alive dengan HTML, menggunakan variabel global dari import.
+    Memformat teks status alive dengan HTML, menggunakan variabel global.
     """
     python_version = pyver() 
     
@@ -45,7 +44,7 @@ def alive():
     """
     Membuat dan menyimpan gambar sederhana yang menunjukkan bahwa bot/aplikasi 'hidup' (alive).
     """
-    ASSETS_DIR = "resources" 
+    ASSETS_DIR = "assets" 
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "bg2.jpg")
     FONT_PATH = os.path.join(ASSETS_DIR, "font.ttf")
 
@@ -102,13 +101,13 @@ def alive():
 
 # --- HANDLER ULTROID ---
 
-@ultroid_cmd(pattern="alva$") # Menggunakan sintaks paling ringkas
+@ultroid_cmd(pattern="Alive$") 
 async def alive_handler(event):
     """
     Handler untuk perintah .alive
     """
     # 1. Feedback awal
-    msg = await eor(event, "**`Processing alive image and status...`**")
+    msg = await ultroid_edit_or_reply(event, "**`Processing alive image and status...`**")
     
     try:
         # 2. Buat Gambar
@@ -116,7 +115,15 @@ async def alive_handler(event):
         
         # 3. Hitung Uptime
         now = datetime.now()
-        diff = now - start_time 
+        
+        # PERBAIKAN: Mengatasi error float vs datetime
+        if isinstance(start_time, (int, float)):
+            dt_start_time = datetime.fromtimestamp(start_time)
+        else:
+            dt_start_time = start_time
+            
+        diff = now - dt_start_time
+        
         days = diff.days
         hours = diff.seconds // 3600
         minutes = (diff.seconds % 3600) // 60
@@ -138,10 +145,10 @@ async def alive_handler(event):
         await msg.delete()
 
     except Exception as e:
-        await eor(msg, f"**ERROR saat menjalankan alive:**\n`{str(e)}`")
+        await ultroid_edit_or_reply(msg, f"**ERROR saat menjalankan alive:**\n`{str(e)}`")
     
     finally:
         # 7. Hapus file gambar
         if 'image_path' in locals() and os.path.exists(image_path):
             os.remove(image_path)
-  
+            
