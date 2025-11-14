@@ -49,8 +49,8 @@ def alive(alive_data):
     """
     ASSETS_DIR = "resources"
     FONT_DIR = "resources/fonts"
-    BACKGROUND_PATH = os.path.join(ASSETS_DIR, "bg2.jpg")
-    FONT_PATH = os.path.join(FONT_DIR, "default.ttf")
+    BACKGROUND_PATH = os.path.join(ASSETS_DIR, "SCJjZ2.gif")
+    FONT_PATH = os.path.join(ASSETS_DIR, "sfont.ttf")
 
     # 1. Buka Background (dengan fallback 1280x720)
     TARGET_SIZE = (1280, 720) 
@@ -67,7 +67,7 @@ def alive(alive_data):
 
     # 2. Tentukan Font
     try:
-        detail_font = ImageFont.truetype(FONT_PATH, size=50) 
+        detail_font = ImageFont.truetype(FONT_PATH, size=60) 
     except FileNotFoundError:
         detail_font = ImageFont.load_default()
 
