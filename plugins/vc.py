@@ -6,7 +6,7 @@ from telethon.tl import functions, types
 from telethon.tl.functions.phone import (
     JoinGroupCallRequest, LeaveGroupCallRequest, GetGroupCallRequest
 )
-from telethon.errors import InvalidArgumentError
+#from telethon.errors import InvalidArgumentError
 import logging
 from . import *
 # --- HELPER FUNCTION: Konversi GroupCall ke InputGroupCall ---
