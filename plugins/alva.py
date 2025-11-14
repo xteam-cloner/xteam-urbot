@@ -1,11 +1,10 @@
 """
 Plugin Name: Alive Checker
-Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720) 
-             dengan kotak bersinar di sekitar teks, menggunakan font default PIL. Teks status bersih tanpa simbol.
+Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720) menggunakan font default PIL.
 """
 import os
 from datetime import datetime
-from PIL import ImageDraw, Image, ImageFont, ImageFilter
+from PIL import ImageDraw, Image, ImageFont
 from platform import python_version as pyver
 
 # --- IMPORTS DARI INTI ULTROID ---
@@ -25,12 +24,12 @@ from xteam.version import ultroid_version
 
 def get_alive_data(uptime):
     """
-    Mengumpulkan data status alive dalam format yang siap dicetak ke gambar (Teks Inti tanpa simbol/pembingkai).
+    Mengumpulkan data status alive dalam format yang siap dicetak ke gambar (Teks Inti tanpa simbol).
     """
     python_version = pyver() 
     
     return [
-        "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰",
+        "XTEAM URBOT IS ALIVE",
         f"Owner : {OWNER_NAME}",
         f"Userbot : {ultroid_version}",
         f"Dc Id : {ultroid_bot.dc_id}",
@@ -38,7 +37,7 @@ def get_alive_data(uptime):
         f"Uptime : {uptime}",
         f"Kurigram : {pver}",
         f"Python : {python_version}",
-        "✵ xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ ✵"
+        "XTEAM CLONER"
     ]
 
 # --- FUNGSI PEMBUAT GAMBAR ALIVE ---
@@ -46,10 +45,11 @@ def get_alive_data(uptime):
 def alive(alive_data):
     """
     Membuat dan menyimpan gambar yang berisi teks status bot pada background kustom (1280x720) 
-    dengan kotak bersinar di sekitar teks, menggunakan font default PIL.
+    menggunakan font default PIL.
     """
-    ASSETS_DIR = "assets" 
+    ASSETS_DIR = "resources" 
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "IMG_20251115_011736_203.jpg")
+    # FONT_PATH tidak lagi digunakan
 
     # 1. Buka Background (dengan fallback 1280x720)
     TARGET_SIZE = (1280, 720) 
@@ -65,78 +65,31 @@ def alive(alive_data):
     # 2. Tentukan Font (MENGGUNAKAN DEFAULT PIL)
     detail_font = ImageFont.load_default() 
 
-    # Fungsi pembantu untuk mengukur teks (Perbaikan untuk Pillow modern)
+    # Fungsi pembantu untuk mengukur teks (menggunakan draw.textsize untuk kompatibilitas)
     def get_text_size(text, font):
-        try:
-            # Cara modern (textbbox)
-            bbox = draw.textbbox((0, 0), text, font=font)
-            return bbox[2] - bbox[0], bbox[3] - bbox[1]
-        except AttributeError:
-            # Fallback (textsize)
-            return draw.textsize(text, font=font) 
+        return draw.textsize(text, font=font) 
 
-    # --- Hitung posisi dan ukuran blok teks ---
-    start_x_detail = 150 # Margin kiri (geser ke kanan)
+    # --- Cetak Semua Detail Alive ke Dalam Gambar (Pusat Vertikal, Geser Kanan) ---
+    start_x_detail = 150 # Margin kiri
 
     total_text_height = 0
     line_heights = []
-    text_widths = []
-
+    
+    # Hitung total tinggi teks
     for line in alive_data:
         w, h = get_text_size(line, detail_font)
         line_heights.append(h)
-        text_widths.append(w)
-        total_text_height += h + 10 
+        total_text_height += h + 10 # Padding 10px untuk font default
 
-    max_text_width = max(text_widths) if text_widths else 0
+    # Hitung posisi Y awal agar teks berada di tengah vertikal
     start_y_detail = (H - total_text_height) / 2
     
-    # --- Koordinat untuk Kotak Bersinar ---
-    padding_x = 30
-    padding_y = 20
-
-    box_left = start_x_detail - padding_x
-    box_top = start_y_detail - padding_y
-    box_right = start_x_detail + max_text_width + padding_x + 10 
-    box_bottom = start_y_detail + total_text_height + padding_y
-
-    box_left = max(0, box_left)
-    box_top = max(0, box_top)
-    box_right = min(W, box_right)
-    box_bottom = min(H, box_bottom)
-    
-    # --- GAMBAR KOTAK BERSINAR ---
-    
-    glow_canvas = Image.new('RGBA', background.size, (0, 0, 0, 0))
-    glow_draw = ImageDraw.Draw(glow_canvas)
-
-    glow_color_outer = (100, 200, 255, 100) # Biru Muda Transparan
-    main_color = (200, 240, 255, 255)       # Biru Sangat Terang (Inti)
-    
-    # Lapisan terluar (Glow)
-    for i in range(3): 
-        glow_draw.rectangle(
-            (box_left - i*2, box_top - i*2, box_right + i*2, box_bottom + i*2),
-            outline=glow_color_outer,
-            width=2
-        )
-    
-    # Lapisan inti
-    glow_draw.rectangle(
-        (box_left, box_top, box_right, box_bottom),
-        outline=main_color,
-        width=2
-    )
-
-    # Terapkan Blur
-    glow_canvas = glow_canvas.filter(ImageFilter.GaussianBlur(radius=5)) 
-    background.paste(glow_canvas, (0, 0), glow_canvas)
-
-    # --- Cetak Teks Status Bot ---
     current_y = start_y_detail
     for i, line in enumerate(alive_data):
+        # Warna Teks diatur Putih
         draw.text((start_x_detail, current_y), line, fill=(255, 255, 255), font=detail_font) 
-        current_y += line_heights[i] + 10 
+
+        current_y += line_heights[i] + 10 # Pindah ke baris berikutnya
 
     # 5. Simpan Gambar
     OUTPUT_DIR = "downloads"
@@ -149,7 +102,7 @@ def alive(alive_data):
 
 # --- HANDLER ULTROID ---
 
-@ultroid_cmd(pattern="alva$") 
+@ultroid_cmd(pattern="Alive$") 
 async def alive_handler(event):
     """
     Handler untuk perintah .alive
@@ -160,6 +113,7 @@ async def alive_handler(event):
         # 2. Hitung Uptime
         now = datetime.now()
         if isinstance(start_time, (int, float)):
+            # Perbaikan float/datetime
             dt_start_time = datetime.fromtimestamp(start_time)
         else:
             dt_start_time = start_time
@@ -169,7 +123,7 @@ async def alive_handler(event):
         days = diff.days
         hours = diff.seconds // 3600
         minutes = (diff.seconds % 3600) // 60
-        uptime_str = f"{days}d, {hours}h, {minutes}m"
+        uptime_str = f"{days} hari, {hours} jam, {minutes} menit"
         
         # 3. Ambil data alive untuk gambar
         alive_data_list = get_alive_data(uptime_str)
