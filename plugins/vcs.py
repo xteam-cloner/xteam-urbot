@@ -1,6 +1,6 @@
 # plugins/groupcall_plugin.py
 
-from xteam import *
+#from xteam import *
 from telethon.tl import types
 from telethon.errors import *
 from . import *
