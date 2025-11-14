@@ -1,13 +1,14 @@
 """
 Plugin Name: Alive Checker
-Description: Menampilkan status aktif bot (Alive) dengan gambar kustom (1280x720) dan detail tercetak di gambar.
+Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720),
+             dengan detail teks tercetak di gambar (tanpa simbol pembingkai, tanpa "BOT ALIVE" / "LAST CHECKED").
 """
 import os
 from datetime import datetime
 from PIL import ImageDraw, Image, ImageFont
 from platform import python_version as pyver
 
-# --- IMPORTS DARI INTI ULTROID ---
+# --- IMPORTS DARI INTI ULTROID (tetap sama) ---
 from . import ultroid_cmd
 from . import (
     OWNER_NAME,
@@ -21,24 +22,22 @@ from xteam.version import __version__ as xteam_lib_ver
 from xteam.version import ultroid_version      
 
 # --- FUNGSI FORMAT PESAN (PENGUMPUL DATA) ---
-
+# Tetap sama, menghasilkan teks tanpa simbol
 def get_alive_data(uptime):
     """
-    Mengumpulkan data status alive dalam format yang siap dicetak ke gambar.
+    Mengumpulkan data status alive dalam format yang siap dicetak ke gambar (Hanya Teks Inti).
     """
     python_version = pyver() 
     
-    # PERHATIAN: Baris "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰" ini akan menjadi judul utama di bagian detail.
-    # Jika Anda ingin menghilangkannya juga, Anda bisa mengomentari atau menghapusnya dari list ini.
     return [
-        "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
-        f"✵ Owner : {OWNER_NAME}",
-        f"✵ Userbot : {ultroid_version}",
-        f"✵ Dc Id : {ultroid_bot.dc_id}",
-        f"✵ Library : {xteam_lib_ver}",
-        f"✵ Uptime : {uptime}",
-        f"✵ Kurigram :  {pver}",
-        f"✵ Python : {python_version}",
+        "✵ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✵",
+        f"Owner : {OWNER_NAME}",
+        f"Userbot : {ultroid_version}",
+        f"Dc Id : {ultroid_bot.dc_id}",
+        f"Library : {xteam_lib_ver}",
+        f"Uptime : {uptime}",
+        f"Kurigram : {pver}",
+        f"Python : {python_version}",
         "✵ xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ ✵"
     ]
 
@@ -46,30 +45,29 @@ def get_alive_data(uptime):
 
 def alive(alive_data):
     """
-    Membuat dan menyimpan gambar sederhana yang menunjukkan bahwa bot/aplikasi 'hidup' (alive),
-    dengan detail teks tercetak di dalamnya, menggunakan dimensi 1280x720.
+    Membuat dan menyimpan gambar sederhana yang berisi teks status bot pada background kustom (1280x720).
     """
     ASSETS_DIR = "resources" 
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "bg2.jpg")
     FONT_PATH = os.path.join(ASSETS_DIR, "font.ttf")
 
-    # 1. Buka background (dengan fallback 1280x720)
+    # 1. Buka Background (dengan fallback 1280x720)
     TARGET_SIZE = (1280, 720) 
     try:
         background = Image.open(BACKGROUND_PATH).convert("RGB")
+        # Opsional: Resize background jika ukurannya tidak sesuai TARGET_SIZE
+        background = background.resize(TARGET_SIZE) 
     except FileNotFoundError:
-        background = Image.new('RGB', TARGET_SIZE, color=(30, 60, 30)) 
+        # Fallback jika bg2.jpg tidak ditemukan
+        background = Image.new('RGB', TARGET_SIZE, color=(30, 60, 30)) # Kembali ke warna hijau gelap default
 
     draw = ImageDraw.Draw(background)
     W, H = background.size 
 
-    # 2. Tentukan Font (disesuaikan untuk 1280x720)
+    # 2. Tentukan Font
     try:
-        # title_font tidak lagi digunakan untuk "BOT ALIVE"
-        info_font = ImageFont.truetype(FONT_PATH, size=45) 
-        detail_font = ImageFont.truetype(FONT_PATH, size=35)
+        detail_font = ImageFont.truetype(FONT_PATH, size=40) 
     except FileNotFoundError:
-        info_font = ImageFont.load_default()
         detail_font = ImageFont.load_default()
 
     # Fungsi pembantu untuk mengukur teks
@@ -80,34 +78,28 @@ def alive(alive_data):
         except AttributeError:
             return draw.textsize(text, font=font)
 
+    # --- Cetak Semua Detail Alive ke Dalam Gambar ---
+    start_x_detail = 100 # Margin kiri
 
-    # --- Bagian A: HANYA Last Checked (Pusat Atas) ---
-    # title_text dihapus atau dikomentari
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    info_text = f"LAST CHECKED: {current_time} WIB"
-
-    # w_title, h_title tidak lagi relevan tanpa title_text
-    w_info, h_info = get_text_size(info_text, info_font)
+    total_text_height = 0
+    line_heights = []
     
-    # Penempatan Last Checked (lebih ke tengah atas sekarang)
-    x_info = (W - w_info) / 2
-    y_info = H / 4 # Posisikan lebih tinggi karena tidak ada BOT ALIVE di atasnya
+    # Hitung total tinggi teks
+    for line in alive_data:
+        _, h = get_text_size(line, detail_font)
+        line_heights.append(h)
+        total_text_height += h + 15 # Tambahkan padding antar baris
 
-    draw.text((x_info, y_info), info_text, fill=(150, 255, 150), font=info_font)
-
-    # --- Bagian B: Cetak Semua Detail Alive ke Dalam Gambar (Margin Kiri) ---
-    start_x_detail = 60 
-    start_y_detail = y_info + h_info + 60 # Mulai sedikit di bawah "Last Checked"
-    line_height = get_text_size("A", detail_font)[1] + 35 
+    # Hitung posisi Y awal agar teks berada di tengah vertikal
+    # dan sedikit ke atas/kiri agar tidak terganggu elemen background
+    start_y_detail = (H - total_text_height) / 2 # Tengah vertikal
     
+    current_y = start_y_detail
     for i, line in enumerate(alive_data):
-        current_y = start_y_detail + (i * line_height)
-        
-        # Penyesuaian Warna Teks
-        if "xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ" in line or "xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ" in line:
-            draw.text((start_x_detail, current_y), line, fill=(255, 255, 100), font=detail_font) 
-        else:
-            draw.text((start_x_detail, current_y), line, fill=(200, 255, 200), font=detail_font)
+        # Warna Teks diatur Putih (255, 255, 255)
+        draw.text((start_x_detail, current_y), line, fill=(255, 255, 255), font=detail_font) 
+
+        current_y += line_heights[i] + 15 # Pindah ke baris berikutnya + padding
 
     # 5. Simpan Gambar
     OUTPUT_DIR = "downloads"
@@ -120,7 +112,7 @@ def alive(alive_data):
 
 # --- HANDLER ULTROID (Tidak ada perubahan) ---
 
-@ultroid_cmd(pattern="Alive$") 
+@ultroid_cmd(pattern="alva$") 
 async def alive_handler(event):
     """
     Handler untuk perintah .alive
