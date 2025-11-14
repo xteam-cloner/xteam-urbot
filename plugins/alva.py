@@ -44,7 +44,7 @@ def alive():
     """
     Membuat dan menyimpan gambar sederhana yang menunjukkan bahwa bot/aplikasi 'hidup' (alive).
     """
-    ASSETS_DIR = "assets" 
+    ASSETS_DIR = "resources" 
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "bg2.jpg")
     FONT_PATH = os.path.join(ASSETS_DIR, "font.ttf")
 
