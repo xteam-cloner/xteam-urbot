@@ -47,7 +47,7 @@ def alive(alive_data):
     Membuat dan menyimpan gambar sederhana yang menunjukkan bahwa bot/aplikasi 'hidup' (alive),
     dengan detail teks tercetak di dalamnya, menggunakan dimensi 1280x720.
     """
-    ASSETS_DIR = "assets" 
+    ASSETS_DIR = "resources" 
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "bg2.jpg")
     FONT_PATH = os.path.join(ASSETS_DIR, "font.ttf")
 
@@ -124,7 +124,7 @@ def alive(alive_data):
 
 # --- HANDLER ULTROID ---
 
-@ultroid_cmd(pattern="Alive$") 
+@ultroid_cmd(pattern="alva$") 
 async def alive_handler(event):
     """
     Handler untuk perintah .alive
