@@ -28,8 +28,10 @@ def get_alive_data(uptime):
     """
     python_version = pyver() 
     
+    # PERHATIAN: Baris "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰" ini akan menjadi judul utama di bagian detail.
+    # Jika Anda ingin menghilangkannya juga, Anda bisa mengomentari atau menghapusnya dari list ini.
     return [
-        "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰",
+        "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
         f"✵ Owner : {OWNER_NAME}",
         f"✵ Userbot : {ultroid_version}",
         f"✵ Dc Id : {ultroid_bot.dc_id}",
@@ -55,8 +57,6 @@ def alive(alive_data):
     TARGET_SIZE = (1280, 720) 
     try:
         background = Image.open(BACKGROUND_PATH).convert("RGB")
-        # Opsional: Jika bg2.jpg tidak 1280x720, resize agar konsisten
-        # background = background.resize(TARGET_SIZE) 
     except FileNotFoundError:
         background = Image.new('RGB', TARGET_SIZE, color=(30, 60, 30)) 
 
@@ -65,11 +65,10 @@ def alive(alive_data):
 
     # 2. Tentukan Font (disesuaikan untuk 1280x720)
     try:
-        title_font = ImageFont.truetype(FONT_PATH, size=90) 
+        # title_font tidak lagi digunakan untuk "BOT ALIVE"
         info_font = ImageFont.truetype(FONT_PATH, size=45) 
         detail_font = ImageFont.truetype(FONT_PATH, size=35)
     except FileNotFoundError:
-        title_font = ImageFont.load_default()
         info_font = ImageFont.load_default()
         detail_font = ImageFont.load_default()
 
@@ -82,27 +81,24 @@ def alive(alive_data):
             return draw.textsize(text, font=font)
 
 
-    # --- Bagian A: Judul dan Last Checked (Pusat Atas) ---
-    title_text = "BOT ALIVE" 
+    # --- Bagian A: HANYA Last Checked (Pusat Atas) ---
+    # title_text dihapus atau dikomentari
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     info_text = f"LAST CHECKED: {current_time} WIB"
 
-    w_title, h_title = get_text_size(title_text, title_font)
+    # w_title, h_title tidak lagi relevan tanpa title_text
     w_info, h_info = get_text_size(info_text, info_font)
     
-    # Penempatan Judul
-    x_title = (W - w_title) / 2
-    y_title = H / 4 
+    # Penempatan Last Checked (lebih ke tengah atas sekarang)
     x_info = (W - w_info) / 2
-    y_info = y_title + h_title + 15
+    y_info = H / 4 # Posisikan lebih tinggi karena tidak ada BOT ALIVE di atasnya
 
-    draw.text((x_title, y_title), title_text, fill=(255, 255, 255), font=title_font)
     draw.text((x_info, y_info), info_text, fill=(150, 255, 150), font=info_font)
 
     # --- Bagian B: Cetak Semua Detail Alive ke Dalam Gambar (Margin Kiri) ---
-    start_x_detail = 100 
-    start_y_detail = H / 2 + 50 
-    line_height = get_text_size("A", detail_font)[1] + 15 
+    start_x_detail = 60 
+    start_y_detail = y_info + h_info + 60 # Mulai sedikit di bawah "Last Checked"
+    line_height = get_text_size("A", detail_font)[1] + 35 
     
     for i, line in enumerate(alive_data):
         current_y = start_y_detail + (i * line_height)
@@ -122,18 +118,16 @@ def alive(alive_data):
 
     return OUTPUT_PATH
 
-# --- HANDLER ULTROID ---
+# --- HANDLER ULTROID (Tidak ada perubahan) ---
 
-@ultroid_cmd(pattern="alva$") 
+@ultroid_cmd(pattern="Alive$") 
 async def alive_handler(event):
     """
     Handler untuk perintah .alive
     """
-    # 1. Feedback awal
     msg = await ultroid_edit_or_reply(event, "**`Processing alive image...`**")
     
     try:
-        # 2. Hitung Uptime (dengan perbaikan float/datetime)
         now = datetime.now()
         if isinstance(start_time, (int, float)):
             dt_start_time = datetime.fromtimestamp(start_time)
@@ -147,27 +141,21 @@ async def alive_handler(event):
         minutes = (diff.seconds % 3600) // 60
         uptime_str = f"{days} hari, {hours} jam, {minutes} menit"
         
-        # 3. Ambil data alive untuk gambar
         alive_data_list = get_alive_data(uptime_str)
-        
-        # 4. Buat Gambar
         image_path = alive(alive_data_list)
         
-        # 5. Kirim Gambar (Tanpa Caption Teks Detail)
         await ultroid_bot.send_file(
             event.chat_id,
             image_path,
             reply_to=event.reply_to_msg_id or event.id,
         )
 
-        # 6. Hapus pesan processing
         await msg.delete()
 
     except Exception as e:
         await ultroid_edit_or_reply(msg, f"**ERROR saat menjalankan alive:**\n`{str(e)}`")
     
     finally:
-        # 7. Hapus file gambar
         if 'image_path' in locals() and os.path.exists(image_path):
             os.remove(image_path)
     
