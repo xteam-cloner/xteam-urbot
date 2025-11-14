@@ -9,6 +9,7 @@ from platform import python_version as pyver
 
 # --- IMPORTS DARI INTI ULTROID (DIAMBIL DARI DAFTAR ANDA) ---
 from . import ultroid_cmd
+from telethon import event
 from . import (
     OWNER_NAME,
     OWNER_USERNAME,
@@ -101,7 +102,7 @@ def alive():
 
 # --- HANDLER ULTROID ---
 
-@ultroid_cmd(pattern="Alive$") # Menggunakan sintaks paling ringkas
+@ultroid_cmd(pattern="alva$") # Menggunakan sintaks paling ringkas
 async def alive_handler(event):
     """
     Handler untuk perintah .alive
