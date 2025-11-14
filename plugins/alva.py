@@ -1,14 +1,14 @@
 """
 Plugin Name: Alive Checker
-Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720),
-             dengan detail teks tercetak di gambar (tanpa simbol pembingkai, tanpa "BOT ALIVE" / "LAST CHECKED").
+Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720) 
+             dengan kotak bersinar di sekitar teks, menggunakan font default PIL.
 """
 import os
 from datetime import datetime
-from PIL import ImageDraw, Image, ImageFont
+from PIL import ImageDraw, Image, ImageFont, ImageFilter # Import ImageFilter untuk blur
 from platform import python_version as pyver
 
-# --- IMPORTS DARI INTI ULTROID (tetap sama) ---
+# --- IMPORTS DARI INTI ULTROID ---
 from . import ultroid_cmd
 from . import (
     OWNER_NAME,
@@ -22,15 +22,15 @@ from xteam.version import __version__ as xteam_lib_ver
 from xteam.version import ultroid_version      
 
 # --- FUNGSI FORMAT PESAN (PENGUMPUL DATA) ---
-# Tetap sama, menghasilkan teks tanpa simbol
+
 def get_alive_data(uptime):
     """
-    Mengumpulkan data status alive dalam format yang siap dicetak ke gambar (Hanya Teks Inti).
+    Mengumpulkan data status alive dalam format yang siap dicetak ke gambar (Teks Inti tanpa simbol).
     """
     python_version = pyver() 
     
     return [
-        "✵ xteam-urbot is Alive ✵",
+        "XTEAM URBOT IS ALIVE",
         f"Owner : {OWNER_NAME}",
         f"Userbot : {ultroid_version}",
         f"Dc Id : {ultroid_bot.dc_id}",
@@ -38,68 +38,103 @@ def get_alive_data(uptime):
         f"Uptime : {uptime}",
         f"Kurigram : {pver}",
         f"Python : {python_version}",
+        "XTEAM CLONER"
     ]
 
 # --- FUNGSI PEMBUAT GAMBAR ALIVE ---
 
 def alive(alive_data):
     """
-    Membuat dan menyimpan gambar sederhana yang berisi teks status bot pada background kustom (1280x720).
+    Membuat dan menyimpan gambar yang berisi teks status bot pada background kustom (1280x720) 
+    dengan kotak bersinar di sekitar teks, menggunakan font default PIL.
     """
-    ASSETS_DIR = "resources"
-    FONT_DIR = "resources/fonts"
+    ASSETS_DIR = "assets" 
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "IMG_20251115_011736_203.jpg")
-    FONT_PATH = os.path.join(ASSETS_DIR, "sfont.ttf")
 
     # 1. Buka Background (dengan fallback 1280x720)
     TARGET_SIZE = (1280, 720) 
     try:
         background = Image.open(BACKGROUND_PATH).convert("RGB")
-        # Opsional: Resize background jika ukurannya tidak sesuai TARGET_SIZE
         background = background.resize(TARGET_SIZE) 
     except FileNotFoundError:
-        # Fallback jika bg2.jpg tidak ditemukan
-        background = Image.new('RGB', TARGET_SIZE, color=(30, 60, 30)) # Kembali ke warna hijau gelap default
+        background = Image.new('RGB', TARGET_SIZE, color=(30, 60, 30)) 
 
     draw = ImageDraw.Draw(background)
     W, H = background.size 
 
-    # 2. Tentukan Font
-    try:
-        detail_font = ImageFont.truetype(FONT_PATH, size=40) 
-    except FileNotFoundError:
-        detail_font = ImageFont.load_default()
+    # 2. Tentukan Font (MENGGUNAKAN DEFAULT PIL)
+    detail_font = ImageFont.load_default() 
 
-    # Fungsi pembantu untuk mengukur teks
+    # Fungsi pembantu untuk mengukur teks (menggunakan draw.textsize)
     def get_text_size(text, font):
-        try:
-            bbox = draw.textbbox((0, 0), text, font=font)
-            return bbox[2] - bbox[0], bbox[3] - bbox[1]
-        except AttributeError:
-            return draw.textsize(text, font=font)
+        return draw.textsize(text, font=font) 
 
-    # --- Cetak Semua Detail Alive ke Dalam Gambar ---
-    start_x_detail = 100 # Margin kiri
+    # --- Hitung posisi dan ukuran blok teks ---
+    start_x_detail = 150 
 
     total_text_height = 0
     line_heights = []
-    
-    # Hitung total tinggi teks
-    for line in alive_data:
-        _, h = get_text_size(line, detail_font)
-        line_heights.append(h)
-        total_text_height += h + 15 # Tambahkan padding antar baris
+    text_widths = []
 
-    # Hitung posisi Y awal agar teks berada di tengah vertikal
-    # dan sedikit ke atas/kiri agar tidak terganggu elemen background
-    start_y_detail = (H - total_text_height) / 2 # Tengah vertikal
+    for line in alive_data:
+        w, h = get_text_size(line, detail_font)
+        line_heights.append(h)
+        text_widths.append(w)
+        total_text_height += h + 10 # Padding 10px 
+
+    max_text_width = max(text_widths) if text_widths else 0
+    start_y_detail = (H - total_text_height) / 2
     
+    # --- Koordinat untuk Kotak Bersinar ---
+    padding_x = 30
+    padding_y = 20
+
+    box_left = start_x_detail - padding_x
+    box_top = start_y_detail - padding_y
+    box_right = start_x_detail + max_text_width + padding_x + 10 # Tambah 10px ekstra
+    box_bottom = start_y_detail + total_text_height + padding_y
+
+    # Batasi kotak agar tidak keluar dari batas gambar
+    box_left = max(0, box_left)
+    box_top = max(0, box_top)
+    box_right = min(W, box_right)
+    box_bottom = min(H, box_bottom)
+    
+    # --- GAMBAR KOTAK BERSINAR ---
+    
+    # 3. Buat kanvas sementara untuk efek glow (RGBA)
+    glow_canvas = Image.new('RGBA', background.size, (0, 0, 0, 0))
+    glow_draw = ImageDraw.Draw(glow_canvas)
+
+    # Warna glow (Biru Neon)
+    glow_color_outer = (100, 200, 255, 100) 
+    glow_color_inner = (150, 220, 255, 150) 
+    main_color = (200, 240, 255, 255)       
+    
+    # Lapisan terluar (lebih tebal, lebih transparan)
+    for i in range(3): 
+        glow_draw.rectangle(
+            (box_left - i*2, box_top - i*2, box_right + i*2, box_bottom + i*2),
+            outline=glow_color_outer,
+            width=2
+        )
+    
+    # Lapisan inti (paling terang, paling tipis)
+    glow_draw.rectangle(
+        (box_left, box_top, box_right, box_bottom),
+        outline=main_color,
+        width=2
+    )
+
+    # 4. Terapkan blur dan tempelkan ke background
+    glow_canvas = glow_canvas.filter(ImageFilter.GaussianBlur(radius=5)) 
+    background.paste(glow_canvas, (0, 0), glow_canvas)
+
+    # --- Cetak Teks Status Bot ---
     current_y = start_y_detail
     for i, line in enumerate(alive_data):
-        # Warna Teks diatur Putih (255, 255, 255)
         draw.text((start_x_detail, current_y), line, fill=(255, 255, 255), font=detail_font) 
-
-        current_y += line_heights[i] + 15 # Pindah ke baris berikutnya + padding
+        current_y += line_heights[i] + 10 
 
     # 5. Simpan Gambar
     OUTPUT_DIR = "downloads"
@@ -110,9 +145,9 @@ def alive(alive_data):
 
     return OUTPUT_PATH
 
-# --- HANDLER ULTROID (Tidak ada perubahan) ---
+# --- HANDLER ULTROID ---
 
-@ultroid_cmd(pattern="alva$") 
+@ultroid_cmd(pattern="Alive$") 
 async def alive_handler(event):
     """
     Handler untuk perintah .alive
@@ -120,6 +155,7 @@ async def alive_handler(event):
     msg = await ultroid_edit_or_reply(event, "**`Processing alive image...`**")
     
     try:
+        # 2. Hitung Uptime
         now = datetime.now()
         if isinstance(start_time, (int, float)):
             dt_start_time = datetime.fromtimestamp(start_time)
@@ -131,23 +167,29 @@ async def alive_handler(event):
         days = diff.days
         hours = diff.seconds // 3600
         minutes = (diff.seconds % 3600) // 60
-        uptime_str = f"{days} hari, {hours} jam, {minutes} menit"
+        uptime_str = f"{days}d, {hours}h, {minutes}s"
         
+        # 3. Ambil data alive untuk gambar
         alive_data_list = get_alive_data(uptime_str)
+        
+        # 4. Buat Gambar
         image_path = alive(alive_data_list)
         
+        # 5. Kirim Gambar
         await ultroid_bot.send_file(
             event.chat_id,
             image_path,
             reply_to=event.reply_to_msg_id or event.id,
         )
 
+        # 6. Hapus pesan processing
         await msg.delete()
 
     except Exception as e:
         await ultroid_edit_or_reply(msg, f"**ERROR saat menjalankan alive:**\n`{str(e)}`")
     
     finally:
+        # 7. Hapus file gambar
         if 'image_path' in locals() and os.path.exists(image_path):
             os.remove(image_path)
-    
+  
