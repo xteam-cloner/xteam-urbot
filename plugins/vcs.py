@@ -5,7 +5,7 @@ from xteam import *
 from telethon.tl import types
 from telethon.errors import *
 import logging # Tambahkan logging untuk debugging
-
+from . import *
 # Optional: Impor patch untuk memastikan eksekusi (meskipun Ultroid seharusnya sudah melakukannya)
 try:
     from telethonpatch import methods
