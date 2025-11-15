@@ -29,7 +29,7 @@ def get_alive_data(uptime):
     python_version = pyver() 
     
     return [
-        "XTEAM URBOT IS ALIVE",
+        "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰",
         f"Owner : {OWNER_NAME}",
         f"Userbot : {ultroid_version}",
         f"Dc Id : {ultroid_bot.dc_id}",
@@ -37,7 +37,7 @@ def get_alive_data(uptime):
         f"Uptime : {uptime}",
         f"Kurigram : {pver}",
         f"Python : {python_version}",
-        "XTEAM CLONER"
+        "✵ xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ ✵"
     ]
 
 # --- FUNGSI PEMBUAT GAMBAR ALIVE ---
@@ -51,7 +51,7 @@ def alive(alive_data):
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "IMG_20251115_011736_203.jpg")
     # Tentukan path dan ukuran font kustom
     FONT_PATH = os.path.join(ASSETS_DIR, "sfont.ttf") # Ganti dengan nama font Anda
-    FONT_SIZE = 40 # Ukuran font yang lebih besar
+    FONT_SIZE = 35 # Ukuran font yang lebih besar
 
     # 1. Buka Background (dengan fallback 1280x720)
     TARGET_SIZE = (1280, 720) 
