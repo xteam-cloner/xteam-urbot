@@ -1,6 +1,6 @@
 """
 Plugin Name: Alive Checker
-Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720) menggunakan font default PIL.
+Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720) menggunakan font kustom dan ukuran yang lebih besar.
 """
 import os
 from datetime import datetime
@@ -45,11 +45,14 @@ def get_alive_data(uptime):
 def alive(alive_data):
     """
     Membuat dan menyimpan gambar yang berisi teks status bot pada background kustom (1280x720) 
-    menggunakan font default PIL.
+    menggunakan font kustom dan ukuran yang lebih besar.
     """
     ASSETS_DIR = "resources" 
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "IMG_20251115_011736_203.jpg")
-    
+    # Tentukan path dan ukuran font kustom
+    FONT_PATH = os.path.join(ASSETS_DIR, "sfont.ttf") # Ganti dengan nama font Anda
+    FONT_SIZE = 40 # Ukuran font yang lebih besar
+
     # 1. Buka Background (dengan fallback 1280x720)
     TARGET_SIZE = (1280, 720) 
     try:
@@ -62,21 +65,27 @@ def alive(alive_data):
     draw = ImageDraw.Draw(background)
     W, H = background.size 
 
-    # 2. Tentukan Font (MENGGUNAKAN DEFAULT PIL)
-    detail_font = ImageFont.load_default() 
+    # 2. Tentukan Font (MENGGUNAKAN FONT KUSTOM)
+    try:
+        detail_font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
+    except IOError:
+        # Fallback ke font default jika font kustom tidak ditemukan
+        print(f"Warning: Font '{FONT_PATH}' not found. Using default font.")
+        detail_font = ImageFont.load_default()
+        # Jika menggunakan font default, mungkin perlu penyesuaian ukuran dan posisi lagi
+        # atau biarkan kecil karena load_default tidak mendukung resize
+        FONT_SIZE = 15 # Ukuran default font bawaan PIL sangat kecil, kita coba set ulang agar tidak terlalu jauh perhitungannya
 
-    # Fungsi pembantu untuk mengukur teks (FIX: Menggunakan draw.textbbox untuk Pillow terbaru)
+    # Fungsi pembantu untuk mengukur teks (Menggunakan draw.textbbox untuk Pillow terbaru)
     def get_text_size(text, font):
-        # textbbox mengembalikan (x_min, y_min, x_max, y_max)
-        # Posisi awal (0, 0) hanya digunakan untuk perhitungan ukuran
         bbox = draw.textbbox((0, 0), text, font=font)
-        # Lebar = x_max - x_min; Tinggi = y_max - y_min
         width = bbox[2] - bbox[0]
         height = bbox[3] - bbox[1]
         return width, height
 
     # --- Cetak Semua Detail Alive ke Dalam Gambar ---
-    start_x_detail = 150 # Margin kiri
+    start_x_detail = 100 # Margin kiri yang disesuaikan
+    line_spacing = 20 # Jarak antar baris yang disesuaikan
 
     total_text_height = 0
     line_heights = []
@@ -85,17 +94,16 @@ def alive(alive_data):
     for line in alive_data:
         w, h = get_text_size(line, detail_font)
         line_heights.append(h)
-        total_text_height += h + 10 # Padding 10px
+        total_text_height += h + line_spacing 
 
     # Hitung posisi Y awal agar teks berada di tengah vertikal
     start_y_detail = (H - total_text_height) / 2
     
     current_y = start_y_detail
     for i, line in enumerate(alive_data):
-        # Warna Teks diatur Putih
         draw.text((start_x_detail, current_y), line, fill=(255, 255, 255), font=detail_font) 
 
-        current_y += line_heights[i] + 10 # Pindah ke baris berikutnya
+        current_y += line_heights[i] + line_spacing 
 
     # 5. Simpan Gambar
     OUTPUT_DIR = "downloads"
@@ -116,10 +124,8 @@ async def alive_handler(event):
     msg = await ultroid_edit_or_reply(event, "**`Processing alive image...`**")
     
     try:
-        # 2. Hitung Uptime
         now = datetime.now()
         if isinstance(start_time, (int, float)):
-            # Perbaikan float/datetime
             dt_start_time = datetime.fromtimestamp(start_time)
         else:
             dt_start_time = start_time
@@ -131,27 +137,22 @@ async def alive_handler(event):
         minutes = (diff.seconds % 3600) // 60
         uptime_str = f"{days} hari, {hours} jam, {minutes} menit"
         
-        # 3. Ambil data alive untuk gambar
         alive_data_list = get_alive_data(uptime_str)
         
-        # 4. Buat Gambar
         image_path = alive(alive_data_list)
         
-        # 5. Kirim Gambar
         await ultroid_bot.send_file(
             event.chat_id,
             image_path,
             reply_to=event.reply_to_msg_id or event.id,
         )
 
-        # 6. Hapus pesan processing
         await msg.delete()
 
     except Exception as e:
         await ultroid_edit_or_reply(msg, f"**ERROR saat menjalankan alive:**\n`{str(e)}`")
     
     finally:
-        # 7. Hapus file gambar
         if 'image_path' in locals() and os.path.exists(image_path):
             os.remove(image_path)
-    
+
