@@ -1,5 +1,5 @@
 # vc_music.py - Plugin Musik VC untuk Ultroid
-# Menggunakan impor klien global yang diminta.
+# Menggunakan e.client untuk memastikan kompatibilitas sesi dengan PyTgCalls.
 
 from __future__ import annotations
 
@@ -16,9 +16,9 @@ from . import *
 from telethon import events, TelegramClient 
 from telethon.tl.types import Message
 from xteam.configs import Var 
-# 🛑 PERUBAHAN: Mengimpor klien secara global.
-from xteam import ultroid_bot as client 
-from ntgcalls import TelegramServerError
+# 🛑 PENTING: JANGAN IMPORT KLIEN SECARA GLOBAL DI SINI. 
+# Gunakan e.client di dalam _manager.
+from ntgcalls import TelegramServerError 
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream
 from pytgcalls.types import (
@@ -152,6 +152,7 @@ class VCManager:
         if PyTgCalls is None:
             raise RuntimeError("pytgcalls is not installed. Run: pip install pytgcalls")
         self.client = client
+        # INISIALISASI UTAMA: Menggunakan klien yang terikat ke event loop
         self.tgcalls = PyTgCalls(client) 
         self.states: Dict[int, VCState] = {}
         self.resolver = YouTubeResolver()
@@ -162,7 +163,7 @@ class VCManager:
             await self._on_track_end(chat_id)
 
         try:
-             # Menggunakan loop dari klien global
+             # Memastikan PyTgCalls dimulai di event loop klien
              client.loop.run_until_complete(self.tgcalls.start()) 
         except Exception as e:
             logger.error(f"Failed to start PyTgCalls: {e}")
@@ -245,17 +246,19 @@ class VCManager:
 
 
 # --- SINGLETON MANAGER & HELPER ---
-_vc_global: Optional[VCManager] = None
+_vc: Dict[int, VCManager] = {} 
 
 def _manager(e) -> VCManager:
     """
-    Fungsi Kritis: Menginisialisasi VCManager menggunakan klien global yang diimpor.
+    Fungsi Kritis: Mengambil klien dari objek event (e.client) dan 
+    menginisialisasi VCManager per ID klien.
     """
-    global _vc_global
-    if _vc_global is None:
-        # 🛑 Menggunakan klien global yang diimpor dari 'xteam'
-        _vc_global = VCManager(client)
-    return _vc_global
+    client_id = id(e.client)
+    global _vc
+    if client_id not in _vc:
+        # Menggunakan e.client yang valid untuk inisialisasi PyTgCalls
+        _vc[client_id] = VCManager(e.client) 
+    return _vc[client_id]
 
 def _cid(e: Message) -> int:
     return e.chat_id
@@ -263,7 +266,6 @@ def _cid(e: Message) -> int:
 # ─────────────────────────────────────────────────────────────
 # Commands (Ultroid Integration)
 # ─────────────────────────────────────────────────────────────
-# [Semua perintah di bawah ini tetap sama, hanya memanggil _manager(e)]
 
 @ultroid_cmd(pattern="vcjoin$", groups_only=True)
 async def vc_join(e: Message):
@@ -274,6 +276,7 @@ async def vc_join(e: Message):
     except RuntimeError as ex:
         await e.eor(f"**❌ Error Dependensi:** `{ex}`")
     except Exception as ex:
+        # Ini akan menangkap Invalid MTProto Client
         await e.eor(f"**❌ Error Inisialisasi PyTgCalls:** `{ex}`")
 
 
@@ -329,7 +332,7 @@ async def vc_play(e: Message):
     except RuntimeError as ex:
         await msg.edit(f"**❌ Gagal Resolusi!** `{ex}`")
     except Exception as ex:
-        await msg.edit(f"**❌ Gagal Memutar!** `{type(ex).__name__}: {ex}`")
+        await msg.eor(f"**❌ Gagal Memutar!** `{type(ex).__name__}: {ex}`")
 
 
 @ultroid_cmd(pattern="vcpause$", groups_only=True)
