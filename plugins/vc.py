@@ -1,6 +1,4 @@
-# plugins/vc.py
-
-from pyUltroid import *
+from . import *
 from telethon.tl import functions, types
 from telethon.tl.functions.phone import (
     JoinGroupCallRequest, LeaveGroupCallRequest
