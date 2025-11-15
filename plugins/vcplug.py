@@ -18,13 +18,13 @@ from telethon.tl.types import Message
 from xteam.configs import Var 
 # 🛑 PERUBAHAN: Mengimpor klien secara global.
 from xteam import ultroid_bot as client 
-
+from ntgcalls import TelegramServerError
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream
 from pytgcalls.types import (
     StreamEnded,
 )
-from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient, TelegramServerError
+from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 
