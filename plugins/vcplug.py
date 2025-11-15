@@ -17,13 +17,13 @@ from telethon import events, TelegramClient
 from telethon.tl.types import Message
 # Menggunakan Var dari xteam.configs
 from xteam.configs import Var 
-
+from ntgcalls import TelegramServerError
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream
 from pytgcalls.types import (
     StreamEnded,
 )
-from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient, TelegramServerError
+from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 
