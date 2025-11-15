@@ -49,14 +49,14 @@ def alive(alive_data):
     """
     ASSETS_DIR = "resources" 
     BACKGROUND_PATH = os.path.join(ASSETS_DIR, "IMG_20251115_011736_203.jpg")
-    # FONT_PATH tidak lagi digunakan
-
+    
     # 1. Buka Background (dengan fallback 1280x720)
     TARGET_SIZE = (1280, 720) 
     try:
         background = Image.open(BACKGROUND_PATH).convert("RGB")
         background = background.resize(TARGET_SIZE) 
     except FileNotFoundError:
+        # Fallback jika gambar background tidak ditemukan
         background = Image.new('RGB', TARGET_SIZE, color=(30, 60, 30)) 
 
     draw = ImageDraw.Draw(background)
@@ -65,11 +65,17 @@ def alive(alive_data):
     # 2. Tentukan Font (MENGGUNAKAN DEFAULT PIL)
     detail_font = ImageFont.load_default() 
 
-    # Fungsi pembantu untuk mengukur teks (menggunakan draw.textsize untuk kompatibilitas)
+    # Fungsi pembantu untuk mengukur teks (FIX: Menggunakan draw.textbbox untuk Pillow terbaru)
     def get_text_size(text, font):
-        return draw.textsize(text, font=font) 
+        # textbbox mengembalikan (x_min, y_min, x_max, y_max)
+        # Posisi awal (0, 0) hanya digunakan untuk perhitungan ukuran
+        bbox = draw.textbbox((0, 0), text, font=font)
+        # Lebar = x_max - x_min; Tinggi = y_max - y_min
+        width = bbox[2] - bbox[0]
+        height = bbox[3] - bbox[1]
+        return width, height
 
-    # --- Cetak Semua Detail Alive ke Dalam Gambar (Pusat Vertikal, Geser Kanan) ---
+    # --- Cetak Semua Detail Alive ke Dalam Gambar ---
     start_x_detail = 150 # Margin kiri
 
     total_text_height = 0
@@ -79,7 +85,7 @@ def alive(alive_data):
     for line in alive_data:
         w, h = get_text_size(line, detail_font)
         line_heights.append(h)
-        total_text_height += h + 10 # Padding 10px untuk font default
+        total_text_height += h + 10 # Padding 10px
 
     # Hitung posisi Y awal agar teks berada di tengah vertikal
     start_y_detail = (H - total_text_height) / 2
@@ -105,7 +111,7 @@ def alive(alive_data):
 @ultroid_cmd(pattern="alva$") 
 async def alive_handler(event):
     """
-    Handler untuk perintah .alive
+    Handler untuk perintah .alva
     """
     msg = await ultroid_edit_or_reply(event, "**`Processing alive image...`**")
     
@@ -148,4 +154,4 @@ async def alive_handler(event):
         # 7. Hapus file gambar
         if 'image_path' in locals() and os.path.exists(image_path):
             os.remove(image_path)
-          
+    
