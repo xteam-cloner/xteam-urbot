@@ -84,7 +84,7 @@ def alive(alive_data):
         return width, height
 
     # --- Cetak Semua Detail Alive ke Dalam Gambar ---
-    start_x_detail = 100 # Margin kiri yang disesuaikan
+    start_x_detail = 150 # Margin kiri yang disesuaikan
     line_spacing = 20 # Jarak antar baris yang disesuaikan
 
     total_text_height = 0
