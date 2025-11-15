@@ -10,7 +10,7 @@ import contextlib
 import logging
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Union, Any
-
+from xteam import ultroid_bot as client
 import httpx
 from . import * 
 from telethon import events, TelegramClient 
