@@ -10,7 +10,7 @@ from telethon.tl.types import DocumentAttributeVideo
 from telethon.errors import MediaEmptyError, WebpageCurlFailedError, InputUserDeactivatedError
 
 from . import ultroid_cmd 
-from . import *
+
 YDL_PARAMS = {
     "quiet": True,
     "no_warnings": True,
@@ -71,12 +71,9 @@ async def download_item_async(url, output_dir, index):
         None, partial(download_item_sync, url, output_dir, index)
     )
 
-@ultroid_cmd(pattern="playlist (.*)", group=1)
+@ultroid_cmd(pattern="ytdlplaylist (.*)", group=1)
 async def youtube_playlist_downloader(event):
-    if not event.is_outgoing and not event.is_private:
-        await event.reply("Hanya berfungsi di chat pribadi atau sebagai perintah outgoing.")
-        return
-        
+    
     url = event.pattern_match.group(1).strip()
     
     if not url.startswith("http") or "list=" not in url:
@@ -142,7 +139,7 @@ async def youtube_playlist_downloader(event):
         except Exception:
             pass 
             
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
 
     try:
         if os.path.exists(temp_dir):
@@ -151,3 +148,4 @@ async def youtube_playlist_downloader(event):
         pass 
 
     await status_msg.edit(f"✅ **Selesai!** Playlist `{playlist_title}` selesai diunduh dan diunggah dalam format **M4A 256kbps**.\nTotal {downloaded_count} dari {total_videos} item berhasil.")
+    
