@@ -7,10 +7,10 @@
 """
 ✘ **Help for YouTube**
 
-๏ **Command:** Video
+๏ **Command:** video
 ◉ **Description:** Download Videos from YouTube.
 
-๏ **Command:** Song
+๏ **Command:** song
 ◉ **Description:** Download Songs from YouTube.
 """
 
@@ -29,7 +29,7 @@ def run_sync(func, *args, **kwargs):
     return get_event_loop().run_in_executor(None, partial(func, *args, **kwargs))
 
 
-@ultroid_cmd(pattern="Video( (.*)|$)")
+@ultroid_cmd(pattern="video( (.*)|$)")
 async def yt_video(e):
     infomsg = await e.eor("`Processing...`")
     try:
@@ -61,7 +61,7 @@ async def yt_video(e):
     )
     # --- End YTDL Options ---
     
-    await infomsg.eor("Mulai Mendownload...")
+    await infomsg.eor("Download ...")
     try:
         ytdl_data = await run_sync(ydl.extract_info, link, download=True)
         file_path = ydl.prepare_filename(ytdl_data)
@@ -83,7 +83,7 @@ async def yt_video(e):
         file_name=title,
         duration=duration,
         supports_streaming=True,
-        caption=f'<blockquote>💡 Informasi {"video"}\n\n🏷 Nama: {title}\n🧭 Durasi: {duration}\n👀 Dilihat: {views}\n📢 Channel: {channel}\nUpload By: {ultroid_bot.full_name}</blockquote>',
+        caption=f'<blockquote>💡 Informasi {"video"}\n\n🏷 Nama: {title}\n🧭 Durasi: {duration}\n👀 Dilihat: {views}\n📢 Channel: {channel}\n🧑‍⚕️ Upload by: {ultroid_bot.full_name}</blockquote>',
         reply_to=e.reply_to_msg_id,
         parse_mode="html",
     )
@@ -93,7 +93,7 @@ async def yt_video(e):
             os.remove(files)
 
 
-@ultroid_cmd(pattern="Song( (.*)|$)")
+@ultroid_cmd(pattern="song( (.*)|$)")
 async def yt_audio(e):
     infomsg = await e.eor("`Processing...`")
     try:
@@ -133,7 +133,7 @@ async def yt_audio(e):
     )
     # --- End YTDL Options ---
     
-    await infomsg.edit("Mulai Mendownload dan Mengkonversi ke MP3...")
+    await infomsg.edit("Download ...")
     try:
         ytdl_data = await run_sync(ydl.extract_info, link, download=True)
         file_path = ydl.prepare_filename(ytdl_data)
@@ -165,8 +165,8 @@ async def yt_audio(e):
         thumb=thumbnail,
         file_name=f"{title}.mp3", # Pastikan nama file di Telegram juga .mp3
         duration=duration,
-        supports_streaming=False,
-        caption=f'<blockquote>💡 Informasi {"Audio"}\n\n🏷 Nama: {title}\n🧭 Durasi: {duration}\n👀 Dilihat: {views}\n📢 Channel: {channel}\nUpload By: {ultroid_bot.full_name}</blockquote>',
+        supports_streaming=True,
+        caption=f'<blockquote>💡 Informasi {"Audio"}\n\n🏷 Nama: {title}\n🧭 Durasi: {duration}\n👀 Dilihat: {views}\n📢 Channel: {channel}\n🧑‍⚕️ Upload by: {ultroid_bot.full_name}</blockquote>',
         reply_to=e.reply_to_msg_id,
         parse_mode="html",
     )
