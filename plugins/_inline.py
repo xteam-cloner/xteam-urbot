@@ -74,14 +74,14 @@ SUP_BUTTONS = [
 
 PING_BUTTONS = [
     [
-        Button.inline("🏡 Modules 🏡", data="uh_Official_"),
+        Button.inline("Refresh", data="ping_btn"),
     ],
 
 ]
 
 ALIVE_BUTTONS = [
     [
-        Button.inline("🏡 PING 🏡", data="ping_btn"),
+        Button.inline("Modules", data="uh_Official_"),
     ],
 
 ]
@@ -645,7 +645,7 @@ async def callback_ping_handler(ult):
 
     await ult.edit(
         ping_message, 
-        buttons=ALIVE_BUTTONS,
+        buttons=PING_BUTTONS,
         link_preview=False,
         parse_mode="html"
     )
@@ -784,98 +784,3 @@ async def send_spam_menu(ult):
         print(f"Error saat menjalankan spammenu command (inline): {e}")
         await eris.edit(f"Terjadi kesalahan saat memanggil inline spam menu: `{type(e).__name__}: {e}`")
 
-
-@in_pattern("spammenu", owner=False)
-async def spam_menu_inline_handler(ult):
-    
-    # --- LOGIKA ISI PESAN ---
-    
-    # PERBAIKAN: Menggunakan get_key tanpa nilai default di argumen
-    # dan menerapkan default value (False) secara eksternal.
-    # Jika udB.get_key("USPAM") adalah None/False/dll., maka False yang akan digunakan.
-    is_spamming = udB.get_key("USPAM") or False 
-    
-    message_text = "**Kontrol Unlimited Spam (via Callback)**\n\n"
-    
-    if is_spamming:
-        message_text += "Status: 🟢 **AKTIF**"
-        description_text = "Status: AKTIF"
-    else:
-        message_text += "Status: 🔴 **TIDAK AKTIF**"
-        description_text = "Status: TIDAK AKTIF"
-        
-    # PERBAIKAN: Menggunakan get_key tanpa nilai default di argumen
-    # dan menerapkan default value secara eksternal.
-    spam_text = udB.get_key("DEFAULT_SPAM_TEXT") or "Spam Ulang Alik! 🚀"
-    message_text += f"\nTeks Spam: `{spam_text}`"
-    
-    # --- Mengembalikan Inline Result (MENGGANTIKAN SEMUA ult.eor) ---
-    await ult.answer(
-        results=[
-            await ult.builder.article(
-                title="⚙️ Menu Kontrol Spam",
-                text=message_text,
-                description=description_text,
-                buttons=SPAM_BUTTONS, 
-                parse_mode="markdown"
-            )
-        ]
-    )
-    
-
-@callback("spam_start", owner=False) # <--- DIUBAH!
-async def spam_start_handler(ult):
-    chat_id = ult.chat_id
-    
-    await ult.answer("Memproses aksi: START...", alert=False)
-    
-    # Cek chat terlarang
-    noU_list = [-1001212184059, -1001451324102] 
-    if ult.chat_id in noU_list:
-        await ult.answer("Tidak diizinkan di chat ini!", alert=True)
-        return
-        
-    if chat_id in active_spam_tasks:
-        await ult.answer("Spam sudah AKTIF di chat ini!", alert=True)
-        return
-
-    # Ambil teks spam 
-    input_text = udB.get_key("DEFAULT_SPAM_TEXT", "Spam Ulang Alik! 🚀")
-    
-    # 1. Set Status
-    udB.set_key("USPAM", True)
-    
-    # 2. **JALANKAN BACKGROUND TASK** (Non-blocking)
-    task = asyncio.create_task(run_unlimited_spam(ult.client, chat_id, input_text))
-    active_spam_tasks[chat_id] = task 
-    
-    # 3. Berikan Feedback dan HAPUS TOMBOL
-    await ult.edit(
-        "**Spam dimulai.** Status diatur ke AKTIF.\n"
-        f"Teks Spam: `{input_text}`",
-        buttons=None, 
-        link_preview=False,
-        parse_mode="markdown"
-    )
-
-
-@callback("spam_stop", owner=False) # <--- DIUBAH!
-async def spam_stop_handler(ult):
-    chat_id = ult.chat_id
-    
-    await ult.answer("Memproses aksi: STOP...", alert=False)
-    
-    # 1. Hentikan task jika ada
-    if chat_id in active_spam_tasks:
-        active_spam_tasks[chat_id].cancel()
-        
-    # 2. Hentikan spam (Hapus Status di DB)
-    udB.del_key("USPAM")
-    
-    # 3. Berikan Feedback dan HAPUS TOMBOL
-    await ult.edit(
-        "**Spam dihentikan.** Status diatur ke TIDAK AKTIF.",
-        buttons=None, 
-        link_preview=False,
-        parse_mode="markdown"
-    )
