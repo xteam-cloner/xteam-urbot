@@ -86,52 +86,6 @@ ALIVE_BUTTONS = [
 
 ]
 
-SPAM_DELAY = 1.5 # Jeda antar pesan spam (dalam detik)
-
-# Variabel Global/Konstanta yang digunakan
-noU = [-1001212184059, -1001451324102] # Daftar chat terlarang (asumsi dari kode 2 asli)
-
-SPAM_BUTTONS = [
-    [
-        Button.inline("🔴 Mulai Spam", data="spam_start"),
-        Button.inline("⏹️ Hentikan Spam", data="spam_stop")
-    ],
-    [
-        Button.inline("🔄 Uptime Bot", data="alive_btn")
-    ]
-]
-
-active_spam_tasks = {} 
-
-# --- FUNGSI UTAMA LOOP SPAM (Background Task) ---
-# Mengambil logika loop dari command uspam asli
-async def run_unlimited_spam(client, chat_id, text_spam):
-    
-    while udB.get_key("USPAM", False):
-        try:
-            # Menggunakan client.send_message (karena ult.respond hanya ada di handler)
-            await client.send_message(chat_id, text_spam)
-            
-            # Wajib: Jeda sebentar agar tidak langsung FloodWait
-            await asyncio.sleep(1) 
-            
-        except FloodWaitError as fw:
-            # Logika FloodWait dari kode asli Anda
-            udB.del_key("USPAM")
-            await client.send_message(chat_id, f"Spam dihentikan karena FloodWait. Tunggu {fw.seconds} detik.")
-            break 
-        except asyncio.CancelledError:
-            break
-        except Exception as e:
-            print(f"ERROR SAAT SPAM di {chat_id}: {e}")
-            break
-            
-    # Cleanup task setelah loop berakhir
-    if chat_id in active_spam_tasks:
-        del active_spam_tasks[chat_id]
-        
-    # Pastikan status DB terhapus
-    udB.del_key("USPAM")
     
 # --------------------BUTTONS--------------------#
 
@@ -365,21 +319,6 @@ async def _(event):
             parse_mode="html",
         )
 
-
-@callback(data="pkng", owner=True)
-async def _(event):
-    start = datetime.now()
-    end = datetime.now()
-    ms = (end - start).microseconds
-    pin = f"🌋Pɪɴɢ = {ms} ms"
-    await event.answer(pin, cache_time=0, alert=True)
-
-
-@callback(data="upp", owner=True)
-async def _(event):
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    pin = f"🙋Uᴘᴛɪᴍᴇ = {uptime}"
-    await event.answer(pin, cache_time=0, alert=True)
 
 
 @callback(data="inlone", owner=True)
