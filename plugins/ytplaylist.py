@@ -10,7 +10,7 @@ from telethon.tl.types import DocumentAttributeVideo
 from telethon.errors import MediaEmptyError, WebpageCurlFailedError, InputUserDeactivatedError
 
 from . import ultroid_cmd 
-
+from . import *
 YDL_PARAMS = {
     "quiet": True,
     "no_warnings": True,
