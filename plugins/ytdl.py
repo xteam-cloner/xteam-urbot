@@ -1,6 +1,9 @@
 # xteam-urbot 
 # Copyright (C) 2024-2025 xteamdev
-
+#
+# This file is a part of < https://github.com/senpai80/Ayra/ >
+# PLease read the GNU Affero General Public License in
+# <https://www.github.com/senpai80/Ayra/blob/main/LICENSE/>.
 """
 ✘ Help for YouTube
 
@@ -54,6 +57,8 @@ async def yt_video(e):
             "geo_bypass": True,
             "cookiefile": "cookies.txt",
             "merge_output_format": "mp4", 
+            # Perbaikan Streaming Video
+            "postprocessor_args": ['-movflags', 'faststart'], 
         }
     )
     
@@ -119,6 +124,8 @@ async def yt_audio(e):
                     "nopostoverwrites": True,
                 }
             ],
+            # Perbaikan Streaming Audio
+            "postprocessor_args": ['-movflags', 'faststart'],
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "nocheckcertificate": True,
             "geo_bypass": True,
