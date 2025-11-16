@@ -1,6 +1,7 @@
 """
 Plugin Name: Alive Checker
-Description: Menampilkan status aktif bot (Alive) pada gambar background (1280x720) menggunakan font kustom dan ukuran yang lebih besar.
+Command: alpic
+Description: Menampilkan status aktif bot (Alive) pada gambar background.
 """
 import os
 from datetime import datetime
@@ -29,7 +30,6 @@ def get_alive_data(uptime):
     python_version = pyver() 
     
     return [
-        "✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰",
         f"Owner : {OWNER_NAME}",
         f"Userbot : {ultroid_version}",
         f"Dc Id : {ultroid_bot.dc_id}",
@@ -37,7 +37,6 @@ def get_alive_data(uptime):
         f"Uptime : {uptime}",
         f"Kurigram : {pver}",
         f"Python : {python_version}",
-        "✵ xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ ✵"
     ]
 
 # --- FUNGSI PEMBUAT GAMBAR ALIVE ---
@@ -116,10 +115,10 @@ def alive(alive_data):
 
 # --- HANDLER ULTROID ---
 
-@ultroid_cmd(pattern="alva$") 
+@ultroid_cmd(pattern="alpic$") 
 async def alive_handler(event):
     """
-    Handler untuk perintah .alva
+    Handler untuk perintah .alpic
     """
     msg = await ultroid_edit_or_reply(event, "**`Processing alive image...`**")
     
@@ -135,7 +134,7 @@ async def alive_handler(event):
         days = diff.days
         hours = diff.seconds // 3600
         minutes = (diff.seconds % 3600) // 60
-        uptime_str = f"{days} hari, {hours} jam, {minutes} menit"
+        uptime_str = f"{days}, {hours}, {minutes}"
         
         alive_data_list = get_alive_data(uptime_str)
         
