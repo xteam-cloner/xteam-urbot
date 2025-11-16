@@ -5,13 +5,13 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/senpai80/Ayra/blob/main/LICENSE/>.
 """
-✘ **Help for YouTube**
+✘ Help for YouTube
 
-๏ **Command:** video
-◉ **Description:** Download Videos from YouTube.
+๏ Command: video
+◉ Description: Download Videos from YouTube.
 
-๏ **Command:** song
-◉ **Description:** Download Songs from YouTube.
+๏ Command: song
+◉ Description: Download Songs from YouTube.
 """
 
 import os
