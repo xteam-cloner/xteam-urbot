@@ -126,7 +126,7 @@ async def yt_audio(e):
             }
         ],
         "postprocessor_args": ['-movflags', 'faststart'],
-        "outtmpl": "downloads/%(id)s_%(playlist_index)s.%(ext)s",
+        "outtmpl": "downloads/%(title)s.%(ext)s",
         "nocheckcertificate": True,
         "geo_bypass": True,
         "cookiefile": "cookies.txt",
@@ -154,12 +154,11 @@ async def yt_audio(e):
             file_path = ydl.prepare_filename(entry) 
             base_path = os.path.splitext(file_path)[0]
             
-            if not file_path.endswith('.m4a'):
-                 file_path = base_path + '.m4a'
-            
             if not os.path.exists(file_path):
-                 await e.respond(f"❌ Gagal menemukan file: {entry.get('title')}. Mungkin diblokir.")
-                 continue
+                 file_path = base_path + '.m4a'
+                 if not os.path.exists(file_path):
+                      await e.respond(f"❌ Gagal menemukan file: {entry.get('title')}. Mungkin diblokir.")
+                      continue
 
             videoid = entry.get("id")
             title = entry.get("title")
@@ -195,4 +194,4 @@ async def yt_audio(e):
     for files in files_to_remove_after_upload:
         if files and os.path.exists(files):
             os.remove(files)
-    
+            
