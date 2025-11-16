@@ -65,7 +65,7 @@ async def yt_video(e):
     }
     
     if is_playlist_url:
-        ydl_params["playlist_items"] = '1-50'
+        ydl_params["playlist_items"] = '50'
 
     ydl = YoutubeDL(ydl_params)
     
@@ -171,7 +171,7 @@ async def yt_audio(e):
     }
     
     if is_playlist_url:
-        ydl_params["playlist_items"] = '1-50'
+        ydl_params["playlist_items"] = '50'
         
     ydl = YoutubeDL(ydl_params)
     
