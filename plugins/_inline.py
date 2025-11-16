@@ -695,9 +695,6 @@ async def inline_alive_query_handler(ult):
         
     # Asumsikan format_message_text sudah Anda gabungkan atau dipindahkan ke __init__.py
     message_text = format_message_text(uptime) # Ganti dengan logika yang sudah diperbaiki
-
-    
-    # --- Panggilan article ---
     result = await ult.builder.article(
         text=message_text, 
         buttons=ALIVE_BUTTONS,
@@ -705,82 +702,23 @@ async def inline_alive_query_handler(ult):
         description=f"Uptime: {uptime}",
         parse_mode="html",
     )
-    
-    # Menjawab inline query (Seperti yang Anda inginkan di kode awal)
     await ult.answer([result], cache_time=0)
 
-import re
-import time
-# Asumsikan impor lain seperti time_formatter, start_time, format_message_text, ALIVE_BUTTONS, 
-# get_string, _strings, OWNER_NAME, HELP, page_num, dll. sudah tersedia.
 
-# Mengganti @in_pattern dengan dekorator callback dan pola regex baru
-# Pola ini akan mencocokkan 'alive_btn' diikuti oleh data apa pun (group 1)
 @callback(re.compile("alive_btn(.*)"), owner=False)
 async def callback_alive_handler(ult):
-    
-    # Meniru cara Kode 2 mengambil data: key, count = ult.data_match.group(1).decode("utf-8").split("_")
-    # Di sini, kita asumsikan 'ult.data_match.group(1)' berisi data tambahan, jika ada
-    # Jika tidak ada, kita bisa mengosongkannya.
-    
-    # Ambil data yang cocok dari regex group 1.
     match_data = ult.data_match.group(1).decode("utf-8") if ult.data_match.group(1) else ""
-    
-    # --- LOGIKA KODE 1 DIMODIFIKASI UNTUK CALLBACK ---
-    
-    # Hitung uptime 
     try:
-        # Masih perlu memastikan time_formatter dan start_time tidak None!
         uptime = time_formatter((time.time() - start_time) * 1000) 
     except NameError:
         uptime = "N/A" 
-        
-    # Asumsikan format_message_text sudah Anda gabungkan
     message_text = format_message_text(uptime) 
-
-    
-    # --- Tindakan Callback (Edit Message) ---
-    # Di callback handler, kita biasanya mengedit pesan yang sudah ada, 
-    # bukan mengirim artikel inline baru.
-    
-    # Meniru ult.edit dari Kode 2:
     await ult.edit(
         message_text, 
-        buttons=ALIVE_BUTTONS, # Gunakan tombol ALIVE_BUTTONS yang sudah ada
+        buttons=ALIVE_BUTTONS,
         link_preview=False,
         parse_mode="html"
     )
-    
-    # Opsional: Menjawab callback query (pop-up atau notifikasi)
     await ult.answer(f"Status ALIVE diperbarui. Uptime: {uptime}", alert=False)
 
 #---------------------------------------------
-
-import asyncio
-from telethon.errors import FloodWaitError
-# Asumsikan 'ultroid_cmd', 'asst', dan modul lain sudah diimpor
-
-@ultroid_cmd(pattern="spammenu$", fullsudo=True) 
-async def send_spam_menu(ult):
-    
-    eris = await ult.eor("⏳ Mengambil menu kontrol spam...")
-    
-    try:
-        results = await asst.inline_query(asst.me.username, "spammenu")
-        
-        if results:
-            await results[0].click(
-                ult.chat_id,         
-                reply_to=ult.id,     
-                hide_via=True
-            )
-            
-            await ult.delete() 
-            
-        else:
-            await eris.edit("❌ Gagal mendapatkan menu kontrol spam melalui inline query. Tidak ada hasil ditemukan.")
-
-    except Exception as e:
-        print(f"Error saat menjalankan spammenu command (inline): {e}")
-        await eris.edit(f"Terjadi kesalahan saat memanggil inline spam menu: `{type(e).__name__}: {e}`")
-
