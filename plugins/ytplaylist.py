@@ -14,25 +14,21 @@ from . import ultroid_cmd
 YDL_PARAMS = {
     "quiet": True,
     "no_warnings": True,
+    # Mengunduh format audio terbaik (bestaudio/best), yang seringnya sudah M4A atau Opus.
     "format": "bestaudio/best",
-    # 📌 PERBAIKAN KRUSIAL: Menonaktifkan penulisan metadata/thumbnail
+    
+    # 📌 PERBAIKAN KRUSIAL: Menghapus postprocessors sepenuhnya
+    # Ini menghilangkan sumber error 'list' object has no attribute 'split'
+    # "postprocessors": [ ... ] DIHAPUS
+    
+    # Opsi-opsi yang tetap penting
     "writethumbnail": False, 
     "writemetadata": False, 
-    "postprocessors": [
-        {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "m4a",
-            "preferredquality": "256", 
-            "nopostoverwrites": False, # Diubah menjadi False
-        }
-    ],
     "postprocessor_args": ['-movflags', 'faststart'],
     "nocheckcertificate": True,
     "geo_bypass": True,
     "cookiefile": "cookies.txt",
 }
-
-
 
 def download_item_sync(url, output_dir, index):
     item_temp_dir = os.path.join(output_dir, str(index))
@@ -42,7 +38,7 @@ def download_item_sync(url, output_dir, index):
         
         ydl_opts = YDL_PARAMS.copy()
         
-        # 📌 PERBAIKAN: Gunakan index sebagai nama file untuk menghindari metadata title yang rusak
+        # Menggunakan INDEX sebagai nama file untuk menghindari metadata title yang rusak
         ydl_opts['outtmpl'] = os.path.join(item_temp_dir, f"{index}.%(ext)s")
         
         # Unduh hanya item ke-[index]
@@ -52,12 +48,10 @@ def download_item_sync(url, output_dir, index):
             # Lakukan proses download dan ekstrak info dalam satu langkah
             info = ydl.extract_info(url, download=True)
             
+            # Mendapatkan entri yang diunduh
             if 'entries' not in info:
-                # Jika unduhan tunggal, info adalah metadata video itu sendiri
                 downloaded_entry = info
             else:
-                # Jika unduhan playlist, cari entri yang sesuai
-                # yt-dlp mengembalikan entries di playlist, kita cari yang sesuai dengan index yang diminta
                 downloaded_entry = next((e for e in info['entries'] if e.get('playlist_index') == index), None)
 
             if not downloaded_entry:
@@ -69,15 +63,12 @@ def download_item_sync(url, output_dir, index):
             width = downloaded_entry.get('width', 0)
             height = downloaded_entry.get('height', 0)
             
-            # Cari nama file yang dihasilkan (sudah pasti index.m4a)
-            filename = os.path.join(item_temp_dir, f"{index}.m4a")
-
-            if not os.path.exists(filename):
-                # Fallback untuk pencarian file yang sebenarnya jika nama ekstensi berbeda
-                 filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith('.m4a')), None)
+            # Cari nama file yang dihasilkan (ext bisa jadi m4a, webm, atau mp3)
+            # Kita perlu mencari file audio apa pun di direktori
+            filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith(('.m4a', '.mp3', '.webm', '.opus'))), None)
 
             if not filename:
-                 return 'Gagal menemukan file unduhan m4a.', None, None, None, None
+                 return 'Gagal menemukan file audio hasil unduhan.', None, None, None, None
             
             return filename, title, duration, width, height
             
@@ -133,20 +124,24 @@ async def youtube_playlist_downloader(event):
         index = i + 1 
         current_title = video.get('title', f"Video ke-{index}")
         
-        await status_msg.edit(f"📥 **[{index}/{total_videos}] Mengunduh M4A 256kbps:** `{current_title}`")
+        # Karena postprocessor dihilangkan, kita tidak bisa menjamin format M4A 256kbps.
+        await status_msg.edit(f"📥 **[{index}/{total_videos}] Mengunduh audio terbaik:** `{current_title}`") 
         filename, title, duration, width, height = await download_item_async(url, temp_dir, index)
         
         if not filename or not os.path.exists(filename) or os.path.basename(filename).startswith('Gagal'):
             await event.reply(f"❌ **[{index}/{total_videos}] Gagal:** `{title if title else current_title}`. Error: `{filename}`")
             continue
             
+        # Dapatkan ekstensi file yang diunduh
+        file_ext = os.path.splitext(filename)[1].strip('.')
+        
         await status_msg.edit(f"⬆️ **[{index}/{total_videos}] Mengunggah:** `{title}`")
         
         try:
             await event.client.send_file(
                 event.chat_id,
                 filename,
-                caption=f"🎧 **{playlist_title}** (M4A 256kbps)\n*Item {index}/{total_videos}:* `{title}`",
+                caption=f"🎧 **{playlist_title}** ({file_ext.upper()} terbaik)\n*Item {index}/{total_videos}:* `{title}`",
                 supports_streaming=True,
             )
             downloaded_count += 1
@@ -171,5 +166,5 @@ async def youtube_playlist_downloader(event):
     except Exception:
         pass 
 
-    await status_msg.edit(f"✅ **Selesai!** Playlist `{playlist_title}` selesai diunduh dan diunggah dalam format **M4A 256kbps**.\nTotal {downloaded_count} dari {total_videos} item berhasil.")
-                
+    await status_msg.edit(f"✅ **Selesai!** Playlist `{playlist_title}` selesai diunduh dan diunggah dalam format **audio terbaik**.\nTotal {downloaded_count} dari {total_videos} item berhasil.")
+    
