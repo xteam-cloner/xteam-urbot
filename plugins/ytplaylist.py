@@ -36,34 +36,52 @@ def download_item_sync(url, output_dir, index):
         
         ydl_opts = YDL_PARAMS.copy()
         
-        ydl_opts['outtmpl'] = os.path.join(item_temp_dir, '%(title)s.%(ext)s')
+        # 📌 Solusi 1: Mengubah outtmpl menjadi deterministik.
+        # Nama file akan menjadi index.m4a di dalam item_temp_dir
+        ydl_opts['outtmpl'] = os.path.join(item_temp_dir, f"{index}.%(ext)s")
         
         ydl_opts['playlist_items'] = [index] 
         
         with YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
+            # Menggunakan download=False dulu untuk mendapatkan info tanpa masalah
+            # Penamaan file bisa menimbulkan error saat download=True.
             
-            if 'entries' in info and info['entries']:
-                downloaded_entry = info['entries'][0]
-                
-                filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith('.m4a')), None)
+            # Mendapatkan info playlist/video
+            info = ydl.extract_info(url, download=False) # Unduh = False sementara
+            
+            if 'entries' not in info or not info['entries']:
+                 return 'Gagal mendapatkan info unduhan (info).', None, None, None, None
 
-                if not filename:
-                    filename = ydl.prepare_filename(downloaded_entry)
-                
-                title = downloaded_entry.get('title', os.path.basename(filename))
-                duration = downloaded_entry.get('duration', 0)
-                width = downloaded_entry.get('width', 0)
-                height = downloaded_entry.get('height', 0)
-                
-                return filename, title, duration, width, height
+            # Filter info untuk item spesifik yang akan diunduh
+            downloaded_entry = info['entries'][0] # Karena playlist_items=[index] seharusnya ini info item ke-index
             
-            return 'Gagal mendapatkan info unduhan.', None, None, None, None
+            # Ekstrak metadata sebelum mengunduh
+            title = downloaded_entry.get('title', f"Video ke-{index}")
+            duration = downloaded_entry.get('duration', 0)
+            width = downloaded_entry.get('width', 0)
+            height = downloaded_entry.get('height', 0)
+            
+            # 📌 Solusi 2: Unduh file sekarang dengan info yang sudah didapat
+            # Ini memastikan metadata sudah diolah sebelum download dipanggil.
+            ydl.download([url])
+            
+            # Nama file sekarang sudah pasti berdasarkan outtmpl yang baru: f"{index}.m4a"
+            filename = os.path.join(item_temp_dir, f"{index}.m4a")
+
+            if not os.path.exists(filename):
+                # Fallback jika nama file berbeda (misalnya, jika extension berbeda)
+                 filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith('.m4a')), None)
+
+            if not filename:
+                 return 'Gagal menemukan file unduhan.', None, None, None, None
+            
+            return filename, title, duration, width, height
             
     except Exception as e:
         if 'item_temp_dir' in locals() and os.path.exists(item_temp_dir):
             shutil.rmtree(item_temp_dir)
         return str(e), None, None, None, None
+        
 
 async def download_item_async(url, output_dir, index):
     loop = get_event_loop()
