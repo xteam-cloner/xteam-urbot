@@ -15,23 +15,23 @@ YDL_PARAMS = {
     "quiet": True,
     "no_warnings": True,
     "format": "bestaudio/best",
-    # 📌 TAMBAHAN KRUSIAL: Menonaktifkan penulisan thumbnail/metadata.
+    # 📌 PERBAIKAN KRUSIAL: Menonaktifkan penulisan metadata/thumbnail
     "writethumbnail": False, 
+    "writemetadata": False, 
     "postprocessors": [
         {
             "key": "FFmpegExtractAudio",
             "preferredcodec": "m4a",
             "preferredquality": "256", 
-            # Hapus atau ubah 'nopostoverwrites' jika masih menimbulkan masalah
-            "nopostoverwrites": False, # Diubah menjadi False atau dihapus
+            "nopostoverwrites": False, # Diubah menjadi False
         }
     ],
-    # Hanya menyertakan movflags yang aman
-    "postprocessor_args": ['-movflags', 'faststart'], 
+    "postprocessor_args": ['-movflags', 'faststart'],
     "nocheckcertificate": True,
     "geo_bypass": True,
     "cookiefile": "cookies.txt",
 }
+
 
 
 def download_item_sync(url, output_dir, index):
