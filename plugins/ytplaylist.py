@@ -1,170 +1,87 @@
+import subprocess
 import os
-from asyncio import get_event_loop
-from functools import partial
 import asyncio
-import shutil 
+import re  # Diperlukan untuk regex
+from . import ultroid_cmd
+from . import *
+# Tentukan folder download di root direktori Ultroid
+DOWNLOAD_DIR = "ULTROID_YT_DOWNLOADS"
 
-from youtubesearchpython import SearchVideos
-from yt_dlp import YoutubeDL
-from telethon.tl.types import DocumentAttributeVideo
-from telethon.errors import MediaEmptyError, WebpageCurlFailedError, InputUserDeactivatedError
+# --- Fungsi Download (Non-Blocking) ---
+# Menggunakan regex untuk mengekstrak nama playlist dari output yt-dlp
+PLAYLIST_NAME_REGEX = r"\[download\] Downloading playlist: (.+)"
 
-from . import ultroid_cmd 
-
-YDL_PARAMS = {
-    "quiet": True,
-    "no_warnings": True,
-    # Mengunduh format audio terbaik (bestaudio/best), yang seringnya sudah M4A atau Opus.
-    "format": "bestaudio/best",
+async def run_download_process(playlist_url):
+    """Fungsi yang menjalankan yt-dlp di thread terpisah."""
     
-    # 📌 PERBAIKAN KRUSIAL: Menghapus postprocessors sepenuhnya
-    # Ini menghilangkan sumber error 'list' object has no attribute 'split'
-    # "postprocessors": [ ... ] DIHAPUS
-    
-    # Opsi-opsi yang tetap penting
-    "writethumbnail": False, 
-    "writemetadata": False, 
-    "postprocessor_args": ['-movflags', 'faststart'],
-    "nocheckcertificate": True,
-    "geo_bypass": True,
-    "cookiefile": "cookies.txt",
-}
-
-def download_item_sync(url, output_dir, index):
-    item_temp_dir = os.path.join(output_dir, str(index))
+    if not os.path.exists(DOWNLOAD_DIR):
+        os.makedirs(DOWNLOAD_DIR)
+        
+    # Tambahkan --get-filename untuk mendapatkan nama folder yang DIBUAT yt-dlp
+    command = [
+        "yt-dlp",
+        "--ignore-errors",
+        "-x", # Ekstrak audio saja
+        "--audio-format", "mp3", # Format output MP3
+        "-o", os.path.join(DOWNLOAD_DIR, "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s"),
+        playlist_url
+    ]
     
     try:
-        os.makedirs(item_temp_dir, exist_ok=True)
+        # Jalankan subprocess.run dalam thread terpisah
+        process = await asyncio.to_thread(
+            subprocess.run, 
+            command, 
+            capture_output=True, 
+            text=True, 
+            check=True
+        )
         
-        ydl_opts = YDL_PARAMS.copy()
+        # Ekstrak nama playlist dari output
+        match = re.search(PLAYLIST_NAME_REGEX, process.stdout)
+        playlist_name = match.group(1).strip() if match else "Unknown_Playlist"
+
+        return True, playlist_name, process.stdout
         
-        # Menggunakan INDEX sebagai nama file untuk menghindari metadata title yang rusak
-        ydl_opts['outtmpl'] = os.path.join(item_temp_dir, f"{index}.%(ext)s")
-        
-        # Unduh hanya item ke-[index]
-        ydl_opts['playlist_items'] = [index] 
-        
-        with YoutubeDL(ydl_opts) as ydl:
-            # Lakukan proses download dan ekstrak info dalam satu langkah
-            info = ydl.extract_info(url, download=True)
-            
-            # Mendapatkan entri yang diunduh
-            if 'entries' not in info:
-                downloaded_entry = info
-            else:
-                downloaded_entry = next((e for e in info['entries'] if e.get('playlist_index') == index), None)
+    except subprocess.CalledProcessError as e:
+        return False, None, f"❌ Download Gagal. Kode Keluar: {e.returncode}\nError: {e.stderr}"
+    except FileNotFoundError:
+        return False, None, "❌ Error: yt-dlp tidak ditemukan. Pastikan sudah terinstal di lingkungan ini."
 
-            if not downloaded_entry:
-                return 'Gagal mendapatkan info unduhan setelah download selesai.', None, None, None, None
-                
-            # Ekstrak metadata yang dibutuhkan
-            title = downloaded_entry.get('title', f"Video ke-{index}")
-            duration = downloaded_entry.get('duration', 0)
-            width = downloaded_entry.get('width', 0)
-            height = downloaded_entry.get('height', 0)
-            
-            # Cari nama file yang dihasilkan (ext bisa jadi m4a, webm, atau mp3)
-            # Kita perlu mencari file audio apa pun di direktori
-            filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith(('.m4a', '.mp3', '.webm', '.opus'))), None)
+# --- COMMAND BOT ---
 
-            if not filename:
-                 return 'Gagal menemukan file audio hasil unduhan.', None, None, None, None
-            
-            return filename, title, duration, width, height
-            
-    except Exception as e:
-        # Cleanup direktori jika terjadi error
-        if os.path.exists(item_temp_dir):
-            shutil.rmtree(item_temp_dir)
-        return str(e), None, None, None, None
-
-async def download_item_async(url, output_dir, index):
-    loop = get_event_loop()
-    return await loop.run_in_executor(
-        None, partial(download_item_sync, url, output_dir, index)
-    )
-
-@ultroid_cmd(pattern="ytdlplaylist (.*)", group=1)
+# Mengubah command untuk menangkap argumen (URL) sebagai grup regex
+@ultroid_cmd(r"ytpl\s+(.*)$")
 async def youtube_playlist_downloader(event):
+    # Cek apakah command dipicu dengan argumen
+    if event.pattern_match and event.pattern_match.group(1):
+        url = event.pattern_match.group(1).strip()
+    elif event.reply_to_msg_id:
+        # Mengambil URL dari balasan pesan (reply)
+        reply_msg = await event.get_reply_message()
+        url = reply_msg.text.strip() if reply_msg and reply_msg.text else None
+    else:
+        await event.edit("⚠️ Harap berikan URL playlist YouTube setelah command, atau balas pesan yang berisi URL.")
+        return
     
-    url = event.pattern_match.group(1).strip()
-    
-    if not url.startswith("http") or "list=" not in url:
-        return await event.reply("❌ **URL Playlist Tidak Valid!** Harap berikan URL YouTube Playlist yang lengkap.")
+    # Validasi URL sederhana
+    if not url.startswith(("http://", "https://", "www.")):
+        await event.edit("❌ Input yang diberikan tampaknya bukan URL yang valid.")
+        return
 
-    temp_dir = f"downloads/playlist_{event.id}/"
-    status_msg = await event.reply("⏳ **Mendapatkan info playlist...**")
+    await event.edit(f"⏳ **Memulai Download Playlist...**\n`{url}`\n\nProses ini mungkin memakan waktu lama tergantung ukuran playlist.")
 
-    try:
-        await status_msg.edit("⏳ **Memproses daftar video...**")
-        ydl_info_opts = {'quiet': True, 'extract_flat': True, 'force_generic_extractor': True, 'noplaylist': False}
-        with YoutubeDL(ydl_info_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-        
-        if 'entries' not in info or not info['entries']:
-            return await status_msg.edit("❌ **Playlist kosong atau tidak ditemukan!**")
-            
-        videos = info['entries']
-        
-        MAX_VIDEOS = 5 
-        if len(videos) > MAX_VIDEOS:
-            await status_msg.edit(f"⚠️ Playlist memiliki {len(videos)} video. **Hanya {MAX_VIDEOS} video pertama** yang akan diproses untuk menghindari *timeout*.")
-            videos = videos[:MAX_VIDEOS]
+    # Jalankan proses download
+    success, playlist_name, output_message = await run_download_process(url)
 
-        total_videos = len(videos)
-        playlist_title = info.get('title', 'Playlist Tanpa Nama')
-        downloaded_count = 0
+    if success:
+        final_path = os.path.join(DOWNLOAD_DIR, playlist_name)
         
-        await status_msg.edit(f"▶️ **Memulai Download Playlist:** `{playlist_title}` ({total_videos} item)")
+        await event.edit(f"✅ **Download Playlist Selesai!**\n\n**Nama Playlist:** `{playlist_name}`\n**Jumlah File:** `{len(os.listdir(final_path))}`\n**Disimpan di:** `{final_path}`")
+        
+        # SINI Anda bisa menambahkan logic untuk mengunggah folder zip ke Telegram
+        # await upload_files_to_telegram(event, final_path)
+        
+    else:
+        await event.edit(f"❌ **Download Gagal**\n\nError: {output_message}")
 
-    except Exception as e:
-        return await status_msg.edit(f"❌ Error saat mendapatkan info playlist: `{str(e)}`")
-
-    for i, video in enumerate(videos):
-        index = i + 1 
-        current_title = video.get('title', f"Video ke-{index}")
-        
-        # Karena postprocessor dihilangkan, kita tidak bisa menjamin format M4A 256kbps.
-        await status_msg.edit(f"📥 **[{index}/{total_videos}] Mengunduh audio terbaik:** `{current_title}`") 
-        filename, title, duration, width, height = await download_item_async(url, temp_dir, index)
-        
-        if not filename or not os.path.exists(filename) or os.path.basename(filename).startswith('Gagal'):
-            await event.reply(f"❌ **[{index}/{total_videos}] Gagal:** `{title if title else current_title}`. Error: `{filename}`")
-            continue
-            
-        # Dapatkan ekstensi file yang diunduh
-        file_ext = os.path.splitext(filename)[1].strip('.')
-        
-        await status_msg.edit(f"⬆️ **[{index}/{total_videos}] Mengunggah:** `{title}`")
-        
-        try:
-            await event.client.send_file(
-                event.chat_id,
-                filename,
-                caption=f"🎧 **{playlist_title}** ({file_ext.upper()} terbaik)\n*Item {index}/{total_videos}:* `{title}`",
-                supports_streaming=True,
-            )
-            downloaded_count += 1
-            
-        except Exception as e:
-            await event.reply(f"❌ **[{index}/{total_videos}] Gagal Unggah:** `{title}`. Error: `{str(e)}`")
-        
-        # Proses Cleanup
-        try:
-            os.remove(filename)
-            item_temp_dir = os.path.dirname(filename)
-            shutil.rmtree(item_temp_dir)
-        except Exception:
-            pass 
-            
-        await asyncio.sleep(1)
-
-    # Cleanup Direktori Utama
-    try:
-        if os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir)
-    except Exception:
-        pass 
-
-    await status_msg.edit(f"✅ **Selesai!** Playlist `{playlist_title}` selesai diunduh dan diunggah dalam format **audio terbaik**.\nTotal {downloaded_count} dari {total_videos} item berhasil.")
-    
