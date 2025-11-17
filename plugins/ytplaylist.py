@@ -4,10 +4,10 @@ from functools import partial
 import asyncio
 import shutil 
 
-from youtubesearchpython import SearchVideos
+from youtubesearchpython import SearchVideos # Tidak digunakan di kode ini, tapi dipertahankan
 from yt_dlp import YoutubeDL
-from telethon.tl.types import DocumentAttributeVideo
-from telethon.errors import MediaEmptyError, WebpageCurlFailedError, InputUserDeactivatedError
+from telethon.tl.types import DocumentAttributeVideo # Tidak digunakan di kode ini, tapi dipertahankan
+from telethon.errors import MediaEmptyError, WebpageCurlFailedError, InputUserDeactivatedError # Tidak digunakan di kode ini, tapi dipertahankan
 
 from . import ultroid_cmd 
 
@@ -34,54 +34,57 @@ def download_item_sync(url, output_dir, index):
         item_temp_dir = os.path.join(output_dir, str(index))
         os.makedirs(item_temp_dir, exist_ok=True)
         
+        # --- Bagian 1: Mendapatkan Metadata (Info) ---
+        # Ini dilakukan terpisah dan tanpa download untuk mendapatkan judul yang aman
+        ydl_info_opts = YDL_PARAMS.copy()
+        ydl_info_opts['noplaylist'] = False
+        ydl_info_opts['playlist_items'] = [index]
+        ydl_info_opts['quiet'] = True
+        
+        with YoutubeDL(ydl_info_opts) as ydl_info:
+             # Ekstrak info tanpa download
+             info = ydl_info.extract_info(url, download=False)
+        
+        if 'entries' not in info or not info['entries']:
+            return 'Gagal mendapatkan info unduhan (info).', None, None, None, None
+
+        downloaded_entry = info['entries'][0]
+        
+        # Ekstrak metadata yang aman digunakan untuk caption
+        title = downloaded_entry.get('title', f"Video ke-{index}")
+        duration = downloaded_entry.get('duration', 0)
+        width = downloaded_entry.get('width', 0)
+        height = downloaded_entry.get('height', 0)
+
+        # --- Bagian 2: Proses Download dengan outtmpl yang Aman ---
         ydl_opts = YDL_PARAMS.copy()
         
-        # 📌 Solusi 1: Mengubah outtmpl menjadi deterministik.
-        # Nama file akan menjadi index.m4a di dalam item_temp_dir
+        # 📌 PERBAIKAN KRUSIAL: Mengganti outtmpl untuk menghilangkan %(title)s
+        # Ini mencegah error 'list' object has no attribute 'split'.
         ydl_opts['outtmpl'] = os.path.join(item_temp_dir, f"{index}.%(ext)s")
         
         ydl_opts['playlist_items'] = [index] 
         
         with YoutubeDL(ydl_opts) as ydl:
-            # Menggunakan download=False dulu untuk mendapatkan info tanpa masalah
-            # Penamaan file bisa menimbulkan error saat download=True.
-            
-            # Mendapatkan info playlist/video
-            info = ydl.extract_info(url, download=False) # Unduh = False sementara
-            
-            if 'entries' not in info or not info['entries']:
-                 return 'Gagal mendapatkan info unduhan (info).', None, None, None, None
+            # Lakukan proses download
+            ydl.download([url]) 
+        
+        # Tentukan nama file yang sudah pasti: index.m4a
+        filename = os.path.join(item_temp_dir, f"{index}.m4a")
 
-            # Filter info untuk item spesifik yang akan diunduh
-            downloaded_entry = info['entries'][0] # Karena playlist_items=[index] seharusnya ini info item ke-index
-            
-            # Ekstrak metadata sebelum mengunduh
-            title = downloaded_entry.get('title', f"Video ke-{index}")
-            duration = downloaded_entry.get('duration', 0)
-            width = downloaded_entry.get('width', 0)
-            height = downloaded_entry.get('height', 0)
-            
-            # 📌 Solusi 2: Unduh file sekarang dengan info yang sudah didapat
-            # Ini memastikan metadata sudah diolah sebelum download dipanggil.
-            ydl.download([url])
-            
-            # Nama file sekarang sudah pasti berdasarkan outtmpl yang baru: f"{index}.m4a"
-            filename = os.path.join(item_temp_dir, f"{index}.m4a")
+        if not os.path.exists(filename):
+            # Fallback jika nama file/ekstensi berbeda
+             filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith('.m4a')), None)
 
-            if not os.path.exists(filename):
-                # Fallback jika nama file berbeda (misalnya, jika extension berbeda)
-                 filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith('.m4a')), None)
-
-            if not filename:
-                 return 'Gagal menemukan file unduhan.', None, None, None, None
-            
-            return filename, title, duration, width, height
+        if not filename:
+             return 'Gagal menemukan file unduhan.', None, None, None, None
+        
+        return filename, title, duration, width, height
             
     except Exception as e:
         if 'item_temp_dir' in locals() and os.path.exists(item_temp_dir):
             shutil.rmtree(item_temp_dir)
         return str(e), None, None, None, None
-        
 
 async def download_item_async(url, output_dir, index):
     loop = get_event_loop()
@@ -132,7 +135,8 @@ async def youtube_playlist_downloader(event):
         await status_msg.edit(f"📥 **[{index}/{total_videos}] Mengunduh M4A 256kbps:** `{current_title}`")
         filename, title, duration, width, height = await download_item_async(url, temp_dir, index)
         
-        if not filename or not os.path.exists(filename) or filename.startswith('Error'):
+        # 'filename' sekarang akan berisi string error jika gagal, atau path jika berhasil
+        if not filename or not os.path.exists(filename) or os.path.basename(filename).startswith('Gagal'):
             await event.reply(f"❌ **[{index}/{total_videos}] Gagal:** `{title if title else current_title}`. Error: `{filename}`")
             continue
             
@@ -150,6 +154,7 @@ async def youtube_playlist_downloader(event):
         except Exception as e:
             await event.reply(f"❌ **[{index}/{total_videos}] Gagal Unggah:** `{title}`. Error: `{str(e)}`")
         
+        # Proses Cleanup
         try:
             os.remove(filename)
             item_temp_dir = os.path.dirname(filename)
@@ -159,6 +164,7 @@ async def youtube_playlist_downloader(event):
             
         await asyncio.sleep(1)
 
+    # Cleanup Direktori Utama
     try:
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
