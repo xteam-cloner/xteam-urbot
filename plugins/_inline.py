@@ -621,7 +621,7 @@ async def alive(event):
         
 
 
-@in_pattern("aliv", owner=False)
+@in_pattern("alive", owner=False)
 async def inline_alive_query_handler(ult):
     # Hitung uptime (gunakan blok try/except yang lebih aman)
     try:
@@ -643,6 +643,50 @@ async def inline_alive_query_handler(ult):
     )
     await ult.answer([result], cache_time=0)
 
+
+
+@in_pattern("aliv", owner=False) 
+async def inline_alive_query_handler_v2(ult):    
+    try:
+        uptime = time_formatter((time.time() - start_time) * 1000) 
+    except NameError:
+        uptime = "N/A" 
+        
+    message_text = format_message_text(uptime)
+    
+    xpic = udB.get_key("ALIVE_PIC")
+    xnone = ["false", "0", "none"] 
+    xdefault = "resources/extras/IMG_20251027_112615_198.jpg" 
+
+    pic = None
+    if xpic and str(xpic).lower() not in xnone:
+        if str(xpic).lower() in ["true", "1"]:
+            pic = xdefault
+        else:
+            pic = xpic  
+    elif not xpic:
+        pic = xdefault 
+
+    if pic and (str(pic).startswith("http") or str(pic).startswith("BQ")) : 
+         result = await ult.builder.photo(
+             file=pic, 
+             text=message_text,
+             buttons=ALIVE_BUTTONS,
+             title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
+             description=f"Uptime: {uptime}",
+             parse_mode="html",
+         )
+    else:
+        result = await ult.builder.article(
+            text=message_text, 
+            buttons=ALIVE_BUTTONS,
+            title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
+            description=f"Uptime: {uptime}",
+            parse_mode="html",
+        )
+        
+    await ult.answer([result], cache_time=0)
+    
 
 @callback(re.compile("alive_btn(.*)"), owner=False)
 async def callback_alive_handler(ult):
