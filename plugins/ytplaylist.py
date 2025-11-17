@@ -15,23 +15,18 @@ YDL_PARAMS = {
     "quiet": True,
     "no_warnings": True,
     "format": "bestaudio/best",
-    # 📌 Menambahkan writethumbnail: False untuk menghindari error metadata/tagging
+    # 📌 TAMBAHAN KRUSIAL: Menonaktifkan penulisan thumbnail/metadata.
     "writethumbnail": False, 
     "postprocessors": [
         {
             "key": "FFmpegExtractAudio",
             "preferredcodec": "m4a",
             "preferredquality": "256", 
-            "nopostoverwrites": True,
-        },
-        # Opsional: Jika masih error, tambahkan ini untuk memaksa menghapus metadata
-        # {
-        #     'key': 'MetadataFromField',
-        #     'filepath': None,
-        #     'remove_fields': ['description', 'tags', 'creator', 'album', 'track_number'] 
-        # }
+            # Hapus atau ubah 'nopostoverwrites' jika masih menimbulkan masalah
+            "nopostoverwrites": False, # Diubah menjadi False atau dihapus
+        }
     ],
-    # Hanya menggunakan movflags, jangan sertakan argumen metadata lain di sini
+    # Hanya menyertakan movflags yang aman
     "postprocessor_args": ['-movflags', 'faststart'], 
     "nocheckcertificate": True,
     "geo_bypass": True,
