@@ -15,19 +15,29 @@ YDL_PARAMS = {
     "quiet": True,
     "no_warnings": True,
     "format": "bestaudio/best",
+    # 📌 Menambahkan writethumbnail: False untuk menghindari error metadata/tagging
+    "writethumbnail": False, 
     "postprocessors": [
         {
             "key": "FFmpegExtractAudio",
             "preferredcodec": "m4a",
             "preferredquality": "256", 
             "nopostoverwrites": True,
-        }
+        },
+        # Opsional: Jika masih error, tambahkan ini untuk memaksa menghapus metadata
+        # {
+        #     'key': 'MetadataFromField',
+        #     'filepath': None,
+        #     'remove_fields': ['description', 'tags', 'creator', 'album', 'track_number'] 
+        # }
     ],
-    "postprocessor_args": ['-movflags', 'faststart'],
+    # Hanya menggunakan movflags, jangan sertakan argumen metadata lain di sini
+    "postprocessor_args": ['-movflags', 'faststart'], 
     "nocheckcertificate": True,
     "geo_bypass": True,
     "cookiefile": "cookies.txt",
 }
+
 
 def download_item_sync(url, output_dir, index):
     item_temp_dir = os.path.join(output_dir, str(index))
