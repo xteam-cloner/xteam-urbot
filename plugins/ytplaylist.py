@@ -4,10 +4,10 @@ from functools import partial
 import asyncio
 import shutil 
 
-from youtubesearchpython import SearchVideos # Tidak digunakan di kode ini, tapi dipertahankan
+from youtubesearchpython import SearchVideos
 from yt_dlp import YoutubeDL
-from telethon.tl.types import DocumentAttributeVideo # Tidak digunakan di kode ini, tapi dipertahankan
-from telethon.errors import MediaEmptyError, WebpageCurlFailedError, InputUserDeactivatedError # Tidak digunakan di kode ini, tapi dipertahankan
+from telethon.tl.types import DocumentAttributeVideo
+from telethon.errors import MediaEmptyError, WebpageCurlFailedError, InputUserDeactivatedError
 
 from . import ultroid_cmd 
 
@@ -30,59 +30,55 @@ YDL_PARAMS = {
 }
 
 def download_item_sync(url, output_dir, index):
+    item_temp_dir = os.path.join(output_dir, str(index))
+    
     try:
-        item_temp_dir = os.path.join(output_dir, str(index))
         os.makedirs(item_temp_dir, exist_ok=True)
         
-        # --- Bagian 1: Mendapatkan Metadata (Info) ---
-        # Ini dilakukan terpisah dan tanpa download untuk mendapatkan judul yang aman
-        ydl_info_opts = YDL_PARAMS.copy()
-        ydl_info_opts['noplaylist'] = False
-        ydl_info_opts['playlist_items'] = [index]
-        ydl_info_opts['quiet'] = True
-        
-        with YoutubeDL(ydl_info_opts) as ydl_info:
-             # Ekstrak info tanpa download
-             info = ydl_info.extract_info(url, download=False)
-        
-        if 'entries' not in info or not info['entries']:
-            return 'Gagal mendapatkan info unduhan (info).', None, None, None, None
-
-        downloaded_entry = info['entries'][0]
-        
-        # Ekstrak metadata yang aman digunakan untuk caption
-        title = downloaded_entry.get('title', f"Video ke-{index}")
-        duration = downloaded_entry.get('duration', 0)
-        width = downloaded_entry.get('width', 0)
-        height = downloaded_entry.get('height', 0)
-
-        # --- Bagian 2: Proses Download dengan outtmpl yang Aman ---
         ydl_opts = YDL_PARAMS.copy()
         
-        # 📌 PERBAIKAN KRUSIAL: Mengganti outtmpl untuk menghilangkan %(title)s
-        # Ini mencegah error 'list' object has no attribute 'split'.
+        # 📌 PERBAIKAN: Gunakan index sebagai nama file untuk menghindari metadata title yang rusak
         ydl_opts['outtmpl'] = os.path.join(item_temp_dir, f"{index}.%(ext)s")
         
+        # Unduh hanya item ke-[index]
         ydl_opts['playlist_items'] = [index] 
         
         with YoutubeDL(ydl_opts) as ydl:
-            # Lakukan proses download
-            ydl.download([url]) 
-        
-        # Tentukan nama file yang sudah pasti: index.m4a
-        filename = os.path.join(item_temp_dir, f"{index}.m4a")
+            # Lakukan proses download dan ekstrak info dalam satu langkah
+            info = ydl.extract_info(url, download=True)
+            
+            if 'entries' not in info:
+                # Jika unduhan tunggal, info adalah metadata video itu sendiri
+                downloaded_entry = info
+            else:
+                # Jika unduhan playlist, cari entri yang sesuai
+                # yt-dlp mengembalikan entries di playlist, kita cari yang sesuai dengan index yang diminta
+                downloaded_entry = next((e for e in info['entries'] if e.get('playlist_index') == index), None)
 
-        if not os.path.exists(filename):
-            # Fallback jika nama file/ekstensi berbeda
-             filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith('.m4a')), None)
+            if not downloaded_entry:
+                return 'Gagal mendapatkan info unduhan setelah download selesai.', None, None, None, None
+                
+            # Ekstrak metadata yang dibutuhkan
+            title = downloaded_entry.get('title', f"Video ke-{index}")
+            duration = downloaded_entry.get('duration', 0)
+            width = downloaded_entry.get('width', 0)
+            height = downloaded_entry.get('height', 0)
+            
+            # Cari nama file yang dihasilkan (sudah pasti index.m4a)
+            filename = os.path.join(item_temp_dir, f"{index}.m4a")
 
-        if not filename:
-             return 'Gagal menemukan file unduhan.', None, None, None, None
-        
-        return filename, title, duration, width, height
+            if not os.path.exists(filename):
+                # Fallback untuk pencarian file yang sebenarnya jika nama ekstensi berbeda
+                 filename = next((os.path.join(root, f) for root, _, files in os.walk(item_temp_dir) for f in files if f.endswith('.m4a')), None)
+
+            if not filename:
+                 return 'Gagal menemukan file unduhan m4a.', None, None, None, None
+            
+            return filename, title, duration, width, height
             
     except Exception as e:
-        if 'item_temp_dir' in locals() and os.path.exists(item_temp_dir):
+        # Cleanup direktori jika terjadi error
+        if os.path.exists(item_temp_dir):
             shutil.rmtree(item_temp_dir)
         return str(e), None, None, None, None
 
@@ -135,7 +131,6 @@ async def youtube_playlist_downloader(event):
         await status_msg.edit(f"📥 **[{index}/{total_videos}] Mengunduh M4A 256kbps:** `{current_title}`")
         filename, title, duration, width, height = await download_item_async(url, temp_dir, index)
         
-        # 'filename' sekarang akan berisi string error jika gagal, atau path jika berhasil
         if not filename or not os.path.exists(filename) or os.path.basename(filename).startswith('Gagal'):
             await event.reply(f"❌ **[{index}/{total_videos}] Gagal:** `{title if title else current_title}`. Error: `{filename}`")
             continue
@@ -172,4 +167,4 @@ async def youtube_playlist_downloader(event):
         pass 
 
     await status_msg.edit(f"✅ **Selesai!** Playlist `{playlist_title}` selesai diunduh dan diunggah dalam format **M4A 256kbps**.\nTotal {downloaded_count} dari {total_videos} item berhasil.")
-    
+                
