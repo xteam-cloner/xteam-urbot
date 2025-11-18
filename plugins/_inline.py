@@ -705,55 +705,81 @@ async def callback_alive_handler(ult):
     await ult.answer(f"Status ALIVE diperbarui. Uptime: {uptime}", alert=False)
 
 #---------------------------------------------
-# Asumsi: Ini adalah handler pesan, bukan inline query handler.
-# Perintah yang memicu mungkin /alive atau /aliv
-@in_pattern("aliv", owner=False) 
-async def alive_message_handler_v2(asst, message): 
-    # Dapatkan chat_id dari pesan
-    chat_id = message.chat.id
+
+@in_pattern("alive", owner=True)
+async def inline_alive(ult):
+    pic = udB.get_key("ALIVE_PIC")
+    if isinstance(pic, list):
+        pic = choice(pic)
+    uptime = time_formatter((time.time() - start_time) * 1000)
+    # Header dihilangkan, menggunakan string langsung
+    # string bot_1 dihilangkan, menggunakan placeholder '🤖 Ultroid Alive'
+    als_header = '🤖 Ultroid Alive' 
+    y = Repo().active_branch
+    xx = Repo().remotes[0].config_reader.get("url")
+    rep = xx.replace(".git", f"/tree/{y}")
+    kk = f"<a href={rep}>{y}</a>"
+    # Mengganti in_alive.format agar sesuai dengan penghilangan header
+    # Asumsi format awal: in_alive.format(header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk)
+    # Menggunakan als_header sebagai pengganti header
+    als = in_alive.format(
+        als_header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk
+    )
+
+    # ALIVE_EMOJI dihilangkan, string pengganti '🌀' akan tetap ada atau dihilangkan tergantung isi 'in_alive'
     
-    try:
-        # Menghitung uptime
-        uptime = time_formatter((time.time() - start_time) * 1000) 
-    except NameError:
-        uptime = "N/A" 
+    builder = ult.builder
+    # buttons perlu didefinisikan atau diimpor jika tidak ada dalam konteks ini, 
+    # di sini diasumsikan sudah ada/diimpor, dan 'bot_2' diubah menjadi 'View Source'
+    buttons = [
+        [
+            Button.url("Support", url="https://t.me/TeamUltroid"),
+            Button.url("Channel", url="https://t.me/UltroidOfficial")
+        ]
+    ] # Contoh inisialisasi buttons jika belum ada/terdefinisi
+
+    if pic:
+        try:
+            if ".jpg" in pic:
+                results = [
+                    await builder.photo(
+                        pic, text=als, parse_mode="html", buttons=ALIVE_BUTTONS
+                    )
+                ]
+            else:
+                if _pic := resolve_bot_file_id(pic):
+                    pic = _pic
+                    # get_string("bot_2") dihilangkan, diganti dengan string 'View Source'
+                    buttons.insert(
+                        0, [Button.inline("View Source", data="alive")] 
+                    )
+                results = [
+                    await builder.document(
+                        pic,
+                        title="Inline Alive",
+                        description="@TeamUltroid",
+                        parse_mode="html",
+                        buttons=ALIVE_BUTTONS,
+                    )
+                ]
+            return await ult.answer(results)
+        except BaseException as er:
+            LOGS.exception(er)
+            
+    # Pastikan buttons juga didefinisikan sebelum digunakan di sini
+    # Jika buttons belum didefinisikan sebelumnya, inisialisasi di sini juga
+    if 'buttons' not in locals():
+        buttons = [
+            [
+                Button.url("Support", url="https://t.me/TeamUltroid"),
+                Button.url("Channel", url="https://t.me/UltroidOfficial")
+            ]
+        ]
         
-    message_text = format_message_text(uptime)
-    
-    xpic = udB.get_key("ALIVE_PIC")
-    xnone = ["false", "0", "none"] 
-    xdefault = "resources/extras/IMG_20251027_112615_198.jpg" 
-
-    pic = None
-    if xpic and str(xpic).lower() not in xnone:
-        if str(xpic).lower() in ["true", "1"]:
-            pic = xdefault
-        else:
-            pic = xpic  
-    elif not xpic:
-        pic = xdefault 
-
-    # Cek apakah ada pic dan apakah pic adalah file eksternal (http/BQ) atau path lokal
-    if pic and (str(pic).startswith("http") or str(pic).startswith("BQ") or not str(pic).endswith(".jpg")): 
-        # Menggunakan asst.send_photo jika ada pic eksternal atau file eksternal
-        # Jika pic adalah path lokal (misalnya xdefault), Anda harus pastikan framework bot Anda mendukung pengiriman file lokal
-        await asst.send_photo(
-            chat_id=chat_id,
-            file=pic, 
-            caption=message_text,
-            buttons=ALIVE_BUTTONS,
-            parse_mode="html",
+    result = [
+        await builder.article(
+            "Alive", text=als, parse_mode="html", link_preview=False, buttons=ALIVE_BUTTONS
         )
-    else:
-        # Menggunakan asst.send_message jika tidak ada pic atau pic adalah file lokal yang tidak didukung langsung oleh send_photo/send_message
-        # Di sini, kita mengirim pesan teks jika tidak ada foto
-        await asst.send_message(
-            chat_id=chat_id,
-            text=message_text, 
-            buttons=ALIVE_BUTTONS,
-            parse_mode="html",
-        )
-    
-    # Perhatikan: Bagian ult.answer([result], cache_time=0) dihilangkan
-    # karena itu khusus untuk merespons inline query.
+    ]
+    await ult.answer(result)
     
