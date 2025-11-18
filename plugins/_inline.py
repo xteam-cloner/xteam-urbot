@@ -722,7 +722,7 @@ async def inline_alive(ult):
     # Mengganti in_alive.format agar sesuai dengan penghilangan header
     # Asumsi format awal: in_alive.format(header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk)
     # Menggunakan als_header sebagai pengganti header
-    als = in_alive.format(
+    als = format_message_text.format(
         als_header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk
     )
 
