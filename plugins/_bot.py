@@ -253,7 +253,7 @@ from telethon.errors.rpcerrorlist import (
     ChatSendMediaForbiddenError,
 )
 
-from pyUltroid.version import __version__ as UltVer
+from xteam.version import __version__ as UltVer
 
 from . import HOSTED_ON, LOGS
 
