@@ -63,7 +63,8 @@ LOG_CHANNEL = udB.get_key("LOG_CHANNEL")
 StartTime = time.time()
 xteam = ultroid_cmd
 
-def format_message_text(uptime):
+# DEFINISI FUNGSI BARU DENGAN DUA PARAMETER
+def format_message_text(uptime, branch_info):
     return f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
                        f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
                        f"✵ Userbot : {ultroid_version}\n" \
@@ -72,7 +73,9 @@ def format_message_text(uptime):
                        f"✵ Uptime : {uptime}\n" \
                        f"✵ Kurigram :  {pver}\n" \
                        f"✵ Python : {pyver()}\n" \
+                       f"✵ Branch : {branch_info}\n" \
                        f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n"
+    
 
 def inline_pic():
     INLINE_PIC = udB.get_key("INLINE_PIC")
