@@ -342,11 +342,17 @@ import asyncio
 
 @callback(data="close", owner=True)
 async def on_plug_in_callback_query_handler(event):
-    await event.edit(
-        get_string("inline_5")
-    )
-    await asyncio.sleep(2)
-    await event.delete()
+    # Coba hapus LANGSUNG tanpa mengedit terlebih dahulu
+    waktu_jeda = 1 
+    await asyncio.sleep(waktu_jeda)
+    
+    # Hapus pesan
+    try:
+        await event.delete()
+    except Exception as e:
+        # PENTING: Catat error untuk debugging
+        print(f"Gagal menghapus pesan: {e}") 
+        # Atau kirim error ini ke chat Anda
 
 
 def page_num(index, key):
