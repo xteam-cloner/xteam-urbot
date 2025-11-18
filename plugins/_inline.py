@@ -45,7 +45,7 @@ from . import (
     NOSPAM_CHAT as noU,
 )
 from ._help import _main_help_menu
-
+from ._bot import *
 
 udB.del_key("USPAM")
 
