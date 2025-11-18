@@ -708,10 +708,7 @@ async def callback_alive_handler(ult):
 
 @in_pattern("aliv", owner=True)
 async def inline_alive(ult):
-    # Ganti ini dengan instance database Anda yang sebenarnya
-udB.set_key("ALIVE_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
-
-    
+    udB.set_key("ALIVE_PIC", "resources/extras/IMG_20251027_112615_198.jpg")  
     # ⚠️ PERBAIKAN TYPEERROR: Pastikan 'pic' adalah string atau list sebelum operasi string.
     # Jika pic adalah None, False, atau boolean dari udB.get_key(), kita ubah menjadi None
     # agar dilewati oleh 'if pic:' di bawah.
