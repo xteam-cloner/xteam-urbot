@@ -367,7 +367,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("🏡", data="alive_btn"))
+    nav_buttons.append(Button.inline("🏡", data="ping_btn"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -379,7 +379,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
-        new_.append([Button.inline("🏡", data="alive_btn")])
+        new_.append([Button.inline("🏡", data="ping_btn")])
 
     return new_
 
