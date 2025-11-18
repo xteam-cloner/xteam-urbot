@@ -645,7 +645,7 @@ async def inline_alive_query_handler(ult):
 
 
 
-@in_pattern("aliva", owner=False) 
+@in_pattern("alivk", owner=False) 
 async def inline_alive_query_handler_v2(asst):    
     try:
         uptime = time_formatter((time.time() - start_time) * 1000) 
@@ -706,7 +706,7 @@ async def callback_alive_handler(ult):
 
 #---------------------------------------------
 
-@in_pattern("alive", owner=True)
+@in_pattern("aliv", owner=True)
 async def inline_alive(ult):
     pic = udB.get_key("ALIVE_PIC")
     if isinstance(pic, list):
