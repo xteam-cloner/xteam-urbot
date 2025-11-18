@@ -706,46 +706,35 @@ async def callback_alive_handler(ult):
 
 #---------------------------------------------
 
+import time
+from random import choice
+from git import Repo
+
 @in_pattern("aliv", owner=True)
 async def inline_alive(ult):
-    udB.set_key("ALIVE_PIC", "resources/extras/IMG_20251027_112615_198.jpg")  
-    # ⚠️ PERBAIKAN TYPEERROR: Pastikan 'pic' adalah string atau list sebelum operasi string.
-    # Jika pic adalah None, False, atau boolean dari udB.get_key(), kita ubah menjadi None
-    # agar dilewati oleh 'if pic:' di bawah.
+    udB.set_key("ALIVE_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
+    
+    pic = udB.get_key("ALIVE_PIC") 
+    
     if not isinstance(pic, (str, list)):
         pic = None
 
     if isinstance(pic, list):
-        # Asumsi 'choice' diimpor
         pic = choice(pic)
         
-    # Menghitung uptime
     uptime = time_formatter((time.time() - start_time) * 1000)
     
-    # MENGHITUNG KK (BRANCH INFO)
-    # Asumsi Repo() sudah diimpor dari git
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
     kk = f"<a href={rep}>{y}</a>"
     
-    # ✅ PERBAIKAN ATTRIBUTEERROR: Panggil fungsi dengan dua argumen
     als = format_message_text(uptime, kk) 
 
     builder = ult.builder
     
-    # Definisikan buttons awal
-    buttons = [
-        [
-            Button.url("Support", url="https://t.me/TeamUltroid"),
-            Button.url("Channel", url="https://t.me/UltroidOfficial")
-        ]
-    ]
-    
-    # Hanya masuk ke blok ini jika 'pic' adalah string yang valid
     if pic:
         try:
-            # Pengecekan ".jpg" sekarang aman karena 'pic' dijamin string
             if ".jpg" in pic:
                 results = [
                     await builder.photo(
@@ -755,10 +744,7 @@ async def inline_alive(ult):
             else:
                 if _pic := resolve_bot_file_id(pic):
                     pic = _pic
-                    # Tambahkan tombol 'View Source'
-                    buttons.insert(
-                        0, [Button.inline("View Source", data="alive")] 
-                    )
+                
                 results = [
                     await builder.document(
                         pic,
@@ -772,10 +758,10 @@ async def inline_alive(ult):
         except BaseException as er:
             LOGS.exception(er)
             
-    # Jika pic tidak ada, bukan string yang valid, atau terjadi error media
     result = [
         await builder.article(
             "Alive", text=als, parse_mode="html", link_preview=False, buttons=ALIVE_BUTTONS
         )
     ]
     await ult.answer(result)
+    
