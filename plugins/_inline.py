@@ -712,31 +712,18 @@ async def inline_alive(ult):
     if isinstance(pic, list):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
-    # Header dihilangkan, menggunakan string langsung
-    # string bot_1 dihilangkan, menggunakan placeholder '🤖 Ultroid Alive'
-    als_header = '🤖 Ultroid Alive' 
     y = Repo().active_branch
     xx = Repo().remotes[0].config_reader.get("url")
     rep = xx.replace(".git", f"/tree/{y}")
     kk = f"<a href={rep}>{y}</a>"
-    # Mengganti in_alive.format agar sesuai dengan penghilangan header
-    # Asumsi format awal: in_alive.format(header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk)
-    # Menggunakan als_header sebagai pengganti header
-    als = format_message_text.format(
-        als_header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk
-    )
-
-    # ALIVE_EMOJI dihilangkan, string pengganti '🌀' akan tetap ada atau dihilangkan tergantung isi 'in_alive'
-    
+    als = format_message_text(uptime, kk) 
     builder = ult.builder
-    # buttons perlu didefinisikan atau diimpor jika tidak ada dalam konteks ini, 
-    # di sini diasumsikan sudah ada/diimpor, dan 'bot_2' diubah menjadi 'View Source'
     buttons = [
         [
             Button.url("Support", url="https://t.me/TeamUltroid"),
             Button.url("Channel", url="https://t.me/UltroidOfficial")
         ]
-    ] # Contoh inisialisasi buttons jika belum ada/terdefinisi
+    ]
 
     if pic:
         try:
@@ -749,7 +736,6 @@ async def inline_alive(ult):
             else:
                 if _pic := resolve_bot_file_id(pic):
                     pic = _pic
-                    # get_string("bot_2") dihilangkan, diganti dengan string 'View Source'
                     buttons.insert(
                         0, [Button.inline("View Source", data="alive")] 
                     )
@@ -757,7 +743,7 @@ async def inline_alive(ult):
                     await builder.document(
                         pic,
                         title="Inline Alive",
-                        description="@TeamUltroid",
+                        description="@xteam_cloner",
                         parse_mode="html",
                         buttons=ALIVE_BUTTONS,
                     )
@@ -766,16 +752,6 @@ async def inline_alive(ult):
         except BaseException as er:
             LOGS.exception(er)
             
-    # Pastikan buttons juga didefinisikan sebelum digunakan di sini
-    # Jika buttons belum didefinisikan sebelumnya, inisialisasi di sini juga
-    if 'buttons' not in locals():
-        buttons = [
-            [
-                Button.url("Support", url="https://t.me/TeamUltroid"),
-                Button.url("Channel", url="https://t.me/UltroidOfficial")
-            ]
-        ]
-        
     result = [
         await builder.article(
             "Alive", text=als, parse_mode="html", link_preview=False, buttons=ALIVE_BUTTONS
