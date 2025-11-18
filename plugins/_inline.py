@@ -646,7 +646,7 @@ async def inline_alive_query_handler(ult):
 
 
 @in_pattern("aliv", owner=False) 
-async def inline_alive_query_handler_v2(ult):    
+async def inline_alive_query_handler_v2(asst):    
     try:
         uptime = time_formatter((time.time() - start_time) * 1000) 
     except NameError:
@@ -668,7 +668,7 @@ async def inline_alive_query_handler_v2(ult):
         pic = xdefault 
 
     if pic and (str(pic).startswith("http") or str(pic).startswith("BQ")) : 
-         result = await ult.builder.photo(
+         result = await asst.builder.photo(
              file=pic, 
              text=message_text,
              buttons=ALIVE_BUTTONS,
@@ -677,7 +677,7 @@ async def inline_alive_query_handler_v2(ult):
              parse_mode="html",
          )
     else:
-        result = await ult.builder.article(
+        result = await asst.builder.article(
             text=message_text, 
             buttons=ALIVE_BUTTONS,
             title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
