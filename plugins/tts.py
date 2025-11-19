@@ -55,9 +55,9 @@ def de_emojify_alt(text):
     info={
         "header": "Text to speech command using Google TTS.",
         "usage": [
-            "{tr}tts <text>",
-            "{tr}tts <reply>",
-            "{tr}tts <language code> ; <text>",
+            "tts <text>",
+            "tts <reply>",
+            "tts <language code> ; <text>",
         ],
     },
 )
