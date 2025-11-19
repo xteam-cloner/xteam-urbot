@@ -37,14 +37,14 @@ from . import *
 ENDPOINTS = {
     "gpt": "https://api.openai.com/v1/chat/completions",
     "antr": "https://api.anthropic.com/v1/messages",
-    "gemini": "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent",
+    "gemini": "https://generativelanguage.googleapis.com/v1/models/gemini-2.5:generateContent",
     "deepseek": "https://api.deepseek.com/v3/chat/completions"
 }
 
 DEFAULT_MODELS = {
     "gpt": "gpt-3.5-turbo",
     "antr": "claude-3-haiku",
-    "gemini": "gemini-2.5-flash",
+    "gemini": "gemini-2.5",
     "deepseek": "DeepSeek-V3"
 }
 
