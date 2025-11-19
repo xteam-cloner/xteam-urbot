@@ -782,7 +782,7 @@ async def inline_alive(ult):
 import time
 import asyncio
 
-@asst_cmd(pattern="asping$", chats=[], type=["official", "assistant"])
+@asst_cmd(pattern="asping$", chats=[])
 async def assistant_ping(event):
     client = event.client 
     ultroid_bot.parse_mode = "html" 
