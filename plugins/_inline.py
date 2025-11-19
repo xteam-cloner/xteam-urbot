@@ -778,3 +778,80 @@ async def inline_alive(ult):
     ]
     await ult.answer(result)
     
+
+import time
+import asyncio
+
+@asst_cmd(pattern="asping$", chats=[], type=["official", "assistant"])
+async def assistant_ping(event):
+    client = event.client 
+    ultroid_bot.parse_mode = "html" 
+    
+    user_id = event.sender_id
+    
+    start = time.time()
+    
+    x = await event.reply("Pong!") 
+    
+    end = round((time.time() - start) * 1000)
+    
+    uptime = time_formatter((time.time() - start_time) * 1000)
+    
+    is_owner = user_id == OWNER_ID
+    is_full_sudo = user_id in SUDO_M.fullsudos 
+    is_standard_sudo = user_id in sudoers()
+    
+    owner_entity = await client.get_entity(OWNER_ID)
+    owner_name = owner_entity.first_name 
+    
+    pic = udB.get_key("PING_PIC")
+    
+    emoji_ping_base = udB.get_key("EMOJI_PING") 
+    emoji_ping_html = (str(emoji_ping_base) if emoji_ping_base else "🏓") + " "
+    
+    emoji_uptime_base = udB.get_key("EMOJI_UPTIME")
+    emoji_uptime_html = (str(emoji_uptime_base) if emoji_uptime_base else "⏰") + " "
+    
+    emoji_owner_base = udB.get_key("EMOJI_OWNER")
+    emoji_owner_html = (str(emoji_owner_base) if emoji_owner_base else "👑") + " "
+    
+    bot_header_text = "<b><a href='https://github.com/xteam-cloner/xteam-urbot'>𖤓⋆xᴛᴇᴀᴍ ᴜʀʙᴏᴛ⋆𖤓</a></b>" 
+    
+    if is_full_sudo or is_standard_sudo:
+        current_user_entity = await client.get_entity(user_id)
+        current_user_name = current_user_entity.first_name or getattr(current_user_entity, 'title', 'User')
+        user_html_mention = f"<a href='tg://user?id={user_id}'>{current_user_name}</a>"
+    else:
+        user_html_mention = f"{owner_name}" 
+
+    owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
+    
+    if is_owner:
+        user_role = "OWNER"
+        display_name = f"{user_role} : {owner_html_mention}" 
+        
+    elif is_full_sudo:
+        user_role = "FULLSUDO" 
+        display_name = f"{user_role} : {user_html_mention}"
+        
+    elif is_standard_sudo:
+        user_role = "SUDOUSER" 
+        display_name = f"{user_role} : {user_html_mention}"
+        
+    else:
+        user_role = ""
+        display_name = f"{owner_html_mention}" 
+        
+    ping_message = f"""
+<blockquote>
+<b>{bot_header_text}</b></blockquote>
+<blockquote>{emoji_ping_html} Ping : {end}ms
+{emoji_uptime_html} Uptime : {uptime}
+{emoji_owner_html} {display_name}
+</blockquote>
+"""
+        
+    await asyncio.sleep(0.5)
+    
+    await x.edit(ping_message, file=pic, parse_mode='html')
+        
