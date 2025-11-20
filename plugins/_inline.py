@@ -572,34 +572,62 @@ async def _(event):
 @in_pattern("ping", owner=False) 
 async def inline_ping_handler(ult):
     
-    # 1. Ambil data pesan dan tombol
+    udB.set_key("PING_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
+    
     ping_message, buttons = await get_ping_message_and_buttons(ult.client)
+    
     pic = udB.get_key("PING_PIC")
     
-    # Ganti PING_BUTTONS menjadi ALIVE_BUTTONS atau sesuaikan
-    
-    # 2. Kirim sebagai DOCUMENT atau PHOTO (lebih disarankan daripada ARTICLE)
-    if pic:
-        result = await ult.builder.photo(
-            pic,  # pic adalah URL atau File ID
-            title="Bot Status",
-            description=ping_message, # Gunakan ping_message sebagai deskripsi
-            buttons=PING_BUTTONS,
-            parse_mode="html",
-        )
-    else:
-        # Jika tidak ada gambar, kembali ke mode ARTICLE (teks biasa)
-        result = await ult.builder.article(
-            title="Bot Status", 
-            text=ping_message, 
-            buttons=PING_BUTTONS, 
-            link_preview=False,
-            parse_mode="html"
-        )
-    
-    await ult.answer([result], cache_time=0)
-    
+    if not isinstance(pic, (str, list)):
+        pic = None
 
+    if isinstance(pic, list):
+        pic = choice(pic)
+        
+    ping_text = ping_message 
+    
+    builder = ult.builder
+    
+    if pic:
+        try:
+            if ".jpg" in pic:
+                results = [
+                    await builder.photo(
+                        pic, 
+                        text=ping_text,     
+                        parse_mode="html", 
+                        buttons=PING_BUTTONS
+                    )
+                ]
+            else:
+                if _pic := resolve_bot_file_id(pic):
+                    pic = _pic
+                
+                results = [
+                    await builder.document(
+                        pic,
+                        title="Inline Ping",
+                        description="xteamdev",
+                        parse_mode="html",
+                        buttons=PING_BUTTONS,
+                        text=ping_text,     
+                    )
+                ]
+            return await ult.answer(results, cache_time=0)
+        except BaseException as er:
+            LOGS.exception(er)
+            
+    result = [
+        await builder.article(
+            "Bot Status", 
+            text=ping_text,                 
+            parse_mode="html", 
+            link_preview=False, 
+            buttons=PING_BUTTONS
+        )
+    ]
+    await ult.answer(result, cache_time=0)
+    
 
 @callback(re.compile("ping_btn(.*)"), owner=False) 
 async def callback_ping_handler(ult):
