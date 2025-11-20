@@ -766,7 +766,7 @@ from git import Repo
 
 @in_pattern("aliv", owner=True)
 async def inline_alive(ult):
-    udB.set_key("ALIVE_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
+    #udB.set_key("ALIVE_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
     
     pic = udB.get_key("ALIVE_PIC") 
     
