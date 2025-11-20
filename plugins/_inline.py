@@ -572,21 +572,35 @@ async def _(event):
 @in_pattern("ping", owner=False) 
 async def inline_ping_handler(ult):
     
+    # 1. Ambil data pesan dan tombol
     ping_message, buttons = await get_ping_message_and_buttons(ult.client)
     pic = udB.get_key("PING_PIC")
-        
-    result = await ult.builder.article(
-        title="Bot Status", 
-        text=ping_message, 
-        buttons=PING_BUTTONS, 
-        link_preview=bool(pic),
-        parse_mode="html"
-    )
+    
+    # Ganti PING_BUTTONS menjadi ALIVE_BUTTONS atau sesuaikan
+    
+    # 2. Kirim sebagai DOCUMENT atau PHOTO (lebih disarankan daripada ARTICLE)
+    if pic:
+        # Kirim sebagai DOCUMENT. 'pic' bisa berupa file ID atau URL.
+        result = await ult.builder.document(
+            pic,
+            title="Bot Status", 
+            description=ping_message, # Pesan menjadi deskripsi
+            buttons=PING_BUTTONS,     # Tombol
+            parse_mode="html"
+        )
+    else:
+        # Jika tidak ada gambar, kembali ke mode ARTICLE (teks biasa)
+        result = await ult.builder.article(
+            title="Bot Status", 
+            text=ping_message, 
+            buttons=PING_BUTTONS, 
+            link_preview=False,
+            parse_mode="html"
+        )
     
     await ult.answer([result], cache_time=0)
+    
 
-
-import re
 
 @callback(re.compile("ping_btn(.*)"), owner=False) 
 async def callback_ping_handler(ult):
