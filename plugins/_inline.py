@@ -580,13 +580,12 @@ async def inline_ping_handler(ult):
     
     # 2. Kirim sebagai DOCUMENT atau PHOTO (lebih disarankan daripada ARTICLE)
     if pic:
-        # Kirim sebagai DOCUMENT. 'pic' bisa berupa file ID atau URL.
-        result = await ult.builder.document(
-            pic,
-            title="Bot Status", 
-            description=ping_message, # Pesan menjadi deskripsi
-            buttons=PING_BUTTONS,     # Tombol
-            parse_mode="html"
+        result = await ult.builder.photo(
+            pic,  # pic adalah URL atau File ID
+            title="Bot Status",
+            description=ping_message, # Gunakan ping_message sebagai deskripsi
+            buttons=PING_BUTTONS,
+            parse_mode="html",
         )
     else:
         # Jika tidak ada gambar, kembali ke mode ARTICLE (teks biasa)
