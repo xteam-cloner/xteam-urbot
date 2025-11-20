@@ -1,8 +1,8 @@
 """ Google Text to Speech
 Available Commands:
-{tr}tts <LanguageCode> ; <text>
-{tr}tts <text> (uses 'en' by default)
-{tr}tts <LanguageCode> (as reply to a message)
+• tts <LanguageCode> ; <text>
+• tts <text> (uses 'en' by default)
+• tts <LanguageCode> (as reply to a message)
 """
 
 import os
@@ -15,10 +15,7 @@ from gtts import gTTS
 # Menggunakan impor spesifik dari Xteam/Ultroid yang Anda berikan
 from xteam._misc._decorators import ultroid_cmd
 from xteam._misc._wrappers import eod, eor 
-# from xteam.fns.helper import deEmojify # <--- Hapus atau Nonaktifkan ini
-# from . import reply_id # <--- DIHILANGKAN
 
-plugin_category = "utils"
 
 # ====================================================================
 # FUNGSI ALTERNATIF PENGGANTI deEmojify
@@ -49,18 +46,7 @@ def de_emojify_alt(text):
 # DEKORATOR DAN FUNGSI UTAMA
 # ====================================================================
 
-@ultroid_cmd(
-    pattern="tts(?:\s|$)([\s\S]*)",
-    command=("tts", plugin_category),
-    info={
-        "header": "Text to speech command using Google TTS.",
-        "usage": [
-            "tts <text>",
-            "tts <reply>",
-            "tts <language code> ; <text>",
-        ],
-    },
-)
+@ultroid_cmd(pattern="tts(?:\s|$)([\s\S]*)")
 async def tts_cmd(event):
     "Text to speech command"
     input_str = event.pattern_match.group(1)
