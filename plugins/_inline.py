@@ -572,7 +572,7 @@ async def _(event):
 @in_pattern("ping", owner=False) 
 async def inline_ping_handler(ult):
     
-    udB.set_key("PING_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
+    #udB.set_key("PING_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
     
     ping_message, buttons = await get_ping_message_and_buttons(ult.client)
     
