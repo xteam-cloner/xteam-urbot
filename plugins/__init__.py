@@ -28,7 +28,7 @@ from xteam import udB, clients
 from xteam._misc._assistant import asst_cmd, callback, in_pattern
 from xteam._misc._decorators import ultroid_cmd
 from xteam._misc._wrappers import eod, eor
-from xteam.dB import DEVLIST, ULTROID_IMAGES, ALIVE_TEXT, ALIVE_NAME, QUOTES
+from xteam.dB import DEVLIST as devs, ULTROID_IMAGES, ALIVE_TEXT, ALIVE_NAME, QUOTES
 from xteam.fns.helper import *
 from xteam.fns.misc import *
 from xteam.fns.tools import *
