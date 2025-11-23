@@ -18,7 +18,7 @@ from secrets import choice
 from xteam.dB import devs
 from telethon.tl.types import User
 from xteam._misc import sudoers
-from . import ultroid_cmd as ayiinCmd 
+from . import ultroid_cmd 
 from . import (
     ATRA_COL,
     LOGS,
@@ -35,6 +35,7 @@ from . import (
     callback,
     def_logs,
     eor,
+    eod,
     get_string,
     heroku_logs,
     in_pattern,
@@ -67,14 +68,21 @@ ayiincakep = [
 ]
 
 
-@ayiinCmd("cping$", devs=True)
+from . import clients
+
+@ultroid_cmd("Cping$", devs=True)
 async def _(ping):
+    
+    if ping.client not in clients:
+        return 
     start = time.time()
-    x = await ping.eor("ping")
+    x = await ping.eod("ping")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     user = await ping.client.get_me()
-    message = "**✧ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ✧**\n\n✧ **ᴘɪɴɢᴇʀ :** `{} ms`\n✧ **ᴜᴘᴛɪᴍᴇ :** `{}`\n✧ **ᴏᴡɴᴇʀ :** `{}`\n✧ **ɪᴅ :** `{}`"
+    
+    message = "✧ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ✧\n✧ ᴘɪɴɢᴇʀ : {} ms\n✧ ᴜᴘᴛɪᴍᴇ : {}\n✧ CLIENT : {}\n✧ ɪᴅ : {}"
+    
     await ping.reply(
         message.format(
             end,
@@ -85,20 +93,22 @@ async def _(ping):
     )
 
 
+
 # KALO NGEFORK absen ini GA USAH DI HAPUS YA GOBLOK 😡
 # JANGAN DI HAPUS GOBLOK 😡 LU COPY AJA TINGGAL TAMBAHIN
 # DI HAPUS GUA GBAN YA 🥴 GUA TANDAIN LU AKUN TELENYA 😡
 
 # Absen by : mrismanaziz <https://github.com/mrismanaziz/man-userbot>
 
-@ayiinCmd("absen$", devs=True)
-async def ayiinabsen(ganteng):
+from random import choice
+from . import clients
+
+@ultroid_cmd("absen$", devs=True)
+async def ayiinabsen(ganteng):  
+    if ganteng.client in clients:
+        return  
     await ganteng.reply(choice(absen))
-
-
-@ayiinCmd("Aku ganteng kan$", devs=True)
-async def ayiin(ganteng):
-    await ganteng.reply(choice(ayiincakep))
+    
 
 
 # ========================×========================
