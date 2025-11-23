@@ -19,7 +19,6 @@ from . import (
     start_time,
     udB,
     OWNER_ID,
-    SUDO_M,
     OWNER_NAME,
     OWNER_USERNAME,
     time_formatter,
