@@ -70,11 +70,11 @@ ayiincakep = [
 @ayiinCmd("cping$", devs=True)
 async def _(ping):
     start = time.time()
-    x = await ping.eor("Pong !")
+    x = await ping.eor("ping")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter((time.time() - start_time) * 1000)
     user = await ping.client.get_me()
-    message = "**✧ ᴀʏɪɪɴ-ᴜsᴇʀʙᴏᴛ ✧**\n\n✧ **ᴘɪɴɢᴇʀ :** `{} ms`\n✧ **ᴜᴘᴛɪᴍᴇ :** `{}`\n✧ **ᴏᴡɴᴇʀ :** `{}`\n✧ **ɪᴅ :** `{}`"
+    message = "**✧ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ✧**\n\n✧ **ᴘɪɴɢᴇʀ :** `{} ms`\n✧ **ᴜᴘᴛɪᴍᴇ :** `{}`\n✧ **ᴏᴡɴᴇʀ :** `{}`\n✧ **ɪᴅ :** `{}`"
     await ping.reply(
         message.format(
             end,
