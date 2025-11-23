@@ -12,7 +12,7 @@ from telethon.tl.types import (
     InputMessagesFilterVoice,
     InputMessagesFilterPhotos,
 )
-from xteam import (
+from . import (
     ultroid_bot,  
     client,       
     clients,      
