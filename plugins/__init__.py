@@ -24,7 +24,7 @@ from random import choice
 import requests
 from telethon import Button, events
 from telethon.tl import functions, types  # pylint:ignore
-from xteam import udB
+from xteam import udB, clients
 from xteam._misc._assistant import asst_cmd, callback, in_pattern
 from xteam._misc._decorators import ultroid_cmd
 from xteam._misc._wrappers import eod, eor
