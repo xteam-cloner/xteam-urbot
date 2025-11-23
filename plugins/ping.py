@@ -73,7 +73,7 @@ async def test_additional_clients(clients_list):
     return results
 
 
-@xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="ping$", chats=[], type=["official"])
 async def consolidated_ping(event):
     
     ultroid_bot.parse_mode = "html" 
@@ -115,7 +115,7 @@ async def consolidated_ping(event):
         additional_ping_data = await test_additional_clients(clients)
         
         for user_info, latency in additional_ping_data.items():
-            additional_client_results += f"\n🔌 Client **{user_info}**: {latency}"
+            additional_client_results += f"\n🔌 Client {user_info}: {latency}"
 
     
     ping_message = f"""
