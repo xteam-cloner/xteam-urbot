@@ -82,7 +82,7 @@ async def consolidated_ping(event):
     user_id = event.sender_id
     
     start = time.time()
-    x = await event.reply("ping")
+    x = await event.edit("ping")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter(time.time() - start_time) 
     
@@ -117,7 +117,7 @@ async def consolidated_ping(event):
         additional_ping_data = await test_additional_clients(clients)
         
         for user_info, latency in additional_ping_data.items():
-            additional_client_results += f"\n🔌 Client {user_info}: {latency}"
+            additional_client_results += f"\nClient  {user_info}: {latency}"
 
     
     ping_message = f"""
