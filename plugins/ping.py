@@ -27,9 +27,8 @@ from . import (
     eor,
     call_back,
     callback,
-    sudoers,  
 )
-from xteam._misc import SUDO_M, owner_and_sudos
+from xteam._misc import SUDO_M, owner_and_sudos, sudoers
 from xteam.fns.custom_markdown import CustomMarkdown
 from xteam.fns.helper import download_file, inline_mention
 from ._inline import *
