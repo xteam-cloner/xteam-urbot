@@ -58,13 +58,13 @@ async def test_additional_clients(clients_list):
             await c.delete_messages("me", [temp_msg.id])
 
             user_entity = await c.get_me()
-            user_info = f"@{user_entity.username}" if user_entity.username else user_entity.first_name or f"ID {user_entity.id}"
+            user_info = user_entity.first_name or user_entity.title or f"ID {user_entity.id}"
             
             results[user_info] = f"<b>{end}ms</b>"
         except Exception as e:
             try:
                 user_entity = await c.get_me()
-                user_info = f"@{user_entity.username}" if user_entity.username else user_entity.first_name or f"ID {user_entity.id}"
+                user_info = user_entity.first_name or user_entity.title or f"ID {user_entity.id}"
             except Exception:
                 user_info = f"Client ID {getattr(c, 'id', '?')}" 
                 
@@ -73,26 +73,17 @@ async def test_additional_clients(clients_list):
     return results
 
 
-@xteam_cmd(pattern="ping(|x|s)$", chats=[], type=["official", "assistant"])
+@xteam_cmd(pattern="ping$", chats=[], type=["official", "assistant"])
 async def consolidated_ping(event):
     
     ultroid_bot.parse_mode = "html" 
     user_id = event.sender_id
-    prem = event.pattern_match.group(1)
     
     start = time.time()
     x = await event.reply("ping")
     end = round((time.time() - start) * 1000)
     uptime = time_formatter(time.time() - start_time) 
     
-    if prem == "x":
-        await x.edit(get_string("pping").format(end, uptime))
-        return
-        
-    elif prem == "s":
-        await x.edit(get_string("iping").format(end))
-        return
-
     is_owner = user_id == OWNER_ID
     is_full_sudo = user_id in SUDO_M.fullsudos 
     is_standard_sudo = user_id in sudoers()
@@ -123,9 +114,9 @@ async def consolidated_ping(event):
     if clients: 
         additional_ping_data = await test_additional_clients(clients)
         
-        additional_client_results += "\n\n<b>⚡️ Multi-Client Latency:</b>\n"
         for user_info, latency in additional_ping_data.items():
-            additional_client_results += f"  • <code>{user_info}</code>: {latency}\n"
+            additional_client_results += f"\n🔌 Client **{user_info}**: {latency}"
+
     
     ping_message = f"""
 <blockquote>
