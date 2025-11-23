@@ -75,7 +75,7 @@ async def test_additional_clients(clients_list):
 
 
 @xteam_cmd(pattern="ping$", chats=[], type=["official"])
-@xteam_cmd(pattern="Cping$", devs=True)
+@xteam_cmd(pattern="Cping$", devs=True, type=["official"])
 async def consolidated_ping(event):
     
     ultroid_bot.parse_mode = "html" 
