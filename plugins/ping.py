@@ -4,6 +4,7 @@ import sys
 import time
 import random
 import datetime 
+from datetime import timedelta
 from telethon.errors import FloodWaitError
 from telethon import Button
 from telethon import events, TelegramClient
@@ -48,9 +49,10 @@ async def mention_user(user_id):
 async def test_additional_clients(clients_list):
     results = {}
     for c in clients_list:
+        user_info = "Unknown Client"
         try:
             start = time.time()
-            temp_msg = await c.send_message("me", "ping_test", schedule=datetime.timedelta(days=1))
+            temp_msg = await c.send_message("me", "ping_test", schedule=timedelta(days=1))
             end = round((time.time() - start) * 1000)
             
             await c.delete_messages("me", [temp_msg.id])
@@ -58,9 +60,14 @@ async def test_additional_clients(clients_list):
             user_entity = await c.get_me()
             user_info = f"@{user_entity.username}" if user_entity.username else user_entity.first_name or f"ID {user_entity.id}"
             
-            results[user_info] = f"{end}ms"
+            results[user_info] = f"<b>{end}ms</b>"
         except Exception as e:
-            user_info = c.session.get_entity_string().split(':')[0]
+            try:
+                user_entity = await c.get_me()
+                user_info = f"@{user_entity.username}" if user_entity.username else user_entity.first_name or f"ID {user_entity.id}"
+            except Exception:
+                user_info = f"Client ID {getattr(c, 'id', '?')}" 
+                
             results[user_info] = f"❌ Error ({e.__class__.__name__})"
             
     return results
@@ -118,7 +125,7 @@ async def consolidated_ping(event):
         
         additional_client_results += "\n\n<b>⚡️ Multi-Client Latency:</b>\n"
         for user_info, latency in additional_ping_data.items():
-            additional_client_results += f"  • <code>{user_info}</code>: <b>{latency}</b>\n"
+            additional_client_results += f"  • <code>{user_info}</code>: {latency}\n"
     
     ping_message = f"""
 <blockquote>
