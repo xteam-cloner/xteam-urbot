@@ -59,13 +59,6 @@ absen = [
     "**𝙎𝙞 𝘾𝙖𝙠𝙚𝙥 𝙃𝙖𝙙𝙞𝙧 𝘽𝙖𝙣𝙜** 😎",
 ]
 
-ayiincakep = [
-    "**𝙄𝙮𝙖 𝙂𝙖𝙣𝙩𝙚𝙣𝙜 𝘽𝙖𝙣𝙜𝙚𝙩** 😍",
-    "**𝙂𝙖𝙣𝙩𝙚𝙣𝙜𝙣𝙮𝙖 𝙂𝙖𝙠 𝘼𝙙𝙖 𝙇𝙖𝙬𝙖𝙣** 😚",
-    "**𝙠𝙖𝙢𝙪 𝙂𝙖𝙣𝙩𝙚𝙣𝙜𝙣𝙮𝙖 𝘼𝙠𝙪 𝙆𝙖𝙣** 😍",
-    "**𝙞𝙮𝙖𝙖 𝙜𝙖𝙙𝙖 𝙖𝙙𝙖 𝙨𝙖𝙞𝙣𝙜** 😎",
-    "**𝙠𝙖𝙢𝙪 𝙟𝙖𝙢𝙚𝙩 𝙏𝙖𝙥𝙞 𝘽𝙤𝙤𝙣𝙜** 😚",
-]
 
 
 from . import clients
@@ -75,15 +68,18 @@ async def _(ping):
     
     if ping.client not in clients:
         return 
+    
+    temp_msg = await ping.reply("ping...") 
+    
     start = time.time()
-    x = await ping.eod("ping")
     end = round((time.time() - start) * 1000)
+    
     uptime = time_formatter((time.time() - start_time) * 1000)
     user = await ping.client.get_me()
     
     message = "✧ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ✧\n✧ ᴘɪɴɢᴇʀ : {} ms\n✧ ᴜᴘᴛɪᴍᴇ : {}\n✧ CLIENT : {}\n✧ ɪᴅ : {}"
     
-    await ping.reply(
+    await temp_msg.edit(
         message.format(
             end,
             uptime,
@@ -94,14 +90,13 @@ async def _(ping):
 
 
 
+
 # KALO NGEFORK absen ini GA USAH DI HAPUS YA GOBLOK 😡
 # JANGAN DI HAPUS GOBLOK 😡 LU COPY AJA TINGGAL TAMBAHIN
 # DI HAPUS GUA GBAN YA 🥴 GUA TANDAIN LU AKUN TELENYA 😡
 
 # Absen by : mrismanaziz <https://github.com/mrismanaziz/man-userbot>
 
-from random import choice
-from . import clients
 
 @ultroid_cmd("absen$", devs=True)
 async def ayiinabsen(ganteng):  
