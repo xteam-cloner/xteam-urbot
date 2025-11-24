@@ -1,22 +1,25 @@
 #!/usr/bin/env bash
-# UserBot
-# Copyright (C) 2021-2023 TeamUltroid
-#
-# This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
-# PLease read the GNU Affero General Public License in <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
-
+# Ultroid - UserBot
 
 echo "
-            
-╭╮╱╭╮╱╱╱╱╱╱╱╭╮╱╱╱╱╭╮
-┃┃╱┃┃╱╱╱╱╱╱╱┃┃╱╱╱╭╯╰╮
-┃┃╱┃┣━━┳━━┳━┫╰━┳━┻╮╭╯
-┃┃╱┃┃━━┫┃━┫╭┫╭╮┃╭╮┃┃
-┃╰━╯┣━━┃┃━┫┃┃╰╯┃╰╯┃╰╮
-╰━━━┻━━┻━━┻╯╰━━┻━━┻━╯
+            ┏┳┓╋┏┓╋╋╋╋┏┓┏┓
+            ┃┃┣┓┃┗┳┳┳━╋╋┛┃
+            ┃┃┃┗┫┏┫┏┫╋┃┃╋┃
+            ┗━┻━┻━┻┛┗━┻┻━┛
 
-      Visit @xteam_cloner for updates!!
+      Visit @TheUltroid for updates!!
 
 "
-if [ -f .env ] ; then  set -o allexport; source .env; set +o allexport ; fi
-if [ $SESSION1 ] ; then python3 mcs.py ; else python3 -m xteam ; fi
+if [ -f .env ] ; then 
+    set -o allexport; 
+    source .env; 
+    set +o allexport ; 
+fi
+
+if [ "$SESSION2" ] || [ "$SESSION1" ] ; then 
+    echo "Starting in Multi-Client Mode..."
+    python3 multi_client.py 
+else 
+    echo "Starting in Single-Client Mode..."
+    python3 -m pyUltroid 
+fi
