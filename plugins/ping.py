@@ -76,7 +76,7 @@ async def test_additional_clients(clients_list):
             
             await c.delete_messages("me", [temp_msg.id])
 
-            ping_text = f"🏓  Ping : <b>{end}ms</b>\n⏰  Uptime : {time_formatter(time.time() - start_time)}\n👑 OWNER : {user_mention}"
+            ping_text = f"🏓 Ping : <b>{end}ms</b>\n⏰ Uptime : {time_formatter(time.time() - start_time)}\n👑 OWNER : {user_mention}"
             
             results[user_info_display] = ping_text
         except Exception as e:
@@ -115,12 +115,11 @@ async def consolidated_ping(event):
     
     # 1. PESAN KLIEN UTAMA (Menggunakan mention yang diset secara manual)
     main_client_message = f"""
-<b>{main_client_display_name}</b>
-**{bot_header_text}**
-<blockquote>🏓  Ping : <b>{end}ms</b>
-⏰  Uptime : {uptime}
-👑 OWNER : {main_client_mention}</blockquote>
-"""
+    {bot_header_text}
+    <blockquote>🏓 Ping : <b>{end}ms</b>
+    ⏰ Uptime : {uptime}
+    👑 OWNER : {main_client_mention}</blockquote>
+    """
     
     
     # 2. KLIEN TAMBAHAN (Menggunakan mention dari test_additional_clients)
@@ -131,10 +130,9 @@ async def consolidated_ping(event):
             
             
             additional_client_message = f"""
-<b>{user_info}</b>
-**{bot_header_text}**
-<blockquote>{detail_text}</blockquote>
-"""
+            {bot_header_text}
+            <blockquote>{detail_text}</blockquote>
+            """
             
             await client.send_message(
                 event.chat_id,
