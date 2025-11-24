@@ -96,7 +96,7 @@ try:
     while True:
         time.sleep(3600)
 except KeyboardInterrupt:
-    #print("Launcher stopped manually.")
+    print("Launcher stopped manually.")
 except Exception as er:
     print(f"Error in main loop: {er}")
     
