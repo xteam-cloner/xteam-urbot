@@ -65,20 +65,12 @@ from . import clients
 
 @ultroid_cmd("Cping$", devs=True)
 async def _(ping):
-    
-    if ping.client not in clients:
-        return 
-    
     temp_msg = await ping.reply("ping...") 
-    
     start = time.time()
     end = round((time.time() - start) * 1000)
-    
     uptime = time_formatter((time.time() - start_time) * 1000)
     user = await ping.client.get_me()
-    
     message = "✧ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ✧\n✧ ᴘɪɴɢᴇʀ : {} ms\n✧ ᴜᴘᴛɪᴍᴇ : {}\n✧ CLIENT : {}\n✧ ɪᴅ : {}"
-    
     await temp_msg.edit(
         message.format(
             end,
@@ -100,8 +92,6 @@ async def _(ping):
 
 @ultroid_cmd("absen$", devs=True)
 async def ayiinabsen(ganteng):  
-    if ganteng.client in clients:
-        return  
     await ganteng.reply(choice(absen))
     
 
