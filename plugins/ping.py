@@ -1,4 +1,4 @@
-import asyncio
+Import asyncio
 import os
 import sys
 import time
@@ -39,17 +39,36 @@ async def mention_user(user_id):
     try:
         user_entity = await ultroid_bot.get_entity(user_id)
         first_name = user_entity.first_name
-        mention_text = f"[{first_name}](tg://user?id={user_id})"
+        mention_text = f"<a href='tg://user?id={user_id}'>{first_name}</a>"
         return mention_text
     except Exception as e:
         print(f"Failed to mention user: {e}")
         return str(user_id)
 
 
+async def get_client_display_data(cl, client_count=0):
+    user_info_display = f"Client {client_count}"
+    user_id = None
+    try:
+        user_entity = await cl.get_me()
+        user_id = user_entity.id
+        user_info_display = user_entity.first_name or user_entity.title or f"Client {client_count}"
+        
+        if client_count == 1 and user_info_display == "Client 1":
+            user_info_display = "ᴄᴀᴛʜ ᴀꜱꜱɪꜱᴛᴀɴᴛꜱ"
+            
+        mention = await mention_user(user_id)
+        return user_info_display, mention, user_id
+    except Exception:
+        return user_info_display, user_info_display, user_id
+
+
 async def test_additional_clients(clients_list):
     results = {}
+    client_count = 1 
     for c in clients_list:
-        user_info = "Unknown Client"
+        user_info_display, user_mention, user_id = await get_client_display_data(c, client_count)
+        
         try:
             start = time.time()
             temp_msg = await c.send_message("me", "ping_test", schedule=timedelta(days=1))
@@ -57,18 +76,14 @@ async def test_additional_clients(clients_list):
             
             await c.delete_messages("me", [temp_msg.id])
 
-            user_entity = await c.get_me()
-            user_info = user_entity.first_name or user_entity.title or f"ID {user_entity.id}"
+            ping_text = f"🏓  Ping : <b>{end}ms</b>\n⏰  Uptime : {time_formatter(time.time() - start_time)}\n👑 OWNER : {user_mention}"
             
-            results[user_info] = f"<b>{end}ms</b>"
+            results[user_info_display] = ping_text
         except Exception as e:
-            try:
-                user_entity = await c.get_me()
-                user_info = user_entity.first_name or user_entity.title or f"ID {user_entity.id}"
-            except Exception:
-                user_info = f"Client ID {getattr(c, 'id', '?')}" 
-                
-            results[user_info] = f"❌ Error ({e.__class__.__name__})"
+            error_text = f"❌ Error ({e.__class__.__name__})"
+            results[user_info_display] = error_text
+        
+        client_count += 1
             
     return results
 
@@ -79,55 +94,56 @@ async def consolidated_ping(event):
     ultroid_bot.parse_mode = "html" 
     user_id = event.sender_id
     
+    # Menetapkan nama/mention Klien Utama secara manual
+    main_client_display_name = "ᴊɪʏᴏ ᴠx | ᴜʙ"
+    main_client_mention = f"<a href='tg://user?id={OWNER_ID}'>{main_client_display_name}</a>" 
+
+    bot_header_text = "𖤓⋆xᴛᴇᴀᴍ ᴜʀʙᴏᴛ⋆𖤓"
+
     x = await event.reply("ping...") 
     
     start = time.time()
-    end = round((time.time() - start) * 1000)
+    try:
+        temp_msg = await client.send_message("me", "main_ping_test", schedule=timedelta(days=1))
+        end = round((time.time() - start) * 1000)
+        await client.delete_messages("me", [temp_msg.id])
+    except Exception:
+        end = "Err"
+        
     uptime = time_formatter(time.time() - start_time) 
     
-    is_owner = user_id == OWNER_ID
-    is_full_sudo = user_id in SUDO_M.fullsudos 
-    is_standard_sudo = user_id in sudoers()
-
-    if is_owner:
-        user_role = "OWNER"
-        owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{OWNER_NAME}</a>"
-        display_name = f"👑 {user_role} : {owner_html_mention}" 
-        
-    elif is_full_sudo or is_standard_sudo:
-        current_user_entity = await client.get_entity(user_id)
-        current_user_name = current_user_entity.first_name or current_user_entity.title
-        user_role = "FULLSUDO" if is_full_sudo else "SUDOUSER"
-        user_html_mention = f"<a href='tg://user?id={user_id}'>{current_user_name}</a>"
-        display_name = f"⚡️ {user_role} : {user_html_mention}"
-        
-    else:
-        owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{OWNER_NAME}</a>"
-        display_name = f"👤 User : {owner_html_mention}" 
-
-    pic = udB.get_key("PING_PIC")
-    emoji_ping_base = udB.get_key("EMOJI_PING"); emoji_ping_html = (str(emoji_ping_base) if emoji_ping_base else "🏓") + " "
-    emoji_uptime_base = udB.get_key("EMOJI_UPTIME"); emoji_uptime_html = (str(emoji_uptime_base) if emoji_uptime_base else "⏰") + " "
     
-    bot_header_text = "<b><a href='https://github.com/xteam-cloner/xteam-urbot'>𖤓⋆xᴛᴇᴀᴍ ᴜʀʙᴏᴛ⋆𖤓</a></b>" 
+    # 1. PESAN KLIEN UTAMA (Menggunakan mention yang diset secara manual)
+    main_client_message = f"""
+<b>{main_client_display_name}</b>
+**{bot_header_text}**
+<blockquote>🏓  Ping : <b>{end}ms</b>
+⏰  Uptime : {uptime}
+👑 OWNER : {main_client_mention}</blockquote>
+"""
     
-    additional_client_results = ""
+    
+    # 2. KLIEN TAMBAHAN (Menggunakan mention dari test_additional_clients)
     if clients: 
         additional_ping_data = await test_additional_clients(clients)
         
-        for user_info, latency in additional_ping_data.items():
-            additional_client_results += f"\n👑 Client {user_info}: {latency}"
+        for user_info, detail_text in additional_ping_data.items():
+            
+            
+            additional_client_message = f"""
+<b>{user_info}</b>
+**{bot_header_text}**
+<blockquote>{detail_text}</blockquote>
+"""
+            
+            await client.send_message(
+                event.chat_id,
+                additional_client_message,
+                reply_to=event.id, 
+                parse_mode='html'
+            )
 
     
-    ping_message = f"""
-<blockquote>
-<b>{bot_header_text}</b></blockquote>
-<blockquote>{emoji_ping_html} Ping : <b>{end}ms</b>
-{emoji_uptime_html} Uptime : {uptime}
-{display_name}
-{additional_client_results}</blockquote>
-"""
-        
-    await asyncio.sleep(0.5)
-    await x.edit(ping_message, file=pic, parse_mode='html')
     
+    await asyncio.sleep(0.5)
+    await x.edit(main_client_message, parse_mode='html')
