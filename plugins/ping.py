@@ -1,4 +1,4 @@
-import asyncio
+Import asyncio
 import os
 import sys
 import time
@@ -34,7 +34,6 @@ from xteam._misc import SUDO_M, owner_and_sudos, sudoers
 from xteam.fns.custom_markdown import CustomMarkdown
 from xteam.fns.helper import download_file, inline_mention
 from ._inline import *
-
 
 async def mention_user(user_id):
     try:
@@ -80,11 +79,9 @@ async def consolidated_ping(event):
     ultroid_bot.parse_mode = "html" 
     user_id = event.sender_id
     
-    # 1. KIRIM PESAN SEMENTARA DENGAN KLIEN UTAMA
     x = await event.reply("ping...") 
     
     start = time.time()
-    # Lakukan ping di sini
     end = round((time.time() - start) * 1000)
     uptime = time_formatter(time.time() - start_time) 
     
@@ -119,7 +116,7 @@ async def consolidated_ping(event):
         additional_ping_data = await test_additional_clients(clients)
         
         for user_info, latency in additional_ping_data.items():
-            additional_client_results += f"\n🔌 Client **{user_info}**: {latency}"
+            additional_client_results += f"\n👑 Client {user_info}: {latency}"
 
     
     ping_message = f"""
@@ -132,6 +129,5 @@ async def consolidated_ping(event):
 """
         
     await asyncio.sleep(0.5)
-    # 2. EDIT PESAN SEMENTARA yang baru saja dikirim
     await x.edit(ping_message, file=pic, parse_mode='html')
     
