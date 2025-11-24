@@ -44,6 +44,7 @@ from telethon import __version__ as tver
 from pytgcalls import __version__ as pytver
 from platform import python_version as pyver
 from ntgcalls import NTgCalls
+from git import Repo
 
 ntgcalls = NTgCalls()
 udB: Database
