@@ -17,7 +17,7 @@ def _check_and_launch(suffix):
     found_all = True
     client_id = suffix if suffix else "1" 
     
-    print(f"Memeriksa konfigurasi untuk Klien ID {client_id}...")
+    print(f"Checking the configuration for the Client ID {client_id}...")
     
     for var in REQUIRED_VARS:
         full_var_name = var + suffix
@@ -29,13 +29,13 @@ def _check_and_launch(suffix):
                  return False 
             
             found_all = False
-            print(f"    ⚠️ Melewatkan Klien {client_id} karena '{full_var_name}' tidak ditemukan.")
+            #print(f"    ⚠️ Melewatkan Klien {client_id} karena '{full_var_name}' tidak ditemukan.")
             return False 
             
         env_vars_to_pass[var] = value
 
     if found_all:
-        print(f"    ✅ Variabel ditemukan. Meluncurkan Klien {client_id}...")
+        print(f"✅ Variable found. Launching Client {client_id}...")
         
         process_env = os.environ.copy()
         
@@ -68,7 +68,7 @@ def _check_and_launch(suffix):
         # --- LOGIKA CWD UNIK DIHAPUS ---
 
         subprocess.Popen(
-            [sys.executable, "-m", "pyUltroid"],
+            [sys.executable, "-m", "xteam"],
             stdin=None,
             stderr=None,
             stdout=None,
@@ -82,21 +82,21 @@ def _check_and_launch(suffix):
 
 # -------------------------------------------------------------
 
-print("--- Starting Primary Client Check (ID 1) ---")
+#print("--- Starting Primary Client Check (ID 1) ---")
 primary_client_launched = _check_and_launch("")
 
-print("\n--- Starting Additional Client Check (ID 2 through 5) ---")
+#print("\n--- Starting Additional Client Check (ID 2 through 5) ---")
 for i in range(2, 6): 
     _check_and_launch(str(i))
 
 # -------------------------------------------------------------
 
 try:
-    print("\nLauncher remains active to keep PyUltroid client processes running.")
+    #print("\nLauncher remains active to keep PyUltroid client processes running.")
     while True:
         time.sleep(3600)
 except KeyboardInterrupt:
-    print("Launcher stopped manually.")
+    #print("Launcher stopped manually.")
 except Exception as er:
     print(f"Error in main loop: {er}")
     
