@@ -544,7 +544,7 @@ async def get_ping_message_and_buttons(client): # Parameter latency_ms dihapus
     
     return ping_message, ping_buttons()
 #------------------------------------------------------    
-"""@ultroid_cmd(pattern="ping$")
+@ultroid_cmd(pattern="ping$")
 async def _(event):
     client = event.client     
     try:
@@ -567,7 +567,7 @@ async def _(event):
     except Exception as e:
         print(f"Error saat menjalankan ping command: {e}")
         await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
-"""        
+        
 
 @in_pattern("ping", owner=False) 
 async def inline_ping_handler(ult):
