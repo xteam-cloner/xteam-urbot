@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-# Ultroid - UserBot
+# xteam-urbot
 
 echo "
-            ┏┳┓╋┏┓╋╋╋╋┏┓┏┓
-            ┃┃┣┓┃┗┳┳┳━╋╋┛┃
-            ┃┃┃┗┫┏┫┏┫╋┃┃╋┃
-            ┗━┻━┻━┻┛┗━┻┻━┛
+            ╭╮╱╭╮╱╱╱╱╱╱╱╭╮╱╱╱╱╭╮
+            ┃┃╱┃┃╱╱╱╱╱╱╱┃┃╱╱╱╭╯╰╮
+            ┃┃╱┃┣━━┳━━┳━┫╰━┳━┻╮╭╯
+            ┃┃╱┃┃━━┫┃━┫╭┫╭╮┃╭╮┃┃
+            ┃╰━╯┣━━┃┃━┫┃┃╰╯┃╰╯┃╰╮
+            ╰━━━┻━━┻━━┻╯╰━━┻━━┻━╯
 
-      Visit @TheUltroid for updates!!
+      Visit @xteam_cloner for updates!!
+
+
 
 "
 if [ -f .env ] ; then 
@@ -21,5 +25,5 @@ if [ "$SESSION2" ] || [ "$SESSION1" ] ; then
     python3 multi_client.py 
 else 
     echo "Starting in Single-Client Mode..."
-    python3 -m pyUltroid 
+    python3 -m xteam 
 fi
