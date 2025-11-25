@@ -29,7 +29,6 @@ def _check_and_launch(suffix):
                  return False 
             
             found_all = False
-            #print(f"    ⚠️ Melewatkan Klien {client_id} karena '{full_var_name}' tidak ditemukan.")
             return False 
             
         env_vars_to_pass[var] = value
@@ -48,31 +47,23 @@ def _check_and_launch(suffix):
         
         process_env['CLIENT_ID'] = client_id 
         
-        # --- MODIFIKASI: Penetapan Nama Sesi Eksplisit (SESSION_NAME) ---
         if client_id == "1":
-            process_env['SESSION_NAME'] = "asst" # asst.session
+            process_env['SESSION_NAME'] = "asst" 
         elif client_id == "2":
-            process_env['SESSION_NAME'] = "userbot" # userbot.session
+            process_env['SESSION_NAME'] = "userbot" 
         else:
             process_env['SESSION_NAME'] = f"ultroid_client_{client_id}"
-        # ------------------------------------------------------------------
-
-        # --- MODIFIKASI UNTUK PYTHONPATH (Tetap dipertahankan) ---
+        
         current_pythonpath = process_env.get('PYTHONPATH', '')
         process_env['PYTHONPATH'] = f"{current_pythonpath}:{BASE_DIR}"
-        # --------------------------------------------------------
-
-        # CWD DITETAPKAN KE BASE_DIR UNTUK SEMUA KLIEN
+        
         client_cwd = BASE_DIR
         
-        # --- LOGIKA CWD UNIK DIHAPUS ---
-
         subprocess.Popen(
             [sys.executable, "-m", "xteam"],
             stdin=None,
             stderr=None,
             stdout=None,
-            # CWD selalu BASE_DIR
             cwd=client_cwd, 
             env=process_env,
             close_fds=True,
@@ -80,19 +71,12 @@ def _check_and_launch(suffix):
         return True
     return False
 
-# -------------------------------------------------------------
-
-#print("--- Starting Primary Client Check (ID 1) ---")
 primary_client_launched = _check_and_launch("")
 
-#print("\n--- Starting Additional Client Check (ID 2 through 5) ---")
 for i in range(2, 6): 
     _check_and_launch(str(i))
 
-# -------------------------------------------------------------
-
 try:
-    #print("\nLauncher remains active to keep PyUltroid client processes running.")
     while True:
         time.sleep(3600)
 except KeyboardInterrupt:
