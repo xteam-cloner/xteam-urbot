@@ -46,7 +46,7 @@ screen -S xteam-urbot
 ```
 ✨ Finally Run the bot:
 ```console
-bash startup
+bash start
 ```
 ✨ For getting out from screen session press
 • Ctrl+a and Ctrl+d
