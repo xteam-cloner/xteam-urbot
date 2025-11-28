@@ -2,6 +2,18 @@
   <img src="./resources/extras/logo_readme.jpg" alt="xteam-urbot Logo">
 </p>
 
+<b>Advanced Multi-Client Featured Telegram UserBot, Built in Python Using Telethon lib.</b>
+
+[![Stars](https://img.shields.io/github/stars/xteam-cloner/xteam-urbot?style=flat-square&color=yellow)](https://github.com/xteam-cloner/xteam-urbot/stargazers)
+[![Forks](https://img.shields.io/github/forks/xteam-cloner/xteam-urbot?style=flat-square&color=orange)](https://github.com/xteam-cloner/xteam-urbot/fork)
+[![Size](https://img.shields.io/github/repo-size/xteam-cloner/xteam-urbot?style=flat-square&color=green)](https://github.com/xteam-cloner/xteam-urbot/)   
+[![Python](https://img.shields.io/badge/Python-v3.12.3-blue)](https://www.python.org/)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/xteam-cloner/xteam-urbot/graphs/commit-activity)
+[![Docker Pulls](https://img.shields.io/docker/pulls/xteam-cloner/xteam-urbot?style=flat-square)](https://img.shields.io/docker/pulls/xteam-cloner/xteam-urbot?style=flat-square)   
+[![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/xteam-cloner/xteam-urbot)
+[![License](https://img.shields.io/badge/License-AGPL-blue)](https://github.com/xteam-cloner/xteam-urbot/blob/main/LICENSE)   
+----
+</b>
 
 <h3 align="center">
     ─「 ᴅᴇᴩʟᴏʏ ᴏɴ ᴠᴘs 」─
