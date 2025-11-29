@@ -706,7 +706,7 @@ async def inline_alive_query_handler_v2(asst):
     except NameError:
         uptime = "N/A" 
         
-    message_text = format_message_text(uptime)
+    message_text = format_message_text(uptime, branch_info)
     
     xpic = udB.get_key("ALIVE_PIC")
     xnone = ["false", "0", "none"] 
