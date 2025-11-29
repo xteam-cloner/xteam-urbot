@@ -14,7 +14,7 @@ if [ -f .env ] ; then
 fi
 
 if [ "$SESSION2" ] || [ "$SESSION1" ] ; then 
-    echo "          -----------------------------------
+    echo "                    -----------------------------------
                             Starting Multi Client 
                     -----------------------------------"
     python3 multi_client.py 
