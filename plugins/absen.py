@@ -61,7 +61,6 @@ absen = [
 
 
 
-from . import clients
 
 @ultroid_cmd("Cping$", devs=True)
 async def _(ping):
