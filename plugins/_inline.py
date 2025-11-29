@@ -687,7 +687,7 @@ async def inline_alive_query_handler(ult):
         uptime = "N/A" 
         
     # Asumsikan format_message_text sudah Anda gabungkan atau dipindahkan ke __init__.py
-    message_text = format_message_text(uptime) # Ganti dengan logika yang sudah diperbaiki
+    message_text = format_message_text(uptime, branch_info) # Ganti dengan logika yang sudah diperbaiki
     result = await ult.builder.article(
         text=message_text, 
         buttons=ALIVE_BUTTONS,
