@@ -14,7 +14,9 @@ if [ -f .env ] ; then
 fi
 
 if [ "$SESSION2" ] || [ "$SESSION1" ] ; then 
-    echo "Starting in Multi-Client Mode..."
+    echo "          -----------------------------------
+                            Starting Multi Client 
+                    -----------------------------------"
     python3 multi_client.py 
 else 
     echo "Starting in Single-Client Mode..."
