@@ -1,15 +1,14 @@
-<p align="center">
-  <img src="./resources/extras/logo_readme.jpg" alt="xteam-urbot Logo">
+<p align="center"><img src="https://i0.wp.com/images.hive.blog/DQmZgGvu6YXrMNyDb4wVURLV14WNNSYs58R1kY64HNMSmCL/hive-didver1.gif"></p>
+<p align="center"> <img src="./resources/extras/logo_readme.jpg" alt="xteam-urbot Logo">
 </p>
-
-<b>Advanced Multi-Client Featured Telegram UserBot, Built in Python Using Telethon lib.</b>
+<h2 align="center">𖤓 xᴛᴇᴀᴍ ᴜʀʙᴏᴛ 𖤓</h2></h2>
+<p align="center"><img src="https://i0.wp.com/images.hive.blog/DQmZgGvu6YXrMNyDb4wVURLV14WNNSYs58R1kY64HNMSmCL/hive-didver1.gif"></p>
 
 [![Stars](https://img.shields.io/github/stars/xteam-cloner/xteam-urbot?style=flat-square&color=yellow)](https://github.com/xteam-cloner/xteam-urbot/stargazers)
 [![Forks](https://img.shields.io/github/forks/xteam-cloner/xteam-urbot?style=flat-square&color=orange)](https://github.com/xteam-cloner/xteam-urbot/fork)
 [![Size](https://img.shields.io/github/repo-size/xteam-cloner/xteam-urbot?style=flat-square&color=green)](https://github.com/xteam-cloner/xteam-urbot/)   
 [![Python](https://img.shields.io/badge/Python-v3.12.3-blue)](https://www.python.org/)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/xteam-cloner/xteam-urbot/graphs/commit-activity)
-[![Docker Pulls](https://img.shields.io/docker/pulls/xteam-cloner/xteam-urbot?style=flat-square)](https://img.shields.io/docker/pulls/xteam-cloner/xteam-urbot?style=flat-square)   
 [![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/xteam-cloner/xteam-urbot)
 [![License](https://img.shields.io/badge/License-AGPL-blue)](https://github.com/xteam-cloner/xteam-urbot/blob/main/LICENSE)   
 ----
@@ -73,8 +72,6 @@ apt update && apt upgrade -y && apt install python wget -y && pip install Teleth
 ```
 </details>
 
-</h3>
-
 # License
 [![License](https://www.gnu.org/graphics/agplv3-155x51.png)](LICENSE)   
 xteam is licensed under [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html) v3 or later.
@@ -83,3 +80,6 @@ xteam is licensed under [GNU Affero General Public License](https://www.gnu.org/
 * [![TeamUltroid-Devs](https://img.shields.io/static/v1?label=Teamultroid&message=devs&color=critical)](https://t.me/UltroidDevs)
 * [![TeamX-Mods](https://img.shields.io/static/v1?label=TeamX&message=Mods&color=critical)](https://t.me/xteam_cloner)
 * [![Lonami-Telethon](https://img.shields.io/static/v1?label=Telethon&message=devs&color=critical)](https://github.com/LonamiWebs/Telethon)
+</h3>
+<p align="center"><img src="https://i0.wp.com/images.hive.blog/DQmZgGvu6YXrMNyDb4wVURLV14WNNSYs58R1kY64HNMSmCL/hive-didver1.gif"></p>
+<p align="center"><img src="https://i0.wp.com/images.hive.blog/DQmZgGvu6YXrMNyDb4wVURLV14WNNSYs58R1kY64HNMSmCL/hive-didver1.gif"></p>
