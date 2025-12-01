@@ -39,3 +39,53 @@ async def hitung_total_grup_plugin(event):
     )
 
     await event.edit(output, parse_mode="html")
+
+from telethon.tl.types import User, Channel, Chat
+from . import ultroid_cmd, ultroid_bot, start_time 
+import time
+from datetime import timedelta
+
+START_TIME = start_time 
+
+client = ultroid_bot 
+
+@ultroid_cmd(pattern="status(| (.*))$", fullsudo=True)
+async def status_checker(event):
+    await event.edit("🔄 Mengambil status klien...")
+    
+    try:
+        me = await event.client.get_me()
+        is_premium = getattr(me, 'premium', False)
+        dc_id = event.client.session.dc_id
+    except Exception:
+        is_premium = False
+        dc_id = 'Unknown'
+
+    try:
+        ping_result = await event.client.ping_service(dc_id=dc_id)
+        ping_dc = ping_result.get('duration', float('inf')) * 1000
+    except Exception:
+        ping_dc = float('inf')
+
+    current_time = time.time()
+    uptime_seconds = current_time - START_TIME
+    uptime_str = str(timedelta(seconds=int(uptime_seconds)))
+    
+    peer_users_status = "unlimited" if is_premium else "standard (500)"
+    peer_group_status = "unlimited" if is_premium else "standard (200)"
+    
+    status_level = "Ultra Max" if is_premium else "Standard"
+    
+    output = (
+        f"**Status: [{status_level}]**\n"
+        "--------------------------------------------------\n"
+        f"    `is_premium:` `{is_premium}`\n"
+        f"    `peer_users:` `{total_chat_pribadi}`\n"
+        f"    `peer_group:` `{total_semua_grup}`\n"
+        f"    `dc_id:` `{dc_id}`\n"
+        f"    `ping_dc:` `{ping_dc:.3f} ms`\n"
+        f"    `uptime:` `{uptime_str}`"
+    )
+
+    await event.edit(output)
+    
