@@ -1,5 +1,4 @@
 # Important Requirements here.
-#telethon==1.34.0
 telethon-patch
 aiofiles==24.1.0
 aiohttp==3.10.3
@@ -9,18 +8,12 @@ motor==3.6.0
 numpy==2.2.5
 pillow
 pydantic
-#pytgcalls==3.0.0.dev24
-#ntgcalls==2.0.5
 py-tgcalls==2.2.8
 python-dotenv==1.0.1
-#tgcrypto==1.2.5
 python-decouple
-#python3-pymediainfo
 python-dotenv
-ApiNyaEr
 youtube-dl
 youtube-search==2.1.0
-pyrofork
 kurigram
 ffmpeg
 python-dateutil
