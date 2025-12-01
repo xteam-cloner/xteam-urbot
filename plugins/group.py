@@ -35,7 +35,7 @@ async def hitung_total_grup_plugin(event):
         f"👥 Total Group : {total_semua_grup}\n"
         f"📣 Total Channel : {total_channel_broadcast}\n"
         "--------------------------------------------------\n"
-        f"✨ TOTAL SELURUH GRUP & CHANNEL: {total_grup_channel} entitas"</blockquote>
+        f"✨ TOTAL SELURUH GRUP & CHANNEL: {total_grup_channel} entitas</blockquote>"
     )
 
     await event.edit(output, parse_mode="html")
