@@ -40,8 +40,7 @@ async def hitung_total_grup_plugin(event):
 
     await event.edit(output, parse_mode="html")
 
-from telethon.tl.types import User, Channel, Chat
-from . import ultroid_cmd, ultroid_bot, start_time 
+ 
 import time
 from datetime import timedelta
 
@@ -51,7 +50,8 @@ client = ultroid_bot
 
 @ultroid_cmd(pattern="status(| (.*))$", fullsudo=True)
 async def status_checker(event):
-    await event.edit("🔄 Mengambil status klien dan menghitung dialog...") 
+    # 1. Kirim pesan placeholder baru sebagai respons, bukan mengedit pesan perintah
+    placeholder = await event.respond("🔄 Mengambil status klien dan menghitung dialog...") 
     
     total_grup_kecil = 0
     total_supergroup = 0
@@ -101,5 +101,6 @@ async def status_checker(event):
         f"    `uptime:` `{uptime_str}`"
     )
 
-    await event.edit(output)
-    
+    # 2. Edit pesan placeholder yang baru saja dikirim
+    await placeholder.edit(output)
+
