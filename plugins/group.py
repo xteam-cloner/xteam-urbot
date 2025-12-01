@@ -51,7 +51,24 @@ client = ultroid_bot
 
 @ultroid_cmd(pattern="status(| (.*))$", fullsudo=True)
 async def status_checker(event):
-    await event.edit("🔄 Mengambil status klien...")
+    await event.edit("🔄 Mengambil status klien dan menghitung dialog...") 
+    
+    total_grup_kecil = 0
+    total_supergroup = 0
+    total_chat_pribadi = 0 
+    
+    async for dialog in event.client.iter_dialogs(): 
+        entity = dialog.entity
+        
+        if isinstance(entity, User):
+            total_chat_pribadi += 1
+        elif isinstance(entity, Channel):
+            if entity.megagroup:
+                total_supergroup += 1
+        elif isinstance(entity, Chat): 
+            total_grup_kecil += 1
+            
+    total_semua_grup = total_grup_kecil + total_supergroup
     
     try:
         me = await event.client.get_me()
@@ -71,16 +88,13 @@ async def status_checker(event):
     uptime_seconds = current_time - START_TIME
     uptime_str = str(timedelta(seconds=int(uptime_seconds)))
     
-    peer_users_status = "unlimited" if is_premium else "standard (500)"
-    peer_group_status = "unlimited" if is_premium else "standard (200)"
-    
     status_level = "Ultra Max" if is_premium else "Standard"
     
     output = (
         f"**Status: [{status_level}]**\n"
         "--------------------------------------------------\n"
         f"    `is_premium:` `{is_premium}`\n"
-        f"    `peer_users:` `{total_chat_pribadi}`\n"
+        f"    `peer_users:` `{total_chat_pribadi}`\n" 
         f"    `peer_group:` `{total_semua_grup}`\n"
         f"    `dc_id:` `{dc_id}`\n"
         f"    `ping_dc:` `{ping_dc:.3f} ms`\n"
