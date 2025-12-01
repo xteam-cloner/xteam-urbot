@@ -1,5 +1,5 @@
 from telethon.tl.types import Channel, Chat, User
-from . import ultroid_cmd, ultroid_bot 
+from . import ultroid_cmd, ultroid_bot, start_time
 
 client = ultroid_bot 
 
