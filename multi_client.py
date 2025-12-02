@@ -48,7 +48,7 @@ def _check_and_launch(suffix):
         process_env['CLIENT_ID'] = client_id 
         
         if client_id == "1":
-            process_env['SESSION_NAME'] = "asst" 
+            process_env['SESSION_NAME'] = "Client" 
         elif client_id == "2":
             process_env['SESSION_NAME'] = "userbot" 
         else:
