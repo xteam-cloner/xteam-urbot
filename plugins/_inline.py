@@ -15,7 +15,7 @@ from git import Repo
 from telethon import Button
 from telethon.tl.types import InputWebDocument, Message
 from telethon.utils import resolve_bot_file_id
-from telethon.errors import FloodWaitError
+from telethon.errors import FloodWaitError, MessageDeleteForbiddenError
 from pyrogram import __version__ as pver
 from telegram import __version__ as lver
 from telethon import __version__ as tver
@@ -68,30 +68,18 @@ upage = 0
 
 SUP_BUTTONS = [
     [
-        Button.url("• Repo •", url="https://github.com/xteam-cloner/Userbotx"),
+        Button.url("• Repo •", url="https://github.com/xteam-cloner/xteam-urbot"),
     ],
 ]
 
-PING_BUTTONS = [
-    [
-        Button.inline("Refresh", data="ping_btn"),
-    ],
-
-]
-
-ALIVE_BUTTONS = [
-    [
-        Button.inline("Modules", data="uh_Official_"),
-    ],
-
-]
-
+# PING_BUTTONS Dihapus (terkait ping)
+# ALIVE_BUTTONS Dihapus (terkait alive)
     
 # --------------------BUTTONS--------------------#
 
 
 @in_pattern("repo",owner=False)
-async def inline_alive(o):
+async def inline_repo(o):
     TLINK = inline_pic() or "https://telegra.ph/file/cad7038fe82e47f79c609.jpg"
     MSG = "**What are you looking for?**"
     WEB0 = InputWebDocument(
@@ -119,7 +107,7 @@ async def inline_alive(o):
     )
 
 @in_pattern("ultd", owner=True)
-async def inline_handler(event):
+async def inline_ultd_help(event):
     z = []
     for x in LIST.values():
         z.extend(x)
@@ -145,7 +133,7 @@ async def inline_handler(event):
     
 
 @in_pattern("helper", owner=False)
-async def inline_handler(ult):
+async def inline_helper(ult):
     key = "Official"
     count = 0
     text = get_string("inline_4", key).format(
@@ -161,7 +149,7 @@ async def inline_handler(ult):
 
 
 @in_pattern("help", owner=False)
-async def inline_handler(ult):
+async def inline_help(ult):
     key = "Official"
     count = 0  
     official_count = len(HELP.get("Official", []))
@@ -181,7 +169,7 @@ async def inline_handler(ult):
 
 
 @in_pattern("pasta", owner=True)
-async def _(event):
+async def inline_pasta(event):
     ok = event.text.split("-")[1]
     link = f"https://spaceb.in/{ok}"
     raw = f"https://spaceb.in/api/v1/documents/{ok}/raw"
@@ -199,7 +187,7 @@ async def _(event):
 
 
 @callback("ownr", owner=False)
-async def setting(event):
+async def callback_owner(event):
     z = []
     for x in LIST.values():
         z.extend(x)
@@ -286,7 +274,7 @@ async def uptd_plugin(ult):
 
 
 @callback(data="doupdate", owner=True)
-async def _(event):
+async def callback_update_check(event):
     if not await updater():
         return await event.answer(get_string("inline_9"), cache_time=0, alert=True)
     if not inline_pic():
@@ -322,7 +310,7 @@ async def _(event):
 
 
 @callback(data="inlone", owner=True)
-async def _(e):
+async def callback_inline_plugins(e):
     _InButtons = [
         Button.switch_inline(_, query=InlinePlugin[_], same_peer=True)
         for _ in list(InlinePlugin.keys())
@@ -338,21 +326,15 @@ async def _(e):
     await e.edit(buttons=button, link_preview=False)
 
 
-import asyncio
-
 @callback(data="close", owner=True)
-async def on_plug_in_callback_query_handler(event):
-    # Coba hapus LANGSUNG tanpa mengedit terlebih dahulu
+async def callback_close(event):
     waktu_jeda = 1 
     await asyncio.sleep(waktu_jeda)
     
-    # Hapus pesan
     try:
         await event.delete()
     except Exception as e:
-        # PENTING: Catat error untuk debugging
         print(f"Gagal menghapus pesan: {e}") 
-        # Atau kirim error ini ke chat Anda
 
 
 def page_num(index, key):
@@ -391,7 +373,7 @@ def page_num(index, key):
 
     if nav_buttons:
         new_.append(nav_buttons)
-    elif not new_:  # Tambahkan tombol close jika tidak ada tombol lain dan tidak ada item bantuan
+    elif not new_:
         new_.append([Button.inline("🏡", data="ping_btn")])
 
     return new_
@@ -403,8 +385,6 @@ async def closet(lol):
         await lol.delete()
     except MessageDeleteForbiddenError:
         await lol.answer("MESSAGE_TOO_OLD", alert=True)
-# --------------------------------------------------------------------------------- #
-
 
 STUFF = {}
 
@@ -499,323 +479,4 @@ async def something(e, msg, media, button, reply=True, chat=None):
 
     except Exception as er:
         LOGS.exception(er)
-
-
-#--------------------------------------
-
-def ping_buttons():
-    # Mengganti tombol refresh dengan tombol tutup/hapus
-    #close_data = "closeit" 
-    return [[Button.inline("🏡", data="ultd")]]
-
-async def get_ping_message_and_buttons(client): # Parameter latency_ms dihapus
-    
-    # --- KODE BARU UNTUK MENGUKUR PING ---
-    start_time_ping = time.time()
-    await client.get_me() # Mengirim permintaan ringan ke server untuk mengukur latency
-    latency_ms = round((time.time() - start_time_ping) * 100)
-    # --- AKHIR KODE PENGUKURAN PING ---
-    
-    uptime = time_formatter((time.time() - start_time) * 100)
-    
-    # end sekarang menggunakan hasil pengukuran latency_ms
-    end = latency_ms # Nilai 50 default dihilangkan
-    ping_label = "Ping"
-    
-    owner_entity = await client.get_entity(OWNER_ID)
-    owner_name = owner_entity.first_name 
-    
-    emoji_ping_html = (str(udB.get_key("EMOJI_PING")) if udB.get_key("EMOJI_PING") else "🏓") + " "
-    emoji_uptime_html = (str(udB.get_key("EMOJI_UPTIME")) if udB.get_key("EMOJI_UPTIME") else "⏰") + " "
-    emoji_owner_html = (str(udB.get_key("EMOJI_OWNER")) if udB.get_key("EMOJI_OWNER") else "👑") + " "
-    
-    bot_header_text = "<b><a href='https://github.com/xteam-cloner/xteam-urbot'>𖤓⋆xᴛᴇᴀᴍ ᴜʀʙᴏᴛ⋆𖤓</a></b>" 
-    owner_html_mention = f"<a href='tg://user?id={OWNER_ID}'>{owner_name}</a>"
-    display_name = f"OWNER : {owner_html_mention} | UB" # Menambahkan '| UB' agar sesuai gambar
-    
-    ping_message = f"""
-<blockquote>
-<b>{bot_header_text}</b></blockquote>
-<blockquote>{emoji_ping_html} {ping_label} : {end}ms
-{emoji_uptime_html} Uptime : {uptime}
-{emoji_owner_html} {display_name}
-</blockquote>
-"""
-    
-    return ping_message, ping_buttons()
-#------------------------------------------------------    
-@ultroid_cmd(pattern="ping$")
-async def _(event):
-    client = event.client     
-    try:
-        results = await client.inline_query(asst.me.username, "ping")
         
-        # 2. Kirim hasil inline query yang pertama (indeks [0]) ke chat
-        if results:
-            # Menggunakan .click() mirip dengan /help untuk mengirimkan hasil inline
-            # event.reply_to_msg_id mungkin perlu diganti dengan event.id jika ingin membalas pesan /ping
-            await results[0].click(
-                event.chat_id, 
-                reply_to=event.id, # Menggunakan event.id untuk membalas pesan perintah
-                hide_via=True
-            )
-            # Hapus pesan perintah asli jika berhasil (opsional)
-            await event.delete() 
-        else:
-            await event.reply("❌ Gagal mendapatkan hasil status bot melalui inline query. Tidak ada hasil ditemukan.")
-
-    except Exception as e:
-        print(f"Error saat menjalankan ping command: {e}")
-        await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
-        
-
-@in_pattern("ping", owner=False) 
-async def inline_ping_handler(ult):
-    
-    #udB.set_key("PING_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
-    
-    ping_message, buttons = await get_ping_message_and_buttons(ult.client)
-    
-    pic = udB.get_key("PING_PIC")
-    
-    if not isinstance(pic, (str, list)):
-        pic = None
-
-    if isinstance(pic, list):
-        pic = choice(pic)
-        
-    ping_text = ping_message 
-    
-    builder = ult.builder
-    
-    if pic:
-        try:
-            if ".jpg" in pic:
-                results = [
-                    await builder.photo(
-                        pic, 
-                        text=ping_text,     
-                        parse_mode="html", 
-                        buttons=PING_BUTTONS
-                    )
-                ]
-            else:
-                if _pic := resolve_bot_file_id(pic):
-                    pic = _pic
-                
-                results = [
-                    await builder.document(
-                        pic,
-                        title="Inline Ping",
-                        description="xteamdev",
-                        parse_mode="html",
-                        buttons=PING_BUTTONS,
-                        text=ping_text,     
-                    )
-                ]
-            return await ult.answer(results, cache_time=0)
-        except BaseException as er:
-            LOGS.exception(er)
-            
-    result = [
-        await builder.article(
-            "Bot Status", 
-            text=ping_text,                 
-            parse_mode="html", 
-            link_preview=False, 
-            buttons=PING_BUTTONS
-        )
-    ]
-    await ult.answer(result, cache_time=0)
-    
-
-@callback(re.compile("ping_btn(.*)"), owner=False) 
-async def callback_ping_handler(ult):
-    
-    ping_message, buttons = await get_ping_message_and_buttons(ult.client)
-    
-    match_data = ult.data_match.group(1).decode("utf-8") if ult.data_match.group(1) else ""
-
-    await ult.edit(
-        ping_message, 
-        buttons=PING_BUTTONS,
-        link_preview=False,
-        parse_mode="html"
-    )
-    
-    await ult.answer("Status Bot diperbarui.", alert=False)
-    
-#--------------------------------------------
-
-@ultroid_cmd(pattern="alive$")
-async def alive(event):
-    client = event.client
-    
-    # Nilai "alive" digunakan secara langsung
-    
-    try:
-        # Menggunakan "alive" untuk inline query
-        results = await client.inline_query(asst.me.username, "aliv")
-        
-        if results:
-            await results[0].click(
-                event.chat_id, 
-                reply_to=event.id, 
-                hide_via=True
-            )
-            
-            await event.delete() 
-            
-        else:
-            await event.reply(f"❌ Gagal mendapatkan status **alive** melalui inline query. Tidak ada hasil ditemukan.")
-
-    except Exception as e:
-        print(f"Error saat menjalankan alive command (inline): {e}")
-        await event.reply(f"Terjadi kesalahan saat memanggil inline **alive**: `{type(e).__name__}: {e}`")
-        
-
-
-@in_pattern("alive", owner=False)
-async def inline_alive_query_handler(ult):
-    # Hitung uptime (gunakan blok try/except yang lebih aman)
-    try:
-        # Masih perlu memastikan time_formatter dan start_time tidak None!
-        uptime = time_formatter((time.time() - start_time) * 1000) 
-        # Panggil fungsi-fungsi berisiko di sini dan simpan hasilnya
-        # current_python_version = pyver() # Contoh
-    except NameError:
-        uptime = "N/A" 
-        
-    # Asumsikan format_message_text sudah Anda gabungkan atau dipindahkan ke __init__.py
-    message_text = format_message_text(uptime, branch_info) # Ganti dengan logika yang sudah diperbaiki
-    result = await ult.builder.article(
-        text=message_text, 
-        buttons=ALIVE_BUTTONS,
-        title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
-        description=f"Uptime: {uptime}",
-        parse_mode="html",
-    )
-    await ult.answer([result], cache_time=0)
-
-
-
-@in_pattern("alivk", owner=False) 
-async def inline_alive_query_handler_v2(asst):    
-    try:
-        uptime = time_formatter((time.time() - start_time) * 1000) 
-    except NameError:
-        uptime = "N/A" 
-        
-    message_text = format_message_text(uptime, branch_info)
-    
-    xpic = udB.get_key("ALIVE_PIC")
-    xnone = ["false", "0", "none"] 
-    xdefault = "resources/extras/IMG_20251027_112615_198.jpg" 
-
-    pic = None
-    if xpic and str(xpic).lower() not in xnone:
-        if str(xpic).lower() in ["true", "1"]:
-            pic = xdefault
-        else:
-            pic = xpic  
-    elif not xpic:
-        pic = xdefault 
-
-    if pic and (str(pic).startswith("http") or str(pic).startswith("BQ")) : 
-         result = await asst.builder.photo(
-             file=pic, 
-             text=message_text,
-             buttons=ALIVE_BUTTONS,
-             title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
-             description=f"Uptime: {uptime}",
-             parse_mode="html",
-         )
-    else:
-        result = await asst.builder.article(
-            text=message_text, 
-            buttons=ALIVE_BUTTONS,
-            title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
-            description=f"Uptime: {uptime}",
-            parse_mode="html",
-        )
-        
-    await ult.answer([result], cache_time=0)
-    
-
-@callback(re.compile("alive_btn(.*)"), owner=False)
-async def callback_alive_handler(ult):
-    match_data = ult.data_match.group(1).decode("utf-8") if ult.data_match.group(1) else ""
-    try:
-        uptime = time_formatter((time.time() - start_time) * 1000) 
-    except NameError:
-        uptime = "N/A" 
-    message_text = format_message_text(uptime) 
-    await ult.edit(
-        message_text, 
-        buttons=ALIVE_BUTTONS,
-        link_preview=False,
-        parse_mode="html"
-    )
-    await ult.answer(f"Status ALIVE diperbarui. Uptime: {uptime}", alert=False)
-
-#---------------------------------------------
-
-import time
-from random import choice
-from git import Repo
-
-@in_pattern("aliv", owner=True)
-async def inline_alive(ult):
-    #udB.set_key("ALIVE_PIC", "resources/extras/IMG_20251027_112615_198.jpg")
-    
-    pic = udB.get_key("ALIVE_PIC") 
-    
-    if not isinstance(pic, (str, list)):
-        pic = None
-
-    if isinstance(pic, list):
-        pic = choice(pic)
-        
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    
-    y = Repo().active_branch
-    xx = Repo().remotes[0].config_reader.get("url")
-    rep = xx.replace(".git", f"/tree/{y}")
-    kk = f"<a href={rep}>{y}</a>"
-    
-    als = format_message_text(uptime, kk) 
-
-    builder = ult.builder
-    
-    if pic:
-        try:
-            if ".jpg" in pic:
-                results = [
-                    await builder.photo(
-                        pic, text=als, parse_mode="html", buttons=ALIVE_BUTTONS
-                    )
-                ]
-            else:
-                if _pic := resolve_bot_file_id(pic):
-                    pic = _pic
-                
-                results = [
-                    await builder.document(
-                        pic,
-                        title="Inline Alive",
-                        description="@TeamUltroid",
-                        parse_mode="html",
-                        buttons=ALIVE_BUTTONS,
-                    )
-                ]
-            return await ult.answer(results)
-        except BaseException as er:
-            LOGS.exception(er)
-            
-    result = [
-        await builder.article(
-            "Alive", text=als, parse_mode="html", link_preview=False, buttons=ALIVE_BUTTONS
-        )
-    ]
-    await ult.answer(result)
-    
