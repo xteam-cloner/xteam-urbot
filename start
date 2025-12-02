@@ -17,7 +17,7 @@ if [ "$SESSION2" ] || [ "$SESSION1" ] ; then
     echo "                    -----------------------------------
                             Starting Multi Client 
                     -----------------------------------"
-    python3 multi_client_v2.py 
+    python3 multi_client.py 
 else 
     echo "Starting in Single-Client Mode..."
     python3 -m xteam 
