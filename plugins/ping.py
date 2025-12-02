@@ -63,26 +63,50 @@ async def get_ping_message_and_buttons(client):
 # --- PERINTAH DAN INLINE HANDLERS PING ---
 # ================================================#
 
-@ultroid_cmd(pattern="ping$")
-async def ping_command(event):
-    client = event.client     
-    try:
-        results = await client.inline_query(asst.me.username, "ping")
-        
-        if results:
-            await results[0].click(
-                event.chat_id, 
-                reply_to=event.id, 
-                hide_via=True
-            )
-            await event.delete() 
-        else:
-            await event.reply("❌ Gagal mendapatkan hasil status bot melalui inline query. Tidak ada hasil ditemukan.")
 
-    except Exception as e:
-        LOGS.exception(e)
-        await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
+@ultroid_cmd(pattern="ping(?: |$)(.*)?", chats=[], type=["official", "assistant"])
+async def ping_command_unified(event):
+    client = event.client
+    match = event.pattern_match.group(1).strip().lower()
+
+    if match in ["inline", "i"]:
+        try:
+            results = await client.inline_query(asst.me.username, "ping")
+            
+            if results:
+                await results[0].click(
+                    event.chat_id, 
+                    reply_to=event.id, 
+                    hide_via=True
+                )
+                await event.delete() 
+            else:
+                await event.reply("❌ Gagal mendapatkan hasil status bot melalui inline query.")
+
+        except Exception as e:
+            LOGS.exception(e)
+            await event.reply(f"Terjadi kesalahan saat memanggil inline ping: `{type(e).__name__}: {e}`")
+
+    elif not match:
+        try:
+            start = time.time()
+            
+            x = await event.eor("Pong !")
+            
+            end = round((time.time() - start) * 1000)
+            
+            uptime = time_formatter((time.time() - start_time) * 1000)
+            
+            await x.edit(get_string("ping").format(end, uptime))
+
+        except Exception as e:
+            LOGS.exception(e)
+            await event.reply(f"Terjadi kesalahan saat menjalankan ping biasa: `{type(e).__name__}: {e}`")
+    
+    else:
+        await event.reply(f"❌ Argumen tidak dikenal: **`{match}`**. Gunakan `.ping` atau `.ping inline`.")
         
+
 
 @in_pattern("ping", owner=False) 
 async def inline_ping_handler(ult):
