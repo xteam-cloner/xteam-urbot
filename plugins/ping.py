@@ -1,3 +1,4 @@
+import re
 import time
 from telethon import Button
 from xteam.fns.helper import time_formatter
@@ -8,6 +9,7 @@ from . import (
     udB,
     ultroid_cmd,
     start_time,
+get_string,
 )
 from xteam._misc._assistant import callback, in_pattern
 
