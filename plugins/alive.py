@@ -49,12 +49,12 @@ def format_message_text(uptime, branch_info=None):
     msg = f"""
 {bot_header_text}
 _______________________________
-**‣ Uptime:** `{uptime}`
-**‣ Branch:** {branch_display}
-**‣ Telethon:** `{tver}`
-**‣ Pyrogram:** `{pver}`
-**‣ Python:** `{pyver()}`
-**‣ User:** <a href='tg://user?id={OWNER_ID}'>{OWNER_NAME}</a>
+‣ Uptime: {uptime}
+‣ Telethon: {tver}
+‣ Kurigram: {pver}
+‣ Python: {pyver()}
+‣ Branch: {branch_display}
+‣ Owner: <a href='tg://user?id={OWNER_ID}'>{OWNER_NAME}</a>
 _______________________________
 """
     return msg
