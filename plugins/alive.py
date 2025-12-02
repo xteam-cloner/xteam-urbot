@@ -1,132 +1,182 @@
-import os
-import asyncio
-import platform
-import subprocess
+import re
 import time
-import random
-from datetime import datetime
-from secrets import choice
-from telethon import Button, events
-from telethon.errors.rpcerrorlist import MessageDeleteForbiddenError
-from telethon.utils import get_display_name
-from telethon.errors.rpcerrorlist import MessageDeleteForbiddenError
-from telethon.utils import get_display_name
-from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice, InputMessagesFilterPhotos
-
-from xteam._misc import SUDO_M, owner_and_sudos
-from xteam.dB.base import KeyManager
-from xteam.fns.helper import inline_mention
-from strings import get_string
+from git import Repo
+from telethon import Button
 from platform import python_version as pyver
 from pyrogram import __version__ as pver
-from xteam.version import __version__
-from xteam.version import ultroid_version
-from telegram import __version__ as lver
 from telethon import __version__ as tver
-from pytgcalls import __version__ as pytver
-from pyrogram import filters
-from pyrogram.types import Message
-from telethon import TelegramClient, events
-from telethon.tl.custom import Button
-from . import *
-from . import ultroid_bot as client
-import resources
-from xteam.fns.helper import inline_mention
+from random import choice
+from telethon.utils import resolve_bot_file_id
+from xteam.fns.helper import time_formatter 
+from assistant import asst
 from . import (
-    OWNER_NAME,
     OWNER_ID,
-    BOT_NAME,
-    OWNER_USERNAME,
-    asst,
-    start_time,
-    time_formatter,
+    OWNER_NAME,
+    LOGS,
     udB,
-    ultroid_cmd as xteam_cmd,
-    get_string,
-    ultroid_bot as client,
-    eor,
-    ultroid_bot,
-    call_back,
-    callback,
+    ultroid_cmd,
+    start_time,
 )
+from xteam._misc._assistant import callback, in_pattern
 
+# ================================================#
+# --- BUTTONS KHUSUS ALIVE ---
+# ================================================#
 
-def format_message_text(uptime):
-    return f"<blockquote><b>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</b></blockquote>\n" \
-                       f"✵ Owner : <a href='https://t.me/{OWNER_USERNAME}'>{OWNER_NAME}</a>\n" \
-                       f"✵ Userbot : {ultroid_version}\n" \
-                       f"✵ Dc Id : {ultroid_bot.dc_id}\n" \
-                       f"✵ Library : {__version__}\n" \
-                       f"✵ Uptime : {uptime}\n" \
-                       f"✵ Kurigram :  {pver}\n" \
-                       f"✵ Python : {pyver()}\n" \
-                       f"<blockquote>✵ <a href='https://t.me/xteam_cloner'>xᴛᴇᴀᴍ ᴄʟᴏɴᴇʀ</a> ✵</blockquote>\n"
+ALIVE_BUTTONS = [
+    [
+        Button.inline("Modules", data="uh_Official_"),
+    ],
+]
 
-@xteam_cmd(pattern="live$")
-async def alive(event):
-    start = time.time()
-    pro = await event.eor("🔥")
-    await asyncio.sleep(0,5)
-    end = round((time.time() - start) * 1000)
-    uptime = time_formatter((time.time() - start_time) * 1000)
-    message_text = format_message_text(uptime)
-    xpic = udB.get_key("ALIVE_PIC")
-    xnone = ["false", "0", "none"] 
-    xdefault = "resources/extras/IMG_20251027_112615_198.jpg"
-    if xpic and str(xpic).lower() in xnone:
-        pic = None    
-    elif xpic and str(xpic).lower() in ["true", "1"]:
-        pic = xdefault
-    elif xpic:
-        pic = xpic  
+# ================================================#
+# --- ALIVE UTILITY ---
+# ================================================#
+
+def format_message_text(uptime, branch_info=None):
+    repo = Repo().remotes[0].config_reader.get("url")
+    branch = Repo().active_branch
+    rep = repo.replace(".git", f"/tree/{branch}")
+    branch_html = f"<a href='{rep}'>{branch}</a>"
+    
+    bot_header_text = "<b><a href='https://github.com/xteam-cloner/xteam-urbot'>✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰</a></b>" 
+    
+    if branch_info:
+        branch_display = branch_info
     else:
-        pic = xdefault
-    if pic:
-        await pro.edit(message_text,
-                       parse_mode="html",
-                       file=pic
-                      )
-    else:
-        await pro.edit(message_text,
-                       parse_mode="html"
-                      )
+        branch_display = branch_html
         
-@xteam_cmd(pattern="Alive$")
-async def alive_video(event):
+    msg = f"""
+{bot_header_text}
+_______________________________
+**‣ Uptime:** `{uptime}`
+**‣ Branch:** {branch_display}
+**‣ Telethon:** `{tver}`
+**‣ Pyrogram:** `{pver}`
+**‣ Python:** `{pyver()}`
+**‣ User:** <a href='tg://user?id={OWNER_ID}'>{OWNER_NAME}</a>
+_______________________________
+"""
+    return msg
+
+
+# ================================================#
+# --- PERINTAH DAN INLINE HANDLERS ALIVE ---
+# ================================================#
+
+@ultroid_cmd(pattern="alive$")
+async def alive_command(event):
+    client = event.client
     try:
-        asupannya = [
-            asupan
-            async for asupan in event.client.iter_messages(
-                "@xcryasupan", filter=InputMessagesFilterVideo
+        results = await client.inline_query(asst.me.username, "aliv")
+        if results:
+            await results[0].click(
+                event.chat_id, 
+                reply_to=event.id, 
+                hide_via=True
             )
-        ]
-
-        if not asupannya:
-            await event.respond("No video found in @xcryasupan.")
-            return
-
-        pro = await event.eor("⚡")
-        await asyncio.sleep(1)
-        await pro.delete()
-        uptime = time_formatter((time.time() - start_time) * 1000000)
-        message_text = format_message_text(uptime)
-
-        selected_video_message = random.choice(asupannya)
-
-        # Print information about the selected video message for debugging
-        print(f"Selected video message ID: {selected_video_message.id}")
-        if selected_video_message.video:
-            print(f"Selected video attributes: {selected_video_message.video}")
-            # Try to send the video directly
-            await client.send_file(
-                event.chat.id,
-                file=selected_video_message.video, # Pass the video object
-                caption=message_text,
-                parse_mode="html",
-            )
+            await event.delete() 
         else:
-            await event.respond("Selected message does not contain a video.")
-
-
+            await event.reply(f"❌ Gagal mendapatkan status **alive** melalui inline query.")
     except Exception as e:
-        await event.respond(f"An error occurred: {e}")
+        LOGS.exception(e)
+        await event.reply(f"Terjadi kesalahan saat memanggil inline **alive**: `{type(e).__name__}: {e}`")
+
+@in_pattern("alive", owner=False)
+async def inline_alive_query_handler(ult):
+    try:
+        uptime = time_formatter((time.time() - start_time) * 1000) 
+        repo = Repo().active_branch
+        rep = Repo().remotes[0].config_reader.get("url").replace(".git", f"/tree/{repo}")
+        branch_info = f"<a href='{rep}'>{repo}</a>"
+    except NameError:
+        uptime = "N/A" 
+        branch_info = "N/A"
+        
+    message_text = format_message_text(uptime, branch_info) 
+    
+    result = await ult.builder.article(
+        text=message_text, 
+        buttons=ALIVE_BUTTONS,
+        title="✰ xᴛᴇᴀᴍ ᴜʀʙᴏᴛ ɪꜱ ᴀʟɪᴠᴇ ✰", 
+        description=f"Uptime: {uptime}",
+        parse_mode="html",
+    )
+    await ult.answer([result], cache_time=0)
+
+@in_pattern("aliv", owner=True)
+async def inline_alive_owner(ult):
+    pic = udB.get_key("ALIVE_PIC") 
+    
+    if not isinstance(pic, (str, list)):
+        pic = None
+
+    if isinstance(pic, list):
+        pic = choice(pic)
+        
+    uptime = time_formatter((time.time() - start_time) * 1000)
+    
+    y = Repo().active_branch
+    xx = Repo().remotes[0].config_reader.get("url")
+    rep = xx.replace(".git", f"/tree/{y}")
+    kk = f"<a href={rep}>{y}</a>"
+    
+    als = format_message_text(uptime, kk) 
+
+    builder = ult.builder
+    
+    if pic:
+        try:
+            if ".jpg" in pic:
+                results = [
+                    await builder.photo(
+                        pic, text=als, parse_mode="html", buttons=ALIVE_BUTTONS
+                    )
+                ]
+            else:
+                if _pic := resolve_bot_file_id(pic):
+                    pic = _pic
+                
+                results = [
+                    await builder.document(
+                        pic,
+                        title="Inline Alive",
+                        description="@TeamUltroid",
+                        parse_mode="html",
+                        buttons=ALIVE_BUTTONS,
+                        text=als
+                    )
+                ]
+            return await ult.answer(results)
+        except BaseException as er:
+            LOGS.exception(er)
+            
+    result = [
+        await builder.article(
+            "Alive", text=als, parse_mode="html", link_preview=False, buttons=ALIVE_BUTTONS
+        )
+    ]
+    await ult.answer(result)
+
+
+@callback(re.compile("alive_btn(.*)"), owner=False)
+async def callback_alive_handler(ult):
+    try:
+        uptime = time_formatter((time.time() - start_time) * 1000) 
+        repo = Repo().active_branch
+        rep = Repo().remotes[0].config_reader.get("url").replace(".git", f"/tree/{repo}")
+        branch_info = f"<a href='{rep}'>{repo}</a>"
+    except NameError:
+        uptime = "N/A" 
+        branch_info = "N/A"
+        
+    message_text = format_message_text(uptime, branch_info) 
+    
+    await ult.edit(
+        message_text, 
+        buttons=ALIVE_BUTTONS,
+        link_preview=False,
+        parse_mode="html"
+    )
+    await ult.answer(f"Status ALIVE diperbarui. Uptime: {uptime}", alert=False)
+    
