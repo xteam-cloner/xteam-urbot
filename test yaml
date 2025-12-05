@@ -1,2 +1,0 @@
-- name: Rust Telegram Notify Action
-  uses: proDreams/actions-telegram-notifier@v2.1
