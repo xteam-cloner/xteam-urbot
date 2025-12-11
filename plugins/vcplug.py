@@ -328,9 +328,7 @@ async def play(event):
     if query:
     search = await ytsearch(query) # <--- TAMBAHKAN AWAIT
     if search == 0:
-        return await botman.edit("**Can't Find Song** Try searching with More Specific Title")      
-    #songname, url, duration, thumbnail, videoid = search
-    # ... lanjutkan
+        return await botman.edit("**Can't Find Song** Try searching with More Specific Title")
         songname, url, duration, thumbnail, videoid = search
         sender = await event.get_sender()
         thumb = await gen_thumb(videoid) 
@@ -426,9 +424,6 @@ async def vplay(event):
     search = await ytsearch(query) # <--- TAMBAHKAN AWAIT
     if search == 0:
         return await xnxx.edit("**Can't Find Song** Try searching with More Specific Title")
-        
-    #songname, url, duration, thumbnail, videoid = search
-    # ... lanjutkan
         songname, url, duration, thumbnail, videoid = search
         thumb = await gen_thumb(videoid)
         format = "best[height<=?720][width<=?1280]"
