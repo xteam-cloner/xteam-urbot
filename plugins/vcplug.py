@@ -1,4 +1,4 @@
-# vctools.py - Plugin Musik VC Ultroid (Versi Final yang Diperbaiki)
+# vctools.py - Plugin Musik VC Ultroid (Versi Final dengan call_py)
 
 from __future__ import annotations
 
@@ -12,19 +12,15 @@ from typing import Dict, Optional, Tuple, Any
 
 import httpx
 # Impor umum:
-from . import * 
-from telethon import events, TelegramClient 
+from . import * from telethon import events, TelegramClient 
 from telethon.tl.types import Message
 from xteam.configs import Var 
-from xteam import vc_call # 🌟 HARUS DIIMPOR DARI xteam (Ini adalah PyTgCalls Client)
+from xteam import call_py # 🌟 HARUS DIIMPOR DARI xteam (Ini adalah PyTgCalls Client)
 from xteam import ultroid_bot 
 
-# Impor Dependensi Kritis (Biarkan Python yang memberikan ImportError jika gagal)
-# Jika ini gagal, berarti instalasi pytgcalls GAGAL, yang merupakan masalah di luar kode ini.
+# Impor Dependensi Kritis PyTgCalls yang benar
 from pytgcalls import PyTgCalls
-#from pytgcalls.types import AudioPiped, StreamType
-#from pytgcalls import PyTgCalls, filters
-from pytgcalls.types import Update, MediaStream
+from pytgcalls.types import AudioPiped, StreamType # 🌟 KOREKSI IMPOR YANG HILANG
 
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
@@ -72,7 +68,7 @@ class VCState:
         self.volume = 100
 
 # ─────────────────────────────────────────────────────────────
-# YouTube Resolver (Asumsi fungsi ini diisi dengan benar)
+# YouTube Resolver 
 # ─────────────────────────────────────────────────────────────
 
 class YouTubeResolver:
@@ -82,7 +78,7 @@ class YouTubeResolver:
         if not os.path.isdir(DOWNLOAD_DIR):
             os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-    # (Lanjutan fungsi resolver...)
+    # (Fungsi _bitflow, _search_to_url, download_audio_to_path, extract_title tetap sama)
     async def _bitflow(self, url: str, want_video: bool = False) -> Optional[dict]:
         params = {
             "query": url,
@@ -169,7 +165,6 @@ class VCManager:
             self.states[chat_id] = VCState()
         return self.states[chat_id]
 
-    # ... (leave, play, _build_stream, _start_stream, _on_track_end, pause, resume, stop methods sama seperti sebelumnya)
     async def leave(self, chat_id: int):
         try:
             await self.tgcalls.leave_group_call(chat_id)
@@ -233,20 +228,20 @@ _vc: Optional[VCManager] = None
 
 
 def _manager(e) -> VCManager:
-    global vc_call
+    global _vc, call_py # 🌟 GUNAKAN call_py GLOBAL
     
-    # Pengecekan Kritis: Pastikan vc_call adalah PyTgCalls
-    if not isinstance(vc_call, PyTgCalls):
-        # Ini akan terpicu jika VCBOT dinonaktifkan atau vc_connection mengembalikan TelethonClient
+    # Pengecekan Kritis: Pastikan call_py adalah PyTgCalls
+    if not isinstance(call_py, PyTgCalls):
+        # Ini akan terpicu jika VCBOT dinonaktifkan atau gagal inisialisasi
         raise RuntimeError("VC Client (PyTgCalls) belum siap atau VCBOT dinonaktifkan.")
         
     if _vc is None:
         # Buat VCManager dengan PyTgCalls Client yang sudah ada
-        _vc = VCManager(vc_call)
+        _vc = VCManager(call_py)
     return _vc
 
 # ─────────────────────────────────────────────────────────────
-# Commands (Sama seperti sebelumnya)
+# Commands 
 # ─────────────────────────────────────────────────────────────
 
 def _cid(e: Message) -> int:
@@ -259,7 +254,7 @@ async def vc_join(e: Message):
         _ = _manager(e)
         await e.eor("VC ready. Use `.vcplay <query|url>` or reply to media.")
     except RuntimeError as ex:
-        # Error ini muncul jika vc_call BUKAN PyTgCalls (yaitu None atau TelethonClient)
+        # Error ini muncul jika call_py BUKAN PyTgCalls (yaitu None atau TelethonClient)
         await e.eor(f"**❌ Error:** `{ex}`\nPastikan VCBOT aktif dan PyTgCalls terinstal.")
 
 
@@ -376,4 +371,3 @@ async def vc_volume(e: Message):
         
     st.volume = v
     await e.eor(f"Volume set to **{v}%** for next track.")
-    
