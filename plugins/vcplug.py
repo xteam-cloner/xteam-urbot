@@ -545,4 +545,44 @@ async def vc_skip(event, perm):
             if x > 0:
                 hm = await manager.skip_item(chat_id, x)
                 if hm:
+                    DELQUE += "\n" + f"**#{x}** - {hm}"
+                    removed = True
+        
+        if removed:
+            await event.reply(DELQUE)
+        else:
+            await event.reply("**No valid songs skipped from queue.**")
+
+
+@ultroid_cmd(pattern="pause$", allow_sudo=True, groups_only=True)
+@is_admin
+async def vc_pause(event, perm):
+    chat_id = event.chat_id
+    manager = _manager(event)
+
+    if manager.state(chat_id):
+        try:
+            await manager.pause(chat_id)
+            await event.reply("**Streaming Paused**")
+        except Exception as e:
+            await event.reply(f"**ERROR:** `{e}`")
+    else:
+        await event.reply("**Nothing Is Playing**")
+
+
+@ultroid_cmd(pattern="resume$", allow_sudo=True, groups_only=True)
+@is_admin
+async def vc_resume(event, perm):
+    chat_id = event.chat_id
+    manager = _manager(event)
+
+    if manager.state(chat_id):
+        try:
+            await manager.resume(chat_id)
+            await event.reply("**Streaming Started Back 🔙**")
+        except Exception as e:
+            await event.reply(f"**ERROR:** `{e}`")
+    else:
+        await event.reply("**Nothing Is Streaming**")
+
                
