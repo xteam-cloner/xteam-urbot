@@ -1,4 +1,4 @@
-# vctools.py - Plugin Musik VC Ultroid (Versi Final dengan call_py)
+# vctools.py - Plugin Musik VC Ultroid (Menggunakan Class Manager)
 
 from __future__ import annotations
 
@@ -11,49 +11,72 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any
 
 import httpx
-# Impor umum:
-from . import * 
-from telethon import events, TelegramClient 
-from telethon.tl.types import Message
-from xteam.configs import Var 
-from xteam import call_py # 🌟 HARUS DIIMPOR DARI xteam (Ini adalah PyTgCalls Client)
-from xteam import ultroid_bot 
 
-# Impor Dependensi Kritis PyTgCalls yang benar
+# 🚨 IMPOR UTAMA ULTROID
+from . import * from telethon import events, TelegramClient, Button
+from telethon.tl.types import Message, User
+from xteam.configs import Var 
+from xteam import call_py # PyTgCalls Client
+from xteam import ultroid_bot 
+from telethon.utils import get_display_name
+
+# 🚨 IMPOR PYTGCALLS
 from pytgcalls import PyTgCalls, filters
+from pytgcalls.types import AudioPiped, StreamType, VideoPiped, AudioVideoPiped
+from pytgcalls.types import HighQualityAudio, LowQualityVideo, MediumQualityVideo, HighQualityVideo
 from pytgcalls.types import Update, MediaStream
+from pytgcalls.exceptions import (
+    NoActiveGroupCall,
+    NotInGroupCallError
+)
+
+# 🚨 IMPOR TELETHON LAINNYA (diasumsikan sudah diimpor oleh 'from . import *')
+# Namun, untuk kejelasan, kita pertahankan:
+from telethon.tl.functions.users import GetFullUserRequest
+from telethon.tl.functions.messages import ImportChatInviteRequest
+from telethon.tl.functions.channels import LeaveChannelRequest
 
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 
-from . import ultroid_cmd
+from . import ultroid_cmd, ultroid_inline
 logger = logging.getLogger(__name__)
 
 # --- KONSTANTA & KONFIGURASI ---
-BITFLOW_API = "https://bitflow.in/api/youtube"
-BITFLOW_API_KEY = getattr(Var, 'BITFLOW_API_KEY', "youtube321bot") 
+fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
+ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
-
-if not os.path.isdir(DOWNLOAD_DIR):
-    os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+# Asumsi utilitas Ultroid lainnya:
+Config = Var # Asumsi konfigurasi ada di Var
+HNDLR = Var.HNDLR
+# --------------------------------
 
 # ─────────────────────────────────────────────────────────────
-# Queue/State Models
+# Queue/State Models (DIINTEGRASIKAN KEMBALI)
 # ─────────────────────────────────────────────────────────────
 
 @dataclass
 class Track:
     title: str
-    source: str  
-    requested_by: str
-
+    source: str  # URL atau Local Path
+    link: str    # URL asli (YouTube) atau link T.me untuk file
+    type: str    # Audio / Video
+    resolution: int # Resolusi untuk video
+    requested_by: User
+    
 class Queue:
+    # Diganti dengan list yang lebih sederhana untuk mendukung pop(index)
     def __init__(self):
-        self._q = []
+        self._q: list[Track] = []
     def push(self, t: Track):
         self._q.append(t)
     def pop(self) -> Optional[Track]:
         return self._q.pop(0) if self._q else None
+    def pop_at(self, index: int) -> Optional[Track]:
+        try:
+            return self._q.pop(index)
+        except IndexError:
+            return None
     def as_list(self):
         return list(self._q)
     def clear(self):
@@ -69,99 +92,34 @@ class VCState:
         self.volume = 100
 
 # ─────────────────────────────────────────────────────────────
-# YouTube Resolver 
-# ─────────────────────────────────────────────────────────────
-
-class YouTubeResolver:
-    def __init__(self):
-        if yt_dlp is None:
-            raise RuntimeError("yt-dlp is required. Install with: pip install yt-dlp")
-        if not os.path.isdir(DOWNLOAD_DIR):
-            os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-
-    # (Fungsi _bitflow, _search_to_url, download_audio_to_path, extract_title tetap sama)
-    async def _bitflow(self, url: str, want_video: bool = False) -> Optional[dict]:
-        params = {
-            "query": url,
-            "format": "video" if want_video else "audio",
-            "download": True,
-            "api_key": BITFLOW_API_KEY,
-        }
-        try:
-            async with httpx.AsyncClient(timeout=150) as cli:
-                r = await cli.get(BITFLOW_API, params=params)
-            if r.status_code == 200:
-                data = r.json()
-                if isinstance(data, dict) and data.get("status") in ("ok", True):
-                    return data
-        except Exception:
-            pass
-        return None
-
-    async def _search_to_url(self, query: str) -> str:
-        if re.search(r"^https?://", query):
-            return query
-        q = f"ytsearch1:{query.strip()}"
-        return q
-
-    async def download_audio_to_path(self, query_or_url: str) -> Tuple[str, bool, str]:
-        target = await self._search_to_url(query_or_url)
-        title = await self.extract_title(target)
-        bf = await self._bitflow(target, want_video=False)
-        if bf and bf.get("url") and bf.get("videoid"):
-            filename = os.path.join(DOWNLOAD_DIR, f"{bf['videoid']}.{bf.get('ext','m4a')}")
-            if not os.path.exists(filename):
-                opts = {
-                    "format": "bestaudio/best", "outtmpl": filename, "geo_bypass": True, 
-                    "nocheckcertificate": True, "quiet": True, "no_warnings": True,
-                }
-                def _dl():
-                    with yt_dlp.YoutubeDL(opts) as y: y.download([bf["url"]]) 
-                loop = asyncio.get_running_loop()
-                await loop.run_in_executor(None, _dl)
-            return filename, True, title 
-
-        proc = await asyncio.create_subprocess_exec(
-            "yt-dlp", "-g", "-f", "bestaudio/best", target,
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        url = stdout.decode().split("\n")[0].strip() if stdout else ""
-        if url:
-            return url, False, title 
-
-        err = (stderr or b"unknown error").decode()
-        raise RuntimeError(f"Failed to resolve audio: {err}")
-
-    async def extract_title(self, query_or_url: str) -> str:
-        opts = {"quiet": True, "skip_download": True}
-        try:
-            with yt_dlp.YoutubeDL(opts) as y:
-                info = y.extract_info(query_or_url, download=False)
-                if isinstance(info, dict) and "entries" in info:
-                    info = info["entries"][0] 
-                return info.get("title") or "Unknown Title"
-        except Exception:
-            return "Unknown Title"
-
-
-# ─────────────────────────────────────────────────────────────
-# VC Manager
+# VC Manager (DIINTEGRASIKAN KEMBALI)
 # ─────────────────────────────────────────────────────────────
 
 class VCManager:
-    # 🌟 PERUBAHAN KRITIS: Menerima PyTgCalls Client yang sudah distart
     def __init__(self, tgcalls_client: PyTgCalls):
-        self.tgcalls = tgcalls_client # 👈 Gunakan klien yang ada!
+        self.tgcalls = tgcalls_client 
         self.states: Dict[int, VCState] = {}
-        self.resolver = YouTubeResolver()
-
+        # self.resolver = YouTubeResolver() # Resolver bisa di luar manager
+        
+        # 🌟 Setup Event Handlers PyTgCalls
         @self.tgcalls.on_stream_end()
         async def on_end(_, update):
-            chat_id = update.chat_id
-            await self._on_track_end(chat_id)
+            await self._on_track_end(update.chat_id)
 
-    def state(self, chat_id: int) -> VCState:
+        @self.tgcalls.on_closed_voice_chat()
+        async def closedvc(_, chat_id: int):
+            self.states.pop(chat_id, None)
+
+        @self.tgcalls.on_left()
+        @self.tgcalls.on_kicked()
+        async def left_kicked_vc(_, chat_id: int):
+            self.states.pop(chat_id, None)
+
+
+    def state(self, chat_id: int) -> Optional[VCState]:
+        return self.states.get(chat_id)
+
+    def get_or_create_state(self, chat_id: int) -> VCState:
         if chat_id not in self.states:
             self.states[chat_id] = VCState()
         return self.states[chat_id]
@@ -174,26 +132,53 @@ class VCManager:
         self.states.pop(chat_id, None)
 
     async def play(self, chat_id: int, track: Track):
-        st = self.state(chat_id)
+        st = self.get_or_create_state(chat_id)
         async with st.lock:
             if st.now_playing is None:
                 await self._start_stream(chat_id, track)
             else:
                 st.queue.push(track)
+                # Return posisi queue (index terakhir + 1, karena 0 adalah now_playing)
+                return len(st.queue.as_list()) 
+        return 1 # Jika langsung dimainkan (posisi 1 di queue virtual)
 
-    def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> AudioPiped:
-        gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
-        return AudioPiped(
-            src,
-            stream_type=StreamType().local_stream if is_local else StreamType().pulse_stream,
-            additional_ffmpeg_parameters=["-af", f"volume={gain_db}dB"],
-        )
+
+    def _build_stream(self, track: Track) -> MediaStream:
+        gain_db = 6.0 * (track.resolution / 100.0 - 1.0) # Menggunakan resolution sebagai volume
+        
+        is_local = os.path.exists(track.source)
+        
+        if track.type == "Audio":
+            # Audio Piped
+            return AudioPiped(
+                track.source,
+                stream_type=StreamType().pulse_stream,
+                additional_ffmpeg_parameters=["-af", f"volume={gain_db}dB"],
+            )
+        else: # Video
+            # Video Piped
+            if track.resolution == 720:
+                vid_qual = HighQualityVideo()
+            elif track.resolution == 480:
+                vid_qual = MediumQualityVideo()
+            elif track.resolution == 360:
+                vid_qual = LowQualityVideo()
+            else:
+                vid_qual = HighQualityVideo() # Default
+            
+            return AudioVideoPiped(
+                track.source, 
+                HighQualityAudio(), 
+                vid_qual,
+                stream_type=StreamType().pulse_stream,
+                additional_ffmpeg_parameters=["-af", f"volume={gain_db}dB"],
+            )
 
     async def _start_stream(self, chat_id: int, track: Track):
-        st = self.state(chat_id)
+        st = self.get_or_create_state(chat_id)
         st.now_playing = track
-        is_local = os.path.exists(track.source)
-        stream = self._build_stream(track.source, st.volume, is_local)
+        stream = self._build_stream(track)
+        
         try:
             await self.tgcalls.join_group_call(chat_id, stream)
         except Exception:
@@ -201,14 +186,19 @@ class VCManager:
 
     async def _on_track_end(self, chat_id: int):
         st = self.state(chat_id)
+        if not st: return
+        
         async with st.lock:
             nxt = st.queue.pop()
             if nxt:
                 await self._start_stream(chat_id, nxt)
+                return nxt
             else:
                 st.now_playing = None
                 with contextlib.suppress(Exception):
                     await self.tgcalls.leave_group_call(chat_id)
+                self.states.pop(chat_id, None) # Hapus state jika queue kosong
+                return None
 
     async def pause(self, chat_id: int):
         await self.tgcalls.pause_stream(chat_id)
@@ -216,159 +206,342 @@ class VCManager:
     async def resume(self, chat_id: int):
         await self.tgcalls.resume_stream(chat_id)
 
-    async def stop(self, chat_id: int):
+    async def skip_item(self, chat_id: int, index: int) -> Optional[str]:
         st = self.state(chat_id)
-        st.queue.clear()
-        st.now_playing = None
-        with contextlib.suppress(Exception):
-            await self.tgcalls.leave_group_call(chat_id)
+        if not st: return None
+        
+        removed_track = st.queue.pop_at(index - 1) # index 1 di command = index 0 di list
+        return removed_track.title if removed_track else None
 
 
 # Singleton manager
 _vc: Optional[VCManager] = None
 
-
 def _manager(e) -> VCManager:
-    global _vc, call_py # 🌟 GUNAKAN call_py GLOBAL
+    global _vc, call_py
     
-    # Pengecekan Kritis: Pastikan call_py adalah PyTgCalls
     if not isinstance(call_py, PyTgCalls):
-        # Ini akan terpicu jika VCBOT dinonaktifkan atau gagal inisialisasi
         raise RuntimeError("VC Client (PyTgCalls) belum siap atau VCBOT dinonaktifkan.")
         
     if _vc is None:
-        # Buat VCManager dengan PyTgCalls Client yang sudah ada
         _vc = VCManager(call_py)
     return _vc
 
 # ─────────────────────────────────────────────────────────────
-# Commands 
+# Utils (DIIMPOR/DIPERBAIKI)
 # ─────────────────────────────────────────────────────────────
 
-def _cid(e: Message) -> int:
-    return e.chat_id
+def vcmention(user):
+    full_name = get_display_name(user)
+    if not isinstance(user, User):
+        return full_name
+    return f"[{full_name}](tg://user?id={user.id})"
 
 
-@ultroid_cmd(pattern="vcjoin$", groups_only=True)
-async def vc_join(e: Message):
+def ytsearch(query: str):
     try:
-        _ = _manager(e)
-        await e.eor("VC ready. Use `.vcplay <query|url>` or reply to media.")
-    except RuntimeError as ex:
-        # Error ini muncul jika call_py BUKAN PyTgCalls (yaitu None atau TelethonClient)
-        await e.eor(f"**❌ Error:** `{ex}`\nPastikan VCBOT aktif dan PyTgCalls terinstal.")
+        # Menggunakan async VideosSearch dari yt_dlp
+        search = ultroid_bot.loop.run_until_complete(VideosSearch(query, limit=1).next())
+        data = search["result"][0]
+        songname = data["title"]
+        url = data["link"]
+        duration = data["duration"]
+        thumbnail = f"https://i.ytimg.com/vi/{data['id']}/hqdefault.jpg"
+        videoid = data["id"]
+        return [songname, url, duration, thumbnail, videoid]
+    except Exception as e:
+        logger.error(f"YouTube Search Error: {e}")
+        return 0
 
 
-@ultroid_cmd(pattern="vcleave$", groups_only=True)
-async def vc_leave(e: Message):
-    try:
-        await _manager(e).leave(_cid(e))
-        await e.eor("Left VC.")
-    except Exception as ex:
-        await e.eor(f"`{type(ex).__name__}: {ex}`")
+async def ytdl(format: str, link: str):
+    # Menggunakan fungsi bash Ultroid
+    stdout, stderr = await bash(f'yt-dlp -g -f "{format}" {link}')
+    if stdout:
+        return 1, stdout.split("\n")[0]
+    return 0, stderr
 
 
-@ultroid_cmd(pattern=r"vcplay(?:\s+(.+))?$", groups_only=True)
-async def vc_play(e: Message):
-    chat_id = _cid(e)
-    arg = (e.pattern_match.group(1) or "").strip()
-
-    if e.is_reply and not arg:
-        r = await e.get_reply_message()
-        if r and (r.audio or r.voice or r.video or r.document):
-            msg = await e.eor("Downloading replied media…")
-            path = await e.client.download_media(r, file=DOWNLOAD_DIR)
-            title = os.path.basename(path)
-            await _manager(e).play(chat_id, Track(title=title, source=path, requested_by=str(e.sender_id)))
-            return await msg.edit(f"Queued replied media: **{title}**")
-
-    if not arg:
-        return await e.eor("Usage: `.vcplay <url|query>` or reply to media.")
-
-    msg = await e.eor("Resolving & downloading…")
-    mgr = _manager(e)
-    try:
-        src, is_local, title = await mgr.resolver.download_audio_to_path(arg)
-        await mgr.play(chat_id, Track(title=title, source=src, requested_by=str(e.sender_id)))
-        await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
-    except RuntimeError as ex:
-        await msg.edit(f"**❌ Gagal Resolusi!** `{ex}`")
-    except Exception as ex:
-        await msg.edit(f"❌ Error: `{type(ex).__name__}: {ex}`")
+# Skip diubah menjadi metode di VCManager
+# async def skip_item(chat_id: int, x: int): ... (Dihapus/Diganti)
 
 
-@ultroid_cmd(pattern="vcpause$", groups_only=True)
-async def vc_pause(e: Message):
-    try:
-        await _manager(e).pause(_cid(e))
-        await e.eor("Paused.")
-    except Exception as ex:
-        await e.eor(f"`{type(ex).__name__}: {ex}`")
-
-
-@ultroid_cmd(pattern="vcresume$", groups_only=True)
-async def vc_resume(e: Message):
-    try:
-        await _manager(e).resume(_cid(e))
-        await e.eor("Resumed.")
-    except Exception as ex:
-        await e.eor(f"`{type(ex).__name__}: {ex}`")
-
-
-@ultroid_cmd(pattern="vcskip$", groups_only=True)
-async def vc_skip(e: Message):
-    try:
-        await _manager(e)._on_track_end(_cid(e))
-        await e.eor("Skipped.")
-    except Exception as ex:
-        await e.eor(f"`{type(ex).__name__}: {ex}`")
-
-
-@ultroid_cmd(pattern="vcstop$", groups_only=True)
-async def vc_stop(e: Message):
-    try:
-        await _manager(e).stop(_cid(e))
-        await e.eor("Stopped and cleared queue.")
-    except Exception as ex:
-        await e.eor(f"`{type(ex).__name__}: {ex}`")
-
-
-@ultroid_cmd(pattern="vcnp$", groups_only=True)
-async def vc_now_playing(e: Message):
-    st = _manager(e).state(_cid(e))
-    if st.now_playing:
-        await e.eor(f"Now playing: **{st.now_playing.title}**")
-    else:
-        await e.eor("Nothing is playing.")
-
-
-@ultroid_cmd(pattern="vcqueue$", groups_only=True)
-async def vc_queue(e: Message):
-    st = _manager(e).state(_cid(e))
-    if not len(st.queue):
-        return await e.eor("Queue is empty.")
-    lines = [f"**{i+1}.** {t.title}" for i, t in enumerate(st.queue.as_list())]
-    np_title = st.now_playing.title if st.now_playing else "None"
-    response = (
-        f"🎶 Sedang Diputar: **{np_title}**\n"
-        f"--- Antrean ({len(st.queue.as_list())} Lagu) ---\n"
-        + "\n".join(lines)
-    )
-    await e.eor(response)
-
-
-@ultroid_cmd(pattern=r"vcvol(?:\s+(\d{1,3}))?$", groups_only=True)
-async def vc_volume(e: Message):
-    arg = e.pattern_match.group(1)
-    st = _manager(e).state(_cid(e))
+async def skip_current_song(chat_id: int):
+    # Logika skip diubah ke manager
+    manager = _manager(None) # None karena tidak pakai event
+    st = manager.state(chat_id)
+    if not st: return 0
     
-    if arg is None:
-        return await e.eor(f"Current volume: **{st.volume}%** (applies to next track)")
+    # Ambil lagu berikutnya (indeks 0 di queue)
+    next_track = st.queue.as_list()[0] if st.queue.as_list() else None
     
-    try:
-        v = min(200, max(0, int(arg)))
-    except ValueError:
-        return await e.eor("`Give a number 0-200.`")
+    if st.now_playing and not next_track:
+        # Hanya 1 lagu, tinggalkan VC
+        await manager.leave(chat_id)
+        return 1
+    elif next_track:
+        # Ada lagu berikutnya
+        await manager._start_stream(chat_id, next_track)
+        st.queue.pop() # Hapus dari queue karena sudah dimainkan
+        return [next_track.title, next_track.link, next_track.type]
+    
+    return 0
+
+
+# ─────────────────────────────────────────────────────────────
+# Commands (MENGGANTI @Zaid.on DENGAN @ultroid_cmd)
+# ─────────────────────────────────────────────────────────────
+
+btnn =[[Button.inline("✯ cʟᴏꜱᴇ ✯", data="cls")]]
+
+@ultroid_inline(pattern="cls")
+async def _(event):
+     await event.delete()
+
+
+@ultroid_cmd(pattern="play(?: (.+))?", allow_sudo=True, groups_only=True)
+@AssistantAdd
+async def play(event):
+    chat_id = event.chat_id
+    from_user = vcmention(event.sender) 
+    manager = _manager(event)
+    st = manager.get_or_create_state(chat_id)
+    
+    query = event.pattern_match.group(1)
+    replied = await event.get_reply_message()
+
+    if not replied and not query:
+        return await event.client.send_file(chat_id, Config.CMD_IMG, caption="**Give Me Your Query Which You want to Play**\n\n **Example**: `{}play Nira Ishq Bass boosted`".format(HNDLR), buttons=btnn)
+
+    botman = await event.reply("🔎")
+    
+    if query:
+        search = ytsearch(query)
+        if search == 0:
+            return await botman.edit("**Can't Find Song** Try searching with More Specific Title")     
         
-    st.volume = v
-    await e.eor(f"Volume set to **{v}%** for next track.")
+        songname, url, duration, thumbnail, videoid = search
+        sender = await event.get_sender()
+        thumb = await gen_thumb(videoid)
+        format = "bestaudio[ext=m4a]" # Format audio terbaik
+        hm, ytlink = await ytdl(format, url)
+        
+        if hm == 0:
+            return await botman.edit(f"`{ytlink}`")
+
+        new_track = Track(songname, ytlink, url, "Audio", st.volume, sender)
+        
+        if st.now_playing:
+            pos = await manager.play(chat_id, new_track)
+            caption = f"✨ **ᴀᴅᴅᴇᴅ ᴛᴏ ǫᴜᴇᴜᴇ ᴀᴛ** {pos}\n\n❄ **ᴛɪᴛʟᴇ :** [{songname}]({url})\n⏱ **ᴅᴜʀᴀᴛɪᴏɴ :** {duration} ᴍɪɴᴜᴛᴇs\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+            await botman.delete()
+            await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
+        else:
+            try:
+                await manager._start_stream(chat_id, new_track)
+                caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({url})\n⏱ **ᴅᴜʀᴀᴛɪᴏɴ :** {duration} ᴍɪɴᴜᴛᴇs\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+                await botman.delete()
+                await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
+            except Exception as ep:
+                st.now_playing = None
+                st.queue.clear()
+                await botman.edit(f"`{ep}`")
+    
+    elif replied and (replied.audio or replied.voice):
+        await botman.edit("➕ Downloading File...")
+        dl = await replied.download_media(file=DOWNLOAD_DIR)
+        link = f"https://t.me/c/{chat_id}/{replied.id}"
+        songname = "Telegram Music Player" if replied.audio else "Voice Note"
+        sender = await event.get_sender()
+
+        new_track = Track(songname, dl, link, "Audio", st.volume, sender)
+        
+        if st.now_playing:
+            pos = await manager.play(chat_id, new_track)
+            caption = f"✨ **ᴀᴅᴅᴇᴅ ᴛᴏ ǫᴜᴇᴜᴇ ᴀᴛ** {pos}\n\n❄ **ᴛɪᴛʟᴇ :** [{songname}]({link})\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+            await botman.delete()
+            await event.client.send_file(chat_id, ngantri, caption=caption, buttons=btnn)
+        else:
+            try:
+                await manager._start_stream(chat_id, new_track)
+                caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({link})\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+                await botman.delete()
+                await event.client.send_file(chat_id, fotoplay, caption=caption, buttons=btnn)
+            except Exception as ep:
+                st.now_playing = None
+                st.queue.clear()
+                await botman.edit(f"`{ep}`")
+
+    else:
+        return await botman.edit("Invalid input or replied media. Need query or audio/voice reply.")
+
+
+@ultroid_cmd(pattern="end$", allow_sudo=True, groups_only=True)
+@is_admin
+async def vc_end(event, perm):
+    chat_id = event.chat_id
+    manager = _manager(event)
+    st = manager.state(chat_id)
+    
+    if st and st.now_playing:
+        await manager.leave(chat_id)
+        await event.reply(f"**Streaming Ended**")
+    else:
+        await event.reply("**Ntg is playing ~**")
+
+
+@ultroid_cmd(pattern="vplay(?: (.+))?", allow_sudo=True, groups_only=True)
+@AssistantAdd
+async def vplay(event):
+    chat_id = event.chat_id
+    from_user = vcmention(event.sender)
+    manager = _manager(event)
+    st = manager.get_or_create_state(chat_id)
+
+    if Var.HEROKU_MODE == "ENABLE":
+        await event.reply("__Currently Heroku Mode is ENABLED so You Can't Stream Video because Video Streaming Cause of Banning Your Heroku Account__.")
+        return
+
+    query = event.pattern_match.group(1)
+    replied = await event.get_reply_message()
+    
+    if not replied and not query:
+        return await event.client.send_file(chat_id, Config.CMD_IMG, caption="**Give Me Your Query Which You want to Stream**\n\n **Example**: `{}vplay Nira Ishq Bass boosted`".format(HNDLR), buttons=btnn)
+
+    xnxx = await event.reply("**🔄 Processing Query... Please Wait!**")
+    
+    RESOLUSI = 720 # Default
+
+    if query:
+        search = ytsearch(query)
+        if search == 0:
+            return await xnxx.edit("**Can't Find Song** Try searching with More Specific Title")
+        
+        songname, url, duration, thumbnail, videoid = search
+        thumb = await gen_thumb(videoid)
+        format = "best[height<=?720][width<=?1280]"
+        hm, ytlink = await ytdl(format, url)
+        
+        if hm == 0:
+            return await xnxx.edit(f"`{ytlink}`")
+            
+        sender = await event.get_sender()
+        new_track = Track(songname, ytlink, url, "Video", RESOLUSI, sender)
+
+        if st.now_playing:
+            pos = await manager.play(chat_id, new_track)
+            caption = f"**✨ ᴀᴅᴅᴇᴅ ᴛᴏ ǫᴜᴇᴜᴇ ᴀᴛ** {pos}\n\n❄ **ᴛɪᴛʟᴇ :** [{songname}]({url})\n⏱ **ᴅᴜʀᴀᴛɪᴏɴ :** {duration} ᴍɪɴᴜᴛᴇs\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+            await xnxx.delete()
+            await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
+        else:
+            try:
+                await manager._start_stream(chat_id, new_track)
+                caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({url})\n⏱ **ᴅᴜʀᴀᴛɪᴏɴ :** {duration} ᴍɪɴᴜᴛᴇs\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+                await xnxx.delete()
+                await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
+            except Exception as ep:
+                st.now_playing = None
+                st.queue.clear()
+                await xnxx.edit(f"`{ep}`")
+    
+    elif replied and (replied.video or replied.document):
+        if len(event.text.split()) > 1 and event.text.split()[1].isdigit():
+             RESOLUSI = int(event.text.split()[1])
+        
+        await xnxx.edit("➕ **Downloading Replied File**")
+        dl = await replied.download_media(file=DOWNLOAD_DIR)
+        link = f"https://t.me/c/{chat_id}/{replied.id}"
+        songname = "Telegram Video Player"
+        sender = await event.get_sender()
+        
+        new_track = Track(songname, dl, link, "Video", RESOLUSI, sender)
+
+        if st.now_playing:
+            pos = await manager.play(chat_id, new_track)
+            caption = f"**✨ ᴀᴅᴅᴇᴅ ᴛᴏ ǫᴜᴇᴜᴇ ᴀᴛ** {pos}\n\n❄ **ᴛɪᴛʟᴇ :** [{songname}]({link})\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+            await xnxx.delete()
+            await event.client.send_file(chat_id, ngantri, caption=caption, buttons=btnn)
+        else:
+            try:
+                await manager._start_stream(chat_id, new_track)
+                caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n✨ **ᴛɪᴛʟᴇ :** [{songname}]({link})\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+                await xnxx.delete()
+                await event.client.send_file(chat_id, fotoplay, caption=caption, buttons=btnn)
+            except Exception as ep:
+                st.now_playing = None
+                st.queue.clear()
+                await xnxx.edit(f"`{ep}`")
+    
+    else:
+        return await xnxx.edit("Invalid input or replied media. Need query or video/document reply.")
+
+
+@ultroid_cmd(pattern="playlist$", allow_sudo=True, groups_only=True)
+@is_admin
+async def vc_playlist(event, perm):
+    chat_id = event.chat_id
+    st = _manager(event).state(chat_id)
+    
+    if not st or not st.now_playing:
+        return await event.reply("**Ntg is Streaming**")
+        
+    np = st.now_playing
+    queue_list = st.queue.as_list()
+    
+    PLAYLIST = f"**🎧 PLAYLIST:**\n**• [{np.title}]({np.link})** | `{np.type}` \n\n**• Upcoming Streaming ({len(queue_list)}):**"
+    
+    for x, track in enumerate(queue_list):
+        PLAYLIST += f"\n**#{x+1}** - [{track.title}]({track.link}) | `{track.type}`"
+        
+    await event.reply(PLAYLIST, link_preview=False)
+
+
+@ultroid_cmd(pattern="leavevc$", allow_sudo=True, groups_only=True)
+@is_admin
+async def leavevc(event, perm):
+    xnxx = await event.reply("Processing")
+    chat_id = event.chat_id
+    
+    manager = _manager(event)
+    st = manager.state(chat_id)
+    
+    if st:
+        await manager.leave(chat_id)
+        await xnxx.edit(f"**Left the voice chat** `{chat_id}`")
+    else:
+        await xnxx.edit(f"**I am not on Voice Chat**")
+
+
+@ultroid_cmd(pattern="skip(?: (.+))?", allow_sudo=True, groups_only=True)
+@is_admin
+async def vc_skip(event, perm):
+    chat_id = event.chat_id
+    manager = _manager(event)
+    st = manager.state(chat_id)
+    
+    if not st or not st.now_playing:
+        return await event.reply("**Nothing Is Streaming**")
+
+    arg = event.pattern_match.group(1)
+    
+    if not arg:
+        # Skip current song (0)
+        next_track = await manager._on_track_end(chat_id)
+        if next_track is None:
+            await event.reply("empty queue, leaving voice chat")
+        else:
+            await event.reply(
+                f"**⏭ Skipped**\n**🎧 Now Playing** - [{next_track.title}]({next_track.link})",
+                link_preview=False,
+            )
+    else:
+        skip_indices = [int(x) for x in arg.split(" ") if x.isdigit()]
+        skip_indices.sort(reverse=True) # Hapus dari belakang untuk menghindari perubahan indeks
+        DELQUE = "**Removing Following Songs From Queue:**"
+        removed = False
+
+        for x in skip_indices:
+            if x > 0:
+                hm = await manager.skip_item(chat_id, x)
+                if hm:
+               
