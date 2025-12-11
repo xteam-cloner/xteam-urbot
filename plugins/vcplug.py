@@ -150,8 +150,8 @@ async def ytsearch(query: str):
 
 async def ytdl(format: str, link: str):
     COOKIES_FILE = "cookies.txt"
-    command = f'yt-dlp --cookies {COOKIES_FILE} -g -f "{format}" {link}'
-    
+    command = f'yt-dlp --cookies {COOKIES_FILE} --js-runtimes node -g -f "{format}" {link}'
+
     stdout, stderr = await bash(command)
     if stdout:
         return 1, stdout.split("\n")[0]
