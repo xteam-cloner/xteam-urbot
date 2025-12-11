@@ -20,7 +20,7 @@ from xteam.configs import Var
 from xteam import call_py # PyTgCalls Client
 from xteam import ultroid_bot 
 from telethon.utils import get_display_name
-
+from xteam.fns.admins import admin_check
 # 🚨 IMPOR PYTGCALLS
 from pytgcalls import PyTgCalls
 from pytgcalls import filters as fl
