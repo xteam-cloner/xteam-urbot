@@ -45,7 +45,7 @@ from telethon.tl.functions.channels import LeaveChannelRequest
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 
-from . import ultroid_cmd, ultroid_inline
+from . import ultroid_cmd
 logger = logging.getLogger(__name__)
 
 # --- KONSTANTA & KONFIGURASI ---
@@ -300,7 +300,7 @@ async def skip_current_song(chat_id: int):
 
 btnn =[[Button.inline("✯ cʟᴏꜱᴇ ✯", data="cls")]]
 
-@ultroid_inline(pattern="cls")
+@ultroid_cmd(pattern="cls")
 async def _(event):
      await event.delete()
 
