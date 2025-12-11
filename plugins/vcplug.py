@@ -22,15 +22,20 @@ from xteam import ultroid_bot
 from telethon.utils import get_display_name
 
 # 🚨 IMPOR PYTGCALLS
-from pytgcalls import PyTgCalls, filters
-from pytgcalls.types import AudioPiped, StreamType, VideoPiped, AudioVideoPiped
-from pytgcalls.types import HighQualityAudio, LowQualityVideo, MediumQualityVideo, HighQualityVideo
-from pytgcalls.types import Update, MediaStream
-from pytgcalls.exceptions import (
-    NoActiveGroupCall,
-    NotInGroupCallError
+from pytgcalls import PyTgCalls
+from pytgcalls import filters as fl
+from ntgcalls import TelegramServerError
+from pytgcalls.exceptions import NoActiveGroupCall
+from pytgcalls.types import (
+    ChatUpdate,
+    MediaStream,
+    StreamEnded,
+    GroupCallConfig,
+    GroupCallParticipant,
+    UpdatedGroupCallParticipant,
+    AudioQuality,
+    VideoQuality,
 )
-
 # 🚨 IMPOR TELETHON LAINNYA (diasumsikan sudah diimpor oleh 'from . import *')
 # Namun, untuk kejelasan, kita pertahankan:
 from telethon.tl.functions.users import GetFullUserRequest
