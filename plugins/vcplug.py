@@ -1,6 +1,3 @@
-# vctools.py - Plugin Musik VC Ultroid (TANPA Class Manager)
-# Diadaptasi dari kode User dan struktur Userbot Ultroid
-
 from __future__ import annotations
 
 import asyncio
@@ -14,17 +11,13 @@ from typing import Dict, Optional, Tuple, Any
 
 import httpx
 
-# 🚨 IMPOR UTAMA ULTROID
-from . import * 
-from telethon import events, TelegramClient, Button
+from . import * from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User
 from xteam.configs import Var 
-from xteam import call_py # PyTgCalls Client
+from xteam import call_py 
 from xteam import ultroid_bot 
 from telethon.utils import get_display_name
-# Asumsi xteam.fns.admins.admin_check adalah fungsi terpisah
 from xteam.fns.admins import admin_check 
-# 🚨 IMPOR PYTGCALLS
 from pytgcalls import PyTgCalls
 from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
@@ -38,8 +31,14 @@ from pytgcalls.types import (
     UpdatedGroupCallParticipant,
     AudioQuality,
     VideoQuality,
+    AudioPiped,
+    AudioVideoPiped,
+    StreamType,
+    HighQualityAudio,
+    HighQualityVideo,
+    MediumQualityVideo,
+    LowQualityVideo,
 )
-# 🚨 IMPOR TELETHON LAINNYA
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
@@ -57,19 +56,14 @@ from youtubesearchpython.__future__ import VideosSearch
 from . import ultroid_cmd
 logger = logging.getLogger(__name__)
 
-# --- KONSTANTA & KONFIGURASI ---
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 Config = Var 
-#HNDLR = Var.HNDLR # Asumsi HNDLR didefinisikan di Var
+HNDLR = Var.HNDLR
 ASSISTANT_ID = Var.ASSISTANT_ID 
 
-# --- STATUS GLOBAL VC (Pengganti VCManager.states) ---
-# Dictionary: {chat_id: {'queue': [], 'now_playing': Track, 'volume': 100, 'lock': Lock}}
 VC_STATUS: Dict[int, Dict[str, Any]] = {}
-
-# --- DATACLASS UNTUK TRACK ---
 
 @dataclass
 class Track:
@@ -80,14 +74,10 @@ class Track:
     resolution: int
     requested_by: User
     
-# --- DECORATOR is_admin & AssistantAdd ---
-
 def is_admin(func):
     @functools.wraps(func)
     async def a_c(event, *args, **kwargs):
         is_admin = False
-        # Pemeriksaan ini mungkin redundan jika Anda menggunakan admin_check, 
-        # tapi dipertahankan sesuai permintaan struktur decorator
         if not event.is_private:
             try:
                 _s = await event.client.get_permissions(event.chat_id, event.sender_id)
@@ -96,7 +86,6 @@ def is_admin(func):
             except:
                 is_admin = False
         if is_admin:
-            # Mengirimkan event dan perms(_s)
             await func(event, _s, *args, **kwargs) 
         else:
             await event.reply("Only Admins can execute this command!")
@@ -104,15 +93,11 @@ def is_admin(func):
 
 def AssistantAdd(mystic):
     async def wrapper(event):
-        # Tambahkan logika untuk resolusi entitas ASSISTANT_ID di sini jika perlu.
-        # Jika ASSISTANT_ID belum dikenal, error ValueError akan terjadi di sini.
         try:
-            # Mencoba mendapatkan izin (memastikan asisten ada di cache dan grup)
             await event.client.get_permissions(int(event.chat_id), int(ASSISTANT_ID))
         except UserNotParticipantError:
             if event.is_group:
                 try:
-                    # Mencoba mendapatkan link dan mengimpor asisten
                     link = await event.client(ExportChatInviteRequest(event.chat_id))
                     invitelinkk = link.link
                     invitelink = invitelinkk.replace("https://t.me/+", "")
@@ -127,20 +112,14 @@ def AssistantAdd(mystic):
                     await event.reply(
                         f"__Assistant Failed To Join__\n\n**Reason**: {e}"
                     )
-                    return # Gagal, keluar dari wrapper
-            # Jika semua berhasil (atau sudah ada), lanjutkan
+                    return 
         except ValueError as ve:
-             # Menangani error yang Anda laporkan sebelumnya
             await event.reply(f"❌ **Error Entity:** Could not resolve Assistant ID (`{ASSISTANT_ID}`). Please ensure the assistant has started a chat with the bot master and is online.")
             return
 
         return await mystic(event)
 
     return wrapper
-
-# ─────────────────────────────────────────────────────────────
-# Utils / Fungsi Global (Fungsi Inti VC)
-# ─────────────────────────────────────────────────────────────
 
 def get_vc_state(chat_id: int, create: bool = False) -> Optional[Dict[str, Any]]:
     if chat_id not in VC_STATUS and create:
@@ -158,13 +137,11 @@ def vcmention(user):
         return full_name
     return f"[{full_name}](tg://user?id={user.id})"
 
-async def ytsearch(query: str): # <--- HARUS ASYNC DEF
+async def ytsearch(query: str):
     try:
-        # Gunakan klien asinkron dari youtubesearchpython.__future__
         search = VideosSearch(query, limit=1)
-        data = await search.next() # <--- PENTING: GUNAKAN AWAIT
+        data = await search.next() 
         
-        # Ekstrak data yang diperlukan
         data = data["result"][0]
         songname = data["title"]
         url = data["link"]
@@ -178,15 +155,12 @@ async def ytsearch(query: str): # <--- HARUS ASYNC DEF
         
 
 async def ytdl(format: str, link: str):
-    # Asumsi fungsi bash() tersedia di lingkungan Ultroid
     stdout, stderr = await bash(f'yt-dlp -g -f "{format}" {link}')
     if stdout:
         return 1, stdout.split("\n")[0]
     return 0, stderr
 
-# Asumsi fungsi gen_thumb(videoid) tersedia secara global
 async def gen_thumb(videoid):
-    # Placeholder: Dalam kode produksi, ini akan mengunduh dan mengedit thumbnail
     return fotoplay 
 
 async def _build_stream(track: Track) -> MediaStream:
@@ -198,7 +172,7 @@ async def _build_stream(track: Track) -> MediaStream:
             stream_type=StreamType().pulse_stream,
             additional_ffmpeg_parameters=["-af", f"volume={gain_db}dB"],
         )
-    else: # Video
+    else: 
         if track.resolution >= 720:
             vid_qual = HighQualityVideo()
         elif track.resolution >= 480:
@@ -222,7 +196,6 @@ async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
     stream = await _build_stream(track)
     
     try:
-        # Mencoba bergabung. Jika sudah bergabung, PyTgCalls akan mencoba change_stream
         await client.join_group_call(chat_id, stream)
     except Exception:
         await client.change_stream(chat_id, stream)
@@ -248,8 +221,6 @@ async def global_leave(chat_id: int):
         pass
     VC_STATUS.pop(chat_id, None)
 
-# --- GLOBAL PYTGCALLS HANDLERS ---
-
 async def _on_track_end_handler(_, update: StreamEnded):
     chat_id = update.chat_id
     st = get_vc_state(chat_id)
@@ -269,10 +240,7 @@ async def _on_track_end_handler(_, update: StreamEnded):
         await _start_stream(chat_id, nxt, client)
         return nxt
 
-# Tambahkan ini di bagian BAWAH file vcplug.py
-
 def register_vc_handlers():
-    """Mendaftarkan handlers PyTgCalls setelah call_py diinisialisasi."""
     global call_py 
     
     if call_py is None:
@@ -293,15 +261,6 @@ def register_vc_handlers():
         VC_STATUS.pop(chat_id, None)
 
     logger.info("VC Handlers registered successfully.")
-
-# ⚠️ CATATAN: Pastikan kode inisialisasi Userbot Anda memanggil:
-# register_vc_handlers()
-# setelah call_py = PyTgCalls(...) dilakukan.
-
-
-# ─────────────────────────────────────────────────────────────
-# Commands (MENGGANTI @Zaid.on DENGAN @ultroid_cmd)
-# ─────────────────────────────────────────────────────────────
 
 btnn =[[Button.inline("✯ cʟᴏꜱᴇ ✯", data="cls")]]
 
@@ -326,9 +285,10 @@ async def play(event):
     botman = await event.reply("🔎")
     
     if query:
-    search = await ytsearch(query) # <--- TAMBAHKAN AWAIT
-    if search == 0:
-        return await botman.edit("**Can't Find Song** Try searching with More Specific Title")
+        search = await ytsearch(query)
+        if search == 0:
+            return await botman.edit("**Can't Find Song** Try searching with More Specific Title")
+            
         songname, url, duration, thumbnail, videoid = search
         sender = await event.get_sender()
         thumb = await gen_thumb(videoid) 
@@ -397,8 +357,6 @@ async def vc_end(event, perm):
     else:
         await event.reply("**Ntg is playing ~**")
 
-# Tambahkan vplay (diadaptasi)
-
 @ultroid_cmd(pattern="vplay(?: (.+))?", allow_sudo=True, groups_only=True)
 @AssistantAdd
 async def vplay(event):
@@ -406,7 +364,7 @@ async def vplay(event):
     from_user = vcmention(await event.get_sender())
     st = get_vc_state(chat_id, create=True)
 
-    if Var.HEROKU_MODE == "ENABLE": # Asumsi Var.HEROKU_MODE tersedia
+    if Var.HEROKU_MODE == "ENABLE": 
         await event.reply("__Currently Heroku Mode is ENABLED so You Can't Stream Video because Video Streaming Cause of Banning Your Heroku Account__.")
         return
 
@@ -418,12 +376,13 @@ async def vplay(event):
 
     xnxx = await event.reply("**🔄 Processing Query... Please Wait!**")
     
-    RESOLUSI = 720 # Default
+    RESOLUSI = 720 
 
     if query:
-    search = await ytsearch(query) # <--- TAMBAHKAN AWAIT
-    if search == 0:
-        return await xnxx.edit("**Can't Find Song** Try searching with More Specific Title")
+        search = await ytsearch(query)
+        if search == 0:
+            return await xnxx.edit("**Can't Find Song** Try searching with More Specific Title")
+            
         songname, url, duration, thumbnail, videoid = search
         thumb = await gen_thumb(videoid)
         format = "best[height<=?720][width<=?1280]"
@@ -481,4 +440,4 @@ async def vplay(event):
     
     else:
         return await xnxx.edit("Invalid input or replied media. Need query, video/document reply, or audio/voice reply.")
-        
+                              
