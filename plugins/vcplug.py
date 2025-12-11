@@ -158,31 +158,22 @@ async def gen_thumb(videoid):
     return fotoplay 
 
 async def _build_stream(track: Track) -> MediaStream:
-    gain_db = 6.0 * (track.resolution / 100.0 - 1.0)
-    
+    aud_qual = AudioQuality.HIGH
+
     if track.type == "Audio":
-        return AudioPiped(
+        return MediaStream(
             track.source,
-            stream_type=StreamType().pulse_stream,
-            additional_ffmpeg_parameters=["-af", f"volume={gain_db}dB"],
+            audio_parameters=aud_qual,
+            video_flags=MediaStream.Flags.IGNORE,
         )
-    else: 
-        if track.resolution >= 720:
-            vid_qual = HighQualityVideo()
-        elif track.resolution >= 480:
-            vid_qual = MediumQualityVideo()
-        elif track.resolution >= 360:
-            vid_qual = LowQualityVideo()
-        else:
-            vid_qual = HighQualityVideo() 
-        
-        return AudioVideoPiped(
+    else:
+        vid_qual = VideoQuality.HIGH 
+        return MediaStream(
             track.source, 
-            HighQualityAudio(), 
-            vid_qual,
-            stream_type=StreamType().pulse_stream,
-            additional_ffmpeg_parameters=["-af", f"volume={gain_db}dB"],
+            audio_parameters=aud_qual,
+            video_parameters=vid_qual,
         )
+
 
 async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
     st = get_vc_state(chat_id, create=True)
