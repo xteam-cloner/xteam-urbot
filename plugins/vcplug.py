@@ -32,13 +32,6 @@ from pytgcalls.types import (
     UpdatedGroupCallParticipant,
     AudioQuality,
     VideoQuality,
-    AudioPiped,
-    AudioVideoPiped,
-    StreamType,
-    HighQualityAudio,
-    HighQualityVideo,
-    MediumQualityVideo,
-    LowQualityVideo,
 )
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
