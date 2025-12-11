@@ -22,7 +22,9 @@ from xteam import ultroid_bot
 # Impor Dependensi Kritis (Biarkan Python yang memberikan ImportError jika gagal)
 # Jika ini gagal, berarti instalasi pytgcalls GAGAL, yang merupakan masalah di luar kode ini.
 from pytgcalls import PyTgCalls
-from pytgcalls.types import AudioPiped, StreamType
+#from pytgcalls.types import AudioPiped, StreamType
+#from pytgcalls import PyTgCalls, filters
+from pytgcalls.types import Update, MediaStream
 
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
