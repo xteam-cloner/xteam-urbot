@@ -62,7 +62,7 @@ from telethon.errors.rpcerrorlist import (
     UserNotParticipantError,
     UserAlreadyParticipantError
 )
-from telethon.tl.functions.channels import ExportChatInviteRequest
+from telethon.tl.functions.messages import ExportChatInviteRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from xteam.configs import Var # Asumsi ASSISTANT_ID ada di Var
 
