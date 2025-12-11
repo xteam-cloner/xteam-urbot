@@ -37,14 +37,6 @@ from pytgcalls.types import (
     UpdatedGroupCallParticipant,
     AudioQuality,
     VideoQuality,
-    # ⚠️ ASUMSI IMPOR STREAM TYPES DARI PYTGCALLS (KODE ASLI ANDA)
-    AudioPiped,
-    AudioVideoPiped,
-    StreamType,
-    HighQualityAudio,
-    HighQualityVideo,
-    MediumQualityVideo,
-    LowQualityVideo,
 )
 # 🚨 IMPOR TELETHON LAINNYA
 from telethon.tl.functions.users import GetFullUserRequest
