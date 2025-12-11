@@ -54,7 +54,7 @@ ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 # Asumsi utilitas Ultroid lainnya:
 Config = Var # Asumsi konfigurasi ada di Var
-HNDLR = Var.HNDLR
+#HNDLR = Var.HNDLR
 # --------------------------------
 
 # ─────────────────────────────────────────────────────────────
