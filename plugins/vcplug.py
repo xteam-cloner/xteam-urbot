@@ -158,10 +158,14 @@ def vcmention(user):
         return full_name
     return f"[{full_name}](tg://user?id={user.id})"
 
-def ytsearch(query: str):
+async def ytsearch(query: str): # <--- HARUS ASYNC DEF
     try:
-        search = ultroid_bot.loop.run_until_complete(VideosSearch(query, limit=1).next())
-        data = search["result"][0]
+        # Gunakan klien asinkron dari youtubesearchpython.__future__
+        search = VideosSearch(query, limit=1)
+        data = await search.next() # <--- PENTING: GUNAKAN AWAIT
+        
+        # Ekstrak data yang diperlukan
+        data = data["result"][0]
         songname = data["title"]
         url = data["link"]
         duration = data["duration"]
@@ -171,6 +175,7 @@ def ytsearch(query: str):
     except Exception as e:
         logger.error(f"YouTube Search Error: {e}")
         return 0
+        
 
 async def ytdl(format: str, link: str):
     # Asumsi fungsi bash() tersedia di lingkungan Ultroid
@@ -321,10 +326,11 @@ async def play(event):
     botman = await event.reply("🔎")
     
     if query:
-        search = ytsearch(query)
-        if search == 0:
-            return await botman.edit("**Can't Find Song** Try searching with More Specific Title")     
-        
+    search = await ytsearch(query) # <--- TAMBAHKAN AWAIT
+    if search == 0:
+        return await botman.edit("**Can't Find Song** Try searching with More Specific Title")      
+    #songname, url, duration, thumbnail, videoid = search
+    # ... lanjutkan
         songname, url, duration, thumbnail, videoid = search
         sender = await event.get_sender()
         thumb = await gen_thumb(videoid) 
@@ -417,10 +423,12 @@ async def vplay(event):
     RESOLUSI = 720 # Default
 
     if query:
-        search = ytsearch(query)
-        if search == 0:
-            return await xnxx.edit("**Can't Find Song** Try searching with More Specific Title")
+    search = await ytsearch(query) # <--- TAMBAHKAN AWAIT
+    if search == 0:
+        return await xnxx.edit("**Can't Find Song** Try searching with More Specific Title")
         
+    #songname, url, duration, thumbnail, videoid = search
+    # ... lanjutkan
         songname, url, duration, thumbnail, videoid = search
         thumb = await gen_thumb(videoid)
         format = "best[height<=?720][width<=?1280]"
