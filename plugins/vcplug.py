@@ -176,6 +176,10 @@ async def _build_stream(track: Track) -> MediaStream:
 
 
 async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
+    if client is None:
+        logger.error("PyTgCalls Client (call_py) is None. Cannot start stream.")
+        return
+
     st = get_vc_state(chat_id, create=True)
     st['now_playing'] = track
     stream = await _build_stream(track)
