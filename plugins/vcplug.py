@@ -1,3 +1,5 @@
+# vc_music.py - Plugin Musik VC untuk Ultroid
+
 from __future__ import annotations
 
 import asyncio
@@ -9,12 +11,12 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Union, Any
 
 import httpx
-from . import * 
-from telethon import events, TelegramClient 
+# Pastikan impor umum paket xteam dan telethon sudah benar
+from . import * from telethon import events, TelegramClient 
 from telethon.tl.types import Message
 from xteam.configs import Var 
-from xteam import vcClient # 🌟 IMPOR KLIEN PYTGCALLS GLOBAL
-from xteam import ultroid_bot # IMPOR KLIEN TELETHON UTAMA UNTUK MENGIRIM PESAN
+from xteam import vc_call # 🌟 PERUBAHAN KRITIS: IMPOR KLIEN PYTGCALLS GLOBAL DENGAN NAMA vc_call
+from xteam import ultroid_bot # IMPOR KLIEN TELETHON UTAMA UNTUK MENGIRIM PESAN (jika diperlukan)
 
 from ntgcalls import TelegramServerError 
 from pytgcalls import PyTgCalls
@@ -154,11 +156,12 @@ class YouTubeResolver:
 # ─────────────────────────────────────────────────────────────
 
 class VCManager:
+    # Menerima PyTgCalls Client (yang sekarang bernama vc_call)
     def __init__(self, client: TelegramClient, tgcalls_client: PyTgCalls):
         if PyTgCalls is None:
             raise RuntimeError("pytgcalls is not installed. Run: pip install pytgcalls")
         self.client = client
-        self.tgcalls = tgcalls_client 
+        self.tgcalls = tgcalls_client # 👈 self.tgcalls adalah vc_call global
         self.states: Dict[int, VCState] = {}
         self.resolver = YouTubeResolver()
 
@@ -213,7 +216,6 @@ class VCManager:
             await self.tgcalls.join_group_call(chat_id, stream)
         except NoActiveGroupCall:
             logger.warning(f"No active VC in chat {chat_id}. Cannot start stream.")
-            # Menggunakan ultroid_bot untuk mengirim pesan notifikasi
             await ultroid_bot.send_message(chat_id, "`❌ Tidak ada Obrolan Suara aktif.`")
         except Exception as e:
             logger.error(f"Error starting stream: {e}")
@@ -259,22 +261,21 @@ _vc: Dict[int, VCManager] = {}
 
 def _manager(e) -> VCManager:
     """
-    Mengambil klien PyTgCalls global (vcClient) dan membuat VCManager per ID klien.
-    Pengecekan ketat 'vcClient is None' diganti dengan pengecekan instance PyTgCalls.
+    Mengambil klien PyTgCalls global (vc_call) dan membuat VCManager per ID klien.
     """
-    global vcClient 
+    global vc_call # 🌟 PERUBAHAN: Merujuk ke variabel global vc_call
 
-    # 💡 Pengecekan baru: Pastikan vcClient adalah instance PyTgCalls yang valid 
-    # (berarti VCBOT=True dan inisialisasi sukses di main_async).
-    if not isinstance(vcClient, PyTgCalls):
-        # Ini akan menangkap jika vcClient masih None, atau jika VCBOT=False, 
-        # dan memicu error yang lebih informatif.
-        raise RuntimeError("VC Client (PyTgCalls) belum siap atau `VCBOT` dinonaktifkan.")
+    if not isinstance(vc_call, PyTgCalls):
+        # 🌟 PERUBAHAN: Cek tipe vc_call
+        raise RuntimeError(
+            "VC Client (PyTgCalls) belum siap atau `VCBOT` dinonaktifkan."
+        )
 
     client_id = id(e.client)
     global _vc
     if client_id not in _vc:
-        _vc[client_id] = VCManager(e.client, vcClient) 
+        # 🌟 PERUBAHAN: Teruskan vc_call ke VCManager
+        _vc[client_id] = VCManager(e.client, vc_call) 
     return _vc[client_id]
 
 def _cid(e: Message) -> int:
@@ -429,4 +430,3 @@ async def vc_volume(e: Message):
         
     st.volume = v
     await e.eor(f"Volume diatur ke **{v}%** untuk lagu berikutnya. (Akan diterapkan pada pemutaran stream/file berikutnya)")
-        
