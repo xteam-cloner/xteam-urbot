@@ -264,18 +264,35 @@ async def _on_track_end_handler(_, update: StreamEnded):
         await _start_stream(chat_id, nxt, client)
         return nxt
 
-@call_py.on_stream_end()
-async def on_end_global(client, update: StreamEnded):
-    await _on_track_end_handler(client, update)
+# Tambahkan ini di bagian BAWAH file vcplug.py
 
-@call_py.on_closed_voice_chat()
-async def closedvc_global(_, chat_id: int):
-    VC_STATUS.pop(chat_id, None)
+def register_vc_handlers():
+    """Mendaftarkan handlers PyTgCalls setelah call_py diinisialisasi."""
+    global call_py 
+    
+    if call_py is None:
+        logger.warning("call_py is still None after loading plugin. Handlers not registered.")
+        return
 
-@call_py.on_left()
-@call_py.on_kicked()
-async def left_kicked_vc_global(_, chat_id: int):
-    VC_STATUS.pop(chat_id, None)
+    @call_py.on_stream_end()
+    async def on_end_global(client, update: StreamEnded):
+        await _on_track_end_handler(client, update)
+
+    @call_py.on_closed_voice_chat()
+    async def closedvc_global(_, chat_id: int):
+        VC_STATUS.pop(chat_id, None)
+
+    @call_py.on_left()
+    @call_py.on_kicked()
+    async def left_kicked_vc_global(_, chat_id: int):
+        VC_STATUS.pop(chat_id, None)
+
+    logger.info("VC Handlers registered successfully.")
+
+# ⚠️ CATATAN: Pastikan kode inisialisasi Userbot Anda memanggil:
+# register_vc_handlers()
+# setelah call_py = PyTgCalls(...) dilakukan.
+
 
 # ─────────────────────────────────────────────────────────────
 # Commands (MENGGANTI @Zaid.on DENGAN @ultroid_cmd)
