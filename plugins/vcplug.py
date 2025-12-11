@@ -20,8 +20,8 @@ from xteam import call_py # 🌟 HARUS DIIMPOR DARI xteam (Ini adalah PyTgCalls 
 from xteam import ultroid_bot 
 
 # Impor Dependensi Kritis PyTgCalls yang benar
-from pytgcalls import PyTgCalls
-from pytgcalls.types import AudioPiped, StreamType # 🌟 KOREKSI IMPOR YANG HILANG
+from pytgcalls import PyTgCalls, filters
+from pytgcalls.types import Update, MediaStream
 
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
