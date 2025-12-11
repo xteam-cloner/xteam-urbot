@@ -33,7 +33,7 @@ import httpx
 from . import *
 from telethon import events
 from telethon.tl.types import Message
-
+from xteam import vc_cal
 try:
     from pytgcalls import PyTgCalls
     from pytgcalls.types import AudioPiped
@@ -281,7 +281,7 @@ _vc: Optional[VCManager] = None
 def _manager(e) -> VCManager:
     global _vc
     if _vc is None:
-        _vc = VCManager(e.client)
+        _vc = VCManager(vc_call)
     return _vc
 
 # ─────────────────────────────────────────────────────────────
