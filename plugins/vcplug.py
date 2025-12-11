@@ -56,6 +56,49 @@ DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 Config = Var # Asumsi konfigurasi ada di Var
 #HNDLR = Var.HNDLR
 # --------------------------------
+# Di vcplug.py (Tambahkan ini di bagian atas, di bawah impor)
+
+from telethon.errors.rpcerrorlist import (
+    UserNotParticipantError,
+    UserAlreadyParticipantError
+)
+from telethon.tl.functions.channels import ExportChatInviteRequest
+from telethon.tl.functions.messages import ImportChatInviteRequest
+from xteam.configs import Var # Asumsi ASSISTANT_ID ada di Var
+
+# Dapatkan ID asisten dari konfigurasi
+ASSISTANT_ID = Var.ASSISTANT_ID # Ganti Var dengan sumber config yang benar!
+
+def AssistantAdd(mystic):
+    async def wrapper(event):
+        try:
+            # Gunakan event.client untuk mengambil izin
+            permissions = await event.client.get_permissions(int(event.chat_id), int(ASSISTANT_ID))
+        except UserNotParticipantError:
+            if event.is_group:
+                try:
+                    # Gunakan event.client untuk mengambil dan mengimpor link
+                    link = await event.client(ExportChatInviteRequest(event.chat_id))
+                    invitelinkk = link.link
+                    invitelink = invitelinkk.replace("https://t.me/+", "")
+                    
+                    # Gunakan event.client untuk bergabung sebagai bot
+                    await event.client(ImportChatInviteRequest(invitelink)) 
+                    await event.reply(
+                        f"Joined Successfully",
+                    )
+                except UserAlreadyParticipantError:
+                    pass
+                except Exception as e:
+                    await event.reply(
+                        f"__Assistant Failed To Join__\n\n**Reason**: {e}"
+                    )
+                    return
+        return await mystic(event)
+
+    return wrapper
+
+# ... Lanjutkan dengan @ultroid_cmd(pattern="play")
 
 # ─────────────────────────────────────────────────────────────
 # Queue/State Models (DIINTEGRASIKAN KEMBALI)
