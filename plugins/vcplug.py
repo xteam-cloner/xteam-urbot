@@ -233,7 +233,7 @@ _vc: Optional[VCManager] = None
 
 
 def _manager(e) -> VCManager:
-    global _vc, vc_call
+    global vc_call
     
     # Pengecekan Kritis: Pastikan vc_call adalah PyTgCalls
     if not isinstance(vc_call, PyTgCalls):
