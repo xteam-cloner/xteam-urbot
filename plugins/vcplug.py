@@ -12,7 +12,8 @@ from typing import Dict, Optional, Tuple, Union, Any
 
 import httpx
 # Pastikan impor umum paket xteam dan telethon sudah benar
-from . import * from telethon import events, TelegramClient 
+from . import * 
+from telethon import events, TelegramClient 
 from telethon.tl.types import Message
 from xteam.configs import Var 
 from xteam import vc_call # 🌟 PERUBAHAN KRITIS: IMPOR KLIEN PYTGCALLS GLOBAL DENGAN NAMA vc_call
