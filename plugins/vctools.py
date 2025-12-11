@@ -33,7 +33,7 @@ import httpx
 from . import *
 from telethon import events
 from telethon.tl.types import Message
-from xteam import vc_cal
+from xteam import vc_call
 try:
     from pytgcalls import PyTgCalls
     from pytgcalls.types import AudioPiped
