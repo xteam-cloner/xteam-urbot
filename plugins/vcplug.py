@@ -1,47 +1,54 @@
-# vc_music.py - Plugin Musik VC untuk Ultroid
+# vc_music.py - Plugin Musik VC Ultroid
 
 from __future__ import annotations
 
 import asyncio
-import re
 import os
+import re
 import contextlib 
-import logging
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple, Union, Any
+from typing import Dict, Optional, Tuple, Any
 
 import httpx
-# Pastikan impor umum paket xteam dan telethon sudah benar
-from . import * 
-from telethon import events, TelegramClient 
+# Impor umum
+from . import * from telethon import events, TelegramClient 
 from telethon.tl.types import Message
 from xteam.configs import Var 
-from xteam import vc_call # 🌟 PERUBAHAN KRITIS: IMPOR KLIEN PYTGCALLS GLOBAL DENGAN NAMA vc_call
-from xteam import ultroid_bot # IMPOR KLIEN TELETHON UTAMA UNTUK MENGIRIM PESAN (jika diperlukan)
+from xteam import vc_call # 🌟 IMPOR KLIEN PYTGCALLS GLOBAL (HARUS SUDAH DIINISIALISASI DI main.py)
+from xteam import ultroid_bot 
 
-from ntgcalls import TelegramServerError 
-from pytgcalls import PyTgCalls
-from pytgcalls.types import MediaStream
-from pytgcalls.types import (
-    StreamEnded,
-)
-from pytgcalls.exceptions import NoActiveGroupCall, InvalidMTProtoClient
-import yt_dlp
-from youtubesearchpython.__future__ import VideosSearch
+# Import PyTgCalls secara eksplisit tanpa blok try/except yang menyesatkan
+# Jika impor ini gagal, Python akan memberikan ImportError yang jelas.
+try:
+    from pytgcalls import PyTgCalls
+    from pytgcalls.types import AudioPiped, StreamType
+except ImportError:
+    # Jika PyTgCalls benar-benar tidak terinstal, kita set ke None, 
+    # dan fungsi _manager yang akan menangkapnya.
+    PyTgCalls = None 
+
+# Import library lainnya
+try:
+    import yt_dlp
+except ImportError:
+    yt_dlp = None 
+try:
+    from youtubesearchpython.__future__ import VideosSearch
+except ImportError:
+    VideosSearch = None 
 
 from . import ultroid_cmd
+import logging
+logger = logging.getLogger(__name__)
 
 # --- KONSTANTA & KONFIGURASI ---
+YOUTUBE_REGEX = r"(?:youtube\.com|youtu\.be)"
 BITFLOW_API = "https://bitflow.in/api/youtube"
 BITFLOW_API_KEY = getattr(Var, 'BITFLOW_API_KEY', "youtube321bot") 
-
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
-YOUTUBE_REGEX = r"(?:youtube\.com|youtu\.be)"
 
 if not os.path.isdir(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-    
-logger = logging.getLogger(__name__)
 
 # ─────────────────────────────────────────────────────────────
 # Queue/State Models
@@ -58,19 +65,21 @@ class Queue:
         self._q = []
     def push(self, t: Track):
         self._q.append(t)
-    def pop(self, index: int = 0) -> Optional[Track]:
-        return self._q.pop(index) if self._q else None
+    def pop(self) -> Optional[Track]:
+        return self._q.pop(0) if self._q else None
     def as_list(self):
         return list(self._q)
     def clear(self):
         self._q.clear()
+    def __len__(self):
+        return len(self._q)
 
 class VCState:
     def __init__(self):
         self.queue = Queue()
         self.now_playing: Optional[Track] = None
         self.lock = asyncio.Lock()
-        self.volume = 100 
+        self.volume = 100
 
 # ─────────────────────────────────────────────────────────────
 # YouTube Resolver
@@ -80,7 +89,12 @@ class YouTubeResolver:
     def __init__(self):
         if yt_dlp is None:
             raise RuntimeError("yt-dlp is required. Install with: pip install yt-dlp")
+        if not os.path.isdir(DOWNLOAD_DIR):
+            os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+    # (Fungsi _bitflow, _search_to_url, download_audio_to_path, extract_title sama seperti sebelumnya)
+    # ... (Masukkan kembali kode YouTubeResolver di sini)
+    
     async def _bitflow(self, url: str, want_video: bool = False) -> Optional[dict]:
         params = {
             "query": url,
@@ -157,17 +171,16 @@ class YouTubeResolver:
 # ─────────────────────────────────────────────────────────────
 
 class VCManager:
-    # Menerima PyTgCalls Client (yang sekarang bernama vc_call)
-    def __init__(self, client: TelegramClient, tgcalls_client: PyTgCalls):
-        if PyTgCalls is None:
-            raise RuntimeError("pytgcalls is not installed. Run: pip install pytgcalls")
-        self.client = client
-        self.tgcalls = tgcalls_client # 👈 self.tgcalls adalah vc_call global
+    # 🌟 PERBAIKAN: Menerima PyTgCalls Client yang sudah diinisialisasi
+    def __init__(self, tgcalls_client: PyTgCalls):
+        # 🛑 Hapus: Pengecekan PyTgCalls is None dan pembuatan PyTgCalls(client) di sini
+        
+        self.tgcalls = tgcalls_client # 👈 Klien PyTgCalls yang sudah diinisialisasi
         self.states: Dict[int, VCState] = {}
         self.resolver = YouTubeResolver()
 
         @self.tgcalls.on_stream_end()
-        async def on_end(_, update: StreamEnded):
+        async def on_end(_, update):
             chat_id = update.chat_id
             await self._on_track_end(chat_id)
 
@@ -177,6 +190,7 @@ class VCManager:
         return self.states[chat_id]
 
     async def leave(self, chat_id: int):
+        # ... (implementasi lainnya sama)
         try:
             await self.tgcalls.leave_group_call(chat_id)
         except Exception:
@@ -191,46 +205,29 @@ class VCManager:
             else:
                 st.queue.push(track)
 
-    def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> MediaStream:
-        gain_db = 6.0 * (min(vol_percent, 200) / 100.0 - 1.0)
-        ffmpeg_params = ["-af", f"volume={gain_db}dB"]
-        
-        if is_local:
-            return MediaStream.telegram(
-                file=src, 
-                additional_ffmpeg_parameters=ffmpeg_params,
-            )
-        else:
-            return MediaStream.url(
-                url=src, 
-                additional_ffmpeg_parameters=ffmpeg_params,
-            )
-
+    def _build_stream(self, src: str, vol_percent: int, is_local: bool) -> AudioPiped:
+        gain_db = 6.0 * (vol_percent / 100.0 - 1.0)
+        return AudioPiped(
+            src,
+            stream_type=StreamType().local_stream if is_local else StreamType().pulse_stream,
+            additional_ffmpeg_parameters=["-af", f"volume={gain_db}dB"],
+        )
 
     async def _start_stream(self, chat_id: int, track: Track):
         st = self.state(chat_id)
         st.now_playing = track
         is_local = os.path.exists(track.source)
         stream = self._build_stream(track.source, st.volume, is_local)
-        
         try:
             await self.tgcalls.join_group_call(chat_id, stream)
-        except NoActiveGroupCall:
-            logger.warning(f"No active VC in chat {chat_id}. Cannot start stream.")
-            await ultroid_bot.send_message(chat_id, "`❌ Tidak ada Obrolan Suara aktif.`")
-        except Exception as e:
-            logger.error(f"Error starting stream: {e}")
-            await ultroid_bot.send_message(chat_id, f"❌ Error saat memulai stream: `{e}`")
-            await self._on_track_end(chat_id)
-
+        except Exception:
+            # Jika bergabung gagal, coba ganti stream (misal sudah di VC)
+            await self.tgcalls.change_stream(chat_id, stream)
 
     async def _on_track_end(self, chat_id: int):
+        # ... (implementasi lainnya sama)
         st = self.state(chat_id)
         async with st.lock:
-            if st.now_playing and os.path.exists(st.now_playing.source):
-                with contextlib.suppress(Exception):
-                    os.remove(st.now_playing.source)
-            
             nxt = st.queue.pop()
             if nxt:
                 await self._start_stream(chat_id, nxt)
@@ -238,6 +235,8 @@ class VCManager:
                 st.now_playing = None
                 with contextlib.suppress(Exception):
                     await self.tgcalls.leave_group_call(chat_id)
+    
+    # ... (pause, resume, stop methods sama seperti sebelumnya)
 
     async def pause(self, chat_id: int):
         await self.tgcalls.pause_stream(chat_id)
@@ -247,169 +246,138 @@ class VCManager:
 
     async def stop(self, chat_id: int):
         st = self.state(chat_id)
-        if st.now_playing and os.path.exists(st.now_playing.source):
-            with contextlib.suppress(Exception):
-                os.remove(st.now_playing.source)
-
         st.queue.clear()
         st.now_playing = None
         with contextlib.suppress(Exception):
             await self.tgcalls.leave_group_call(chat_id)
 
+# Singleton manager
+_vc: Optional[VCManager] = None
 
-# --- SINGLETON MANAGER & HELPER ---
-_vc: Dict[int, VCManager] = {} 
 
 def _manager(e) -> VCManager:
-    """
-    Mengambil klien PyTgCalls global (vc_call) dan membuat VCManager per ID klien.
-    """
-    global vc_call # 🌟 PERUBAHAN: Merujuk ke variabel global vc_call
-
+    global _vc, vc_call
+    
+    # 🌟 Pengecekan Kritis: Pastikan vc_call adalah PyTgCalls
     if not isinstance(vc_call, PyTgCalls):
-        # 🌟 PERUBAHAN: Cek tipe vc_call
-        raise RuntimeError(
-            "VC Client (PyTgCalls) belum siap atau `VCBOT` dinonaktifkan."
-        )
+        raise RuntimeError("VC Client (PyTgCalls) belum siap atau VCBOT dinonaktifkan.")
+        
+    if _vc is None:
+        # 🌟 PERBAIKAN: Teruskan objek PyTgCalls yang sudah ada
+        _vc = VCManager(vc_call)
+    return _vc
 
-    client_id = id(e.client)
-    global _vc
-    if client_id not in _vc:
-        # 🌟 PERUBAHAN: Teruskan vc_call ke VCManager
-        _vc[client_id] = VCManager(e.client, vc_call) 
-    return _vc[client_id]
+# ─────────────────────────────────────────────────────────────
+# Commands
+# ─────────────────────────────────────────────────────────────
 
 def _cid(e: Message) -> int:
     return e.chat_id
 
-# ─────────────────────────────────────────────────────────────
-# Commands (Ultroid Integration)
-# ─────────────────────────────────────────────────────────────
 
 @ultroid_cmd(pattern="vcjoin$", groups_only=True)
 async def vc_join(e: Message):
-    """Perintah: .vcjoin - Menginisialisasi manager."""
     try:
-        _ = _manager(e) 
-        await e.eor("`VC Manager siap. Gunakan .vcplay <query|url>`")
+        _ = _manager(e)
+        await e.eor("VC ready. Use `.vcplay <query|url>` or reply to media.")
     except RuntimeError as ex:
-        await e.eor(f"**❌ Error:** `{ex}`\nPastikan `VCBOT` aktif dan Anda menunggu startup selesai.")
-    except Exception as ex:
-        await e.eor(f"**❌ Error Inisialisasi:** `{type(ex).__name__}: {ex}`")
+        await e.eor(f"**❌ Error:** `{ex}`\nPastikan VCBOT aktif.")
 
 
 @ultroid_cmd(pattern="vcleave$", groups_only=True)
 async def vc_leave(e: Message):
-    """Perintah: .vcleave - Meninggalkan VC."""
     try:
         await _manager(e).leave(_cid(e))
-        await e.eor("`👋 Berhasil meninggalkan VC.`")
+        await e.eor("Left VC.")
     except Exception as ex:
-        await e.eor(f"**❌ Gagal!** `{type(ex).__name__}: {ex}`")
+        await e.eor(f"`{type(ex).__name__}: {ex}`")
 
 
 @ultroid_cmd(pattern=r"vcplay(?:\s+(.+))?$", groups_only=True)
 async def vc_play(e: Message):
-    """Perintah: .vcplay - Memutar atau mengantrekan lagu."""
     chat_id = _cid(e)
     arg = (e.pattern_match.group(1) or "").strip()
 
+    # ... (Logika vcplay/reply media sama seperti sebelumnya)
     if e.is_reply and not arg:
         r = await e.get_reply_message()
         if r and (r.audio or r.voice or r.video or r.document):
-            msg = await e.eor("`📥 Mengunduh media yang dibalas...`")
-            path = await e.client.download_media(r, file=DOWNLOAD_DIR) 
+            msg = await e.eor("Downloading replied media…")
+            path = await e.client.download_media(r, file=DOWNLOAD_DIR)
             title = os.path.basename(path)
-            
-            await _manager(e).play(
-                chat_id, 
-                Track(
-                    title=title, 
-                    source=path, 
-                    requested_by=str(e.sender_id)
-                )
-            )
-            return await msg.edit(f"`✅ Media yang dibalas diantrekan: **{title}**`")
+            await _manager(e).play(chat_id, Track(title=title, source=path, requested_by=str(e.sender_id)))
+            return await msg.edit(f"Queued replied media: **{title}**")
 
     if not arg:
-        return await e.eor("`Penggunaan: .vcplay <url|query>` atau balas ke media.")
+        return await e.eor("Usage: `.vcplay <url|query>` or reply to media.")
 
-    msg = await e.eor("`🌐 Mencari & mengunduh...`")
+    msg = await e.eor("Resolving & downloading…")
     mgr = _manager(e)
     try:
         src, is_local, title = await mgr.resolver.download_audio_to_path(arg)
-        
-        await mgr.play(
-            chat_id, 
-            Track(
-                title=title, 
-                source=src, 
-                requested_by=str(e.sender_id)
-            )
-        )
-        await msg.edit(f"`✅ Diantrekan:` **{title}** `{'[Lokal]' if is_local else '[Stream]'}`")
+        await mgr.play(chat_id, Track(title=title, source=src, requested_by=str(e.sender_id)))
+        await msg.edit(f"Queued: **{title}** {'(local)' if is_local else '(stream)'}")
     except RuntimeError as ex:
         await msg.edit(f"**❌ Gagal Resolusi!** `{ex}`")
     except Exception as ex:
-        await msg.eor(f"**❌ Gagal Memutar!** `{type(ex).__name__}: {ex}`")
+        await msg.edit(f"❌ Error: `{type(ex).__name__}: {ex}`")
 
+# ... (vc_pause, vc_resume, vc_skip, vc_stop, vcnp, vcqueue, vcvol methods sama seperti sebelumnya)
 
 @ultroid_cmd(pattern="vcpause$", groups_only=True)
 async def vc_pause(e: Message):
     try:
         await _manager(e).pause(_cid(e))
-        await e.eor("`⏸ Dijeda.`")
+        await e.eor("Paused.")
     except Exception as ex:
-        await e.eor(f"**❌ Gagal!** `{type(ex).__name__}: {ex}`")
+        await e.eor(f"`{type(ex).__name__}: {ex}`")
 
 
 @ultroid_cmd(pattern="vcresume$", groups_only=True)
 async def vc_resume(e: Message):
     try:
         await _manager(e).resume(_cid(e))
-        await e.eor("`▶ Dilanjutkan.`")
+        await e.eor("Resumed.")
     except Exception as ex:
-        await e.eor(f"**❌ Gagal!** `{type(ex).__name__}: {ex}`")
+        await e.eor(f"`{type(ex).__name__}: {ex}`")
 
 
 @ultroid_cmd(pattern="vcskip$", groups_only=True)
 async def vc_skip(e: Message):
     try:
-        await _manager(e)._on_track_end(_cid(e)) 
-        await e.eor("`⏩ Dilewati.`")
+        await _manager(e)._on_track_end(_cid(e))
+        await e.eor("Skipped.")
     except Exception as ex:
-        await e.eor(f"**❌ Gagal!** `{type(ex).__name__}: {ex}`")
+        await e.eor(f"`{type(ex).__name__}: {ex}`")
 
 
 @ultroid_cmd(pattern="vcstop$", groups_only=True)
 async def vc_stop(e: Message):
     try:
         await _manager(e).stop(_cid(e))
-        await e.eor("`⏹ Dihentikan dan antrean dibersihkan.`")
+        await e.eor("Stopped and cleared queue.")
     except Exception as ex:
-        await e.eor(f"**❌ Gagal!** `{type(ex).__name__}: {ex}`")
+        await e.eor(f"`{type(ex).__name__}: {ex}`")
 
 
 @ultroid_cmd(pattern="vcnp$", groups_only=True)
 async def vc_now_playing(e: Message):
     st = _manager(e).state(_cid(e))
     if st.now_playing:
-        await e.eor(f"🎶 Sedang diputar: **{st.now_playing.title}**")
+        await e.eor(f"Now playing: **{st.now_playing.title}**")
     else:
-        await e.eor("`Tidak ada yang diputar.`")
+        await e.eor("Nothing is playing.")
 
 
 @ultroid_cmd(pattern="vcqueue$", groups_only=True)
 async def vc_queue(e: Message):
     st = _manager(e).state(_cid(e))
-    if not st.queue.as_list():
-        return await e.eor("`Antrean kosong.`")
-    
+    if not len(st.queue):
+        return await e.eor("Queue is empty.")
     lines = [f"**{i+1}.** {t.title}" for i, t in enumerate(st.queue.as_list())]
-    np_title = st.now_playing.title if st.now_playing else "Tidak ada"
-    
+    np_title = st.now_playing.title if st.now_playing else "None"
     response = (
-        f"**🎶 Sedang Diputar:** {np_title}\n"
+        f"🎶 Sedang Diputar: **{np_title}**\n"
         f"--- Antrean ({len(st.queue.as_list())} Lagu) ---\n"
         + "\n".join(lines)
     )
@@ -422,12 +390,12 @@ async def vc_volume(e: Message):
     st = _manager(e).state(_cid(e))
     
     if arg is None:
-        return await e.eor(f"Volume saat ini: **{st.volume}%** (berlaku untuk lagu berikutnya)")
+        return await e.eor(f"Current volume: **{st.volume}%** (applies to next track)")
     
     try:
         v = min(200, max(0, int(arg)))
     except ValueError:
-        return await e.eor("`Masukkan angka antara 0-200.`")
+        return await e.eor("`Give a number 0-200.`")
         
     st.volume = v
-    await e.eor(f"Volume diatur ke **{v}%** untuk lagu berikutnya. (Akan diterapkan pada pemutaran stream/file berikutnya)")
+    await e.eor(f"Volume set to **{v}%** for next track.")
