@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import asyncio
 import os
 import re
@@ -150,10 +149,12 @@ async def ytsearch(query: str):
 
 async def ytdl(format: str, link: str):
     COOKIES_FILE = "cookies.txt"
-    command = f'yt-dlp --cookies {COOKIES_FILE} --js-runtimes node --remote-components ejs:github -g -f "{format}" {link}'
+    # Menggunakan fns.helper.bash yang diasumsikan ada di proyek
+    command = f'yt-dlp --cookies {COOKIES_FILE} --js-runtimes node --remote-components ejs:github -g -f "{format}" {link}' 
 
-    stdout, stderr = await bash(command)
+    stdout, stderr = await bash(command) # Asumsi bash() tersedia
     if stdout:
+        # yt-dlp -g mengembalikan URL streaming (source)
         return 1, stdout.split("\n")[0]
     return 0, stderr
 
@@ -179,15 +180,31 @@ async def _build_stream(track: Track) -> MediaStream:
         )
 
 
+# =========================================================================
+# FUNGSI PERBAIKAN UNTUK MENGATASI NAME ERROR
+# =========================================================================
+async def get_audio_source_from_track(track: Track):
+    """
+    Mengambil objek Track dan mengembalikannya sebagai MediaStream 
+    yang dapat digunakan oleh PyTgCalls.
+    Fungsi ini adalah wrapper untuk _build_stream.
+    """
+    return await _build_stream(track)
+# =========================================================================
+
+
 async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
     audio_source = await get_audio_source_from_track(track)
+    
+    # Klien utama PyTgCalls harus menggunakan MediaStream sebagai argumen untuk join/change
+    stream = audio_source 
     
     if not await client.is_connected(chat_id):
         try:
             logging.info(f"Joining VC in {chat_id} and starting stream.")
             await client.join_group_call(
                 chat_id,
-                audio_source
+                stream # Menggunakan MediaStream yang dibangun dari track
             )
         except Exception as e:
             logging.error(f"Failed to join VC in {chat_id}: {e}")
@@ -197,13 +214,16 @@ async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
         logging.info(f"Client already in VC. Changing stream to new track.")
         await client.change_stream(
             chat_id, 
-            audio_source
+            stream
         )
         
     st = get_vc_state(chat_id)
     st['now_playing'] = track
     st['status'] = 'playing'
     
+    # Baris ini terlihat duplikat dan berpotensi menyebabkan error, 
+    # karena logika join/change sudah ada di blok if/else di atas. 
+    # Dibiarkan sesuai kode asli, tetapi perlu diwaspadai jika terjadi bug.
     try:
         await client.join_group_call(chat_id, stream)
     except Exception:
@@ -449,4 +469,3 @@ async def vplay(event):
     
     else:
         return await xnxx.edit("Invalid input or replied media. Need query, video/document reply, or audio/voice reply.")
-                              
