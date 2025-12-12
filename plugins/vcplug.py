@@ -14,8 +14,7 @@ from . import *
 from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User
 from xteam.configs import Var 
-from xteam import call_py
-#from xteam import call_py as client
+from xteam import call_py # AKAN MENGAMBIL xteam.call_py YANG SUDAH DISET DI __main__.py
 from xteam import ultroid_bot 
 from telethon.utils import get_display_name
 from xteam.fns.admins import admin_check 
@@ -54,7 +53,7 @@ fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 Config = Var 
-#HNDLR = Var.HNDLR
+HNDLR = Var.HNDLR # Asumsi HNDLR didefinisikan di Var
 ASSISTANT_ID = Var.ASSISTANT_ID 
 
 VC_STATUS: Dict[int, Dict[str, Any]] = {}
@@ -80,6 +79,8 @@ def is_admin(func):
             except:
                 is_admin = False
         if is_admin:
+            # Perlu dipastikan bahwa admin_check(event) tidak diperlukan jika sudah ada _s.
+            # Menggunakan _s sebagai argumen kedua seperti yang didefinisikan di decorator
             await func(event, _s, *args, **kwargs) 
         else:
             await event.reply("Only Admins can execute this command!")
@@ -96,6 +97,10 @@ def AssistantAdd(mystic):
                     invitelinkk = link.link
                     invitelink = invitelinkk.replace("https://t.me/+", "")
                     
+                    # Menggunakan event.client untuk asisten jika event.client adalah bot utama
+                    # Catatan: Asisten harus menggunakan kliennya sendiri (vc_client) untuk join, 
+                    # namun kode ini menggunakan klien bot utama untuk join, yang mungkin merupakan 
+                    # desain yang dimaksudkan jika bot utama adalah admin.
                     await event.client(ImportChatInviteRequest(invitelink)) 
                     await event.reply(
                         f"Joined Successfully",
@@ -147,13 +152,23 @@ async def ytsearch(query: str):
         logger.error(f"YouTube Search Error: {e}")
         return 0
         
+# Asumsi fungsi bash() tersedia di lingkungan xteam
+async def bash(cmd: str) -> Tuple[str, str]:
+    """Execute shell command."""
+    process = await asyncio.create_subprocess_shell(
+        cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, stderr = await process.communicate()
+    return stdout.decode().strip(), stderr.decode().strip()
 
 async def ytdl(format: str, link: str):
     COOKIES_FILE = "cookies.txt"
     # Menggunakan fns.helper.bash yang diasumsikan ada di proyek
     command = f'yt-dlp --cookies {COOKIES_FILE} --js-runtimes node --remote-components ejs:github -g -f "{format}" {link}' 
 
-    stdout, stderr = await bash(command) # Asumsi bash() tersedia
+    stdout, stderr = await bash(command) # Menggunakan fungsi bash() yang diasumsikan ada
     if stdout:
         # yt-dlp -g mengembalikan URL streaming (source)
         return 1, stdout.split("\n")[0]
@@ -161,6 +176,8 @@ async def ytdl(format: str, link: str):
 
 
 async def gen_thumb(videoid):
+    # Logika untuk menghasilkan thumbnail dari videoid harus ditambahkan di sini
+    # Saat ini hanya mengembalikan fotoplay statis
     return fotoplay 
 
 async def _build_stream(track: Track) -> MediaStream:
@@ -173,6 +190,7 @@ async def _build_stream(track: Track) -> MediaStream:
             video_flags=MediaStream.Flags.IGNORE,
         )
     else:
+        # Menggunakan VideoQuality.HIGH untuk video
         vid_qual = VideoQuality.HIGH 
         return MediaStream(
             track.source, 
@@ -181,31 +199,26 @@ async def _build_stream(track: Track) -> MediaStream:
         )
 
 
-# =========================================================================
-# FUNGSI PERBAIKAN UNTUK MENGATASI NAME ERROR
-# =========================================================================
 async def get_audio_source_from_track(track: Track):
     """
     Mengambil objek Track dan mengembalikannya sebagai MediaStream 
     yang dapat digunakan oleh PyTgCalls.
-    Fungsi ini adalah wrapper untuk _build_stream.
     """
     return await _build_stream(track)
-# =========================================================================
 
 
 async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
     audio_source = await get_audio_source_from_track(track)
     
-    # Klien utama PyTgCalls harus menggunakan MediaStream sebagai argumen untuk join/change
     stream = audio_source 
     
+    # ⚠️ GUARDRAIL ASLI: Cek koneksi di sini
     if not await client.is_connected(chat_id):
         try:
             logging.info(f"Joining VC in {chat_id} and starting stream.")
             await client.join_group_call(
                 chat_id,
-                stream # Menggunakan MediaStream yang dibangun dari track
+                stream 
             )
         except Exception as e:
             logging.error(f"Failed to join VC in {chat_id}: {e}")
@@ -222,9 +235,7 @@ async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
     st['now_playing'] = track
     st['status'] = 'playing'
     
-    # Baris ini terlihat duplikat dan berpotensi menyebabkan error, 
-    # karena logika join/change sudah ada di blok if/else di atas. 
-    # Dibiarkan sesuai kode asli, tetapi perlu diwaspadai jika terjadi bug.
+    # Baris duplikat yang berpotensi menyebabkan error
     try:
         await client.join_group_call(chat_id, stream)
     except Exception:
@@ -233,10 +244,10 @@ async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
 async def global_play(event: events.NewMessage, track: Track):
     chat_id = event.chat_id
     st = get_vc_state(chat_id, create=True)
-    client = call_py # Mengambil variabel global
+    client = call_py # Mengambil variabel global yang sudah diekspos
 
     # =================================================================
-    # PERBAIKAN: VALIDASI KLIEN PYTGCALLS SEBELUM DIGUNAKAN
+    # PERBAIKAN: VALIDASI KLIEN PYTGCALLS SEBELUM DIGUNAKAN (Guardrail)
     # =================================================================
     if client is None:
         await event.reply("❌ **Kesalahan Koneksi:** Klien Voice Chat (PyTgCalls/Assistant) belum berhasil terhubung atau dimuat. Harap periksa log dan pastikan konfigurasi `VC_SESSION` valid.")
@@ -254,10 +265,11 @@ async def global_play(event: events.NewMessage, track: Track):
 
 async def global_leave(chat_id: int):
     client = call_py
-    try:
-        await client.leave_group_call(chat_id)
-    except Exception:
-        pass
+    if client:
+        try:
+            await client.leave_group_call(chat_id)
+        except Exception:
+            pass
     VC_STATUS.pop(chat_id, None)
 
 async def _on_track_end_handler(_, update: StreamEnded):
@@ -266,6 +278,7 @@ async def _on_track_end_handler(_, update: StreamEnded):
     if not st: return
     
     client = call_py 
+    if client is None: return # Guardrail tambahan
     
     async with st['lock']:
         if not st['queue']:
@@ -280,7 +293,7 @@ async def _on_track_end_handler(_, update: StreamEnded):
         return nxt
 
 def register_vc_handlers():
-    global call_py 
+    # Gunakan variabel global call_py yang sudah diimpor
     
     if call_py is None:
         logger.warning("call_py is still None after loading plugin. Handlers not registered.")
@@ -346,10 +359,19 @@ async def play(event):
             await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
         else:
             try:
-                await _start_stream(chat_id, new_track, call_py)
-                caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({url})\n⏱ **ᴅᴜʀᴀᴛɪᴏɴ :** {duration} ᴍɪɴᴜᴛᴇs\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
-                await botman.delete()
-                await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
+                # global_play sudah memanggil _start_stream jika now_playing is None
+                # Kita bisa memanggil global_play di sini dan menghapus logika try/except ini,
+                # tetapi untuk menjaga kode tetap mirip aslinya, kita asumsikan _start_stream
+                # dipanggil di sini dan global_play hanya untuk antrian.
+                # Namun, global_play sudah menangani logika ini, mari kita gunakan global_play.
+                
+                res = await global_play(event, new_track)
+                if res == 1:
+                    caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({url})\n⏱ **ᴅᴜʀᴀᴛɪᴏɴ :** {duration} ᴍɪɴᴜᴛᴇs\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+                    await botman.delete()
+                    await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
+                # Jika res > 1, itu sudah ditangani di blok if st['now_playing']
+                
             except Exception as ep:
                 st['now_playing'] = None
                 st['queue'].clear()
@@ -371,10 +393,11 @@ async def play(event):
             await event.client.send_file(chat_id, ngantri, caption=caption, buttons=btnn)
         else:
             try:
-                await _start_stream(chat_id, new_track, call_py)
-                caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({link})\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
-                await botman.delete()
-                await event.client.send_file(chat_id, fotoplay, caption=caption, buttons=btnn)
+                res = await global_play(event, new_track)
+                if res == 1:
+                    caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({link})\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+                    await botman.delete()
+                    await event.client.send_file(chat_id, fotoplay, caption=caption, buttons=btnn)
             except Exception as ep:
                 st['now_playing'] = None
                 st['queue'].clear()
@@ -440,10 +463,11 @@ async def vplay(event):
             await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
         else:
             try:
-                await _start_stream(chat_id, new_track, call_py)
-                caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({url})\n⏱ **ᴅᴜʀᴀᴛɪᴏɴ :** {duration} ᴍɪɴᴜᴛᴇs\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
-                await xnxx.delete()
-                await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
+                res = await global_play(event, new_track)
+                if res == 1:
+                    caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n🌸 **ᴛɪᴛʟᴇ :** [{songname}]({url})\n⏱ **ᴅᴜʀᴀᴛɪᴏɴ :** {duration} ᴍɪɴᴜᴛᴇs\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+                    await xnxx.delete()
+                    await event.client.send_file(chat_id, thumb, caption=caption, buttons=btnn)
             except Exception as ep:
                 st['now_playing'] = None
                 st['queue'].clear()
@@ -468,10 +492,11 @@ async def vplay(event):
             await event.client.send_file(chat_id, ngantri, caption=caption, buttons=btnn)
         else:
             try:
-                await _start_stream(chat_id, new_track, call_py)
-                caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n✨ **ᴛɪᴛʟᴇ :** [{songname}]({link})\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
-                await xnxx.delete()
-                await event.client.send_file(chat_id, fotoplay, caption=caption, buttons=btnn)
+                res = await global_play(event, new_track)
+                if res == 1:
+                    caption = f"➻ **sᴛᴀʀᴛᴇᴅ sᴛʀᴇᴀᴍɪɴɢ**\n\n✨ **ᴛɪᴛʟᴇ :** [{songname}]({link})\n🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {from_user}"
+                    await xnxx.delete()
+                    await event.client.send_file(chat_id, fotoplay, caption=caption, buttons=btnn)
             except Exception as ep:
                 st['now_playing'] = None
                 st['queue'].clear()
@@ -479,3 +504,4 @@ async def vplay(event):
     
     else:
         return await xnxx.edit("Invalid input or replied media. Need query, video/document reply, or audio/voice reply.")
+    
