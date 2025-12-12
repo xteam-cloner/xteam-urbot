@@ -15,7 +15,7 @@ from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User
 from xteam.configs import Var 
 from xteam import call_py
-from xteam import call_py as client
+#from xteam import call_py as client
 from xteam import ultroid_bot 
 from telethon.utils import get_display_name
 from xteam.fns.admins import admin_check 
@@ -250,6 +250,7 @@ async def global_play(event: events.NewMessage, track: Track):
         else:
             st['queue'].append(track)
             return len(st['queue']) + 1
+
 
 async def global_leave(chat_id: int):
     client = call_py
