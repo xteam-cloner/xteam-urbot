@@ -232,7 +232,15 @@ async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
 async def global_play(event: events.NewMessage, track: Track):
     chat_id = event.chat_id
     st = get_vc_state(chat_id, create=True)
-    client = call_py
+    client = call_py # Mengambil variabel global
+
+    # =================================================================
+    # PERBAIKAN: VALIDASI KLIEN PYTGCALLS
+    # =================================================================
+    if client is None:
+        await event.reply("❌ **VC Client Error:** Bot musik belum berhasil terhubung (PyTgCalls/Assistant belum siap). Cek log dan konfigurasi VC_SESSION Anda.")
+        return 0 
+    # =================================================================
 
     async with st['lock']:
         if st['now_playing'] is None:
