@@ -53,7 +53,7 @@ fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 Config = Var 
-HNDLR = Var.HNDLR # Asumsi HNDLR didefinisikan di Var
+#HNDLR = Var.HNDLR # Asumsi HNDLR didefinisikan di Var
 ASSISTANT_ID = Var.ASSISTANT_ID 
 
 VC_STATUS: Dict[int, Dict[str, Any]] = {}
