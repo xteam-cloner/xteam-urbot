@@ -14,7 +14,8 @@ from . import *
 from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User
 from xteam.configs import Var 
-from xteam import call_py 
+from xteam import call_py
+from xteam import call_py as client
 from xteam import ultroid_bot 
 from telethon.utils import get_display_name
 from xteam.fns.admins import admin_check 
@@ -235,10 +236,10 @@ async def global_play(event: events.NewMessage, track: Track):
     client = call_py # Mengambil variabel global
 
     # =================================================================
-    # PERBAIKAN: VALIDASI KLIEN PYTGCALLS
+    # PERBAIKAN: VALIDASI KLIEN PYTGCALLS SEBELUM DIGUNAKAN
     # =================================================================
     if client is None:
-        await event.reply("❌ **VC Client Error:** Bot musik belum berhasil terhubung (PyTgCalls/Assistant belum siap). Cek log dan konfigurasi VC_SESSION Anda.")
+        await event.reply("❌ **Kesalahan Koneksi:** Klien Voice Chat (PyTgCalls/Assistant) belum berhasil terhubung atau dimuat. Harap periksa log dan pastikan konfigurasi `VC_SESSION` valid.")
         return 0 
     # =================================================================
 
