@@ -180,13 +180,29 @@ async def _build_stream(track: Track) -> MediaStream:
 
 
 async def _start_stream(chat_id: int, track: Track, client: PyTgCalls):
-    if client is None:
-        logger.error("PyTgCalls Client (call_py) is None. Cannot start stream.")
-        return
-
-    st = get_vc_state(chat_id, create=True)
+    audio_source = await get_audio_source_from_track(track)
+    
+    if not await client.is_connected(chat_id):
+        try:
+            logging.info(f"Joining VC in {chat_id} and starting stream.")
+            await client.join_group_call(
+                chat_id,
+                audio_source
+            )
+        except Exception as e:
+            logging.error(f"Failed to join VC in {chat_id}: {e}")
+            raise
+            
+    else:
+        logging.info(f"Client already in VC. Changing stream to new track.")
+        await client.change_stream(
+            chat_id, 
+            audio_source
+        )
+        
+    st = get_vc_state(chat_id)
     st['now_playing'] = track
-    stream = await _build_stream(track)
+    st['status'] = 'playing'
     
     try:
         await client.join_group_call(chat_id, stream)
