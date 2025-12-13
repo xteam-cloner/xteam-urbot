@@ -10,9 +10,8 @@ from typing import Dict, Optional, Tuple, Any, Union
 from datetime import datetime, timedelta
 
 import httpx
-from xteam.vcbot import *
-from . import * 
-from telethon import events, TelegramClient, Button
+# Asumsi modul ini ada atau diganti
+from xteam.vcbot import * from . import * from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User, TypeUser
 from xteam.configs import Var 
 from xteam import call_py, bot as client
@@ -54,7 +53,7 @@ logger = logging.getLogger(__name__)
 # --- Variabel Asumsi Global (Sesuaikan jika diperlukan) ---
 # QUEUE: Global dictionary for queue data {chat_id: [item1, item2, ...]}
 # get_queue, skip_current_song, clear_queue, skip_item: Fungsi utilitas queue
-# ytsearch, ytdl, gen_thumb, CHAT_TITLE: Fungsi utilitas YouTube/Thumbnail
+# ytsearch, ytdl, gen_thumb, CHAT_TITLE, add_to_queue: Fungsi utilitas YouTube/Thumbnail/Queue
 # -----------------------------------------------------------
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
@@ -62,24 +61,8 @@ ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
 
-def dynamic_media_stream(path: str, video: bool = False, ffmpeg_params: str = None) -> MediaStream:
-    if video:
-        return MediaStream(
-            media_path=path,
-            audio_parameters=AudioQuality.HIGH,
-            video_parameters=VideoQuality.HD_720p,
-            audio_flags=MediaStream.Flags.REQUIRED,
-            video_flags=MediaStream.Flags.REQUIRED,
-            ffmpeg_parameters=ffmpeg_params,
-        )
-    else:
-        return MediaStream(
-            media_path=path,
-            audio_parameters=AudioQuality.HIGH,
-            audio_flags=MediaStream.Flags.REQUIRED,
-            video_flags=MediaStream.Flags.IGNORE,
-            ffmpeg_parameters=ffmpeg_params,
-        )
+# Fungsi dynamic_media_stream telah dihapus.
+# Implementasi MediaStream kini berada langsung di vc_play dan vc_vplay.
 
 def vcmention(user: TypeUser):
     full_name = get_display_name(user)
@@ -124,10 +107,18 @@ async def vc_play(event):
             )
         else:
             try:
+                # --- PENGGANTIAN LOGIKA dynamic_media_stream (YOUTUBE AUDIO) ---
                 await call_py.join_group_call(
                     chat_id,
-                    dynamic_media_stream(ytlink, video=False),
+                    MediaStream(
+                        media_path=ytlink,
+                        audio_parameters=AudioQuality.HIGH,
+                        audio_flags=MediaStream.Flags.REQUIRED,
+                        video_flags=MediaStream.Flags.IGNORE, # Abaikan Video
+                        ffmpeg_parameters=None,
+                    ),
                 )
+                # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
                 caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Atas permintaan:** {from_user}"
                 await botman.delete()
@@ -157,10 +148,18 @@ async def vc_play(event):
             await botman.delete()
         else:
             try:
+                # --- PENGGANTIAN LOGIKA dynamic_media_stream (TELEGRAM AUDIO) ---
                 await call_py.join_group_call(
                     chat_id,
-                    dynamic_media_stream(dl, video=False),
+                    MediaStream(
+                        media_path=dl,
+                        audio_parameters=AudioQuality.HIGH,
+                        audio_flags=MediaStream.Flags.REQUIRED,
+                        video_flags=MediaStream.Flags.IGNORE, # Abaikan Video
+                        ffmpeg_parameters=None,
+                    ),
                 )
+                # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, dl, link, "Audio", 0)
                 caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Lagu`\n🎧 **Atas permintaan:** {from_user}"
                 await event.client.send_file(
@@ -213,10 +212,19 @@ async def vc_vplay(event):
             )
         else:
             try:
+                # --- PENGGANTIAN LOGIKA dynamic_media_stream (YOUTUBE VIDEO) ---
                 await call_py.join_group_call(
                     chat_id,
-                    dynamic_media_stream(ytlink, video=True),
+                    MediaStream(
+                        media_path=ytlink,
+                        audio_parameters=AudioQuality.HIGH,
+                        video_parameters=VideoQuality.HD_720p,
+                        audio_flags=MediaStream.Flags.REQUIRED,
+                        video_flags=MediaStream.Flags.REQUIRED, # Butuh Video
+                        ffmpeg_parameters=None,
+                    ),
                 )
+                # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
                 return await xnxx.edit(
                     f"**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}",
@@ -251,10 +259,19 @@ async def vc_vplay(event):
             await xnxx.delete()
         else:
             try:
+                # --- PENGGANTIAN LOGIKA dynamic_media_stream (TELEGRAM VIDEO) ---
                 await call_py.join_group_call(
                     chat_id,
-                    dynamic_media_stream(dl, video=True),
+                    MediaStream(
+                        media_path=dl,
+                        audio_parameters=AudioQuality.HIGH,
+                        video_parameters=VideoQuality.HD_720p,
+                        audio_flags=MediaStream.Flags.REQUIRED,
+                        video_flags=MediaStream.Flags.REQUIRED, # Butuh Video
+                        ffmpeg_parameters=None,
+                    ),
                 )
+                # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, dl, link, "Video", RESOLUSI)
                 caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
                 await xnxx.delete()
@@ -295,6 +312,7 @@ async def vc_skip(event):
             await edit_delete(event, "antrian kosong, meninggalkan obrolan suara", 10)
         else:
             # Asumsi skip_current_song akan memanggil call_py.play() untuk lagu berikutnya
+            # menggunakan MediaStream yang dibentuk berdasarkan item antrian berikutnya.
             await edit_or_reply(
                 event,
                 f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[1]})",
@@ -410,10 +428,9 @@ async def stream_end_handler(_, u: Update):
         # Jika antrian kosong, tinggalkan panggilan
         await call_py.leave_group_call(chat_id)
         clear_queue(chat_id)
-        # Anda dapat menambahkan kirim pesan ke chat untuk memberitahu
         
-    # Catatan: Fungsi skip_current_song Anda harus mencakup logika
-    # untuk memanggil call_py.play() dengan MediaStream lagu berikutnya
+    # Catatan: Fungsi skip_current_song harus diperbarui untuk menghasilkan MediaStream
+    # berdasarkan item antrian berikutnya.
 
 @call_py.on_closed_voice_chat()
 async def closedvc(_, chat_id: int):
@@ -434,24 +451,35 @@ async def kickedvc(_, chat_id: int):
         clear_queue(chat_id)
 
 # --- FUNGSI LANJUTAN TAMBAHAN (Disesuaikan dari contoh sebelumnya) ---
-# Anda harus membuat command handler untuk ini jika ingin menggunakannya!
+# Anda harus memastikan fungsi-fungsi utilitas ini (get_queue, skip_current_song, dll.)
+# sudah memiliki implementasi yang benar di modul lain yang diimpor ('xteam.vcbot', '.').
 
 async def play_next_stream(chat_id: int, file_path: str, is_video: bool = False, ffmpeg_seek: str = None):
-    """Fungsi pembantu yang dipanggil oleh skip_current_song untuk memulai lagu berikutnya."""
-    stream = dynamic_media_stream(
-        path=file_path,
-        video=is_video,
-        ffmpeg_params=ffmpeg_seek
-    )
+    """
+    Fungsi pembantu yang dipanggil oleh skip_current_song untuk memulai lagu berikutnya.
+    (Implementasi ini seharusnya sudah berada di utilitas antrian Anda)
+    """
+    if is_video:
+        stream = MediaStream(
+            media_path=file_path,
+            audio_parameters=AudioQuality.HIGH,
+            video_parameters=VideoQuality.HD_720p,
+            audio_flags=MediaStream.Flags.REQUIRED,
+            video_flags=MediaStream.Flags.REQUIRED,
+            ffmpeg_parameters=ffmpeg_seek,
+        )
+    else:
+        stream = MediaStream(
+            media_path=file_path,
+            audio_parameters=AudioQuality.HIGH,
+            audio_flags=MediaStream.Flags.REQUIRED,
+            video_flags=MediaStream.Flags.IGNORE,
+            ffmpeg_parameters=ffmpeg_seek,
+        )
+        
     try:
         await call_py.play(chat_id, stream)
         # Tambahkan logika pengiriman pesan "Sedang Memutar" di sini
     except Exception as e:
         logger.error(f"Gagal memutar stream di {chat_id}: {e}")
-        # Lanjutkan ke lagu berikutnya jika gagal
-
-# Contoh: vcseek (tambahan, perlu dihubungkan ke ultroid_cmd)
-# @man_cmd(pattern=r"seek(?: |$)(.*)", group_only=True)
-# async def vc_seek(event):
-#     # Implementasi seek memerlukan data 'file_path', 'to_seek', dan 'duration' dari antrian
-#     pass
+        # Lanjutkan ke lagu berikutnya jika gagal (misalnya panggil skip_current_song lagi)
