@@ -419,38 +419,12 @@ async def vc_playlist(event):
 
 
 # --- HANDLER OTOMATIS PYTGCALLS ---
-
-#@call_py.on_stream_end()
-#async def stream_end_handler(_, u: Update):
-    #chat_id = u.chat_id
+if call_py is not None:
+    # 1. Daftarkan stream_end_handler
+    call_py.on_stream_end()(stream_end_handler) 
     
-    # Logika untuk memainkan lagu berikutnya dalam antrian
-    op = await skip_current_song(chat_id)
-    if op == 1 or op == 0:
-        # Jika antrian kosong, tinggalkan panggilan
-        await call_py.leave_group_call(chat_id)
-        clear_queue(chat_id)
-        
-    # Catatan: Fungsi skip_current_song harus diperbarui untuk menghasilkan MediaStream
-    # berdasarkan item antrian berikutnya.
-
-@call_py.on_closed_voice_chat()
-async def closedvc(_, chat_id: int):
-    # Bersihkan antrian dan status ketika VC ditutup secara manual
-    if chat_id in QUEUE:
-        clear_queue(chat_id)
-
-@call_py.on_left()
-async def leftvc(_, chat_id: int):
-    # Bersihkan antrian dan status ketika asisten meninggalkan panggilan
-    if chat_id in QUEUE:
-        clear_queue(chat_id)
-
-@call_py.on_kicked()
-async def kickedvc(_, chat_id: int):
-    # Bersihkan antrian dan status ketika asisten ditendang
-    if chat_id in QUEUE:
-        clear_queue(chat_id)
+    # 2. Daftarkan closed_voice_chat handler
+    call_py.on_closed_voice_chat()(closedvc)
 
 # --- FUNGSI LANJUTAN TAMBAHAN (Disesuaikan dari contoh sebelumnya) ---
 # Anda harus memastikan fungsi-fungsi utilitas ini (get_queue, skip_current_song, dll.)
