@@ -1,4 +1,4 @@
-From __future__ import annotations
+from __future__ import annotations
 import asyncio
 import os
 import re
