@@ -6,7 +6,8 @@ import contextlib
 import logging
 import functools
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional, Tuple, Any, Union
+from datetime import datetime, timedelta
 
 import httpx
 from xteam.vcbot import *
@@ -21,7 +22,7 @@ from xteam.fns.admins import admin_check
 from pytgcalls import PyTgCalls
 from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
-from pytgcalls.exceptions import NoActiveGroupCall, AlreadyJoinedError
+from pytgcalls.exceptions import NoActiveGroupCall, AlreadyJoinedError, NoAudioSourceFound, NoVideoSourceFound
 from pytgcalls.types import (
     Update,
     ChatUpdate,
@@ -32,11 +33,7 @@ from pytgcalls.types import (
     UpdatedGroupCallParticipant,
     AudioQuality,
     VideoQuality,
-    # StreamType, # TELAH DIHAPUS
 )
-# Perhatikan bahwa jika StreamType tidak ada, ia harus dihapus dari daftar impor di atas juga.
-# Karena Anda tidak mengirimkan kembali daftar impor yang diperbarui, saya asumsikan sudah dihapus.
-# Saya HAPUS JUGA IMPOR YANG SAYA TAMBAHKAN DARI BAWAH
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
@@ -53,6 +50,12 @@ from youtubesearchpython.__future__ import VideosSearch
 
 from . import ultroid_cmd as man_cmd, eor as edit_or_reply, edit_delete 
 logger = logging.getLogger(__name__)
+
+# --- Variabel Asumsi Global (Sesuaikan jika diperlukan) ---
+# QUEUE: Global dictionary for queue data {chat_id: [item1, item2, ...]}
+# get_queue, skip_current_song, clear_queue, skip_item: Fungsi utilitas queue
+# ytsearch, ytdl, gen_thumb, CHAT_TITLE: Fungsi utilitas YouTube/Thumbnail
+# -----------------------------------------------------------
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
@@ -124,7 +127,6 @@ async def vc_play(event):
                 await call_py.join_group_call(
                     chat_id,
                     dynamic_media_stream(ytlink, video=False),
-                    # stream_type=StreamType().pulse_stream, # DIHAPUS
                 )
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
                 caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Atas permintaan:** {from_user}"
@@ -158,7 +160,6 @@ async def vc_play(event):
                 await call_py.join_group_call(
                     chat_id,
                     dynamic_media_stream(dl, video=False),
-                    # stream_type=StreamType().pulse_stream, # DIHAPUS
                 )
                 add_to_queue(chat_id, songname, dl, link, "Audio", 0)
                 caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Lagu`\n🎧 **Atas permintaan:** {from_user}"
@@ -215,7 +216,6 @@ async def vc_vplay(event):
                 await call_py.join_group_call(
                     chat_id,
                     dynamic_media_stream(ytlink, video=True),
-                    # stream_type=StreamType().pulse_stream, # DIHAPUS
                 )
                 add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
                 return await xnxx.edit(
@@ -254,7 +254,6 @@ async def vc_vplay(event):
                 await call_py.join_group_call(
                     chat_id,
                     dynamic_media_stream(dl, video=True),
-                    # stream_type=StreamType().pulse_stream, # DIHAPUS
                 )
                 add_to_queue(chat_id, songname, dl, link, "Video", RESOLUSI)
                 caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
@@ -295,6 +294,7 @@ async def vc_skip(event):
         elif op == 1:
             await edit_delete(event, "antrian kosong, meninggalkan obrolan suara", 10)
         else:
+            # Asumsi skip_current_song akan memanggil call_py.play() untuk lagu berikutnya
             await edit_or_reply(
                 event,
                 f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[1]})",
@@ -348,15 +348,26 @@ async def vc_volume(event):
     admin = chat.admin_rights
     creator = chat.creator
     chat_id = event.chat_id
+    
+    # Pengecekan Admin
     if not admin and not creator:
-        return await edit_delete(event, f"**Maaf {me.first_name} Bukan Admin 👮**", 30)
+        # Pengecekan admin_check (jika Anda menggunakan fungsi tersebut)
+        if not await admin_check(event):
+             return await edit_delete(event, f"**Maaf {me.first_name} Bukan Admin 👮**", 30)
 
     if chat_id in QUEUE:
         try:
-            await call_py.change_volume_call(chat_id, volume=int(query))
+            # PyTgCalls menerima volume antara 0 dan 100
+            volume_level = int(query)
+            if not 0 <= volume_level <= 100:
+                return await edit_delete(event, "**Volume harus antara 0 dan 100.**", 10)
+                
+            await call_py.change_volume_call(chat_id, volume=volume_level)
             await edit_or_reply(
-                event, f"**Berhasil Mengubah Volume Menjadi** `{query}%`"
+                event, f"**Berhasil Mengubah Volume Menjadi** `{volume_level}%`"
             )
+        except ValueError:
+             await edit_delete(event, "**Mohon masukkan angka yang valid untuk volume.**", 10)
         except Exception as e:
             await edit_delete(event, f"**ERROR:** `{e}`", 30)
     else:
@@ -387,26 +398,60 @@ async def vc_playlist(event):
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
 
 
+# --- HANDLER OTOMATIS PYTGCALLS ---
+
 @call_py.on_stream_end()
 async def stream_end_handler(_, u: Update):
     chat_id = u.chat_id
-    await skip_current_song(chat_id)
-
+    
+    # Logika untuk memainkan lagu berikutnya dalam antrian
+    op = await skip_current_song(chat_id)
+    if op == 1 or op == 0:
+        # Jika antrian kosong, tinggalkan panggilan
+        await call_py.leave_group_call(chat_id)
+        clear_queue(chat_id)
+        # Anda dapat menambahkan kirim pesan ke chat untuk memberitahu
+        
+    # Catatan: Fungsi skip_current_song Anda harus mencakup logika
+    # untuk memanggil call_py.play() dengan MediaStream lagu berikutnya
 
 @call_py.on_closed_voice_chat()
 async def closedvc(_, chat_id: int):
+    # Bersihkan antrian dan status ketika VC ditutup secara manual
     if chat_id in QUEUE:
         clear_queue(chat_id)
-
 
 @call_py.on_left()
 async def leftvc(_, chat_id: int):
+    # Bersihkan antrian dan status ketika asisten meninggalkan panggilan
     if chat_id in QUEUE:
         clear_queue(chat_id)
-
 
 @call_py.on_kicked()
 async def kickedvc(_, chat_id: int):
+    # Bersihkan antrian dan status ketika asisten ditendang
     if chat_id in QUEUE:
         clear_queue(chat_id)
-    
+
+# --- FUNGSI LANJUTAN TAMBAHAN (Disesuaikan dari contoh sebelumnya) ---
+# Anda harus membuat command handler untuk ini jika ingin menggunakannya!
+
+async def play_next_stream(chat_id: int, file_path: str, is_video: bool = False, ffmpeg_seek: str = None):
+    """Fungsi pembantu yang dipanggil oleh skip_current_song untuk memulai lagu berikutnya."""
+    stream = dynamic_media_stream(
+        path=file_path,
+        video=is_video,
+        ffmpeg_params=ffmpeg_seek
+    )
+    try:
+        await call_py.play(chat_id, stream)
+        # Tambahkan logika pengiriman pesan "Sedang Memutar" di sini
+    except Exception as e:
+        logger.error(f"Gagal memutar stream di {chat_id}: {e}")
+        # Lanjutkan ke lagu berikutnya jika gagal
+
+# Contoh: vcseek (tambahan, perlu dihubungkan ke ultroid_cmd)
+# @man_cmd(pattern=r"seek(?: |$)(.*)", group_only=True)
+# async def vc_seek(event):
+#     # Implementasi seek memerlukan data 'file_path', 'to_seek', dan 'duration' dari antrian
+#     pass
