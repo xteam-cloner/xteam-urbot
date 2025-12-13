@@ -49,7 +49,7 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 
-from . import ultroid_cmd as man_cmd, eor as edit_or_reply, edit_delete 
+from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete 
 logger = logging.getLogger(__name__)
 
 # --- Variabel Asumsi Global (Sesuaikan jika diperlukan) ---
