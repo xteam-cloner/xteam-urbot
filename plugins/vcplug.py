@@ -418,18 +418,6 @@ async def vc_playlist(event):
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
 
 
-# --- HANDLER OTOMATIS PYTGCALLS ---
-if call_py is not None:
-    # 1. Daftarkan stream_end_handler
-    call_py.on_stream_end()(stream_end_handler) 
-    
-    # 2. Daftarkan closed_voice_chat handler
-    call_py.on_closed_voice_chat()(closedvc)
-
-# --- FUNGSI LANJUTAN TAMBAHAN (Disesuaikan dari contoh sebelumnya) ---
-# Anda harus memastikan fungsi-fungsi utilitas ini (get_queue, skip_current_song, dll.)
-# sudah memiliki implementasi yang benar di modul lain yang diimpor ('xteam.vcbot', '.').
-
 async def play_next_stream(chat_id: int, file_path: str, is_video: bool = False, ffmpeg_seek: str = None):
     """
     Fungsi pembantu yang dipanggil oleh skip_current_song untuk memulai lagu berikutnya.
