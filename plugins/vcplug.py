@@ -23,7 +23,7 @@ from xteam.fns.admins import admin_check
 #import PyTgCalls
 from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
-from pytgcalls.exceptions import NoActiveGroupCall, AlreadyJoinedError, NoAudioSourceFound, NoVideoSourceFound
+from pytgcalls.exceptions import NoActiveGroupCall, NoAudioSourceFound, NoVideoSourceFound
 from pytgcalls.types import (
     Update,
     ChatUpdate,
