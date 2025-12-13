@@ -40,7 +40,7 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors.rpcerrorlist import (
     UserNotParticipantError,
-    UserAlreadyParticipantError
+    UserAlreadyParticipantError # <-- Sudah diimpor dan akan digunakan sebagai pengganti
 )
 from telethon.tl.functions.messages import ExportChatInviteRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
@@ -127,7 +127,7 @@ async def vc_play(event):
                 return await event.client.send_file(
                     chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
                 )
-            except AlreadyJoinedError:
+            except UserAlreadyParticipantError: # <--- PERBAIKAN 1/4: Mengganti AlreadyJoinedError
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await botman.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -168,7 +168,7 @@ async def vc_play(event):
                     chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id
                 )
                 await botman.delete()
-            except AlreadyJoinedError:
+            except UserAlreadyParticipantError: # <--- PERBAIKAN 2/4: Mengganti AlreadyJoinedError
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await botman.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -232,7 +232,7 @@ async def vc_vplay(event):
                     f"**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}",
                     link_preview=False,
                 )
-            except AlreadyJoinedError:
+            except UserAlreadyParticipantError: # <--- PERBAIKAN 3/4: Mengganti AlreadyJoinedError
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await xnxx.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -280,7 +280,7 @@ async def vc_vplay(event):
                 return await event.client.send_file(
                     chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id
                 )
-            except AlreadyJoinedError:
+            except UserAlreadyParticipantError: # <--- PERBAIKAN 4/4: Mengganti AlreadyJoinedError
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await xnxx.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -458,4 +458,4 @@ async def play_next_stream(chat_id: int, file_path: str, is_video: bool = False,
         # Tambahkan logika pengiriman pesan "Sedang Memutar" di sini
     except Exception as e:
         logger.error(f"Gagal memutar stream di {chat_id}: {e}")
-        # Lanjutkan ke lagu berikutnya jika gagal (misalnya panggil skip_current_song lagi)
+        # Lanjut
