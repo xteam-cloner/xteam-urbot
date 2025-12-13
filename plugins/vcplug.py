@@ -420,9 +420,9 @@ async def vc_playlist(event):
 
 # --- HANDLER OTOMATIS PYTGCALLS ---
 
-@call_py.on_stream_end()
-async def stream_end_handler(_, u: Update):
-    chat_id = u.chat_id
+#@call_py.on_stream_end()
+#async def stream_end_handler(_, u: Update):
+    #chat_id = u.chat_id
     
     # Logika untuk memainkan lagu berikutnya dalam antrian
     op = await skip_current_song(chat_id)
