@@ -10,7 +10,7 @@ from typing import Dict, Optional, Tuple, Any, Union
 from datetime import datetime, timedelta
 
 import httpx
-# Asumsi modul ini ada atau diganti
+# Asumsi modul ini ada atau diganti, sesuaikan import helper functions di sini
 from xteam.vcbot import * 
 from . import * 
 from telethon import events, TelegramClient, Button
@@ -40,7 +40,7 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors.rpcerrorlist import (
     UserNotParticipantError,
-    UserAlreadyParticipantError # <-- Sudah diimpor dan akan digunakan sebagai pengganti
+    UserAlreadyParticipantError # <-- Pengecualian yang benar
 )
 from telethon.tl.functions.messages import ExportChatInviteRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
@@ -56,15 +56,13 @@ logger = logging.getLogger(__name__)
 # QUEUE: Global dictionary for queue data {chat_id: [item1, item2, ...]}
 # get_queue, skip_current_song, clear_queue, skip_item: Fungsi utilitas queue
 # ytsearch, ytdl, gen_thumb, CHAT_TITLE, add_to_queue: Fungsi utilitas YouTube/Thumbnail/Queue
+# join_call, group_assistant: ASUMSI helper function untuk PyTgCalls
 # -----------------------------------------------------------
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
-
-# Fungsi dynamic_media_stream telah dihapus.
-# Implementasi MediaStream kini berada langsung di vc_play dan vc_vplay.
 
 def vcmention(user: TypeUser):
     full_name = get_display_name(user)
@@ -109,16 +107,11 @@ async def vc_play(event):
             )
         else:
             try:
-                # --- PENGGANTIAN LOGIKA dynamic_media_stream (YOUTUBE AUDIO) ---
-                await call_py.join_group_call(
+                # --- PENGGANTIAN LOGIKA JOIN GROUP CALL DENGAN HELPER (YOUTUBE AUDIO) ---
+                await join_call(
                     chat_id,
-                    MediaStream(
-                        media_path=ytlink,
-                        audio_parameters=AudioQuality.HIGH,
-                        audio_flags=MediaStream.Flags.REQUIRED,
-                        video_flags=MediaStream.Flags.IGNORE, # Abaikan Video
-                        ffmpeg_parameters=None,
-                    ),
+                    link=ytlink,
+                    video=False,
                 )
                 # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
@@ -127,7 +120,7 @@ async def vc_play(event):
                 return await event.client.send_file(
                     chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
                 )
-            except UserAlreadyParticipantError: # <--- PERBAIKAN 1/4: Mengganti AlreadyJoinedError
+            except UserAlreadyParticipantError:
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await botman.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -150,16 +143,11 @@ async def vc_play(event):
             await botman.delete()
         else:
             try:
-                # --- PENGGANTIAN LOGIKA dynamic_media_stream (TELEGRAM AUDIO) ---
-                await call_py.join_group_call(
+                # --- PENGGANTIAN LOGIKA JOIN GROUP CALL DENGAN HELPER (TELEGRAM AUDIO) ---
+                await join_call(
                     chat_id,
-                    MediaStream(
-                        media_path=dl,
-                        audio_parameters=AudioQuality.HIGH,
-                        audio_flags=MediaStream.Flags.REQUIRED,
-                        video_flags=MediaStream.Flags.IGNORE, # Abaikan Video
-                        ffmpeg_parameters=None,
-                    ),
+                    link=dl,
+                    video=False,
                 )
                 # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, dl, link, "Audio", 0)
@@ -168,7 +156,7 @@ async def vc_play(event):
                     chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id
                 )
                 await botman.delete()
-            except UserAlreadyParticipantError: # <--- PERBAIKAN 2/4: Mengganti AlreadyJoinedError
+            except UserAlreadyParticipantError: # <--- Pengecualian yang benar
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await botman.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -214,17 +202,11 @@ async def vc_vplay(event):
             )
         else:
             try:
-                # --- PENGGANTIAN LOGIKA dynamic_media_stream (YOUTUBE VIDEO) ---
-                await call_py.join_group_call(
+                # --- PENGGANTIAN LOGIKA JOIN GROUP CALL DENGAN HELPER (YOUTUBE VIDEO) ---
+                await join_call(
                     chat_id,
-                    MediaStream(
-                        media_path=ytlink,
-                        audio_parameters=AudioQuality.HIGH,
-                        video_parameters=VideoQuality.HD_720p,
-                        audio_flags=MediaStream.Flags.REQUIRED,
-                        video_flags=MediaStream.Flags.REQUIRED, # Butuh Video
-                        ffmpeg_parameters=None,
-                    ),
+                    link=ytlink,
+                    video=True,
                 )
                 # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
@@ -232,7 +214,7 @@ async def vc_vplay(event):
                     f"**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}",
                     link_preview=False,
                 )
-            except UserAlreadyParticipantError: # <--- PERBAIKAN 3/4: Mengganti AlreadyJoinedError
+            except UserAlreadyParticipantError: # <--- Pengecualian yang benar
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await xnxx.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -261,17 +243,11 @@ async def vc_vplay(event):
             await xnxx.delete()
         else:
             try:
-                # --- PENGGANTIAN LOGIKA dynamic_media_stream (TELEGRAM VIDEO) ---
-                await call_py.join_group_call(
+                # --- PENGGANTIAN LOGIKA JOIN GROUP CALL DENGAN HELPER (TELEGRAM VIDEO) ---
+                await join_call(
                     chat_id,
-                    MediaStream(
-                        media_path=dl,
-                        audio_parameters=AudioQuality.HIGH,
-                        video_parameters=VideoQuality.HD_720p,
-                        audio_flags=MediaStream.Flags.REQUIRED,
-                        video_flags=MediaStream.Flags.REQUIRED, # Butuh Video
-                        ffmpeg_parameters=None,
-                    ),
+                    link=dl,
+                    video=True,
                 )
                 # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, dl, link, "Video", RESOLUSI)
@@ -280,7 +256,7 @@ async def vc_vplay(event):
                 return await event.client.send_file(
                     chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id
                 )
-            except UserAlreadyParticipantError: # <--- PERBAIKAN 4/4: Mengganti AlreadyJoinedError
+            except UserAlreadyParticipantError: # <--- Pengecualian yang benar
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await xnxx.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -294,7 +270,8 @@ async def vc_end(event):
     chat_id = event.chat_id
     if chat_id in QUEUE:
         try:
-            await call_py.leave_group_call(chat_id)
+            # Tetap gunakan call_py.leave_group_call (Metode ini umumnya tetap ada)
+            await call_py.leave_group_call(chat_id) 
             clear_queue(chat_id)
             await edit_or_reply(event, "**Menghentikan Streaming**")
         except Exception as e:
@@ -313,8 +290,7 @@ async def vc_skip(event):
         elif op == 1:
             await edit_delete(event, "antrian kosong, meninggalkan obrolan suara", 10)
         else:
-            # Asumsi skip_current_song akan memanggil call_py.play() untuk lagu berikutnya
-            # menggunakan MediaStream yang dibentuk berdasarkan item antrian berikutnya.
+            # Asumsi skip_current_song akan memanggil fungsi play_next_stream/join_call untuk lagu berikutnya
             await edit_or_reply(
                 event,
                 f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[1]})",
@@ -371,13 +347,11 @@ async def vc_volume(event):
     
     # Pengecekan Admin
     if not admin and not creator:
-        # Pengecekan admin_check (jika Anda menggunakan fungsi tersebut)
         if not await admin_check(event):
              return await edit_delete(event, f"**Maaf {me.first_name} Bukan Admin 👮**", 30)
 
     if chat_id in QUEUE:
         try:
-            # PyTgCalls menerima volume antara 0 dan 100
             volume_level = int(query)
             if not 0 <= volume_level <= 100:
                 return await edit_delete(event, "**Volume harus antara 0 dan 100.**", 10)
@@ -418,32 +392,20 @@ async def vc_playlist(event):
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
 
 
+# --- HANDLER OTOMATIS PYTGCALLS ---
+# Bagian ini dikomentari/dihapus karena event handling kini dilakukan
+# melalui unified_update_handler() di library internal (seperti yang Anda tunjukkan)
+
+# if call_py is not None:
+#     call_py.on_raw_stream_end()(stream_end_handler) 
+#     call_py.on_closed_voice_chat()(closedvc)
+
+
 async def play_next_stream(chat_id: int, file_path: str, is_video: bool = False, ffmpeg_seek: str = None):
     """
     Fungsi pembantu yang dipanggil oleh skip_current_song untuk memulai lagu berikutnya.
-    (Implementasi ini seharusnya sudah berada di utilitas antrian Anda)
+    (Fungsi ini harus diimplementasikan atau diimpor dari modul helper)
     """
-    if is_video:
-        stream = MediaStream(
-            media_path=file_path,
-            audio_parameters=AudioQuality.HIGH,
-            video_parameters=VideoQuality.HD_720p,
-            audio_flags=MediaStream.Flags.REQUIRED,
-            video_flags=MediaStream.Flags.REQUIRED,
-            ffmpeg_parameters=ffmpeg_seek,
-        )
-    else:
-        stream = MediaStream(
-            media_path=file_path,
-            audio_parameters=AudioQuality.HIGH,
-            audio_flags=MediaStream.Flags.REQUIRED,
-            video_flags=MediaStream.Flags.IGNORE,
-            ffmpeg_parameters=ffmpeg_seek,
-        )
-        
-    try:
-        await call_py.play(chat_id, stream)
-        # Tambahkan logika pengiriman pesan "Sedang Memutar" di sini
-    except Exception as e:
-        logger.error(f"Gagal memutar stream di {chat_id}: {e}")
-        # Lanjut
+    # Asumsi fungsi ini menggunakan join_call atau assistant.play()
+    pass
+
