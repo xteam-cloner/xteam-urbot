@@ -14,7 +14,7 @@ from . import *
 from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User
 from xteam.configs import Var 
-from xteam import call_py, vc_client as client# AKAN MENGAMBIL xteam.call_py YANG SUDAH DISET DI __main__.py
+from xteam import call_py, bot as client# AKAN MENGAMBIL xteam.call_py YANG SUDAH DISET DI __main__.py
 from xteam import ultroid_bot 
 from telethon.utils import get_display_name
 from xteam.fns.admins import admin_check 
