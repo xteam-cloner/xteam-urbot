@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any
 
 import httpx
-
+from xteam.vcbot import *
 from . import * 
 from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User
