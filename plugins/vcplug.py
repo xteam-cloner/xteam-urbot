@@ -391,36 +391,3 @@ async def vc_playlist(event):
     else:
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
 
-
-
-# Handler untuk event PyTgCalls
-@call_py.on_stream_end()
-async def on_stream_end(event):
-    # Handle stream end event
-    pass
-
-@call_py.on_closed_voice_chat()
-async def on_closed_voice_chat(event):
-    # Handle closed voice chat event
-    pass
-
-# Fungsi untuk memulai lagu berikutnya
-async def play_next_stream(chat_id: int, file_path: str, is_video: bool = False, ffmpeg_seek: str = None):
-    # Implementasikan logika untuk memulai lagu berikutnya
-    pass
-
-# Fungsi untuk bergabung dengan panggilan grup
-async def join_call(chat_id: int, link: str, video: bool = False):
-    # Implementasikan logika untuk bergabung dengan panggilan grup
-    pass
-
-# Fungsi untuk melewati lagu saat ini
-async def skip_current_song(chat_id: int):
-    # Implementasikan logika untuk melewati lagu saat ini
-    pass
-
-# Fungsi untuk membersihkan antrian
-async def clear_queue(chat_id: int):
-    # Implementasikan logika untuk membersihkan antrian
-    pass
-    
