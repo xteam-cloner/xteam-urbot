@@ -1,4 +1,4 @@
-from __future__ import annotations
+From __future__ import annotations
 import asyncio
 import os
 import re
@@ -10,19 +10,19 @@ from typing import Dict, Optional, Tuple, Any
 
 import httpx
 from xteam.vcbot import *
-from . import * 
-from telethon import events, TelegramClient, Button
-from telethon.tl.types import Message, User
+from . import * from telethon import events, TelegramClient, Button
+from telethon.tl.types import Message, User, TypeUser
 from xteam.configs import Var 
-from xteam import call_py, bot as client# AKAN MENGAMBIL xteam.call_py YANG SUDAH DISET DI __main__.py
+from xteam import call_py, bot as client
 from xteam import ultroid_bot 
 from telethon.utils import get_display_name
 from xteam.fns.admins import admin_check 
 from pytgcalls import PyTgCalls
 from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
-from pytgcalls.exceptions import NoActiveGroupCall
+from pytgcalls.exceptions import NoActiveGroupCall, AlreadyJoinedError
 from pytgcalls.types import (
+    Update,
     ChatUpdate,
     MediaStream,
     StreamEnded,
@@ -31,7 +31,11 @@ from pytgcalls.types import (
     UpdatedGroupCallParticipant,
     AudioQuality,
     VideoQuality,
+    # StreamType, # TELAH DIHAPUS
 )
+# Perhatikan bahwa jika StreamType tidak ada, ia harus dihapus dari daftar impor di atas juga.
+# Karena Anda tidak mengirimkan kembali daftar impor yang diperbarui, saya asumsikan sudah dihapus.
+# Saya HAPUS JUGA IMPOR YANG SAYA TAMBAHKAN DARI BAWAH
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
@@ -46,7 +50,7 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 
-from . import ultroid_cmd as man_cmd, eor as edit_or_reply 
+from . import ultroid_cmd as man_cmd, eor as edit_or_reply, edit_delete 
 logger = logging.getLogger(__name__)
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
@@ -54,304 +58,216 @@ ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
 
-# VC Bot Plugin - Tanpa Pernyataan Import
-# (Semua dependensi diasumsikan tersedia secara global)
+def dynamic_media_stream(path: str, video: bool = False, ffmpeg_params: str = None) -> MediaStream:
+    if video:
+        return MediaStream(
+            media_path=path,
+            audio_parameters=AudioQuality.HIGH,
+            video_parameters=VideoQuality.HD_720p,
+            audio_flags=MediaStream.Flags.REQUIRED,
+            video_flags=MediaStream.Flags.REQUIRED,
+            ffmpeg_parameters=ffmpeg_params,
+        )
+    else:
+        return MediaStream(
+            media_path=path,
+            audio_parameters=AudioQuality.HIGH,
+            audio_flags=MediaStream.Flags.REQUIRED,
+            video_flags=MediaStream.Flags.IGNORE,
+            ffmpeg_parameters=ffmpeg_params,
+        )
 
-def vcmention(user):
+def vcmention(user: TypeUser):
     full_name = get_display_name(user)
-    if not isinstance(user, types.User):
+    if not isinstance(user, User):
         return full_name
     return f"[{full_name}](tg://user?id={user.id})"
 
 
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
-    title = event.pattern_match.group(1)
+    title_match = event.pattern_match.group(1)
     replied = await event.get_reply_message()
     chat = await event.get_chat()
-    titlegc = chat.title
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
-    if (
-        replied
-        and not replied.audio
-        and not replied.voice
-        and not title
-        or not replied
-        and not title
-    ):
+    
+    if not title_match and not (replied and (replied.audio or replied.voice)):
         return await edit_or_reply(event, "**Silahkan Masukan Judul Lagu**")
-    elif replied and not replied.audio and not replied.voice or not replied:
+
+    if not replied or (replied and not replied.audio and not replied.voice):
         botman = await edit_or_reply(event, "`Searching...`")
         query = event.text.split(maxsplit=1)[1]
         search = ytsearch(query)
+        
         if search == 0:
-            await botman.edit(
-                "**Tidak Dapat Menemukan Lagu** Coba cari dengan Judul yang Lebih Spesifik"
+            return await botman.edit("**Tidak Dapat Menemukan Lagu** Coba cari dengan Judul yang Lebih Spesifik")
+        
+        songname, url, duration, thumbnail, videoid = search
+        ctitle = await CHAT_TITLE(chat.title)
+        thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
+        hm, ytlink = await ytdl(url)
+
+        if hm == 0:
+            return await botman.edit(f"`{ytlink}`")
+
+        if chat_id in QUEUE:
+            pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
+            caption = f"💡 **Lagu Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
+            await botman.delete()
+            return await event.client.send_file(
+                chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
             )
         else:
-            songname = search[0]
-            title = search[0]
-            url = search[1]
-            duration = search[2]
-            thumbnail = search[3]
-            videoid = search[4]
-            titlegc = chat.title
-            ctitle = await CHAT_TITLE(titlegc)
-            thumb = await gen_thumb(thumbnail, title, videoid, ctitle)
-            hm, ytlink = await ytdl(url)
-            if hm == 0:
-                await botman.edit(f"`{ytlink}`")
-            elif chat_id in QUEUE:
-                pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-                caption = f"💡 **Lagu Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
+            try:
+                await call_py.join_group_call(
+                    chat_id,
+                    dynamic_media_stream(ytlink, video=False),
+                    # stream_type=StreamType().pulse_stream, # DIHAPUS
+                )
+                add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
+                caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Atas permintaan:** {from_user}"
                 await botman.delete()
-                await event.client.send_file(
+                return await event.client.send_file(
                     chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
                 )
-            else:
-                try:
-                    await call_py.join_group_call(
-                        chat_id,
-                        AudioPiped(
-                            ytlink,
-                            HighQualityAudio(),
-                        ),
-                        stream_type=StreamType().pulse_stream,
-                    )
-                    add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-                    caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Atas permintaan:** {from_user}"
-                    await botman.delete()
-                    await event.client.send_file(
-                        chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
-                    )
-                except AlreadyJoinedError:
-                    await call_py.leave_group_call(chat_id)
-                    clear_queue(chat_id)
-                    await botman.edit(
-                        "**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi"
-                    )
-                except Exception as ep:
-                    clear_queue(chat_id)
-                    await botman.edit(f"`{ep}`")
+            except AlreadyJoinedError:
+                await call_py.leave_group_call(chat_id)
+                clear_queue(chat_id)
+                return await botman.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
+            except Exception as ep:
+                clear_queue(chat_id)
+                return await botman.edit(f"**ERROR:** `{ep}`")
 
     else:
         botman = await edit_or_reply(event, "📥 **Sedang Mendownload**")
         dl = await replied.download_media()
-        link = f"https://t.me/c/{chat.id}/{event.reply_to_msg_id}"
-        if replied.audio:
-            songname = "Telegram Music Player"
-        elif replied.voice:
-            songname = "Voice Note"
+        link = f"https://t.me/c/{chat_id}/{event.reply_to_msg_id}"
+        songname = "Telegram Music Player" if replied.audio else "Voice Note"
+        
         if chat_id in QUEUE:
             pos = add_to_queue(chat_id, songname, dl, link, "Audio", 0)
             caption = f"💡 **Lagu Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n🎧 **Atas permintaan:** {from_user}"
             await event.client.send_file(
-                chat_id, QUEUE_PIC, caption=caption, reply_to=event.reply_to_msg_id
+                chat_id, ngantri, caption=caption, reply_to=event.reply_to_msg_id
             )
             await botman.delete()
         else:
             try:
                 await call_py.join_group_call(
                     chat_id,
-                    AudioPiped(
-                        dl,
-                        HighQualityAudio(),
-                    ),
-                    stream_type=StreamType().pulse_stream,
+                    dynamic_media_stream(dl, video=False),
+                    # stream_type=StreamType().pulse_stream, # DIHAPUS
                 )
                 add_to_queue(chat_id, songname, dl, link, "Audio", 0)
                 caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Lagu`\n🎧 **Atas permintaan:** {from_user}"
                 await event.client.send_file(
-                    chat_id, PLAY_PIC, caption=caption, reply_to=event.reply_to_msg_id
+                    chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id
                 )
                 await botman.delete()
             except AlreadyJoinedError:
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
-                await botman.edit(
-                    "**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi"
-                )
+                return await botman.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
             except Exception as ep:
                 clear_queue(chat_id)
-                await botman.edit(f"`{ep}`")
+                return await botman.edit(f"**ERROR:** `{ep}`")
 
 
 @man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_vplay(event):
-    title = event.pattern_match.group(1)
+    title_match = event.pattern_match.group(1)
     replied = await event.get_reply_message()
     chat = await event.get_chat()
-    titlegc = chat.title
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
-    if (
-        replied
-        and not replied.video
-        and not replied.document
-        and not title
-        or not replied
-        and not title
-    ):
+    RESOLUSI = 720
+    
+    if not title_match and not (replied and (replied.video or replied.document)):
         return await edit_or_reply(event, "**Silahkan Masukan Judul Video**")
-    if replied and not replied.video and not replied.document:
+
+    if not replied or (replied and not replied.video and not replied.document):
         xnxx = await edit_or_reply(event, "`Searching...`")
         query = event.text.split(maxsplit=1)[1]
         search = ytsearch(query)
-        RESOLUSI = 720
-        hmmm = HighQualityVideo()
+        
         if search == 0:
-            await xnxx.edit(
-                "**Tidak Dapat Menemukan Video** Coba cari dengan Judul yang Lebih Spesifik"
-            )
-        else:
-            songname = search[0]
-            title = search[0]
-            url = search[1]
-            duration = search[2]
-            thumbnail = search[3]
-            videoid = search[4]
-            ctitle = await CHAT_TITLE(titlegc)
-            thumb = await gen_thumb(thumbnail, title, videoid, ctitle)
-            hm, ytlink = await ytdl(url)
-            if hm == 0:
-                await xnxx.edit(f"`{ytlink}`")
-            elif chat_id in QUEUE:
-                pos = add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
-                caption = f"💡 **Video Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
-                await xnxx.delete()
-                await event.client.send_file(
-                    chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
-                )
-            else:
-                try:
-                    await call_py.join_group_call(
-                        chat_id,
-                        AudioVideoPiped(
-                            ytlink,
-                            HighQualityAudio(),
-                            hmmm,
-                        ),
-                        stream_type=StreamType().pulse_stream,
-                    )
-                    add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
-                    await xnxx.edit(
-                        f"**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}",
-                        link_preview=False,
-                    )
-                except AlreadyJoinedError:
-                    await call_py.leave_group_call(chat_id)
-                    clear_queue(chat_id)
-                    await xnxx.edit(
-                        "**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi"
-                    )
-                except Exception as ep:
-                    clear_queue(chat_id)
-                    await xnxx.edit(f"`{ep}`")
+            return await xnxx.edit("**Tidak Dapat Menemukan Video** Coba cari dengan Judul yang Lebih Spesifik")
+        
+        songname, url, duration, thumbnail, videoid = search
+        ctitle = await CHAT_TITLE(chat.title)
+        thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
+        hm, ytlink = await ytdl(url)
 
-    elif replied:
-        xnxx = await edit_or_reply(event, "📥 **Sedang Mendownload**")
-        dl = await replied.download_media()
-        link = f"https://t.me/c/{chat.id}/{event.reply_to_msg_id}"
-        if len(event.text.split()) < 2:
-            RESOLUSI = 720
-        else:
-            pq = event.text.split(maxsplit=1)[1]
-            RESOLUSI = int(pq)
-        if replied.video or replied.document:
-            songname = "Telegram Video Player"
+        if hm == 0:
+            return await xnxx.edit(f"`{ytlink}`")
+
         if chat_id in QUEUE:
-            pos = add_to_queue(chat_id, songname, dl, link, "Video", RESOLUSI)
-            caption = f"💡 **Video Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n🎧 **Atas permintaan:** {from_user}"
-            await event.client.send_file(
-                chat_id, QUEUE_PIC, caption=caption, reply_to=event.reply_to_msg_id
-            )
+            pos = add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
+            caption = f"💡 **Video Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
             await xnxx.delete()
+            return await event.client.send_file(
+                chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
+            )
         else:
-            if RESOLUSI == 360:
-                hmmm = LowQualityVideo()
-            elif RESOLUSI == 480:
-                hmmm = MediumQualityVideo()
-            elif RESOLUSI == 720:
-                hmmm = HighQualityVideo()
             try:
                 await call_py.join_group_call(
                     chat_id,
-                    AudioVideoPiped(
-                        dl,
-                        HighQualityAudio(),
-                        hmmm,
-                    ),
-                    stream_type=StreamType().pulse_stream,
+                    dynamic_media_stream(ytlink, video=True),
+                    # stream_type=StreamType().pulse_stream, # DIHAPUS
                 )
-                add_to_queue(chat_id, songname, dl, link, "Video", RESOLUSI)
-                caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
-                await xnxx.delete()
-                await event.client.send_file(
-                    chat_id, PLAY_PIC, caption=caption, reply_to=event.reply_to_msg_id
+                add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
+                return await xnxx.edit(
+                    f"**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}",
+                    link_preview=False,
                 )
             except AlreadyJoinedError:
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
-                await xnxx.edit(
-                    "**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi"
-                )
+                return await xnxx.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
             except Exception as ep:
                 clear_queue(chat_id)
-                await xnxx.edit(f"`{ep}`")
+                return await xnxx.edit(f"**ERROR:** `{ep}`")
+
     else:
-        xnxx = await edit_or_reply(event, "`Searching...`")
-        query = event.text.split(maxsplit=1)[1]
-        search = ytsearch(query)
-        RESOLUSI = 720
-        hmmm = HighQualityVideo()
-        if search == 0:
-            await xnxx.edit("**Tidak Menemukan Video untuk Keyword yang Diberikan**")
+        xnxx = await edit_or_reply(event, "📥 **Sedang Mendownload**")
+        dl = await replied.download_media()
+        link = f"https://t.me/c/{chat_id}/{event.reply_to_msg_id}"
+        songname = "Telegram Video Player"
+        
+        if len(event.text.split()) > 1:
+            try:
+                RESOLUSI = int(event.text.split(maxsplit=1)[1])
+            except ValueError:
+                pass
+
+        if chat_id in QUEUE:
+            pos = add_to_queue(chat_id, songname, dl, link, "Video", RESOLUSI)
+            caption = f"💡 **Video Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n🎧 **Atas permintaan:** {from_user}"
+            await event.client.send_file(
+                chat_id, ngantri, caption=caption, reply_to=event.reply_to_msg_id
+            )
+            await xnxx.delete()
         else:
-            songname = search[0]
-            title = search[0]
-            url = search[1]
-            duration = search[2]
-            thumbnail = search[3]
-            videoid = search[4]
-            ctitle = await CHAT_TITLE(titlegc)
-            thumb = await gen_thumb(thumbnail, title, videoid, ctitle)
-            hm, ytlink = await ytdl(url)
-            if hm == 0:
-                await xnxx.edit(f"`{ytlink}`")
-            elif chat_id in QUEUE:
-                pos = add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
-                caption = f"💡 **Video Ditambahkan Ke antrian »** `#{pos}`\n\n🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
-                await xnxx.delete()
-                await event.client.send_file(
-                    chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
+            try:
+                await call_py.join_group_call(
+                    chat_id,
+                    dynamic_media_stream(dl, video=True),
+                    # stream_type=StreamType().pulse_stream, # DIHAPUS
                 )
-            else:
-                try:
-                    await call_py.join_group_call(
-                        chat_id,
-                        AudioVideoPiped(
-                            ytlink,
-                            HighQualityAudio(),
-                            hmmm,
-                        ),
-                        stream_type=StreamType().pulse_stream,
-                    )
-                    add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
-                    caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
-                    await xnxx.delete()
-                    await event.client.send_file(
-                        chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
-                    )
-                except AlreadyJoinedError:
-                    await call_py.leave_group_call(chat_id)
-                    clear_queue(chat_id)
-                    await xnxx.edit(
-                        "**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi"
-                    )
-                except Exception as ep:
-                    clear_queue(chat_id)
-                    await xnxx.edit(f"`{ep}`")
+                add_to_queue(chat_id, songname, dl, link, "Video", RESOLUSI)
+                caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
+                await xnxx.delete()
+                return await event.client.send_file(
+                    chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id
+                )
+            except AlreadyJoinedError:
+                await call_py.leave_group_call(chat_id)
+                clear_queue(chat_id)
+                return await xnxx.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
+            except Exception as ep:
+                clear_queue(chat_id)
+                return await xnxx.edit(f"**ERROR:** `{ep}`")
 
 
 @man_cmd(pattern="end$", group_only=True)
@@ -473,7 +389,6 @@ async def vc_playlist(event):
 @call_py.on_stream_end()
 async def stream_end_handler(_, u: Update):
     chat_id = u.chat_id
-    print(chat_id)
     await skip_current_song(chat_id)
 
 
@@ -493,3 +408,4 @@ async def leftvc(_, chat_id: int):
 async def kickedvc(_, chat_id: int):
     if chat_id in QUEUE:
         clear_queue(chat_id)
+    
