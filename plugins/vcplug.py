@@ -20,7 +20,7 @@ from xteam import call_py, bot as client
 from xteam import ultroid_bot 
 from telethon.utils import get_display_name
 from xteam.fns.admins import admin_check 
-from pytgcalls import PyTgCalls
+#import PyTgCalls
 from pytgcalls import filters as fl
 from ntgcalls import TelegramServerError
 from pytgcalls.exceptions import NoActiveGroupCall, AlreadyJoinedError, NoAudioSourceFound, NoVideoSourceFound
