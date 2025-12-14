@@ -31,6 +31,7 @@ from pytgcalls.types import (
     GroupCallParticipant,
     UpdatedGroupCallParticipant,
 )
+from pytgcalls.stream import VideoQuality, AudioQuality
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
@@ -153,7 +154,6 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
     except Exception as e:
         return 0, f"Error saat mengunduh atau konversi: {e}"
 
-
 async def play_next_song(chat_id: int):
     
     pop_an_item(chat_id) 
@@ -164,18 +164,23 @@ async def play_next_song(chat_id: int):
         next_song = chat_queue[0]
         songname, file_path, url_ref, media_type, resolution = next_song
         
-        # Atur kualitas video: HD_720p jika media adalah Video, NONE jika Audio
-        video_q = VideoQuality.HD_720p if media_type == "Video" else VideoQuality.NONE
-        
         try:
+            if media_type == "Video":
+                stream = MediaStream(
+                    media_path=file_path,
+                    audio_parameters=AudioQuality.HIGH,
+                    video_parameters=VideoQuality.HD_720p,
+                )
+            else:
+                stream = MediaStream(
+                    media_path=file_path,
+                    audio_parameters=AudioQuality.HIGH,
+                    video_flags=MediaStream.Flags.IGNORE,
+                )
+                
             await call_py.play(
                 chat_id, 
-                MediaStream(
-                    media_path=file_path,
-                    # Menggunakan keyword arguments untuk stabilitas:
-                    audio_parameters=AudioQuality.HIGH, # Default, tapi diatur eksplisit
-                    video_parameters=video_q,           # Diatur ke HD_720p atau NONE
-                )
+                stream,
             )
             logger.info(f"Mulai lagu berikutnya di {chat_id}: {songname}")
         
@@ -191,7 +196,7 @@ async def play_next_song(chat_id: int):
         except Exception:
             pass
             
-
+            
 
 @call_py.on_update()
 async def stream_end_handler(client, update: Update):
