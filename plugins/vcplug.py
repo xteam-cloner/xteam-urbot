@@ -187,7 +187,7 @@ async def play_next_song(chat_id: int):
             pass
 
 
-@call_py.on_stream_end()
+@call_py.on_update()
 async def stream_end_handler(client, update: Update):
     if isinstance(update, StreamEnded):
         chat_id = update.chat_id
