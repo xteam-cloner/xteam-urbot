@@ -8,12 +8,8 @@ import functools
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any, Union
 from datetime import datetime, timedelta
-
 import httpx
-# Asumsi modul ini ada atau diganti, sesuaikan import helper functions di sini
-from xteam.vcbot import * 
-from . import * 
-from telethon import events, TelegramClient, Button
+from xteam.vcbot import * from . import * from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User, TypeUser
 from xteam.configs import Var 
 from xteam import call_py, bot as client
@@ -32,44 +28,30 @@ from pytgcalls.types import (
     GroupCallConfig,
     GroupCallParticipant,
     UpdatedGroupCallParticipant,
-    AudioQuality,
-    VideoQuality,
 )
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors.rpcerrorlist import (
     UserNotParticipantError,
-    UserAlreadyParticipantError # <-- Pengecualian yang benar
+    UserAlreadyParticipantError
 )
 from telethon.tl.functions.messages import ExportChatInviteRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
-
-
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
-
 from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete 
 logger = logging.getLogger(__name__)
-
-# --- Variabel Asumsi Global (Sesuaikan jika diperlukan) ---
-# QUEUE: Global dictionary for queue data {chat_id: [item1, item2, ...]}
-# get_queue, skip_current_song, clear_queue, skip_item: Fungsi utilitas queue
-# ytsearch, ytdl, gen_thumb, CHAT_TITLE, add_to_queue: Fungsi utilitas YouTube/Thumbnail/Queue
-# join_call, group_assistant: ASUMSI helper function untuk PyTgCalls
-# -----------------------------------------------------------
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
-
 
 def vcmention(user: TypeUser):
     full_name = get_display_name(user)
     if not isinstance(user, User):
         return full_name
     return f"[{full_name}](tg://user?id={user.id})"
-
 
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
@@ -107,13 +89,11 @@ async def vc_play(event):
             )
         else:
             try:
-                # --- PENGGANTIAN LOGIKA JOIN GROUP CALL DENGAN HELPER (YOUTUBE AUDIO) ---
                 await join_call(
                     chat_id,
                     link=ytlink,
                     video=False,
                 )
-                # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
                 caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Atas permintaan:** {from_user}"
                 await botman.delete()
@@ -143,20 +123,18 @@ async def vc_play(event):
             await botman.delete()
         else:
             try:
-                # --- PENGGANTIAN LOGIKA JOIN GROUP CALL DENGAN HELPER (TELEGRAM AUDIO) ---
                 await join_call(
                     chat_id,
                     link=dl,
                     video=False,
                 )
-                # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, dl, link, "Audio", 0)
                 caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Lagu`\n🎧 **Atas permintaan:** {from_user}"
                 await event.client.send_file(
                     chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id
                 )
                 await botman.delete()
-            except UserAlreadyParticipantError: # <--- Pengecualian yang benar
+            except UserAlreadyParticipantError: 
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await botman.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -202,19 +180,18 @@ async def vc_vplay(event):
             )
         else:
             try:
-                # --- PENGGANTIAN LOGIKA JOIN GROUP CALL DENGAN HELPER (YOUTUBE VIDEO) ---
                 await join_call(
                     chat_id,
                     link=ytlink,
                     video=True,
+                    resolution=RESOLUSI,
                 )
-                # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, ytlink, url, "Video", RESOLUSI)
                 return await xnxx.edit(
                     f"**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}",
                     link_preview=False,
                 )
-            except UserAlreadyParticipantError: # <--- Pengecualian yang benar
+            except UserAlreadyParticipantError: 
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await xnxx.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -243,20 +220,19 @@ async def vc_vplay(event):
             await xnxx.delete()
         else:
             try:
-                # --- PENGGANTIAN LOGIKA JOIN GROUP CALL DENGAN HELPER (TELEGRAM VIDEO) ---
                 await join_call(
                     chat_id,
                     link=dl,
                     video=True,
+                    resolution=RESOLUSI,
                 )
-                # -------------------------------------------------------------
                 add_to_queue(chat_id, songname, dl, link, "Video", RESOLUSI)
                 caption = f"🏷 **Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
                 await xnxx.delete()
                 return await event.client.send_file(
                     chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id
                 )
-            except UserAlreadyParticipantError: # <--- Pengecualian yang benar
+            except UserAlreadyParticipantError: 
                 await call_py.leave_group_call(chat_id)
                 clear_queue(chat_id)
                 return await xnxx.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
@@ -350,7 +326,6 @@ async def vc_volume(event):
     creator = chat.creator
     chat_id = event.chat_id
     
-    # Pengecekan Admin
     if not admin and not creator:
         if not await admin_check(event):
              return await edit_delete(event, f"**Maaf {me.first_name} Bukan Admin 👮**", 30)
@@ -395,4 +370,4 @@ async def vc_playlist(event):
             await edit_or_reply(event, PLAYLIST, link_preview=False)
     else:
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
-
+        
