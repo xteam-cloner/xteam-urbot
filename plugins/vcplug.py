@@ -31,7 +31,7 @@ from pytgcalls.types import (
     GroupCallParticipant,
     UpdatedGroupCallParticipant,
 )
-from pytgcalls.stream import VideoQuality, AudioQuality
+from pytgcalls.types.stream import VideoQuality, AudioQuality
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
