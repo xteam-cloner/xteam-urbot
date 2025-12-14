@@ -46,16 +46,16 @@ from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 
-from .queues import QUEUE, add_to_queue, get_queue, pop_an_item, clear_queue 
+from xteam.vcbot import QUEUE, add_to_queue, get_queue, pop_an_item, clear_queue 
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 FFMPEG_ABSOLUTE_PATH = "/usr/bin/ffmpeg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
-logger.info("Memeriksa folder unduhan...")
+#logger.info("Memeriksa folder unduhan...")
 if not os.path.isdir(DOWNLOAD_DIR):
     try:
         os.makedirs(DOWNLOAD_DIR)
