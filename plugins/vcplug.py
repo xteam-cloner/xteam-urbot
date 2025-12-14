@@ -81,74 +81,7 @@ def ytsearch(query: str):
         LOGS.info(str(e))
         return 0
 
-async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
-    # ... (Kode fungsi ytdl lainnya tetap sama seperti yang terakhir saya berikan)
-    
-    # ... (Pastikan semua blok try/except dan postprocessor sudah sesuai)
-    
-    # ...
 
-    loop = asyncio.get_running_loop()
-    if not os.path.isdir(DOWNLOAD_DIR):
-        os.makedirs(DOWNLOAD_DIR)
-
-    def vc_audio_dl_sync():
-        ydl_opts_vc = {
-        # Hanya ID tanpa ekstensi untuk membiarkan postprocessor mengelola penamaan akhir
-        "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s"),
-        "format": "bestaudio/best", # Unduh audio terbaik tanpa membatasi ekstensi
-        "noplaylist": True,
-        "quiet": True,
-        "nocheckcertificate": True,
-        "prefer_ffmpeg": True,
-        "exec_path": FFMPEG_ABSOLUTE_PATH,
-        "js_runtimes": {
-            "node": {},
-        },
-        "postprocessors": [
-            {
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "opus", # TARGET: OGG/Opus
-                "preferredquality": "128",
-            },
-            # Hapus jika Anda ingin metadata tetap ada
-            {
-                "key": "FFmpegMetadata",
-                "add_metadata": False,
-            },
-        ],
-    }
-
-    try:
-        x = yt_dlp.YoutubeDL(ydl_opts_vc)
-        info = x.extract_info(url, download=True)
-        video_id = info.get('id', 'unknown')
-        
-        # Cari file OGG/Opus yang dihasilkan oleh postprocessor
-        final_files = [f for f in os.listdir(DOWNLOAD_DIR) if f.startswith(video_id) and f.endswith('.opus')]
-        # Catatan: Format OGG untuk VC biasanya menggunakan ekstensi .opus
-        
-        if not final_files:
-            # Perhatikan: Perlu memastikan FFMPEG_ABSOLUTE_PATH benar dan mendukung libopus
-            logger.error(f"FFmpeg gagal membuat file OGG/Opus setelah processing untuk ID: {video_id}.")
-            raise FileNotFoundError("Konversi Opus gagal. Cek instalasi libopus di FFMPEG.")
-            
-        final_link = os.path.join(DOWNLOAD_DIR, final_files[0])
-        return final_link
-        
-    except Exception as e:
-        logger.error(f"YTDL VC Error during sync operation: {e}", exc_info=True) # Tambahkan exc_info
-        
-        # Bersihkan file yang diunduh (parsial/gagal)
-        for f in os.listdir(DOWNLOAD_DIR):
-            if f.startswith(video_id):
-                try:
-                    os.remove(os.path.join(DOWNLOAD_DIR, f))
-                except OSError:
-                    pass # Abaikan jika tidak dapat dihapus
-        
-        raise # Re-raise error
-        
         
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
