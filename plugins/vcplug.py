@@ -82,6 +82,105 @@ def ytsearch(query: str):
         return 0
 
 
+# Asumsi: DOWNLOAD_DIR, FFMPEG_ABSOLUTE_PATH, dan logger sudah didefinisikan
+
+async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
+    """
+    Mengunduh audio dari URL dan mengonversinya menjadi format Opus (untuk Voice Chat/VC)
+    menggunakan yt-dlp dan FFmpeg, dijalankan secara sinkron di executor.
+    
+    Args:
+        url (str): URL video/musik yang akan diunduh.
+        
+    Returns:
+        Tuple[int, Union[str, Any]]: (1, path_file_akhir) jika sukses, 
+                                     (0, pesan_error) jika gagal.
+    """
+    loop = asyncio.get_running_loop()
+    
+    # 1. Pastikan direktori unduhan ada
+    if not os.path.isdir(DOWNLOAD_DIR):
+        try:
+            os.makedirs(DOWNLOAD_DIR)
+        except OSError as e:
+            return 0, f"Gagal membuat direktori unduhan: {e}"
+
+    def vc_audio_dl_sync():
+        """
+        Fungsi sinkron untuk menjalankan yt-dlp. 
+        Menggunakan postprocessor untuk memastikan output Opus.
+        """
+        
+        ydl_opts_vc = {
+            # outtmpl tanpa ekstensi, agar postprocessor menentukan ekstensi akhir
+            "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s"), 
+            "format": "bestaudio/best", # Unduh audio terbaik yang tersedia
+            "noplaylist": True,
+            "quiet": True,
+            "nocheckcertificate": True,
+            "prefer_ffmpeg": True,
+            "exec_path": FFMPEG_ABSOLUTE_PATH,
+            "js_runtimes": {
+                "node": {},
+            },
+            # *** Postprocessor untuk Konversi ke Opus (OGG) ***
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "opus", # Codec target (standar untuk VC/OGG)
+                    "preferredquality": "128", # Kualitas bitrate (bisa disesuaikan)
+                },
+                # Hapus metadata file (opsional)
+                {
+                    "key": "FFmpegMetadata",
+                    "add_metadata": False,
+                },
+            ],
+        }
+
+        # video_id digunakan untuk penanganan error dan pembersihan
+        video_id = 'unknown' 
+        
+        try:
+            x = yt_dlp.YoutubeDL(ydl_opts_vc)
+            info = x.extract_info(url, download=True)
+            video_id = info.get('id', 'unknown')
+            
+            # Cari file akhir yang memiliki ekstensi .opus (yang dihasilkan oleh postprocessor)
+            final_files = [f for f in os.listdir(DOWNLOAD_DIR) if f.startswith(video_id) and f.endswith('.opus')]
+            
+            if not final_files:
+                # Ini terjadi jika konversi FFmpeg gagal (misalnya, libopus tidak ada)
+                logger.error(f"FFmpeg gagal membuat file Opus setelah processing untuk ID: {video_id}.")
+                raise FileNotFoundError("Konversi Opus gagal. Pastikan FFMPEG_ABSOLUTE_PATH benar dan mendukung libopus.")
+                
+            final_link = os.path.join(DOWNLOAD_DIR, final_files[0])
+            return final_link
+            
+        except Exception as e:
+            logger.error(f"YTDL VC Error during sync operation: {e}", exc_info=True)
+            
+            # Bersihkan file sementara atau parsial yang gagal diunduh
+            for f in os.listdir(DOWNLOAD_DIR):
+                if f.startswith(video_id):
+                    try:
+                        os.remove(os.path.join(DOWNLOAD_DIR, f))
+                    except OSError:
+                        # Abaikan jika ada masalah penghapusan
+                        pass 
+            
+            # Ulangi error agar dapat ditangkap oleh blok 'await' di luar
+            raise 
+
+    # 2. Jalankan fungsi sinkron di executor
+    try:
+        downloaded_file = await loop.run_in_executor(None, vc_audio_dl_sync)
+        return 1, downloaded_file
+    except Exception as e:
+        # Menangkap error dari vc_audio_dl_sync
+        return 0, f"Error saat mengunduh atau konversi: {e}"
+
+
         
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
