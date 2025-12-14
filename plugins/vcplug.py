@@ -50,6 +50,7 @@ logger = logging.getLogger(__name__)
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
+FFMPEG_ABSOLUTE_PATH = "/usr/bin/ffmpeg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
 logger.info("Memeriksa folder unduhan...")
@@ -81,59 +82,67 @@ def ytsearch(query: str):
         return 0
 
 async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
-    """
-    Mengunduh audio dari URL YouTube, memastikan penggunaan Node.js untuk stabilitas
-    download, dan mengonversi output akhir ke format OGG (diperlukan PyTgCalls).
-    """
+    # ... (Kode fungsi ytdl lainnya tetap sama seperti yang terakhir saya berikan)
     
+    # ... (Pastikan semua blok try/except dan postprocessor sudah sesuai)
+    
+    # ...
+
     loop = asyncio.get_running_loop()
+    if not os.path.isdir(DOWNLOAD_DIR):
+        os.makedirs(DOWNLOAD_DIR)
 
     def vc_audio_dl_sync():
-        """
-        Sub-fungsi sinkron yang dijalankan di thread executor.
-        Memastikan output adalah OGG.
-        """
         ydl_opts_vc = {
-            # Opsi Dasar
             "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
             "format": "bestaudio/best",
             "noplaylist": True,
-            "quiet": True,
+            "quiet": True, 
             "nocheckcertificate": True,
+            "prefer_ffmpeg": True,
             
-            # --- Perbaikan Kritis: Format js_runtimes (Memerlukan Node.js di server) ---
+            # KRITIS: Menggunakan jalur absolut yang benar
+            "exec_path": FFMPEG_ABSOLUTE_PATH,
+            
             "js_runtimes": {
-                "node": {}, # Format dict yang benar untuk yt-dlp terbaru
+                "node": {},
             },
             
-            # --- Konversi ke OGG (Memerlukan FFmpeg di server) ---
             "postprocessors": [
                 {
                     "key": "FFmpegExtractAudio",
-                    "preferredcodec": "ogg",
-                    "preferredquality": "192",
-                }
+                    "preferredcodec": "opus", # Meminta codec Opus
+                    "preferredquality": "192", 
+                },
+                {
+                    "key": "FFmpegMetadata", 
+                    "add_metadata": False,
+                },
             ],
-            "prefer_ffmpeg": True,
         }
         
+        # ... (Sisa logika yt-dlp, error handling, dan pembersihan)
         try:
             x = yt_dlp.YoutubeDL(ydl_opts_vc)
             info = x.extract_info(url, download=True)
             video_id = info.get('id', 'unknown')
             
-            # Jalur file akhir yang seharusnya OGG
-            final_link = os.path.join(DOWNLOAD_DIR, f"{video_id}.ogg")
+            final_files = [f for f in os.listdir(DOWNLOAD_DIR) if f.startswith(video_id) and f.endswith('.ogg')]
             
-            if not os.path.exists(final_link):
-                # Jika FFmpeg gagal, berikan pesan error yang jelas
-                logger.error(f"FFmpeg gagal membuat file OGG: {final_link}")
-                raise FileNotFoundError("Konversi OGG gagal. Pastikan FFmpeg terinstal dan dapat diakses.")
+            if not final_files:
+                logger.error(f"FFmpeg gagal membuat file OGG setelah processing untuk ID: {video_id}. Cek instalasi libopus.")
+                raise FileNotFoundError("Konversi OGG gagal. Pastikan FFMPEG_ABSOLUTE_PATH benar dan mendukung libopus.")
                 
+            final_link = os.path.join(DOWNLOAD_DIR, final_files[0])
             return final_link
             
         except Exception as e:
-            logger.error(f"YTDL VC Error: {e}")
+            logger.error(f"YTDL VC Error during sync operation: {e}")
+            
+            for f in os.listdir(DOWNLOAD_DIR):
+                if f.startswith(video_id):
+                    os.remove(os.path.join(DOWNLOAD_DIR, f))
+            
             raise
 
     # Jalankan fungsi sinkron di executor
@@ -142,7 +151,7 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
         return 1, downloaded_file
     except Exception as e:
         return 0, f"Error: {e}"
-
+        
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
     title_match = event.pattern_match.group(1)
