@@ -8,10 +8,12 @@ async def join_voice_chat(event):
     
     try:
         await event.client.join_group_call(
-            chat_id 
+            chat_id, 
+            join_as=event.input_chat,
+            params=None
         ) 
 
-        await edit_or_reply(event, "**Berhasil bergabung ke Obrolan Suara!** (Akun Utama)")
+        await edit_or_reply(event, "Join the Chat ")
 
     except UserAlreadyParticipantError:
         await edit_delete(event, "**Akun Utama sudah berada di Obrolan Suara.**", time=10)
@@ -26,7 +28,7 @@ async def leave_voice_chat(event):
     try:
         await event.client.leave_group_call(chat_id)
         
-        await edit_or_reply(event, "**Akun Utama telah meninggalkan Obrolan Suara.**")
+        await edit_or_reply(event, "Leaving Chat ")
     
     except Exception:
         await edit_delete(event, "**Akun Utama tidak sedang berada di Obrolan Suara.**", time=10)
