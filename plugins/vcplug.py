@@ -84,13 +84,23 @@ async def ytdl(url):
     """
     Mengunduh audio dari URL YouTube dan menyimpannya di DOWNLOAD_DIR secara asinkron.
     """
+    
     ydl_opts = {
+        # Menggunakan ID video untuk nama file yang unik dan bersih
         'outtmpl': os.path.join(DOWNLOAD_DIR, '%(id)s.%(ext)s'), 
         'format': 'bestaudio/best',
         'noplaylist': True,
         'quiet': True,
         'nocheckcertificate': True,
         'extract_flat': 'in_playlist',
+        
+        # --- PERBAIKAN STABILITAS: PASTIKAN YT-DLP MENGGUNAKAN NODE.JS ---
+        # Ini mengatasi warning "No supported JavaScript runtime..."
+        'js_runtimes': ['node'], 
+        'external_downloader': {'m3u8': 'node'}, 
+        # -----------------------------------------------------------------
+        
+        # KONVERSI KE OGG (Memerlukan FFmpeg agar tidak Error 'ogg')
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'ogg',
@@ -103,14 +113,24 @@ async def ytdl(url):
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(url, download=True)
                 video_id = info_dict.get('id', 'unknown')
+                # Menggunakan ID video untuk membuat jalur file OGG akhir
                 final_link = os.path.join(DOWNLOAD_DIR, f"{video_id}.ogg")
+                
+                # Tambahan: Cek apakah file OGG benar-benar ada
+                if not os.path.exists(final_link):
+                    logger.error(f"Gagal menemukan file OGG di: {final_link}. FFmpeg mungkin gagal.")
+                    raise FileNotFoundError(f"File OGG tidak ditemukan setelah konversi.")
+                    
                 return final_link
 
+        # Menjalankan operasi sinkron (yt-dlp) di thread terpisah (asynci.to_thread)
         final_link = await asyncio.to_thread(run_sync_download)
         
         return 1, final_link
             
     except Exception as e:
+        # Jika terjadi error pada yt-dlp (termasuk kegagalan FFmpeg)
+        logger.error(f"Kesalahan dalam ytdl: {e}")
         return 0, f"Error: {e}"
 
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
