@@ -9,7 +9,9 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any, Union
 from datetime import datetime, timedelta
 import httpx
-from xteam.vcbot import * from . import * from telethon import events, TelegramClient, Button
+from xteam.vcbot import * 
+from . import * 
+from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User, TypeUser
 from xteam.configs import Var 
 from xteam import call_py, bot as client
