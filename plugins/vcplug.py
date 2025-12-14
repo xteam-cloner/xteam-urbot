@@ -164,13 +164,17 @@ async def play_next_song(chat_id: int):
         next_song = chat_queue[0]
         songname, file_path, url_ref, media_type, resolution = next_song
         
+        # Atur kualitas video: HD_720p jika media adalah Video, NONE jika Audio
+        video_q = VideoQuality.HD_720p if media_type == "Video" else VideoQuality.NONE
+        
         try:
             await call_py.play(
                 chat_id, 
                 MediaStream(
-                    file_path, 
-                    video=media_type == "Video",
-                    resolution=resolution if media_type == "Video" else None
+                    media_path=file_path,
+                    # Menggunakan keyword arguments untuk stabilitas:
+                    audio_parameters=AudioQuality.HIGH, # Default, tapi diatur eksplisit
+                    video_parameters=video_q,           # Diatur ke HD_720p atau NONE
                 )
             )
             logger.info(f"Mulai lagu berikutnya di {chat_id}: {songname}")
@@ -186,6 +190,7 @@ async def play_next_song(chat_id: int):
             logger.info(f"Antrian kosong, meninggalkan obrolan suara di {chat_id}")
         except Exception:
             pass
+            
 
 
 @call_py.on_update()
