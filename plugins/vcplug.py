@@ -270,8 +270,7 @@ async def vc_end(event):
     chat_id = event.chat_id
     if chat_id in QUEUE:
         try:
-            # Tetap gunakan call_py.leave_group_call (Metode ini umumnya tetap ada)
-            await call_py.leave_group_call(chat_id) 
+            await call_py.leave_call(chat_id) 
             clear_queue(chat_id)
             await edit_or_reply(event, "**Menghentikan Streaming**")
         except Exception as e:
@@ -283,14 +282,20 @@ async def vc_end(event):
 @man_cmd(pattern="skip(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_skip(event):
     chat_id = event.chat_id
+    
     if len(event.text.split()) < 2:
         op = await skip_current_song(chat_id)
         if op == 0:
             await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
         elif op == 1:
             await edit_delete(event, "antrian kosong, meninggalkan obrolan suara", 10)
+            
+            try:
+                await call_py.leave_call(chat_id) 
+            except Exception:
+                pass
+            
         else:
-            # Asumsi skip_current_song akan memanggil fungsi play_next_stream/join_call untuk lagu berikutnya
             await edit_or_reply(
                 event,
                 f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[1]})",
