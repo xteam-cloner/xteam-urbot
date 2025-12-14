@@ -46,6 +46,8 @@ from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 
+from xteam.vcbot import QUEUE, add_to_queue, get_queue, pop_an_item, clear_queue 
+
 logger = logging.getLogger(__name__)
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
@@ -82,23 +84,9 @@ def ytsearch(query: str):
         return 0
 
 
-# Asumsi: DOWNLOAD_DIR, FFMPEG_ABSOLUTE_PATH, dan logger sudah didefinisikan
-
 async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
-    """
-    Mengunduh audio dari URL dan mengonversinya menjadi format Opus (untuk Voice Chat/VC)
-    menggunakan yt-dlp dan FFmpeg, dijalankan secara sinkron di executor.
-    
-    Args:
-        url (str): URL video/musik yang akan diunduh.
-        
-    Returns:
-        Tuple[int, Union[str, Any]]: (1, path_file_akhir) jika sukses, 
-                                     (0, pesan_error) jika gagal.
-    """
     loop = asyncio.get_running_loop()
     
-    # 1. Pastikan direktori unduhan ada
     if not os.path.isdir(DOWNLOAD_DIR):
         try:
             os.makedirs(DOWNLOAD_DIR)
@@ -106,15 +94,10 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
             return 0, f"Gagal membuat direktori unduhan: {e}"
 
     def vc_audio_dl_sync():
-        """
-        Fungsi sinkron untuk menjalankan yt-dlp. 
-        Menggunakan postprocessor untuk memastikan output Opus.
-        """
         
         ydl_opts_vc = {
-            # outtmpl tanpa ekstensi, agar postprocessor menentukan ekstensi akhir
             "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s"), 
-            "format": "bestaudio/best", # Unduh audio terbaik yang tersedia
+            "format": "bestaudio/best",
             "noplaylist": True,
             "quiet": True,
             "nocheckcertificate": True,
@@ -123,14 +106,12 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
             "js_runtimes": {
                 "node": {},
             },
-            # *** Postprocessor untuk Konversi ke Opus (OGG) ***
             "postprocessors": [
                 {
                     "key": "FFmpegExtractAudio",
-                    "preferredcodec": "opus", # Codec target (standar untuk VC/OGG)
-                    "preferredquality": "128", # Kualitas bitrate (bisa disesuaikan)
+                    "preferredcodec": "opus",
+                    "preferredquality": "128",
                 },
-                # Hapus metadata file (opsional)
                 {
                     "key": "FFmpegMetadata",
                     "add_metadata": False,
@@ -138,7 +119,6 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
             ],
         }
 
-        # video_id digunakan untuk penanganan error dan pembersihan
         video_id = 'unknown' 
         
         try:
@@ -146,11 +126,9 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
             info = x.extract_info(url, download=True)
             video_id = info.get('id', 'unknown')
             
-            # Cari file akhir yang memiliki ekstensi .opus (yang dihasilkan oleh postprocessor)
             final_files = [f for f in os.listdir(DOWNLOAD_DIR) if f.startswith(video_id) and f.endswith('.opus')]
             
             if not final_files:
-                # Ini terjadi jika konversi FFmpeg gagal (misalnya, libopus tidak ada)
                 logger.error(f"FFmpeg gagal membuat file Opus setelah processing untuk ID: {video_id}.")
                 raise FileNotFoundError("Konversi Opus gagal. Pastikan FFMPEG_ABSOLUTE_PATH benar dan mendukung libopus.")
                 
@@ -160,28 +138,63 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
         except Exception as e:
             logger.error(f"YTDL VC Error during sync operation: {e}", exc_info=True)
             
-            # Bersihkan file sementara atau parsial yang gagal diunduh
             for f in os.listdir(DOWNLOAD_DIR):
                 if f.startswith(video_id):
                     try:
                         os.remove(os.path.join(DOWNLOAD_DIR, f))
                     except OSError:
-                        # Abaikan jika ada masalah penghapusan
                         pass 
             
-            # Ulangi error agar dapat ditangkap oleh blok 'await' di luar
             raise 
 
-    # 2. Jalankan fungsi sinkron di executor
     try:
         downloaded_file = await loop.run_in_executor(None, vc_audio_dl_sync)
         return 1, downloaded_file
     except Exception as e:
-        # Menangkap error dari vc_audio_dl_sync
         return 0, f"Error saat mengunduh atau konversi: {e}"
 
 
+async def play_next_song(chat_id: int):
+    
+    pop_an_item(chat_id) 
+    
+    chat_queue = get_queue(chat_id)
+    
+    if chat_queue and len(chat_queue) > 0:
+        next_song = chat_queue[0]
+        songname, file_path, url_ref, media_type, resolution = next_song
         
+        try:
+            await call_py.change_stream(
+                chat_id, 
+                MediaStream(
+                    file_path, 
+                    video=media_type == "Video",
+                    resolution=resolution if media_type == "Video" else None
+                )
+            )
+            logger.info(f"Mulai lagu berikutnya di {chat_id}: {songname}")
+        except Exception as e:
+            logger.error(f"Gagal memutar lagu berikutnya di {chat_id}: {e}", exc_info=True)
+            await play_next_song(chat_id) 
+            
+    else:
+        clear_queue(chat_id)
+        try:
+            await call_py.leave_call(chat_id)
+            logger.info(f"Antrian kosong, meninggalkan obrolan suara di {chat_id}")
+        except Exception:
+            pass
+
+
+@call_py.on_stream_end()
+async def stream_end_handler(client, update: Update):
+    if isinstance(update, StreamEnded):
+        chat_id = update.chat_id
+        logger.info(f"Stream berakhir di {chat_id}. Memeriksa antrian...")
+        asyncio.create_task(play_next_song(chat_id))
+
+
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
     title_match = event.pattern_match.group(1)
@@ -211,7 +224,7 @@ async def vc_play(event):
             return await botman.edit(f"`{ytlink}`")
 
         if chat_id in QUEUE:
-            pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
+            pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0) 
             caption = f"💡 **Lagu Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
             await botman.delete()
             return await event.client.send_file(
@@ -375,20 +388,9 @@ async def vc_vplay(event):
 async def vc_end(event):
     chat_id = event.chat_id
     if chat_id in QUEUE:
-        for song_data in QUEUE.get(chat_id, []):
-            file_path = song_data[1]
-            
-            if os.path.exists(file_path):
-                if DOWNLOAD_DIR in file_path or os.path.dirname(file_path) == os.getcwd():
-                    try:
-                        os.remove(file_path)
-                        logger.info(f"Dihapus file di /end: {file_path}")
-                    except Exception as e:
-                        logger.error(f"Gagal menghapus file {file_path} di /end: {e}")
-                    
+        clear_queue(chat_id) 
         try:
             await call_py.leave_call(chat_id) 
-            clear_queue(chat_id)
             await edit_or_reply(event, "**Menghentikan Streaming**")
         except Exception as e:
             await edit_delete(event, f"**ERROR:** `{e}`")
@@ -401,51 +403,50 @@ async def vc_skip(event):
     chat_id = event.chat_id
     
     if len(event.text.split()) < 2:
-        if chat_id in QUEUE and QUEUE[chat_id]:
-            file_to_delete = QUEUE[chat_id][0][1]
-            if os.path.exists(file_to_delete):
-                try:
-                    os.remove(file_to_delete)
-                except Exception:
-                    pass
         
-        op = await skip_current_song(chat_id)
-        if op == 0:
-            await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
-        elif op == 1:
-            await edit_delete(event, "antrian kosong, meninggalkan obrolan suara", time=10)
-            
-            try:
-                await call_py.leave_call(chat_id) 
-            except Exception:
-                pass
-            
-        else:
+        if chat_id not in QUEUE or not QUEUE[chat_id]:
+            return await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
+        
+        await play_next_song(chat_id) 
+
+        chat_queue = get_queue(chat_id)
+        if chat_queue and len(chat_queue) > 0:
+            op = chat_queue[0]
             await edit_or_reply(
                 event,
                 f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[2]})",
                 link_preview=False,
             )
+        else:
+            await edit_delete(event, "Antrian kosong, meninggalkan obrolan suara", time=10)
+            
     else:
         skip = event.text.split(maxsplit=1)[1]
         DELQUE = "**Menghapus Lagu Berikut Dari Antrian:**"
         if chat_id in QUEUE:
             items = [int(x) for x in skip.split(" ") if x.isdigit()]
             items.sort(reverse=True)
+            
+            cleaned_list = []
+            
             for x in items:
-                if x != 0:
-                    if x < len(QUEUE[chat_id]):
-                        file_path_to_delete = QUEUE[chat_id][x][1]
-                        if os.path.exists(file_path_to_delete):
-                            try:
-                                os.remove(file_path_to_delete)
-                            except Exception:
-                                pass
-                                
-                    hm = await skip_item(chat_id, x)
-                    if hm != 0:
-                        DELQUE = DELQUE + "\n" + f"**#{x}** - {hm}"
-            await event.edit(DELQUE)
+                if x > 0 and x < len(QUEUE[chat_id]):
+                    file_path_to_delete = QUEUE[chat_id][x][1]
+                    song_name = QUEUE[chat_id][x][0]
+                    
+                    QUEUE[chat_id].pop(x) 
+                    
+                    if os.path.exists(file_path_to_delete):
+                        with contextlib.suppress(Exception):
+                            os.remove(file_path_to_delete)
+                            logger.info(f"Dihapus file di /skip #{x}: {file_path_to_delete}")
+                    
+                    cleaned_list.append(f"**#{x}** - {song_name}")
+            
+            if cleaned_list:
+                await event.edit(DELQUE + "\n" + "\n".join(cleaned_list))
+            else:
+                await edit_delete(event, "**Nomor antrian tidak valid.**", time=10)
 
 
 @man_cmd(pattern="pause$", group_only=True)
@@ -492,7 +493,6 @@ async def vc_volume(event):
             volume_level = int(query)
             if not 0 <= volume_level <= 100:
                 return await edit_delete(event, "**Volume harus antara 0 dan 100.**", 10)
-                
             await call_py.change_volume_call(chat_id, volume=volume_level)
             await edit_or_reply(
                 event, f"**Berhasil Mengubah Volume Menjadi** `{volume_level}%`"
@@ -510,20 +510,18 @@ async def vc_playlist(event):
     chat_id = event.chat_id
     if chat_id in QUEUE:
         chat_queue = get_queue(chat_id)
-        if len(chat_queue) == 1:
-            await edit_or_reply(
-                event,
-                f"**🎧 Sedang Memutar:**\n• [{chat_queue[0][0]}]({chat_queue[0][2]}) | `{chat_queue[0][3]}`",
-                link_preview=False,
-            )
-        else:
-            PLAYLIST = f"**🎧 Sedang Memutar:**\n**• [{chat_queue[0][0]}]({chat_queue[0][2]})** | `{chat_queue[0][3]}` \n\n**• Daftar Putar:**"
-            l = len(chat_queue)
-            for x in range(1, l):
-                hmm = chat_queue[x][0]
-                hmmm = chat_queue[x][2]
-                hmmmm = chat_queue[x][3]
-                PLAYLIST = PLAYLIST + "\n" + f"**#{x}** - [{hmm}]({hmmm}) | `{hmmmm}`"
-            await edit_or_reply(event, PLAYLIST, link_preview=False)
+        if not chat_queue:
+            return await edit_delete(event, "**Tidak Ada Lagu Dalam Antrian**", time=10)
+
+        PLAYLIST = f"**🎧 Sedang Memutar:**\n**• [{chat_queue[0][0]}]({chat_queue[0][2]})** | `{chat_queue[0][3]}` \n\n**• Daftar Putar:**"
+        
+        l = len(chat_queue)
+        for x in range(1, l): 
+            hmm = chat_queue[x][0]
+            hmmm = chat_queue[x][2]
+            hmmmm = chat_queue[x][3]
+            PLAYLIST = PLAYLIST + "\n" + f"**#{x}** - [{hmm}]({hmmm}) | `{hmmmm}`"
+            
+        await edit_or_reply(event, PLAYLIST, link_preview=False)
     else:
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
