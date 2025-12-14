@@ -46,7 +46,7 @@ from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 
-from xteam.vcbot import QUEUE, add_to_queue, get_queue, pop_an_item, clear_queue 
+from .queues import QUEUE, add_to_queue, get_queue, pop_an_item, clear_queue 
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +165,7 @@ async def play_next_song(chat_id: int):
         songname, file_path, url_ref, media_type, resolution = next_song
         
         try:
-            await call_py.change_stream(
+            await call_py.play(
                 chat_id, 
                 MediaStream(
                     file_path, 
@@ -174,6 +174,7 @@ async def play_next_song(chat_id: int):
                 )
             )
             logger.info(f"Mulai lagu berikutnya di {chat_id}: {songname}")
+        
         except Exception as e:
             logger.error(f"Gagal memutar lagu berikutnya di {chat_id}: {e}", exc_info=True)
             await play_next_song(chat_id) 
