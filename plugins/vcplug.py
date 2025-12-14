@@ -43,17 +43,75 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
 from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete 
+from youtubesearchpython import VideosSearch
+from xteam import LOGS
+
 logger = logging.getLogger(__name__)
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 
+logger.info("Memeriksa folder unduhan...")
+if not os.path.isdir(DOWNLOAD_DIR):
+    try:
+        os.makedirs(DOWNLOAD_DIR)
+        logger.info(f"Berhasil membuat folder unduhan: {DOWNLOAD_DIR}")
+    except OSError as e:
+        logger.error(f"Gagal membuat folder unduhan {DOWNLOAD_DIR}. Periksa izin: {e}")
+
 def vcmention(user: TypeUser):
     full_name = get_display_name(user)
     if not isinstance(user, User):
         return full_name
     return f"[{full_name}](tg://user?id={user.id})"
+
+def ytsearch(query: str):
+    try:
+        search = VideosSearch(query, limit=1).result()
+        data = search["result"][0]
+        songname = data["title"]
+        url = data["link"]
+        duration = data["duration"]
+        thumbnail = data["thumbnails"][0]["url"]
+        videoid = data["id"]
+        return [songname, url, duration, thumbnail, videoid]
+    except Exception as e:
+        LOGS.info(str(e))
+        return 0
+
+async def ytdl(url):
+    """
+    Mengunduh audio dari URL YouTube dan menyimpannya di DOWNLOAD_DIR secara asinkron.
+    """
+    ydl_opts = {
+        'outtmpl': os.path.join(DOWNLOAD_DIR, '%(id)s.%(ext)s'), 
+        'format': 'bestaudio/best',
+        'noplaylist': True,
+        'quiet': True,
+        'nocheckcertificate': True,
+        'extract_flat': 'in_playlist',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'ogg',
+            'preferredquality': '192',
+        }],
+    }
+    
+    try:
+        def run_sync_download():
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info_dict = ydl.extract_info(url, download=True)
+                video_id = info_dict.get('id', 'unknown')
+                final_link = os.path.join(DOWNLOAD_DIR, f"{video_id}.ogg")
+                return final_link
+
+        final_link = await asyncio.to_thread(run_sync_download)
+        
+        return 1, final_link
+            
+    except Exception as e:
+        return 0, f"Error: {e}"
 
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
@@ -77,6 +135,7 @@ async def vc_play(event):
         songname, url, duration, thumbnail, videoid = search
         ctitle = await CHAT_TITLE(chat.title)
         thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
+        
         hm, ytlink = await ytdl(url)
 
         if hm == 0:
@@ -112,7 +171,7 @@ async def vc_play(event):
 
     else:
         botman = await edit_or_reply(event, "📥 **Sedang Mendownload**")
-        dl = await replied.download_media()
+        dl = await replied.download_media(file=DOWNLOAD_DIR)
         link = f"https://t.me/c/{chat_id}/{event.reply_to_msg_id}"
         songname = "Telegram Music Player" if replied.audio else "Voice Note"
         
@@ -203,7 +262,7 @@ async def vc_vplay(event):
 
     else:
         xnxx = await edit_or_reply(event, "📥 **Sedang Mendownload**")
-        dl = await replied.download_media()
+        dl = await replied.download_media(file=DOWNLOAD_DIR)
         link = f"https://t.me/c/{chat_id}/{event.reply_to_msg_id}"
         songname = "Telegram Video Player"
         
@@ -247,6 +306,17 @@ async def vc_vplay(event):
 async def vc_end(event):
     chat_id = event.chat_id
     if chat_id in QUEUE:
+        for song_data in QUEUE.get(chat_id, []):
+            file_path = song_data[1]
+            
+            if os.path.exists(file_path):
+                if DOWNLOAD_DIR in file_path or os.path.dirname(file_path) == os.getcwd():
+                    try:
+                        os.remove(file_path)
+                        logger.info(f"Dihapus file di /end: {file_path}")
+                    except Exception as e:
+                        logger.error(f"Gagal menghapus file {file_path} di /end: {e}")
+                    
         try:
             await call_py.leave_call(chat_id) 
             clear_queue(chat_id)
@@ -262,6 +332,14 @@ async def vc_skip(event):
     chat_id = event.chat_id
     
     if len(event.text.split()) < 2:
+        if chat_id in QUEUE and QUEUE[chat_id]:
+            file_to_delete = QUEUE[chat_id][0][1]
+            if os.path.exists(file_to_delete):
+                try:
+                    os.remove(file_to_delete)
+                except Exception:
+                    pass
+        
         op = await skip_current_song(chat_id)
         if op == 0:
             await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
@@ -276,7 +354,7 @@ async def vc_skip(event):
         else:
             await edit_or_reply(
                 event,
-                f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[1]})",
+                f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[2]})",
                 link_preview=False,
             )
     else:
@@ -287,6 +365,14 @@ async def vc_skip(event):
             items.sort(reverse=True)
             for x in items:
                 if x != 0:
+                    if x < len(QUEUE[chat_id]):
+                        file_path_to_delete = QUEUE[chat_id][x][1]
+                        if os.path.exists(file_path_to_delete):
+                            try:
+                                os.remove(file_path_to_delete)
+                            except Exception:
+                                pass
+                                
                     hm = await skip_item(chat_id, x)
                     if hm != 0:
                         DELQUE = DELQUE + "\n" + f"**#{x}** - {hm}"
@@ -372,4 +458,3 @@ async def vc_playlist(event):
             await edit_or_reply(event, PLAYLIST, link_preview=False)
     else:
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
-        
