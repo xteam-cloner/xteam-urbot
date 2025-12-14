@@ -49,7 +49,7 @@ from xteam import LOGS
 
 from xteam.vcbot import QUEUE, add_to_queue, get_queue, pop_an_item, clear_queue 
 
-#logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
