@@ -288,7 +288,7 @@ async def vc_skip(event):
         if op == 0:
             await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
         elif op == 1:
-            await edit_delete(event, "antrian kosong, meninggalkan obrolan suara", 10)
+            await edit_delete(event, "antrian kosong, meninggalkan obrolan suara", time=10)
             
             try:
                 await call_py.leave_call(chat_id) 
