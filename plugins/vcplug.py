@@ -80,57 +80,67 @@ def ytsearch(query: str):
         LOGS.info(str(e))
         return 0
 
-async def ytdl(url):
+async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
     """
-    Mengunduh audio dari URL YouTube dan menyimpannya di DOWNLOAD_DIR secara asinkron.
+    Mengunduh audio dari URL YouTube, memastikan penggunaan Node.js untuk stabilitas
+    download, dan mengonversi output akhir ke format OGG (diperlukan PyTgCalls).
     """
     
-    ydl_opts = {
-        # Menggunakan ID video untuk nama file yang unik dan bersih
-        'outtmpl': os.path.join(DOWNLOAD_DIR, '%(id)s.%(ext)s'), 
-        'format': 'bestaudio/best',
-        'noplaylist': True,
-        'quiet': True,
-        'nocheckcertificate': True,
-        'extract_flat': 'in_playlist',
-        
-        # --- PERBAIKAN STABILITAS: PASTIKAN YT-DLP MENGGUNAKAN NODE.JS ---
-        # Ini mengatasi warning "No supported JavaScript runtime..."
-        'js_runtimes': ['node'], 
-        'external_downloader': {'m3u8': 'node'}, 
-        # -----------------------------------------------------------------
-        
-        # KONVERSI KE OGG (Memerlukan FFmpeg agar tidak Error 'ogg')
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'ogg',
-            'preferredquality': '192',
-        }],
-    }
-    
-    try:
-        def run_sync_download():
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info_dict = ydl.extract_info(url, download=True)
-                video_id = info_dict.get('id', 'unknown')
-                # Menggunakan ID video untuk membuat jalur file OGG akhir
-                final_link = os.path.join(DOWNLOAD_DIR, f"{video_id}.ogg")
-                
-                # Tambahan: Cek apakah file OGG benar-benar ada
-                if not os.path.exists(final_link):
-                    logger.error(f"Gagal menemukan file OGG di: {final_link}. FFmpeg mungkin gagal.")
-                    raise FileNotFoundError(f"File OGG tidak ditemukan setelah konversi.")
-                    
-                return final_link
+    loop = asyncio.get_running_loop()
 
-        # Menjalankan operasi sinkron (yt-dlp) di thread terpisah (asynci.to_thread)
-        final_link = await asyncio.to_thread(run_sync_download)
-        
-        return 1, final_link
+    def vc_audio_dl_sync():
+        """
+        Sub-fungsi sinkron yang dijalankan di thread executor.
+        Memastikan output adalah OGG.
+        """
+        ydl_opts_vc = {
+            # Opsi Dasar
+            "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
+            "format": "bestaudio/best",
+            "noplaylist": True,
+            "quiet": True,
+            "nocheckcertificate": True,
             
+            # --- Perbaikan Kritis: Format js_runtimes (Memerlukan Node.js di server) ---
+            "js_runtimes": {
+                "node": {}, # Format dict yang benar untuk yt-dlp terbaru
+            },
+            
+            # --- Konversi ke OGG (Memerlukan FFmpeg di server) ---
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "ogg",
+                    "preferredquality": "192",
+                }
+            ],
+            "prefer_ffmpeg": True,
+        }
+        
+        try:
+            x = yt_dlp.YoutubeDL(ydl_opts_vc)
+            info = x.extract_info(url, download=True)
+            video_id = info.get('id', 'unknown')
+            
+            # Jalur file akhir yang seharusnya OGG
+            final_link = os.path.join(DOWNLOAD_DIR, f"{video_id}.ogg")
+            
+            if not os.path.exists(final_link):
+                # Jika FFmpeg gagal, berikan pesan error yang jelas
+                logger.error(f"FFmpeg gagal membuat file OGG: {final_link}")
+                raise FileNotFoundError("Konversi OGG gagal. Pastikan FFmpeg terinstal dan dapat diakses.")
+                
+            return final_link
+            
+        except Exception as e:
+            logger.error(f"YTDL VC Error: {e}")
+            raise
+
+    # Jalankan fungsi sinkron di executor
+    try:
+        downloaded_file = await loop.run_in_executor(None, vc_audio_dl_sync)
+        return 1, downloaded_file
     except Exception as e:
-        # Jika terjadi error pada yt-dlp (termasuk kegagalan FFmpeg)
-        logger.error(f"Kesalahan dalam ytdl: {e}")
         return 0, f"Error: {e}"
 
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
