@@ -185,13 +185,7 @@ async def play_next_song(chat_id: int):
     
     pop_an_item(chat_id)
 
-    if finished_song_data:
-        file_to_delete = finished_song_data[1]
-        
-        if file_to_delete and os.path.exists(file_to_delete):
-            with contextlib.suppress(Exception):
-                os.remove(file_to_delete)
-                logger.info(f"Dihapus file lokal yang selesai: {file_to_delete}")
+    # Blok penghapusan file individual (os.remove) sudah dihapus di sini
     
     chat_queue = get_queue(chat_id)
     
@@ -201,7 +195,6 @@ async def play_next_song(chat_id: int):
         is_video = (media_type == "Video")
         
         try:
-            # VideoQuality.HD_720p ditetapkan untuk video
             video_quality = VideoQuality.HD_720p 
 
             stream = MediaStream(
@@ -212,25 +205,24 @@ async def play_next_song(chat_id: int):
             )
                 
             await call_py.play(chat_id, stream)
-            logger.info(f"Mulai lagu berikutnya di {chat_id}: {songname}")
+            logger.info(f"Start the next song on {chat_id}: {songname}")
         
         except Exception as e:
             logger.error(
                 f"Gagal memutar lagu berikutnya di {chat_id}: {e}. File: {file_path}", 
                 exc_info=True
             )
-            # Rekursi Aman: Akan menghapus item yang gagal ini di panggilan berikutnya
             asyncio.create_task(play_next_song(chat_id)) 
             
     else:
-        clear_queue(chat_id)
+        # PENTING: clear_queue bertanggung jawab membersihkan file disk sekarang.
+        clear_queue(chat_id) 
         try:
             await call_py.leave_call(chat_id)
             logger.info(f"Antrian kosong, meninggalkan obrolan suara di {chat_id}")
         except Exception:
             pass
-            
-                      
+                                
 
 @call_py.on_update()
 async def stream_end_handler(client, update: Update):
