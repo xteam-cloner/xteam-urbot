@@ -181,39 +181,44 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
         return 0, f"Error saat mengunduh atau konversi: {e}"
                     
 
+
 async def play_next_song(chat_id: int):
+    finished_song_data = get_queue(chat_id)[0] if chat_id in QUEUE and QUEUE[chat_id] else None
     
-    pop_an_item(chat_id) 
+    pop_an_item(chat_id)
+
+    if finished_song_data:
+        file_to_delete = finished_song_data[1]
+        
+        if file_to_delete and os.path.exists(file_to_delete):
+            with contextlib.suppress(Exception):
+                os.remove(file_to_delete)
+                logger.info(f"Dihapus file lokal yang selesai: {file_to_delete}")
     
     chat_queue = get_queue(chat_id)
     
     if chat_queue and len(chat_queue) > 0:
         next_song = chat_queue[0]
         songname, file_path, url_ref, media_type, resolution = next_song
+        is_video = (media_type == "Video")
         
         try:
-            if media_type == "Video":
-                stream = MediaStream(
-                    media_path=file_path,
-                    audio_parameters=AudioQuality.HIGH,
-                    video_parameters=VideoQuality.HD_720p,
-                )
-            else:
-                stream = MediaStream(
-                    media_path=file_path,
-                    audio_parameters=AudioQuality.HIGH,
-                    video_flags=MediaStream.Flags.IGNORE,
-                )
-                
-            await call_py.play(
-                chat_id, 
-                stream,
+            stream = MediaStream(
+                media_path=file_path,
+                audio_parameters=AudioQuality.HIGH,
+                video_parameters=VideoQuality.HD_720p if is_video else VideoQuality.SD_480p,
+                video_flags=MediaStream.Flags.REQUIRED if is_video else MediaStream.Flags.IGNORE,
             )
+                
+            await call_py.play(chat_id, stream)
             logger.info(f"Mulai lagu berikutnya di {chat_id}: {songname}")
         
         except Exception as e:
-            logger.error(f"Gagal memutar lagu berikutnya di {chat_id}: {e}", exc_info=True)
-            await play_next_song(chat_id) 
+            logger.error(
+                f"Gagal memutar lagu berikutnya di {chat_id}: {e}. File: {file_path}", 
+                exc_info=True
+            )
+            asyncio.create_task(play_next_song(chat_id)) 
             
     else:
         clear_queue(chat_id)
@@ -222,6 +227,7 @@ async def play_next_song(chat_id: int):
             logger.info(f"Antrian kosong, meninggalkan obrolan suara di {chat_id}")
         except Exception:
             pass
+            
             
             
 
