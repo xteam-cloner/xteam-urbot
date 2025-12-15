@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any, Union
 from datetime import datetime, timedelta
 import httpx
-from xteam.vcbot import * 
 from . import * 
 from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User, TypeUser
@@ -47,7 +46,7 @@ from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 
-from xteam.vcbot import QUEUE, add_to_queue, get_queue, pop_an_item, clear_queue 
+from xteam.vcbot import CHAT_TITLE, skip_current_song, skip_item, play_next_stream, QUEUE, add_to_queue, clear_queue, get_queue, pop_an_item, gen_thumb, ytsearch, join_call 
 
 logger = logging.getLogger(__name__)
 
