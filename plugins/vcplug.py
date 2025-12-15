@@ -180,8 +180,6 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
     except Exception as e:
         return 0, f"Error saat mengunduh atau konversi: {e}"
                     
-
-
 async def play_next_song(chat_id: int):
     finished_song_data = get_queue(chat_id)[0] if chat_id in QUEUE and QUEUE[chat_id] else None
     
@@ -203,10 +201,13 @@ async def play_next_song(chat_id: int):
         is_video = (media_type == "Video")
         
         try:
+            # VideoQuality.HD_720p ditetapkan untuk video
+            video_quality = VideoQuality.HD_720p 
+
             stream = MediaStream(
                 media_path=file_path,
                 audio_parameters=AudioQuality.HIGH,
-                video_parameters=VideoQuality.HD_720p if is_video else VideoQuality.SD_480p,
+                video_parameters=video_quality if is_video else VideoQuality.SD_480p,
                 video_flags=MediaStream.Flags.REQUIRED if is_video else MediaStream.Flags.IGNORE,
             )
                 
@@ -218,6 +219,7 @@ async def play_next_song(chat_id: int):
                 f"Gagal memutar lagu berikutnya di {chat_id}: {e}. File: {file_path}", 
                 exc_info=True
             )
+            # Rekursi Aman: Akan menghapus item yang gagal ini di panggilan berikutnya
             asyncio.create_task(play_next_song(chat_id)) 
             
     else:
@@ -228,8 +230,7 @@ async def play_next_song(chat_id: int):
         except Exception:
             pass
             
-            
-            
+                      
 
 @call_py.on_update()
 async def stream_end_handler(client, update: Update):
