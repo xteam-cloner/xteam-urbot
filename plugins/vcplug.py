@@ -84,8 +84,7 @@ def ytsearch(query: str):
         LOGS.info(str(e))
         return 0
 
-
-async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
+async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]]:
     loop = asyncio.get_running_loop()
     
     if not os.path.isdir(DOWNLOAD_DIR):
@@ -96,30 +95,52 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
 
     def vc_audio_dl_sync():
         
-        ydl_opts_vc = {
-            "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s"), 
-            "format": "bestaudio/best",
-            "noplaylist": True,
-            "quiet": True,
-            "nocheckcertificate": True,
-            "prefer_ffmpeg": True,
-            "exec_path": FFMPEG_ABSOLUTE_PATH,
-            "js_runtimes": {
-                "node": {},
-            },
-            "postprocessors": [
-                {
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "opus",
-                    "preferredquality": "128",
+        if video_mode:
+            ydl_opts_vc = {
+                "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
+                "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]",
+                "merge_output_format": "mp4",
+                "noplaylist": True,
+                "quiet": True,
+                "nocheckcertificate": True,
+                "prefer_ffmpeg": True,
+                "exec_path": FFMPEG_ABSOLUTE_PATH,
+                "postprocessors": [
+                    {
+                        "key": "FFmpegVideoConvertor",
+                        "preferedformat": "mp4"
+                    },
+                    {
+                        "key": "FFmpegMetadata",
+                        "add_metadata": False,
+                    },
+                ],
+            }
+        else:
+            ydl_opts_vc = {
+                "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s"), 
+                "format": "bestaudio/best",
+                "noplaylist": True,
+                "quiet": True,
+                "nocheckcertificate": True,
+                "prefer_ffmpeg": True,
+                "exec_path": FFMPEG_ABSOLUTE_PATH,
+                "js_runtimes": {
+                    "node": {},
                 },
-                {
-                    "key": "FFmpegMetadata",
-                    "add_metadata": False,
-                },
-            ],
-        }
-
+                "postprocessors": [
+                    {
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "opus",
+                        "preferredquality": "128",
+                    },
+                    {
+                        "key": "FFmpegMetadata",
+                        "add_metadata": False,
+                    },
+                ],
+            }
+        
         video_id = 'unknown' 
         
         try:
@@ -127,11 +148,16 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
             info = x.extract_info(url, download=True)
             video_id = info.get('id', 'unknown')
             
-            final_files = [f for f in os.listdir(DOWNLOAD_DIR) if f.startswith(video_id) and f.endswith('.opus')]
+            if video_mode:
+                target_ext = 'mp4'
+            else:
+                target_ext = 'opus'
+
+            final_files = [f for f in os.listdir(DOWNLOAD_DIR) if f.startswith(video_id) and f.endswith(f'.{target_ext}')]
             
             if not final_files:
-                logger.error(f"FFmpeg gagal membuat file Opus setelah processing untuk ID: {video_id}.")
-                raise FileNotFoundError("Konversi Opus gagal. Pastikan FFMPEG_ABSOLUTE_PATH benar dan mendukung libopus.")
+                logger.error(f"FFmpeg gagal membuat file {target_ext.upper()} setelah processing untuk ID: {video_id}.")
+                raise FileNotFoundError(f"Konversi {target_ext.upper()} gagal.")
                 
             final_link = os.path.join(DOWNLOAD_DIR, final_files[0])
             return final_link
@@ -153,6 +179,7 @@ async def ytdl(url: str) -> Tuple[int, Union[str, Any]]:
         return 1, downloaded_file
     except Exception as e:
         return 0, f"Error saat mengunduh atau konversi: {e}"
+                    
 
 async def play_next_song(chat_id: int):
     
@@ -320,7 +347,7 @@ async def vc_vplay(event):
         songname, url, duration, thumbnail, videoid = search
         ctitle = await CHAT_TITLE(chat.title)
         thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
-        hm, ytlink = await ytdl(url)
+        hm, ytlink = await ytdl(url, video_mode=True)
 
         if hm == 0:
             return await xnxx.edit(f"`{ytlink}`")
