@@ -585,3 +585,31 @@ async def vc_playlist(event):
         await edit_or_reply(event, PLAYLIST, link_preview=False)
     else:
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
+
+
+@man_cmd(pattern="clean$", group_only=True)
+async def clean_disk(event):
+    if not os.path.isdir(DOWNLOAD_DIR):
+        return await edit_or_reply(event, "Folder unduhan tidak ditemukan.")
+    
+    files = os.listdir(DOWNLOAD_DIR)
+    
+    if not files:
+        return await edit_or_reply(event, "Folder unduhan sudah kosong.")
+
+    deleted_count = 0
+    for file_name in files:
+        file_path = os.path.join(DOWNLOAD_DIR, file_name)
+        # HINDARI MENGHAPUS DIREKTORI, HANYA FILE
+        if os.path.isfile(file_path):
+            try:
+                os.remove(file_path)
+                deleted_count += 1
+            except Exception:
+                pass # Abaikan error jika gagal menghapus
+    
+    return await edit_or_reply(event, 
+        f"✅ **Pembersihan Selesai:** Berhasil menghapus **{deleted_count}** file media dari folder unduhan (`{DOWNLOAD_DIR}`)."
+    )
+
+
