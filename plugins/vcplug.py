@@ -241,7 +241,7 @@ async def play_next_song(chat_id: int):
     return [songname, link, type]
 
 
-@man_cmd(pattern=r"(Play|Vplay)\b", group_only=True)
+@man_cmd(pattern=r"(play|vplay)\b", group_only=True)
 async def vc_stream(event):
     
     command_type = event.pattern_match.group(1) 
