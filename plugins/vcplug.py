@@ -58,6 +58,10 @@ FFMPEG_ABSOLUTE_PATH = "/usr/bin/ffmpeg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 COOKIES_FILE_PATH = "cookies.txt"
 
+buttons = [
+    [Button.inline("CLOSE", data="closeit")] 
+]
+
 #logger.info("Memeriksa folder unduhan...")
 if not os.path.isdir(DOWNLOAD_DIR):
     try:
@@ -290,7 +294,7 @@ async def vc_stream(event):
             caption = f"💡 **{MODE_TYPE} Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
             await xteambot.delete()
             return await asst.send_file(
-                chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
+                chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=buttons
             )
         
         # Memutar Sekarang
@@ -306,7 +310,7 @@ async def vc_stream(event):
                 caption = f"🎧 Now Playing!\n\n🏷 **Title :** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
                 await xteambot.delete()
                 return await asst.send_file(
-                    chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
+                    chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=buttons
                 )
             except UserAlreadyParticipantError:
                 if os.path.exists(stream_link):
@@ -348,7 +352,7 @@ async def vc_stream(event):
             thumbnail_file = ngantri if not is_video else fotoplay 
             
             await asst.send_file(
-                chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id
+                chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id, buttons=buttons
             )
             await xteambot.delete()
             
@@ -368,7 +372,7 @@ async def vc_stream(event):
                 
                 await xteambot.delete()
                 return await asst.send_file(
-                    chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id
+                    chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id, buttons=buttons
                 )
             except UserAlreadyParticipantError: 
                 if os.path.exists(dl):
