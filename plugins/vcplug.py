@@ -289,7 +289,7 @@ async def vc_stream(event):
             pos = add_to_queue(chat_id, songname, stream_link, url, MODE_TYPE, RESOLUSI) 
             caption = f"💡 **{MODE_TYPE} Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
             await xteambot.delete()
-            return await asst.client.send_file(
+            return await asst.send_file(
                 chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
             )
         
@@ -305,7 +305,7 @@ async def vc_stream(event):
                 add_to_queue(chat_id, songname, stream_link, url, MODE_TYPE, RESOLUSI)
                 caption = f"🎧 Now Playing!\n\n🏷 **Title :** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
                 await xteambot.delete()
-                return await asst.client.send_file(
+                return await asst.send_file(
                     chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
                 )
             except UserAlreadyParticipantError:
@@ -367,7 +367,7 @@ async def vc_stream(event):
                 thumbnail_file = fotoplay 
                 
                 await xteambot.delete()
-                return await asst.client.send_file(
+                return await asst.send_file(
                     chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id
                 )
             except UserAlreadyParticipantError: 
