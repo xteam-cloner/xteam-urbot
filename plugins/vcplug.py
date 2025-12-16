@@ -190,7 +190,7 @@ async def play_next_song(chat_id: int):
     
     if chat_id not in QUEUE or not QUEUE[chat_id]:
         logger.info(f"Queue is empty, leaving voice chat {chat_id}")
-        await call_py.leave_group_call(chat_id)
+        await call_py.leave_call(chat_id)
         clear_queue(chat_id)
         return None
     
