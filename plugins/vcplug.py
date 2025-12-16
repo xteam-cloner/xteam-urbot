@@ -317,7 +317,7 @@ async def vc_stream(event):
                     with contextlib.suppress(Exception):
                         os.remove(stream_link)
                         
-                await call_py.leave_group_call(chat_id)
+                await call_py.leave_call(chat_id)
                 clear_queue(chat_id)
                 return await xteambot.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
             except Exception as ep:
