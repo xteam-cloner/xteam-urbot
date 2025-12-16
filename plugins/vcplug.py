@@ -126,7 +126,7 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
                 "nocheckcertificate": True,
                 "prefer_ffmpeg": True,
                 "exec_path": FFMPEG_ABSOLUTE_PATH,
-                "cookiefile": COOKIES_FILE_PATH
+                "cookiefile": COOKIES_FILE_PATH,
                 "js_runtimes": {
                     "node": {},
                 },
