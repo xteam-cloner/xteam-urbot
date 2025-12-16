@@ -190,8 +190,6 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
                     
 async def play_next_song(chat_id: int):
     
-    pop_an_item(chat_id)
-    
     if chat_id not in QUEUE or not QUEUE[chat_id]:
         logger.info(f"Queue is empty, leaving voice chat {chat_id}")
         
@@ -253,6 +251,7 @@ async def play_next_song(chat_id: int):
         return await play_next_song(chat_id)
         
     return [songname, link, type]
+    
     
 
 @man_cmd(pattern=r"(play|vplay)\b", group_only=True)
