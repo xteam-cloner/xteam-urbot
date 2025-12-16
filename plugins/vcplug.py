@@ -183,56 +183,77 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
         return 0, f"Error saat mengunduh atau konversi: {e}"
                     
 async def play_next_song(chat_id: int):
-    finished_song_data = get_queue(chat_id)[0] if chat_id in QUEUE and QUEUE[chat_id] else None
-    
     pop_an_item(chat_id)
 
-    # Blok penghapusan file individual (os.remove) sudah dihapus di sini
-    
     chat_queue = get_queue(chat_id)
     
     if chat_queue and len(chat_queue) > 0:
+        
         next_song = chat_queue[0]
         songname, file_path, url_ref, media_type, resolution = next_song
         is_video = (media_type == "Video")
         
-        try:
-            video_quality = VideoQuality.HD_720p 
-
-            stream = MediaStream(
-                media_path=file_path,
-                audio_parameters=AudioQuality.HIGH,
-                video_parameters=video_quality if is_video else VideoQuality.SD_480p,
-                video_flags=MediaStream.Flags.REQUIRED if is_video else MediaStream.Flags.IGNORE,
-            )
-                
-            await call_py.play(chat_id, stream)
-            logger.info(f"Start the next song on {chat_id}: {songname}")
+        MAX_RETRIES = 3 
         
-        except Exception as e:
-            logger.error(
-                f"Gagal memutar lagu berikutnya di {chat_id}: {e}. File: {file_path}", 
-                exc_info=True
-            )
-            asyncio.create_task(play_next_song(chat_id)) 
+        for attempt in range(MAX_RETRIES):
+            try:
+                if is_video:
+                    video_params = VideoQuality.HD_720p if resolution >= 720 else VideoQuality.SD_480p 
+                    stream = MediaStream(
+                        media_path=file_path,
+                        audio_parameters=AudioQuality.HIGH,
+                        video_parameters=video_params,
+                    )
+                else:
+                    stream = MediaStream(
+                        media_path=file_path,
+                        audio_parameters=AudioQuality.HIGH,
+                        video_flags=MediaStream.Flags.IGNORE,
+                    )
+                    
+                await call_py.play(chat_id, stream)
+                logger.info(f"Start the next song on {chat_id}: {songname}")
+                return 
             
+            except Exception as e:
+                logger.error(
+                    f"Gagal memutar lagu berikutnya di {chat_id} (Coba ke {attempt + 1}): {e}. File: {file_path}", 
+                    exc_info=True
+                )
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(0.5) 
+                else:
+                    logger.error(f"Gagal memutar '{songname}' di {chat_id} setelah {MAX_RETRIES} kali percobaan. Melewati lagu ini.")
+                    
+                    if os.path.exists(file_path):
+                        with contextlib.suppress(Exception):
+                            os.remove(file_path)
+                            logger.info(f"Dihapus file yang gagal diputar: {file_path}")
+                            
+                    asyncio.create_task(play_next_song(chat_id)) 
+                    return 
+
     else:
-        # PENTING: clear_queue bertanggung jawab membersihkan file disk sekarang.
         clear_queue(chat_id) 
         try:
             await call_py.leave_call(chat_id)
             logger.info(f"Antrian kosong, meninggalkan obrolan suara di {chat_id}")
         except Exception:
             pass
-                                
+                    
+            
 
 @call_py.on_update()
 async def stream_end_handler(client, update: Update):
     if isinstance(update, StreamEnded):
         chat_id = update.chat_id
         logger.info(f"Stream berakhir di {chat_id}. Memeriksa antrian...")
-        asyncio.create_task(play_next_song(chat_id))
+        
+        await asyncio.sleep(0.7) 
+        logger.info(f"Delay selesai di {chat_id}. Memulai pemutaran lagu berikutnya...")
 
+        asyncio.create_task(play_next_song(chat_id))
+        
 
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
