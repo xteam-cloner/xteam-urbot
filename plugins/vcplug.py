@@ -54,6 +54,7 @@ fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 FFMPEG_ABSOLUTE_PATH = "/usr/bin/ffmpeg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
+COOKIES_FILE_PATH = "cookies.txt"
 
 #logger.info("Memeriksa folder unduhan...")
 if not os.path.isdir(DOWNLOAD_DIR):
@@ -104,6 +105,7 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
                 "nocheckcertificate": True,
                 "prefer_ffmpeg": True,
                 "exec_path": FFMPEG_ABSOLUTE_PATH,
+                "cookiefile": COOKIES_FILE_PATH,
                 "postprocessors": [
                     {
                         "key": "FFmpegVideoConvertor",
@@ -124,6 +126,7 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
                 "nocheckcertificate": True,
                 "prefer_ffmpeg": True,
                 "exec_path": FFMPEG_ABSOLUTE_PATH,
+                "cookiefile": COOKIES_FILE_PATH
                 "js_runtimes": {
                     "node": {},
                 },
