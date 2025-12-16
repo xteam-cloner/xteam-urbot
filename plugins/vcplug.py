@@ -224,16 +224,20 @@ async def play_next_song(chat_id: int):
                     await asyncio.sleep(0.5) 
                 else:
                     logger.error(f"Gagal memutar '{songname}' di {chat_id} setelah {MAX_RETRIES} kali percobaan. Melewati lagu ini.")
-                    
-                    if os.path.exists(file_path):
-                        with contextlib.suppress(Exception):
-                            os.remove(file_path)
-                            logger.info(f"Dihapus file yang gagal diputar: {file_path}")
                             
                     asyncio.create_task(play_next_song(chat_id)) 
                     return 
 
     else:
+        await asyncio.sleep(1) 
+        
+        chat_queue_retry = get_queue(chat_id)
+        
+        if chat_queue_retry and len(chat_queue_retry) > 0:
+            logger.info(f"Ditemukan lagu setelah penundaan, melanjutkan pemutaran di {chat_id}")
+            asyncio.create_task(play_next_song(chat_id))
+            return 
+            
         clear_queue(chat_id) 
         try:
             await call_py.leave_call(chat_id)
