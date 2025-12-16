@@ -194,6 +194,12 @@ async def play_next_song(chat_id: int):
     
     if chat_id not in QUEUE or not QUEUE[chat_id]:
         logger.info(f"Queue is empty, leaving voice chat {chat_id}")
+        
+        try:
+             await call_py.mute(chat_id, is_muted=False) 
+        except Exception:
+             pass 
+
         await call_py.leave_call(chat_id)
         clear_queue(chat_id)
         return None
@@ -235,7 +241,11 @@ async def play_next_song(chat_id: int):
 
     try:
         await call_py.play(chat_id, stream)
-        await unmute_self(chat_id) 
+        
+        try:
+            await call_py.mute(chat_id, is_muted=False) 
+        except Exception:
+            pass
         
     except Exception as e:
         LOGS.error(f"Error playing next stream in {chat_id}: {e}. URL: {url}")
@@ -243,7 +253,7 @@ async def play_next_song(chat_id: int):
         return await play_next_song(chat_id)
         
     return [songname, link, type]
-
+    
 
 @man_cmd(pattern=r"(play|vplay)\b", group_only=True)
 async def vc_stream(event):
@@ -379,7 +389,7 @@ async def vc_stream(event):
                     with contextlib.suppress(Exception):
                         os.remove(dl)
                         
-                await call_py.leave_group_call(chat_id)
+                await call_py.leave_call(chat_id)
                 clear_queue(chat_id)
                 return await xteambot.edit("**ERROR:** `Karena akun sedang berada di obrolan suara`\n\n• Silahkan Coba Play lagi")
             except Exception as ep:
@@ -404,31 +414,16 @@ async def vc_end(event):
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
 
 
-@man_cmd(pattern="skip(?:\s|$)([\s\S]*)", group_only=True)
+@man_cmd(pattern="skip", group_only=True)
 async def vc_skip(event):
     chat_id = event.chat_id
     
-    if len(event.text.split()) < 2:
-        
-        if chat_id not in QUEUE or not QUEUE[chat_id]:
-            return await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
-        
-        await play_next_song(chat_id) 
-
-        chat_queue = get_queue(chat_id)
-        if chat_queue and len(chat_queue) > 0:
-            op = chat_queue[0]
-            await edit_or_reply(
-                event,
-                f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[2]})",
-                link_preview=False,
-            )
-        else:
-            await edit_delete(event, "Antrian kosong, meninggalkan obrolan suara", time=10)
-            
-    else:
-        skip = event.text.split(maxsplit=1)[1]
+    full_command = event.text.split(maxsplit=1)
+    
+    if len(full_command) > 1:
+        skip = full_command[1]
         DELQUE = "**Menghapus Lagu Berikut Dari Antrian:**"
+        
         if chat_id in QUEUE:
             items = [int(x) for x in skip.split(" ") if x.isdigit()]
             items.sort(reverse=True)
@@ -453,7 +448,26 @@ async def vc_skip(event):
                 await event.edit(DELQUE + "\n" + "\n".join(cleaned_list))
             else:
                 await edit_delete(event, "**Nomor antrian tidak valid.**", time=10)
+        
+        return
+            
+    else:
+        if chat_id not in QUEUE or not QUEUE[chat_id]:
+            return await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
+        
+        result = await play_next_song(chat_id) 
 
+        if result is None:
+            return await edit_delete(event, "Antrian kosong, meninggalkan obrolan suara", time=10)
+        
+        songname, link, type = result
+        
+        await edit_or_reply(
+            event,
+            f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{songname}]({link})",
+            link_preview=False,
+                            )
+        
 
 @man_cmd(pattern="pause$", group_only=True)
 async def vc_pause(event):
