@@ -287,9 +287,9 @@ async def vc_stream(event):
         # Antrian Sudah Ada
         if chat_id in QUEUE:
             pos = add_to_queue(chat_id, songname, stream_link, url, MODE_TYPE, RESOLUSI) 
-            caption = f"💡 **{MODE_TYPE} Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
+            caption = f"💡 **{MODE_TYPE} Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
             await xteambot.delete()
-            return await event.client.send_file(
+            return await asst.client.send_file(
                 chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
             )
         
@@ -303,9 +303,9 @@ async def vc_stream(event):
                     resolution=RESOLUSI if is_video else 0,
                 )
                 add_to_queue(chat_id, songname, stream_link, url, MODE_TYPE, RESOLUSI)
-                caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Atas permintaan:** {from_user}"
+                caption = f"🎧 Now Playing!\n\n🏷 **Title :** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
                 await xteambot.delete()
-                return await event.client.send_file(
+                return await asst.client.send_file(
                     chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
                 )
             except UserAlreadyParticipantError:
@@ -347,7 +347,7 @@ async def vc_stream(event):
             
             thumbnail_file = ngantri if not is_video else fotoplay 
             
-            await event.client.send_file(
+            await asst.send_file(
                 chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id
             )
             await xteambot.delete()
@@ -367,7 +367,7 @@ async def vc_stream(event):
                 thumbnail_file = fotoplay 
                 
                 await xteambot.delete()
-                return await event.client.send_file(
+                return await asst.client.send_file(
                     chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id
                 )
             except UserAlreadyParticipantError: 
