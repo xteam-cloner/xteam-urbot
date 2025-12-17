@@ -59,7 +59,8 @@ from . import (
     eor as edit_or_reply, 
     eod as edit_delete, 
     MUSIC_BUTTONS, 
-    callback
+    callback,
+asst
 )
 
 
