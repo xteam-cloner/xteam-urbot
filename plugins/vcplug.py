@@ -246,7 +246,6 @@ async def play_next_song(chat_id: int):
         LOGS.error(f"Gagal memutar lagu berikutnya: {e}")
         return await play_next_song(chat_id)
 
-
 @man_cmd(pattern=r"(play|vplay)\b", group_only=True)
 async def vc_stream(event):
     command_type = event.pattern_match.group(1) 
@@ -260,62 +259,71 @@ async def vc_stream(event):
         title_match = "" 
         
     replied = await event.get_reply_message()
+    chat = await event.get_chat()
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
-    
-    # Logic Invite Assistant (disingkat)
+    asstUserName = asst.me.username
+
     try:
-        await event.client(InviteToChannelRequest(chat_id, [asst.me.username]))
+        await event.client(InviteToChannelRequest(chat_id, [asstUserName]))
     except:
         pass
 
-    # KONDISI 1: JIKA CARI LEWAT JUDUL (YOUTUBE)
     if not replied:
         xteambot = await edit_or_reply(event, f"`Searching {MODE_TYPE}...`")
         search = ytsearch(title_match)
+        
         if search == 0:
-            return await xteambot.edit("Tidak dapat menemukan lagu.")
+            return await xteambot.edit(f"**Tidak Dapat Menemukan {MODE_TYPE}**")
         
         songname, url, duration, thumbnail, videoid = search
+        ctitle = await CHAT_TITLE(chat.title)
+        thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
+        
         stream_link_info = await ytdl(url, video_mode=is_video) 
-        _, stream_link = stream_link_info if isinstance(stream_link_info, tuple) else (0, stream_link_info)
+        hm, stream_link = stream_link_info if isinstance(stream_link_info, tuple) else (0, stream_link_info)
+        
+        if hm == 0:
+            return await xteambot.edit(f"`{stream_link}`")
 
         if chat_id in QUEUE:
             pos = add_to_queue(chat_id, songname, stream_link, url, MODE_TYPE, RESOLUSI) 
+            caption = f"💡 **{MODE_TYPE} Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
             await xteambot.delete()
-            return await asst.send_file(chat_id, fotoplay, caption=f"💡 Added to queue #{pos}\n🏷 Title: {songname}")
+            return await asst.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
         else:
             try:
-                # URUTAN DIPERBAIKI: Add ke queue dulu
                 add_to_queue(chat_id, songname, stream_link, url, MODE_TYPE, RESOLUSI)
                 await join_call(chat_id, link=stream_link, video=is_video, resolution=RESOLUSI)
+                caption = f"🎧 Now Playing!\n\n🏷 **Title :** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
                 await xteambot.delete()
-                return await event.client.send_file(chat_id, fotoplay, caption=f"🎧 Now Playing!\n🏷 Title: {songname}")
-            except Exception as e:
+                return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS)
+            except Exception as ep:
                 clear_queue(chat_id)
-                return await xteambot.edit(f"Error: {e}")
+                return await xteambot.edit(f"**ERROR:** `{ep}`")
 
-    # KONDISI 2: JIKA REPLY MEDIA (TELEGRAM FILE)
     else:
-        xteambot = await edit_or_reply(event, f"📥 Downloading {MODE_TYPE}...")
+        xteambot = await edit_or_reply(event, f"📥 **Sedang Mendownload {MODE_TYPE}**")
         dl = await replied.download_media(file=DOWNLOAD_DIR)
-        songname = "Telegram File"
         link = f"https://t.me/c/{str(chat_id)[4:]}/{replied.id}"
+        songname = f"Telegram {MODE_TYPE} Player"
 
         if chat_id in QUEUE:
             pos = add_to_queue(chat_id, songname, dl, link, MODE_TYPE, RESOLUSI)
+            caption = f"💡 **{MODE_TYPE} Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({link})\n🎧 **Atas permintaan:** {from_user}"
+            await event.client.send_file(chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id)
             await xteambot.delete()
-            await event.client.send_file(chat_id, fotoplay, caption=f"💡 Added to queue #{pos}")
         else:
             try:
-                # URUTAN DIPERBAIKI: Add ke queue dulu
                 add_to_queue(chat_id, songname, dl, link, MODE_TYPE, RESOLUSI)
                 await join_call(chat_id, link=dl, video=is_video, resolution=RESOLUSI)
+                caption = f"🏷 **Judul:** [{songname}]({link})\n💡 **Status:** `Sedang Memutar {MODE_TYPE}`\n🎧 **Atas permintaan:** {from_user}"
                 await xteambot.delete()
-                return await event.client.send_file(chat_id, fotoplay, caption=f"🎧 Now Playing: {songname}")
-            except Exception as e:
+                return await event.client.send_file(chat_id, fotoplay, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS)
+            except Exception as ep:
                 clear_queue(chat_id)
-                return await xteambot.edit(f"Error: {e}")
+                return await xteambot.edit(f"**ERROR:** `{ep}`")
+            
 
 @man_cmd(pattern="end$", group_only=True)
 async def vc_end(event):
