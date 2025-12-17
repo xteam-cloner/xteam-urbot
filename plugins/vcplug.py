@@ -18,7 +18,7 @@ from telethon.errors import (
     UserAlreadyParticipantError
 )
 from xteam.configs import Var 
-from . import call_py, client 
+from xteam import call_py, bot as client
 from telethon.utils import get_display_name
 from xteam.fns.admins import admin_check 
 from pytgcalls import PyTgCalls
@@ -36,7 +36,6 @@ from pytgcalls.types import (
 )
 from pytgcalls.types.stream import VideoQuality, AudioQuality
 from telethon.tl.functions.users import GetFullUserRequest
-#from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors.rpcerrorlist import (
     UserNotParticipantError,
@@ -578,3 +577,40 @@ async def clean_disk(event):
     )
 
 
+
+MUSIC_BUTTONS = [
+    [
+        Button.inline("⏸ PAUSE", data="pauseit"),
+        Button.inline("▶️ RESUME", data="resumeit")
+    ],
+    [
+        Button.inline("⏭ SKIP", data="skipit"),
+        Button.inline("⏹ STOP", data="stopit")
+    ],
+    [
+        Button.inline("🗑 CLOSE", data="closeit")
+    ]
+]
+
+
+@callback(data=re.compile(b"(pauseit|resumeit|stopit|skipit|closeit)"), owner=True)
+async def music_manager(e):
+    query = e.data.decode("utf-8")
+    chat_id = e.chat_id
+    try:
+        if query == "pauseit":
+            await call_py.pause_stream(chat_id)
+            await e.answer("⏸ Paused", alert=False)
+        elif query == "resumeit":
+            await call_py.resume_stream(chat_id)
+            await e.answer("▶️ Resumed", alert=False)
+        elif query == "stopit":
+            await call_py.leave_group_call(chat_id)
+            await e.delete()
+        elif query == "skipit":
+            await call_py.drop_user(chat_id)
+            await e.answer("⏭ Skipped", alert=False)
+        elif query == "closeit":
+            await e.delete()
+    except Exception as err:
+        await e.answer(f"⚠️ Error: {str(err)}", alert=True)
