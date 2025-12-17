@@ -272,12 +272,16 @@ async def vc_stream(event):
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
     
-    valid_replies = (replied and ((replied.audio or replied.voice) if not is_video else (replied.video or replied.document)))
-    
-    if not title_match and not valid_replies:
-        return await edit_or_reply(event, f"**Silahkan Masukan Judul {MODE_TYPE}**")
+    asstUserName = asst.me.username
+    try:
+        await event.client(InviteToChannelRequest(chat_id, [asstUserName]))
+    except (UserAlreadyParticipantError, UserPrivacyRestrictedError, ChatAdminRequiredError):
+        pass
+    except Exception as e:
+        logger.error(f"Gagal mengundang bot asisten: {e}")
+        
+        sender_client = assistant_client if event.is_group else event.client
 
-    # --- 2. LOGIKA PENCARIAN (YOUTUBE) ---
     if not replied or (replied and not valid_replies):
         # Definisikan xteambot
         xteambot = await edit_or_reply(event, f"`Searching {MODE_TYPE}...`")
