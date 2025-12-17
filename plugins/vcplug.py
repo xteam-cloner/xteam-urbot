@@ -283,14 +283,14 @@ async def vc_stream(event):
         if chat_id in QUEUE:
             pos = add_to_queue(chat_id, songname, stream_link, url, MODE_TYPE, RESOLUSI) 
             await xteambot.delete()
-            return await asst.send_file(chat_id, thumbnail, caption=f"💡 Added to queue #{pos}\n🏷 Title: {songname}")
+            return await asst.send_file(chat_id, fotoplay, caption=f"💡 Added to queue #{pos}\n🏷 Title: {songname}")
         else:
             try:
                 # URUTAN DIPERBAIKI: Add ke queue dulu
                 add_to_queue(chat_id, songname, stream_link, url, MODE_TYPE, RESOLUSI)
                 await join_call(chat_id, link=stream_link, video=is_video, resolution=RESOLUSI)
                 await xteambot.delete()
-                return await event.client.send_file(chat_id, thumbnail, caption=f"🎧 Now Playing!\n🏷 Title: {songname}")
+                return await event.client.send_file(chat_id, fotoplay, caption=f"🎧 Now Playing!\n🏷 Title: {songname}")
             except Exception as e:
                 clear_queue(chat_id)
                 return await xteambot.edit(f"Error: {e}")
