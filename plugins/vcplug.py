@@ -12,6 +12,12 @@ import httpx
 from . import * 
 from telethon import events, TelegramClient, Button
 from telethon.tl.types import Message, User, TypeUser
+from telethon.tl.functions.channels import InviteToChannelRequest
+from telethon.errors import (
+    UserPrivacyRestrictedError, 
+    ChatAdminRequiredError, 
+    UserAlreadyParticipantError
+)
 from xteam.configs import Var 
 from xteam import call_py, bot as client
 from xteam import ultroid_bot 
@@ -32,7 +38,7 @@ from pytgcalls.types import (
 )
 from pytgcalls.types.stream import VideoQuality, AudioQuality
 from telethon.tl.functions.users import GetFullUserRequest
-from telethon.tl.functions.messages import ImportChatInviteRequest
+#from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors.rpcerrorlist import (
     UserNotParticipantError,
