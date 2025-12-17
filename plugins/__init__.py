@@ -23,7 +23,7 @@ import datetime
 from random import choice
 import requests
 import re
-from xteam import call_py
+from xteam import call_py, bot as client
 from telethon import Button, events
 from telethon.tl import functions, types  # pylint:ignore
 from xteam import udB
