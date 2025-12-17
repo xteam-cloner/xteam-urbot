@@ -190,16 +190,16 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
         return 0, f"Error saat mengunduh atau konversi: {e}"
                     
 async def play_next_song(chat_id: int):
+    from xteam import call_py
     
     if chat_id not in QUEUE or not QUEUE[chat_id]:
-        logger.info(f"Queue is empty, leaving voice chat {chat_id}")
-        
-        try:
-             await call_py.mute(chat_id, is_muted=False) 
-        except Exception:
-             pass 
-
-        await call_py.leave_call(chat_id)
+        LOGS.info(f"Queue is empty, leaving voice chat {chat_id}")
+        if call_py:
+            try:
+                await call_py.mute(chat_id, is_muted=False) 
+            except Exception:
+                pass 
+            await call_py.leave_call(chat_id)
         clear_queue(chat_id)
         return None
     
@@ -207,10 +207,10 @@ async def play_next_song(chat_id: int):
         next_song = get_queue(chat_id)[0] 
         songname, url, link, type, RESOLUSI = next_song
     except IndexError:
-        logger.warning(f"Antrian tiba-tiba kosong di {chat_id} setelah pop.")
+        LOGS.warning(f"Antrian tiba-tiba kosong di {chat_id} setelah pop.")
         return None
 
-    logger.info(f"Start the next song on {chat_id}: {songname}")
+    LOGS.info(f"Start the next song on {chat_id}: {songname}")
 
     if type == "Audio":
         stream = MediaStream(
@@ -219,7 +219,6 @@ async def play_next_song(chat_id: int):
             audio_flags=MediaStream.Flags.REQUIRED, 
             video_flags=MediaStream.Flags.IGNORE,
         )
-        
     elif type == "Video":
         if RESOLUSI == 720:
             video_quality = VideoQuality.HD_720p
@@ -238,19 +237,20 @@ async def play_next_song(chat_id: int):
             video_flags=MediaStream.Flags.REQUIRED,
         )
 
+    if not call_py:
+        LOGS.error("call_py is None! Cannot play next song.")
+        return None
+
     try:
         await call_py.play(chat_id, stream)
         try:
             await call_py.mute(chat_id, is_muted=False)
-        
         except Exception:
             pass
-        
-        except Exception as e:
-        LOGS.error(f"Error playing next stream in {chat_id}: {e}. URL: {url}")
-        return await play_next_song(chat_id)
         return [songname, link, type]
-    
+    except Exception as e:
+        LOGS.error(f"Error playing next stream in {chat_id}: {e}. URL: {url}")
+        return None
     
 
 @man_cmd(pattern=r"(play|vplay)\b", group_only=True)
