@@ -192,18 +192,22 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
 async def play_next_song(chat_id: int):
     from xteam import call_py
     
-    if chat_id not in QUEUE or len(QUEUE[chat_id]) <= 1:
-        if call_py:
-            try:
-                await call_py.leave_call(chat_id)
-            except Exception:
-                pass
+    if chat_id not in QUEUE or not QUEUE[chat_id]:
         clear_queue(chat_id)
         return None
     
     QUEUE[chat_id].pop(0)
-    next_song = QUEUE[chat_id][0]
-    songname, url, link, type, RESOLUSI = next_song
+
+    if not QUEUE[chat_id]:
+        LOGS.info(f"Antrean di {chat_id} telah habis. Bot standby di Voice Chat.")
+        clear_queue(chat_id)
+        return None
+
+    try:
+        next_song = QUEUE[chat_id][0]
+        songname, url, link, type, RESOLUSI = next_song
+    except (IndexError, KeyError):
+        return None
 
     LOGS.info(f"Memutar lagu berikutnya: {songname}")
 
@@ -228,12 +232,19 @@ async def play_next_song(chat_id: int):
             video_flags=MediaStream.Flags.REQUIRED,
         )
 
+    if not call_py:
+        return None
+
     try:
         await call_py.play(chat_id, stream)
+        try:
+            await call_py.mute(chat_id, False)
+        except:
+            pass
         return [songname, link, type]
     except Exception as e:
-        LOGS.error(f"Error play next: {e}")
-        return None
+        LOGS.error(f"Gagal memutar lagu berikutnya: {e}")
+        return await play_next_song(chat_id)
         
     
 
