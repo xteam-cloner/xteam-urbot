@@ -200,14 +200,12 @@ async def play_next_song(chat_id: int):
                 pass
         clear_queue(chat_id)
         return None
-
+    
     QUEUE[chat_id].pop(0)
+    next_song = QUEUE[chat_id][0]
+    songname, url, link, type, RESOLUSI = next_song
 
-    try:
-        next_song = QUEUE[chat_id][0] 
-        songname, url, link, type, RESOLUSI = next_song
-    except (IndexError, KeyError):
-        return None
+    LOGS.info(f"Memutar lagu berikutnya: {songname}")
 
     if type == "Audio":
         stream = MediaStream(
@@ -234,7 +232,7 @@ async def play_next_song(chat_id: int):
         await call_py.play(chat_id, stream)
         return [songname, link, type]
     except Exception as e:
-        LOGS.error(f"Gagal memutar lagu berikutnya: {e}")
+        LOGS.error(f"Error play next: {e}")
         return None
         
     
