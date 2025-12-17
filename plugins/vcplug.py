@@ -45,7 +45,7 @@ from telethon.tl.functions.messages import ExportChatInviteRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
-from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, MUSIC_BUTTONS, callback
+from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, callback
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 
