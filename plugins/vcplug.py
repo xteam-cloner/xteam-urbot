@@ -196,10 +196,10 @@ async def play_next_song(chat_id: int):
         clear_queue(chat_id)
         return None
     
-    QUEUE[chat_id].pop(0)
-
-    if not QUEUE[chat_id]:
-        LOGS.info(f"Antrean di {chat_id} telah habis. Bot standby di Voice Chat.")
+    if len(QUEUE[chat_id]) > 1:
+        QUEUE[chat_id].pop(0)
+    else:
+        LOGS.info(f"Antrean di {chat_id} telah habis. Bot standby.")
         clear_queue(chat_id)
         return None
 
@@ -245,7 +245,6 @@ async def play_next_song(chat_id: int):
     except Exception as e:
         LOGS.error(f"Gagal memutar lagu berikutnya: {e}")
         return await play_next_song(chat_id)
-        
     
 
 @man_cmd(pattern=r"(play|vplay)\b", group_only=True)
