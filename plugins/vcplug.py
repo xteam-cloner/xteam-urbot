@@ -192,8 +192,7 @@ async def ytdl(url: str, video_mode: bool = False) -> Tuple[int, Union[str, Any]
 async def play_next_song(chat_id: int):
     from xteam import call_py
     
-    if chat_id not in QUEUE or not QUEUE[chat_id]:
-        LOGS.info(f"Queue is empty, leaving voice chat {chat_id}")
+    if chat_id not in QUEUE or len(QUEUE[chat_id]) <= 1:
         if call_py:
             try:
                 await call_py.leave_call(chat_id)
@@ -201,62 +200,41 @@ async def play_next_song(chat_id: int):
                 pass
         clear_queue(chat_id)
         return None
-    
-    QUEUE[chat_id].pop(0)
 
-    if not QUEUE[chat_id]:
-        LOGS.info(f"No more songs in queue for {chat_id}, leaving...")
-        if call_py:
-            try:
-                await call_py.leave_call(chat_id)
-            except Exception:
-                pass
-        clear_queue(chat_id)
-        return None
+    QUEUE[chat_id].pop(0)
 
     try:
         next_song = QUEUE[chat_id][0] 
         songname, url, link, type, RESOLUSI = next_song
-    except IndexError:
+    except (IndexError, KeyError):
         return None
-
-    LOGS.info(f"Start the next song on {chat_id}: {songname}")
 
     if type == "Audio":
         stream = MediaStream(
             media_path=url,
-            audio_parameters=AudioQuality.HIGH, 
-            audio_flags=MediaStream.Flags.REQUIRED, 
+            audio_parameters=AudioQuality.HIGH,
+            audio_flags=MediaStream.Flags.REQUIRED,
             video_flags=MediaStream.Flags.IGNORE,
         )
-    elif type == "Video":
+    else:
         video_quality = (
             VideoQuality.HD_720p if RESOLUSI == 720 else
             VideoQuality.SD_480p if RESOLUSI == 480 else
-            VideoQuality.SD_360p if RESOLUSI == 360 else
-            VideoQuality.SD_480p
+            VideoQuality.SD_360p
         )
         stream = MediaStream(
             media_path=url,
             audio_parameters=AudioQuality.HIGH,
             video_parameters=video_quality,
-            audio_flags=MediaStream.Flags.REQUIRED, 
+            audio_flags=MediaStream.Flags.REQUIRED,
             video_flags=MediaStream.Flags.REQUIRED,
         )
 
-    if not call_py:
-        LOGS.error("call_py is None! Cannot play next song.")
-        return None
-
     try:
         await call_py.play(chat_id, stream)
-        try:
-            await call_py.mute(chat_id, is_muted=False)
-        except Exception:
-            pass
         return [songname, link, type]
     except Exception as e:
-        LOGS.error(f"Error playing next stream in {chat_id}: {e}")
+        LOGS.error(f"Gagal memutar lagu berikutnya: {e}")
         return None
         
     
