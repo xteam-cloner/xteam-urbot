@@ -593,13 +593,13 @@ async def music_manager(e):
     chat_id = e.chat_id
     try:
         if query == "pauseit":
-            await call_py.pause_stream(chat_id)
+            await call_py.pause(chat_id)
             await e.answer("⏸ Paused", alert=False)
         elif query == "resumeit":
-            await call_py.resume_stream(chat_id)
+            await call_py.resume(chat_id)
             await e.answer("▶️ Resumed", alert=False)
         elif query == "stopit":
-            await call_py.leave_group_call(chat_id)
+            await call_py.leave_call(chat_id)
             await e.delete()
         elif query == "skipit":
             await call_py.drop_user(chat_id)
