@@ -196,18 +196,28 @@ async def play_next_song(chat_id: int):
         LOGS.info(f"Queue is empty, leaving voice chat {chat_id}")
         if call_py:
             try:
-                await call_py.mute(chat_id, is_muted=False) 
+                await call_py.leave_call(chat_id)
             except Exception:
-                pass 
-            await call_py.leave_call(chat_id)
+                pass
         clear_queue(chat_id)
         return None
     
+    QUEUE[chat_id].pop(0)
+
+    if not QUEUE[chat_id]:
+        LOGS.info(f"No more songs in queue for {chat_id}, leaving...")
+        if call_py:
+            try:
+                await call_py.leave_call(chat_id)
+            except Exception:
+                pass
+        clear_queue(chat_id)
+        return None
+
     try:
-        next_song = get_queue(chat_id)[0] 
+        next_song = QUEUE[chat_id][0] 
         songname, url, link, type, RESOLUSI = next_song
     except IndexError:
-        LOGS.warning(f"Antrian tiba-tiba kosong di {chat_id} setelah pop.")
         return None
 
     LOGS.info(f"Start the next song on {chat_id}: {songname}")
@@ -220,15 +230,12 @@ async def play_next_song(chat_id: int):
             video_flags=MediaStream.Flags.IGNORE,
         )
     elif type == "Video":
-        if RESOLUSI == 720:
-            video_quality = VideoQuality.HD_720p
-        elif RESOLUSI == 480:
-            video_quality = VideoQuality.SD_480p
-        elif RESOLUSI == 360:
-            video_quality = VideoQuality.SD_360p
-        else:
-            video_quality = VideoQuality.SD_480p 
-
+        video_quality = (
+            VideoQuality.HD_720p if RESOLUSI == 720 else
+            VideoQuality.SD_480p if RESOLUSI == 480 else
+            VideoQuality.SD_360p if RESOLUSI == 360 else
+            VideoQuality.SD_480p
+        )
         stream = MediaStream(
             media_path=url,
             audio_parameters=AudioQuality.HIGH,
@@ -249,8 +256,9 @@ async def play_next_song(chat_id: int):
             pass
         return [songname, link, type]
     except Exception as e:
-        LOGS.error(f"Error playing next stream in {chat_id}: {e}. URL: {url}")
+        LOGS.error(f"Error playing next stream in {chat_id}: {e}")
         return None
+        
     
 
 @man_cmd(pattern=r"(play|vplay)\b", group_only=True)
