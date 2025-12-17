@@ -241,9 +241,11 @@ async def play_next_song(chat_id: int):
     try:
         await call_py.play(chat_id, stream)
         try:
-            await call_py.mute(chat_id, is_muted=False) 
+            await call_py.mute(chat_id, is_muted=False)
+        
         except Exception:
             pass
+        
         except Exception as e:
         LOGS.error(f"Error playing next stream in {chat_id}: {e}. URL: {url}")
         return await play_next_song(chat_id)
