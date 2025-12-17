@@ -40,7 +40,7 @@ from pytgcalls.types import (
 )
 from pytgcalls.types.stream import VideoQuality, AudioQuality
 
-from youtubesearchpython.__future__ import VideosSearch
+#from youtubesearchpython.__future__ import VideosSearch
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 from xteam.configs import Var 
