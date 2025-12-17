@@ -50,7 +50,7 @@ from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, 
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 from xteam.vcbot import CHAT_TITLE, skip_current_song, skip_item, play_next_stream, add_to_queue, gen_thumb, ytsearch, join_call 
-from xteam.vcbot.queues import pop_an_item, QUEUE, clear_queue, get_queue
+from xteam.vcbot.queues import QUEUE, clear_queue, get_queue
 
 
 logger = logging.getLogger(__name__)
