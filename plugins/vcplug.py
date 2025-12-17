@@ -284,7 +284,7 @@ async def vc_stream(event):
     except Exception as e:
         logger.error(f"Gagal mengundang bot asisten: {e}")
         
-        sender_client = assistant_client if event.is_group else event.client
+        sender_client = asst if event.is_group else event.client
 
     if not replied or (replied and not valid_replies):
         # Definisikan xteambot
