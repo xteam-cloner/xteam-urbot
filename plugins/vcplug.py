@@ -48,7 +48,7 @@ from telethon.tl.functions.messages import ExportChatInviteRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 import yt_dlp
 from youtubesearchpython.__future__ import VideosSearch
-from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete 
+from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, MUSIC_BUTTONS, callback
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 
@@ -64,9 +64,7 @@ FFMPEG_ABSOLUTE_PATH = "/usr/bin/ffmpeg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 COOKIES_FILE_PATH = "cookies.txt"
 
-buttons = [
-    [Button.inline("CLOSE", data="closeit")] 
-]
+
 
 #logger.info("Memeriksa folder unduhan...")
 if not os.path.isdir(DOWNLOAD_DIR):
@@ -313,7 +311,7 @@ async def vc_stream(event):
             caption = f"💡 **{MODE_TYPE} Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
             await xteambot.delete()
             return await asst.send_file(
-                chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=buttons
+                chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS
             )
         
         # Memutar Sekarang
@@ -371,7 +369,7 @@ async def vc_stream(event):
             thumbnail_file = ngantri if not is_video else fotoplay 
             
             await event.client.send_file(
-                chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id, buttons=buttons
+                chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS
             )
             await xteambot.delete()
             
@@ -391,7 +389,7 @@ async def vc_stream(event):
                 
                 await xteambot.delete()
                 return await event.client.send_file(
-                    chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id, buttons=buttons
+                    chat_id, thumbnail_file, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS
                 )
             except UserAlreadyParticipantError: 
                 if os.path.exists(dl):
