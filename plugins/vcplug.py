@@ -5,6 +5,7 @@ import re
 import contextlib 
 import logging
 import functools
+from . import *
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any, Union
 from datetime import datetime, timedelta
@@ -48,7 +49,6 @@ from youtubesearchpython.__future__ import VideosSearch
 from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, callback
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
-from . import *
 from xteam.vcbot import CHAT_TITLE, skip_current_song, skip_item, play_next_stream, add_to_queue, gen_thumb, ytsearch, join_call 
 from xteam.vcbot.queues import pop_an_item, QUEUE, clear_queue, get_queue
 
@@ -240,51 +240,41 @@ async def play_next_song(chat_id: int):
 
     try:
         await call_py.play(chat_id, stream)
-        
         try:
             await call_py.mute(chat_id, is_muted=False) 
         except Exception:
             pass
-        
-    except Exception as e:
+        except Exception as e:
         LOGS.error(f"Error playing next stream in {chat_id}: {e}. URL: {url}")
-        
         return await play_next_song(chat_id)
-        
-    return [songname, link, type]
+        return [songname, link, type]
     
     
 
 @man_cmd(pattern=r"(play|vplay)\b", group_only=True)
 async def vc_stream(event):
-    
     command_type = event.pattern_match.group(1) 
     is_video = (command_type == 'vplay')
     RESOLUSI = 720 if is_video else 0
     MODE_TYPE = "Video" if is_video else "Audio"
-    
     try:
         title_match = event.text.split(maxsplit=1)[1]
     except IndexError:
-        title_match = ""
-    
+        title_match = "" 
     replied = await event.get_reply_message()
     chat = await event.get_chat()
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
-    
     asstUserName = asst.me.username
     try:
         await event.client(InviteToChannelRequest(chat_id, [asstUserName]))
     except (UserAlreadyParticipantError, UserPrivacyRestrictedError, ChatAdminRequiredError):
         pass
     except Exception as e:
-        logger.error(f"Gagal mengundang bot asisten: {e}")
-        
+        logger.error(f"Gagal mengundang bot asisten: {e}") 
         sender_client = asst if event.is_group else event.client
-
     if not replied or (replied and not valid_replies):
-        # Definisikan xteambot
+
         xteambot = await edit_or_reply(event, f"`Searching {MODE_TYPE}...`")
         query = title_match
         search = ytsearch(query)
@@ -308,10 +298,8 @@ async def vc_stream(event):
             caption = f"💡 **{MODE_TYPE} Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
             await xteambot.delete()
             return await asst.send_file(
-                chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS
+                chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id
             )
-        
-        # Memutar Sekarang
         else:
             try:
                 await join_call(
@@ -341,10 +329,7 @@ async def vc_stream(event):
                         
                 clear_queue(chat_id)
                 return await xteambot.edit(f"**ERROR:** `{ep}`")
-
-    # --- 3. LOGIKA FILE BALASAN (REPLIED MEDIA) ---
     else:
-        # Definisikan xteambot
         xteambot = await edit_or_reply(event, f"📥 **Sedang Mendownload {MODE_TYPE}**")
         dl = await replied.download_media(file=DOWNLOAD_DIR)
         link = f"https://t.me/c/{chat_id}/{event.reply_to_msg_id}"
@@ -358,7 +343,6 @@ async def vc_stream(event):
                 except ValueError:
                     pass
 
-        # Antrian Sudah Ada
         if chat_id in QUEUE:
             pos = add_to_queue(chat_id, songname, dl, link, MODE_TYPE, RESOLUSI)
             caption = f"💡 **{MODE_TYPE} Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({link})\n**👥 Chat ID:** `{chat_id}`\n🎧 **Atas permintaan:** {from_user}"
