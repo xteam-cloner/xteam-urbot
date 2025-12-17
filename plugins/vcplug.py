@@ -327,7 +327,7 @@ async def vc_stream(event):
                 caption = f"🎧 Now Playing!\n\n🏷 **Title :** [{songname}]({url})\n**⏱ Duration :** `{duration}`\n🎧 **Request By:** {from_user}"
                 await xteambot.delete()
                 return await event.client.send_file(
-                    chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=buttons
+                    chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS
                 )
             except UserAlreadyParticipantError:
                 if os.path.exists(stream_link):
