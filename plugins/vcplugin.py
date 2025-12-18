@@ -133,7 +133,7 @@ async def vc_play(event):
         else:
             try:
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-                await call_py.join_call(chat_id, stream)
+                await join_call(chat_id, stream)
                 caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Atas permintaan:** {from_user}"
                 await botman.delete()
                 await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
@@ -202,7 +202,7 @@ async def vc_vplay(event):
     else:
         try:
             add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
-            await call_py.join_call(chat_id, stream)
+            await join_call(chat_id, stream)
             caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
             await xnxx.delete()
             await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
