@@ -112,7 +112,7 @@ async def vc_play(event):
         if search == 0:
             return await status_msg.edit("**❌ Lagu tidak ditemukan.**")
         
-        songname, url, duration, thumbnail, videoid = search
+        songname, url, duration, thumbnail, videoid, artist = search
         ctitle = await CHAT_TITLE(chat.title)
         thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
         
@@ -124,14 +124,14 @@ async def vc_play(event):
 
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
             pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-            caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Oleh:** {from_user}"
+            caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n\n**🎤 Artist: {artist}\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Oleh:** {from_user}"
             await status_msg.delete()
             return await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
         else:
             try:
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
                 await join_call(chat_id, link=ytlink, video=False, resolution=0)
-                caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Oleh:** {from_user}"
+                caption = f"**🎤 Artist: {artist}\n🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Oleh:** {from_user}"
                 await status_msg.delete()
                 
                 pesan_audio = await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
@@ -158,7 +158,7 @@ async def vc_vplay(event):
     if search == 0:
         return await status_msg.edit("**❌ Video tidak ditemukan.**")
     
-    songname, url, duration, thumbnail, videoid = search
+    songname, url, duration, thumbnail, videoid, artist = search
     ctitle = await CHAT_TITLE(chat.title)
     thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
     
@@ -170,7 +170,7 @@ async def vc_vplay(event):
 
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
-        caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Oleh:** {from_user}"
+        caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n\n**🎤 Artist: {artist}\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Oleh:** {from_user}"
         await status_msg.delete()
         return await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
     
@@ -179,7 +179,7 @@ async def vc_vplay(event):
             add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
             await join_call(chat_id, link=ytlink, video=True, resolution=720)
             
-            caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Memutar Video`\n🎧 **Oleh:** {from_user}"
+            caption = f"🎤 Artist: {artist}\n**🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Memutar Video`\n🎧 **Oleh:** {from_user}"
             await status_msg.delete()
             
             pesan_video = await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
