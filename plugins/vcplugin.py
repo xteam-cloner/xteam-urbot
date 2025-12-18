@@ -77,25 +77,19 @@ def vcmention(user):
 async def skip_current_song(chat_id: int):
     if chat_id not in QUEUE:
         return 0
-        
     if len(QUEUE[chat_id]) > 1:
         QUEUE[chat_id].pop(0)
     else:
         QUEUE[chat_id] = []
         return 1
-
     next_song = QUEUE[chat_id][0]
     songname, url, link, type_mode, RESOLUSI = next_song
-    
     is_video = (type_mode == "Video")
-
     try:
         await join_call(chat_id, link=url, video=is_video, resolution=RESOLUSI)
         return [songname, link]
     except Exception as e:
-        print(f"Error saat skip: {e}")
         return await skip_current_song(chat_id)
-        
 
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
@@ -235,3 +229,29 @@ async def vc_skip(event):
         await edit_delete(event, "**Antrian habis, bot standby.**", 10)
     else:
         await edit_or_reply(event, f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[1]})", link_preview=False)
+
+
+@call_py.on_update()
+async def unified_update_handler(client, update: Update) -> None:
+    try:
+        chat_id = update.chat_id
+    except:
+        return
+
+    if isinstance(update, StreamEnded):
+        if chat_id in QUEUE:
+            op = await skip_current_song(chat_id) 
+            if isinstance(op, list):
+                await client.send_message(
+                    chat_id,
+                    f"**🎧 Sekarang Memutar:** [{op[0]}]({op[1]})",
+                    link_preview=False,
+                )
+            elif op == 1:
+                await client.send_message(chat_id, "**💡 Antrean habis. Bot Standby.**")
+
+    elif isinstance(update, ChatUpdate):
+        status = update.status
+        CRITICAL = (ChatUpdate.Status.KICKED | ChatUpdate.Status.LEFT_GROUP | ChatUpdate.Status.CLOSED_VOICE_CHAT)
+        if (status & ChatUpdate.Status.LEFT_CALL) or (status & CRITICAL):
+            clear_queue(chat_id)
