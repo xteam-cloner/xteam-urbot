@@ -170,7 +170,9 @@ async def vc_vplay(event):
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
     
+    # Variabel pesan didefinisikan sebagai 'xnxx'
     xnxx = await edit_or_reply(event, "`Searching Video...`")
+    
     query = event.text.split(maxsplit=1)[1] if not replied else title
     search = ytsearch(query)
     if search == 0:
@@ -180,29 +182,30 @@ async def vc_vplay(event):
     ctitle = await CHAT_TITLE(chat.title)
     thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
     
-    # Mengambil link stream video dari ytdl
     stream_link_info = await ytdl(url, video_mode=True) 
     hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
     
     if hm == 0:
         return await xnxx.edit(f"`{ytlink}`")
 
-    # Logika Antrean
+    # LOGIKA ANTREAN
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
-        caption = f"💡 **Video Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n🎧 **Request By:** {from_user}"
+        caption = f"💡 **Video Ditambahkan Ke Antrean »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
+        
+        # PERBAIKAN: Gunakan xnxx.delete(), bukan xteambot
         await xnxx.delete()
         return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
+    
     else:
         try:
             add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
-            
-            # PERBAIKAN: Menggunakan join_call dengan video=True
-            # Ini akan otomatis menangani join baru atau change_stream (Standby)
             await join_call(chat_id, link=ytlink, video=True, resolution=720)
             
-            caption = f"🏷 **Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n💡 **Status:** `Now Playing Video`\n🎧 **Request By:** {from_user}"
-            await xteambot.delete()
+            caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
+            
+            # PERBAIKAN: Gunakan xnxx.delete(), bukan xteambot
+            await xnxx.delete()
             return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
         except Exception as ep:
             clear_queue(chat_id)
