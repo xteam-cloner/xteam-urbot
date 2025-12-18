@@ -368,7 +368,7 @@ async def music_manager(e):
             await call_py.leave_call(chat_id)
             await e.delete()
         elif query == "skipit":
-            await call_py.drop_user(chat_id)
+            await skip_current_song(chat_id)
             await e.answer("⏭", alert=False)
         elif query == "closeit":
             await e.delete()
