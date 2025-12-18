@@ -56,7 +56,7 @@ from xteam.vcbot import (
     skip_item,
     ytdl,
     ytsearch,
-    join_cal
+    join_call
 )
 from xteam.vcbot.queues import QUEUE, add_to_queue, clear_queue, get_queue
 
