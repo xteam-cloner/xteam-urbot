@@ -49,6 +49,7 @@ from youtubesearchpython.__future__ import VideosSearch
 from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, callback
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
+from xteam.vcbot.markups import timer_task
 from xteam.vcbot import (
     CHAT_TITLE,
     gen_thumb,
@@ -102,69 +103,43 @@ async def vc_play(event):
     from_user = vcmention(event.sender)
     
     if (replied and not replied.audio and not replied.voice and not title or not replied and not title):
-        return await edit_or_reply(event, "**Silahkan Masukan Judul Lagu**")
+        return await edit_or_reply(event, "**Silakan masukkan judul lagu!**")
     
-    # KONDISI 1: JIKA TIDAK ADA REPLY (CARI DI YOUTUBE)
-    elif replied and not replied.audio and not replied.voice or not replied:
-        botman = await edit_or_reply(event, "`Searching Audio...`")
-        query = event.text.split(maxsplit=1)[1] if not replied else title
+    if (replied and not replied.audio and not replied.voice) or (not replied and title):
+        status_msg = await edit_or_reply(event, "`🔍 Mencari Audio...`")
+        query = title if title else replied.message
         search = ytsearch(query)
         if search == 0:
-            return await botman.edit("**Tidak Dapat Menemukan Lagu**")
+            return await status_msg.edit("**❌ Lagu tidak ditemukan.**")
         
         songname, url, duration, thumbnail, videoid = search
         ctitle = await CHAT_TITLE(chat.title)
         thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
         
-        # Mengambil link stream dari ytdl
         stream_link_info = await ytdl(url, video_mode=False) 
         hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
         
         if hm == 0:
-            return await botman.edit(f"`{ytlink}`")
+            return await status_msg.edit(f"**Error:** `{ytlink}`")
 
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
             pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-            caption = f"💡 **Audio Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n🎧 **Request By:** {from_user}"
-            await botman.delete()
-            return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
+            caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Oleh:** {from_user}"
+            await status_msg.delete()
+            return await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
         else:
             try:
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-                # MENGGUNAKAN JOIN_CALL SEPERTI NOMOR 1
                 await join_call(chat_id, link=ytlink, video=False, resolution=0)
-                caption = f"🏷 **Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n💡 **Status:** `Now Playing`\n🎧 **Request By:** {from_user}"
-                await botman.delete()
-                return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
-            except Exception as ep:
-                clear_queue(chat_id)
-                await botman.edit(f"**ERROR:** `{ep}`")
-
-    # KONDISI 2: JIKA REPLY FILE TELEGRAM
-    else:
-        botman = await edit_or_reply(event, "📥 **Sedang Mendownload Audio...**")
-        dl = await replied.download_media()
-        link = f"https://t.me/c/{str(chat.id)[4:] if str(chat.id).startswith('-100') else chat.id}/{replied.id}"
-        songname = "Telegram Music Player" if replied.audio else "Voice Note"
-
-        if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
-            pos = add_to_queue(chat_id, songname, dl, link, "Audio", 0)
-            caption = f"💡 **Audio Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({link})\n🎧 **Request By:** {from_user}"
-            await event.client.send_file(chat_id, QUEUE_PIC, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
-            await botman.delete()
-        else:
-            try:
-                add_to_queue(chat_id, songname, dl, link, "Audio", 0)
-                # MENGGUNAKAN JOIN_CALL SEPERTI NOMOR 1
-                await join_call(chat_id, link=dl, video=False, resolution=0)
-                caption = f"🏷 **Title:** [{songname}]({link})\n💡 **Status:** `Now Playing`\n🎧 **Request By:** {from_user}"
-                await botman.delete()
-                return await event.client.send_file(chat_id, PLAY_PIC, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
-            except Exception as ep:
-                clear_queue(chat_id)
-                await botman.edit(f"**ERROR:** `{ep}`")
-                asyncio.create_task(timer_task(event.client, chat_id, botman.id, duration))
+                caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Oleh:** {from_user}"
+                await status_msg.delete()
                 
+                pesan_audio = await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
+                asyncio.create_task(timer_task(event.client, chat_id, pesan_audio.id, duration))
+            except Exception as e:
+                clear_queue(chat_id)
+                await status_msg.edit(f"**ERROR:** `{e}`")
+
 @man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_vplay(event):
     title = event.pattern_match.group(1)
@@ -173,13 +148,15 @@ async def vc_vplay(event):
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
     
-    # Variabel pesan didefinisikan sebagai 'xnxx'
-    xnxx = await edit_or_reply(event, "`Searching Video...`")
+    status_msg = await edit_or_reply(event, "`🔍 Mencari Video...`")
     
-    query = event.text.split(maxsplit=1)[1] if not replied else title
+    query = title if title else (replied.message if replied else None)
+    if not query:
+        return await status_msg.edit("**Berikan judul video!**")
+
     search = ytsearch(query)
     if search == 0:
-        return await xnxx.edit("**Tidak Dapat Menemukan Video**")
+        return await status_msg.edit("**❌ Video tidak ditemukan.**")
     
     songname, url, duration, thumbnail, videoid = search
     ctitle = await CHAT_TITLE(chat.title)
@@ -189,31 +166,28 @@ async def vc_vplay(event):
     hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
     
     if hm == 0:
-        return await xnxx.edit(f"`{ytlink}`")
+        return await status_msg.edit(f"**Error:** `{ytlink}`")
 
-    # LOGIKA ANTREAN
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
-        caption = f"💡 **Video Ditambahkan Ke Antrean »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
-        
-        # PERBAIKAN: Gunakan xnxx.delete(), bukan xteambot
-        await xnxx.delete()
-        return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
+        caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Oleh:** {from_user}"
+        await status_msg.delete()
+        return await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
     
     else:
         try:
             add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
             await join_call(chat_id, link=ytlink, video=True, resolution=720)
             
-            caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
+            caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Memutar Video`\n🎧 **Oleh:** {from_user}"
+            await status_msg.delete()
             
-            # PERBAIKAN: Gunakan xnxx.delete(), bukan xteambot
-            await xnxx.delete()
-            return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
-        except Exception as ep:
+            pesan_video = await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
+            asyncio.create_task(timer_task(event.client, chat_id, pesan_video.id, duration))
+        except Exception as e:
             clear_queue(chat_id)
-            await xnxx.edit(f"**ERROR:** `{ep}`")
-            asyncio.create_task(timer_task(event.client, chat_id, xnxx.id, duration))
+            await status_msg.edit(f"**ERROR:** `{e}`")
+            
 
 @man_cmd(pattern="end$", group_only=True)
 async def vc_end(event):
