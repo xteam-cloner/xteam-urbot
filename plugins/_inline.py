@@ -185,7 +185,7 @@ async def inline_pasta(event):
     )
     await event.answer([result])
 
-@callback(re.compile("close_help"), owner=True)
+@callback(re.compile("close_help"))
 async def close_help_func(ult):
     # Menghapus pesan bantuan tersebut
     await ult.delete()
