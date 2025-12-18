@@ -52,7 +52,7 @@ from xteam import LOGS
 from xteam.vcbot import (
     CHAT_TITLE,
     gen_thumb,
-    #skip_current_song,
+    telegram_markup_timer,
     skip_item,
     ytdl,
     ytsearch,
@@ -127,7 +127,7 @@ async def vc_play(event):
             pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
             caption = f"💡 **Audio Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n🎧 **Request By:** {from_user}"
             await botman.delete()
-            return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS)
+            return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
         else:
             try:
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
@@ -135,7 +135,7 @@ async def vc_play(event):
                 await join_call(chat_id, link=ytlink, video=False, resolution=0)
                 caption = f"🏷 **Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n💡 **Status:** `Now Playing`\n🎧 **Request By:** {from_user}"
                 await botman.delete()
-                return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS)
+                return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
             except Exception as ep:
                 clear_queue(chat_id)
                 await botman.edit(f"**ERROR:** `{ep}`")
@@ -150,7 +150,7 @@ async def vc_play(event):
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
             pos = add_to_queue(chat_id, songname, dl, link, "Audio", 0)
             caption = f"💡 **Audio Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({link})\n🎧 **Request By:** {from_user}"
-            await event.client.send_file(chat_id, QUEUE_PIC, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS)
+            await event.client.send_file(chat_id, QUEUE_PIC, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
             await botman.delete()
         else:
             try:
@@ -159,11 +159,12 @@ async def vc_play(event):
                 await join_call(chat_id, link=dl, video=False, resolution=0)
                 caption = f"🏷 **Title:** [{songname}]({link})\n💡 **Status:** `Now Playing`\n🎧 **Request By:** {from_user}"
                 await botman.delete()
-                return await event.client.send_file(chat_id, PLAY_PIC, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS)
+                return await event.client.send_file(chat_id, PLAY_PIC, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
             except Exception as ep:
                 clear_queue(chat_id)
                 await botman.edit(f"**ERROR:** `{ep}`")
-    
+                asyncio.create_task(timer_task(event.client, chat_id, botman.id, duration))
+                
 @man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_vplay(event):
     title = event.pattern_match.group(1)
@@ -197,7 +198,7 @@ async def vc_vplay(event):
         
         # PERBAIKAN: Gunakan xnxx.delete(), bukan xteambot
         await xnxx.delete()
-        return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS)
+        return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
     
     else:
         try:
@@ -208,11 +209,11 @@ async def vc_vplay(event):
             
             # PERBAIKAN: Gunakan xnxx.delete(), bukan xteambot
             await xnxx.delete()
-            return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=MUSIC_BUTTONS)
+            return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id, buttons=telegram_markup_timer("00:00", duration))
         except Exception as ep:
             clear_queue(chat_id)
             await xnxx.edit(f"**ERROR:** `{ep}`")
-            
+            asyncio.create_task(timer_task(event.client, chat_id, xnxx.id, duration))
 
 @man_cmd(pattern="end$", group_only=True)
 async def vc_end(event):
@@ -337,40 +338,3 @@ async def unified_update_handler(client, update: Update) -> None:
         CRITICAL = (ChatUpdate.Status.KICKED | ChatUpdate.Status.LEFT_GROUP | ChatUpdate.Status.CLOSED_VOICE_CHAT)
         if (status & ChatUpdate.Status.LEFT_CALL) or (status & CRITICAL):
             clear_queue(chat_id)
-
-MUSIC_BUTTONS = [
-    [
-        Button.inline("⏸", data="pauseit"),
-        Button.inline("▶️", data="resumeit")
-    ],
-    [
-        Button.inline("⏭", data="skipit"),
-        Button.inline("⏹", data="stopit")
-    ],
-    [
-        Button.inline("🗑", data="closeit")
-    ]
-]
-
-
-@callback(data=re.compile(b"(pauseit|resumeit|stopit|skipit|closeit)"), owner=True)
-async def music_manager(e):
-    query = e.data.decode("utf-8")
-    chat_id = e.chat_id
-    try:
-        if query == "pauseit":
-            await call_py.pause(chat_id)
-            await e.answer("Pause", alert=False)
-        elif query == "resumeit":
-            await call_py.resume(chat_id)
-            await e.answer("Resume", alert=False)
-        elif query == "stopit":
-            await call_py.leave_call(chat_id)
-            await e.delete()
-        elif query == "skipit":
-            await skip_current_song(chat_id)
-            await e.answer("⏭", alert=False)
-        elif query == "closeit":
-            await e.delete()
-    except Exception as err:
-        await e.answer(f"⚠️ Error: {str(err)}", alert=True)
