@@ -64,6 +64,8 @@ logger = logging.getLogger(__name__)
 
 fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
 ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
+PLAY_PIC = "https://telegra.ph/file/6213d2673486beca02967.png"
+QUEUE_PIC = "https://telegra.ph/file/d6f92c979ad96b2031cba.png"
 FFMPEG_ABSOLUTE_PATH = "/usr/bin/ffmpeg"
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 COOKIES_FILE_PATH = "cookies.txt"
