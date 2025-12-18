@@ -234,8 +234,3 @@ async def vc_skip(event):
         await edit_delete(event, "**Antrian habis, bot standby.**", 10)
     else:
         await edit_or_reply(event, f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar** - [{op[0]}]({op[1]})", link_preview=False)
-
-@call_py.on_stream_end()
-async def stream_end_handler(_, u: Update):
-    await skip_current_song(u.chat_id)
-    
