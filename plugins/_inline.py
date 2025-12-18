@@ -185,6 +185,14 @@ async def inline_pasta(event):
     )
     await event.answer([result])
 
+@callback(re.compile("close_help"), owner=True)
+async def close_help_func(ult):
+    # Menghapus pesan bantuan tersebut
+    await ult.delete()
+    # Memberikan notifikasi kecil di atas layar (opsional)
+    #await ult.answer("Menu Bantuan Ditutup", alert=False)
+    
+
 
 @callback("ownr", owner=False)
 async def callback_owner(event):
@@ -362,7 +370,7 @@ def page_num(index, key):
                 data=f"uh_{key}_{index-1}",
             )
         )
-    nav_buttons.append(Button.inline("🏡", data="ping_btn"))
+    nav_buttons.append(Button.inline("🏡", data="close_help"))
     if len(fl_) > 1:
         nav_buttons.append(
             Button.inline(
@@ -374,7 +382,7 @@ def page_num(index, key):
     if nav_buttons:
         new_.append(nav_buttons)
     elif not new_:
-        new_.append([Button.inline("🏡", data="ping_btn")])
+        new_.append([Button.inline("🏡", data="close_help")])
 
     return new_
 
