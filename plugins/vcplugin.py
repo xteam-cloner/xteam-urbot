@@ -77,6 +77,7 @@ def vcmention(user):
 async def skip_current_song(chat_id: int):
     if chat_id not in QUEUE:
         return 0
+        
     if len(QUEUE[chat_id]) > 1:
         QUEUE[chat_id].pop(0)
     else:
@@ -84,18 +85,17 @@ async def skip_current_song(chat_id: int):
         return 1
 
     next_song = QUEUE[chat_id][0]
-    songname, url, link, type, RESOLUSI = next_song
+    songname, url, link, type_mode, RESOLUSI = next_song
     
-    if type == "Audio":
-        stream = MediaStream(media_path=url, audio_parameters=AudioQuality.HIGH, video_flags=MediaStream.Flags.IGNORE)
-    else:
-        stream = MediaStream(media_path=url, audio_parameters=AudioQuality.HIGH, video_parameters=VideoQuality.HD_720p)
+    is_video = (type_mode == "Video")
 
     try:
-        await call_py.play(chat_id, stream)
+        await join_call(chat_id, link=url, video=is_video, resolution=RESOLUSI)
         return [songname, link]
-    except:
+    except Exception as e:
+        print(f"Error saat skip: {e}")
         return await skip_current_song(chat_id)
+        
 
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
@@ -108,8 +108,9 @@ async def vc_play(event):
     if (replied and not replied.audio and not replied.voice and not title or not replied and not title):
         return await edit_or_reply(event, "**Silahkan Masukan Judul Lagu**")
     
+    # KONDISI 1: JIKA TIDAK ADA REPLY (CARI DI YOUTUBE)
     elif replied and not replied.audio and not replied.voice or not replied:
-        botman = await edit_or_reply(event, "`Searching...`")
+        botman = await edit_or_reply(event, "`Searching Audio...`")
         query = event.text.split(maxsplit=1)[1] if not replied else title
         search = ytsearch(query)
         if search == 0:
@@ -118,61 +119,55 @@ async def vc_play(event):
         songname, url, duration, thumbnail, videoid = search
         ctitle = await CHAT_TITLE(chat.title)
         thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
-        hm, ytlink = await ytdl(url)
+        
+        # Mengambil link stream dari ytdl
+        stream_link_info = await ytdl(url, video_mode=False) 
+        hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
         
         if hm == 0:
             return await botman.edit(f"`{ytlink}`")
 
-        stream = MediaStream(media_path=ytlink, audio_parameters=AudioQuality.HIGH, video_flags=MediaStream.Flags.IGNORE)
-
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
             pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-            caption = f"💡 **Lagu Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
+            caption = f"💡 **Audio Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n🎧 **Request By:** {from_user}"
             await botman.delete()
             return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
         else:
             try:
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-                await join_call(chat_id, stream)
-                caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Atas permintaan:** {from_user}"
+                # MENGGUNAKAN JOIN_CALL SEPERTI NOMOR 1
+                await join_call(chat_id, link=ytlink, video=False, resolution=0)
+                caption = f"🏷 **Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n💡 **Status:** `Now Playing`\n🎧 **Request By:** {from_user}"
                 await botman.delete()
-                await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
-            except AlreadyJoinedError:
-                await call_py.play(chat_id, stream)
-                caption = f"🏷 **Judul:** [{songname}]({url})\n💡 **Status:** `Memutar (Standby)`\n🎧 **Atas permintaan:** {from_user}"
-                await botman.delete()
-                await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
+                return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
             except Exception as ep:
                 clear_queue(chat_id)
-                await botman.edit(f"`{ep}`")
+                await botman.edit(f"**ERROR:** `{ep}`")
+
+    # KONDISI 2: JIKA REPLY FILE TELEGRAM
     else:
-        botman = await edit_or_reply(event, "📥 **Sedang Mendownload**")
+        botman = await edit_or_reply(event, "📥 **Sedang Mendownload Audio...**")
         dl = await replied.download_media()
         link = f"https://t.me/c/{str(chat.id)[4:] if str(chat.id).startswith('-100') else chat.id}/{replied.id}"
         songname = "Telegram Music Player" if replied.audio else "Voice Note"
-        
-        stream = MediaStream(media_path=dl, audio_parameters=AudioQuality.HIGH, video_flags=MediaStream.Flags.IGNORE)
 
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
             pos = add_to_queue(chat_id, songname, dl, link, "Audio", 0)
-            caption = f"💡 **Lagu Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({link})\n🎧 **Atas permintaan:** {from_user}"
+            caption = f"💡 **Audio Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({link})\n🎧 **Request By:** {from_user}"
             await event.client.send_file(chat_id, QUEUE_PIC, caption=caption, reply_to=event.reply_to_msg_id)
             await botman.delete()
         else:
             try:
                 add_to_queue(chat_id, songname, dl, link, "Audio", 0)
-                await call_py.join_call(chat_id, stream)
-                caption = f"🏷 **Judul:** [{songname}]({link})\n💡 **Status:** `Sedang Memutar Lagu`\n🎧 **Atas permintaan:** {from_user}"
-                await event.client.send_file(chat_id, PLAY_PIC, caption=caption, reply_to=event.reply_to_msg_id)
+                # MENGGUNAKAN JOIN_CALL SEPERTI NOMOR 1
+                await join_call(chat_id, link=dl, video=False, resolution=0)
+                caption = f"🏷 **Title:** [{songname}]({link})\n💡 **Status:** `Now Playing`\n🎧 **Request By:** {from_user}"
                 await botman.delete()
-            except AlreadyJoinedError:
-                await call_py.play(chat_id, stream)
-                await botman.delete()
-                await event.client.send_file(chat_id, PLAY_PIC, caption=caption)
+                return await event.client.send_file(chat_id, PLAY_PIC, caption=caption, reply_to=event.reply_to_msg_id)
             except Exception as ep:
                 clear_queue(chat_id)
-                await botman.edit(f"`{ep}`")
-
+                await botman.edit(f"**ERROR:** `{ep}`")
+    
 @man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_vplay(event):
     title = event.pattern_match.group(1)
@@ -190,29 +185,35 @@ async def vc_vplay(event):
     songname, url, duration, thumbnail, videoid = search
     ctitle = await CHAT_TITLE(chat.title)
     thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
-    hm, ytlink = await ytdl(url)
     
-    stream = MediaStream(media_path=ytlink, audio_parameters=AudioQuality.HIGH, video_parameters=VideoQuality.HD_720p)
+    # Mengambil link stream video dari ytdl
+    stream_link_info = await ytdl(url, video_mode=True) 
+    hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
+    
+    if hm == 0:
+        return await xnxx.edit(f"`{ytlink}`")
 
+    # Logika Antrean
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
-        caption = f"💡 **Video Ditambahkan Ke antrian »** `#{pos}`\n\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Atas permintaan:** {from_user}"
+        caption = f"💡 **Video Added to queue »** `#{pos}`\n\n**🏷 Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n🎧 **Request By:** {from_user}"
         await xnxx.delete()
-        await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
+        return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
     else:
         try:
             add_to_queue(chat_id, songname, ytlink, url, "Video", 720)
-            await join_call(chat_id, stream)
-            caption = f"🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar Video`\n🎧 **Atas permintaan:** {from_user}"
-            await xnxx.delete()
-            await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
-        except AlreadyJoinedError:
-            await call_py.play(chat_id, stream)
-            await xnxx.delete()
-            await event.client.send_file(chat_id, thumb, caption=caption)
+            
+            # PERBAIKAN: Menggunakan join_call dengan video=True
+            # Ini akan otomatis menangani join baru atau change_stream (Standby)
+            await join_call(chat_id, link=ytlink, video=True, resolution=720)
+            
+            caption = f"🏷 **Title:** [{songname}]({url})\n**⏱ Duration:** `{duration}`\n💡 **Status:** `Now Playing Video`\n🎧 **Request By:** {from_user}"
+            await xteambot.delete()
+            return await event.client.send_file(chat_id, thumb, caption=caption, reply_to=event.reply_to_msg_id)
         except Exception as ep:
             clear_queue(chat_id)
-            await xnxx.edit(f"`{ep}`")
+            await xnxx.edit(f"**ERROR:** `{ep}`")
+            
 
 @man_cmd(pattern="end$", group_only=True)
 async def vc_end(event):
