@@ -81,25 +81,25 @@ def vcmention(user):
 async def skip_current_song(chat_id):
     if chat_id not in QUEUE:
         return 0
-    if len(QUEUE[chat_id]) > 1:
-        QUEUE[chat_id].pop(0) # Hapus lagu yang baru selesai
-    else:
-        QUEUE[chat_id] = []
-        return 1
-
-    next_song = QUEUE[chat_id][0]
-    # Ambil 7 data
-    songname, url, duration, thumb_url, videoid, artist, requester = next_song
     
-    try:
-        # Konversi URL YouTube ke link streaming
-        stream_link_info = await ytdl(url, video_mode=False) 
-        hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
+    # Hapus lagu yang baru selesai menggunakan fungsi dari queues.py
+    pop_an_item(chat_id)
+    
+    if len(QUEUE[chat_id]) > 0:
+        next_song = QUEUE[chat_id][0]
+        # Pastikan unpack 7 data
+        songname, url, duration, thumb_url, videoid, artist, requester = next_song
         
-        await join_call(chat_id, link=ytlink)
-        return [songname, url, duration, thumb_url, videoid, artist, requester]
-    except Exception:
-        return await skip_current_song(chat_id)
+        try:
+            stream_link_info = await ytdl(url, video_mode=False) 
+            hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
+            
+            await join_call(chat_id, link=ytlink)
+            return [songname, url, duration, thumb_url, videoid, artist, requester]
+        except Exception:
+            return await skip_current_song(chat_id)
+    else:
+        return 1
         
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
