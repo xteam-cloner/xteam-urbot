@@ -299,13 +299,13 @@ async def unified_update_handler(client, update: Update) -> None:
         if chat_id in QUEUE:
             op = await skip_current_song(chat_id) 
             if isinstance(op, list):
-                await client.send_message(
+                await event.client.send_message(
                     chat_id,
                     f"**🎧 Sekarang Memutar:** [{op[0]}]({op[1]})",
                     link_preview=False,
                 )
             elif op == 1:
-                await client.send_message(chat_id, "**💡 Antrean habis. Bot Standby.**")
+                await event.client.send_message(chat_id, "**💡 Antrean habis. Bot Standby.**")
 
     elif isinstance(update, ChatUpdate):
         status = update.status
