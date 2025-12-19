@@ -1,30 +1,66 @@
 from __future__ import annotations
 import asyncio
 import os
+import re
+import contextlib 
 import logging
+import functools
+import yt_dlp
 from . import *
-from telethon import events, Button
+from dataclasses import dataclass
+from typing import Dict, Optional, Tuple, Any, Union
+from datetime import datetime, timedelta
+import httpx
+from telethon import events, TelegramClient, Button
+from telethon.tl.types import Message, User, TypeUser
+from telethon.tl.functions.channels import InviteToChannelRequest
+from telethon.errors import (
+    UserPrivacyRestrictedError, 
+    ChatAdminRequiredError, 
+    UserAlreadyParticipantError
+)
+from xteam.configs import Var 
+from xteam import call_py, asst
 from telethon.utils import get_display_name
-from telethon.tl import types
-
-from xteam import call_py, asst, ultroid_bot, LOGS
-from xteam.utils import edit_or_reply, edit_delete
 from xteam.fns.admins import admin_check 
-
-from pytgcalls.types import Update, StreamEnded
-
+from pytgcalls import PyTgCalls, filters as fl
+from pytgcalls import filters as fl
+from ntgcalls import TelegramServerError
+from pytgcalls.exceptions import NoActiveGroupCall, NoAudioSourceFound, NoVideoSourceFound
+from pytgcalls.types import (
+    Update,
+    ChatUpdate,
+    MediaStream,
+    StreamEnded,
+    GroupCallConfig,
+    GroupCallParticipant,
+    UpdatedGroupCallParticipant,
+)
+from pytgcalls.types.stream import VideoQuality, AudioQuality
+from telethon.tl.functions.users import GetFullUserRequest
+from telethon.tl.functions.channels import LeaveChannelRequest
+from telethon.errors.rpcerrorlist import (
+    UserNotParticipantError,
+    UserAlreadyParticipantError
+)
+from telethon.tl.functions.messages import ExportChatInviteRequest
+from telethon.tl.functions.messages import ImportChatInviteRequest
+from youtubesearchpython.__future__ import VideosSearch
+from . import ultroid_bot, ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, callback
+from youtubesearchpython import VideosSearch
+from xteam import LOGS
+from xteam.vcbot.markups import timer_task
 from xteam.vcbot import (
     CHAT_TITLE,
     gen_thumb,
     telegram_markup_timer,
+    skip_item,
     ytdl,
     ytsearch,
-    get_play_text,
+get_play_text,
     join_call
 )
-
-from xteam.vcbot.queues import QUEUE, add_to_queue, clear_queue, get_queue, pop_an_item
-
+from xteam.vcbot.queues import QUEUE, add_to_queue, clear_queue, get_queue
 logger = logging.getLogger(__name__)
 
 def vcmention(user):
