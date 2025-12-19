@@ -46,7 +46,7 @@ from telethon.errors.rpcerrorlist import (
 from telethon.tl.functions.messages import ExportChatInviteRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from youtubesearchpython.__future__ import VideosSearch
-from . import ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, callback
+from . import ultroid_bot, ultroid_cmd as man_cmd, eor as edit_or_reply, eod as edit_delete, callback
 from youtubesearchpython import VideosSearch
 from xteam import LOGS
 from xteam.vcbot.markups import timer_task
@@ -313,20 +313,16 @@ async def unified_update_handler(client, update: Update):
     
     if isinstance(update, StreamEnded):
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 1:
-            # Mengambil data lagu berikutnya
             data = await skip_current_song(chat_id)
             
             if data and data != 1:
                 try:
-                    # Unpack 6 data sesuai struktur kita
                     songname, url, duration, thumb_url, videoid, artist = data
-                    
-                    # Generate thumbnail & caption
                     thumb = await gen_thumb(videoid)
                     caption = get_play_text(songname, artist, duration, "Auto Play")
                     
-                    # Mengirim pesan info lagu baru
-                    await client.send_file(
+                    # Menggunakan ultroid_bot untuk mengirim file
+                    await ultroid_bot.send_file(
                         chat_id, 
                         thumb, 
                         caption=f"**⏭ Memutar Otomatis:**\n{caption}"
@@ -334,7 +330,6 @@ async def unified_update_handler(client, update: Update):
                 except Exception as e:
                     print(f"DEBUG ERROR HANDLER: {e}")
         else:
-            # Jika antrean habis
             await leave_call(chat_id)
             clear_queue(chat_id)
             
