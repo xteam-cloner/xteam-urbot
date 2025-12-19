@@ -114,7 +114,7 @@ async def vc_play(event):
         
         songname, url, duration, thumbnail, videoid, artist = search
         ctitle = await CHAT_TITLE(chat.title)
-        thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
+        thumb = await gen_thumb(videoid)
         
         stream_link_info = await ytdl(url, video_mode=False) 
         hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
@@ -160,7 +160,7 @@ async def vc_vplay(event):
     
     songname, url, duration, thumbnail, videoid, artist = search
     ctitle = await CHAT_TITLE(chat.title)
-    thumb = await gen_thumb(thumbnail, songname, videoid, ctitle)
+    thumb = await gen_thumb(videoid)
     
     stream_link_info = await ytdl(url, video_mode=True) 
     hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
