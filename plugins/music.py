@@ -187,6 +187,17 @@ async def vc_vplay(event):
             clear_queue(chat_id)
             await status_msg.edit(f"**ERROR:** `{e}`")
 
+@man_cmd(pattern="end$", group_only=True)
+async def vc_end(event):
+    chat_id = event.chat_id
+    try:
+        await call_py.leave_call(chat_id)
+        clear_queue(chat_id)
+        await edit_or_reply(event, "**Streaming Berhenti.**")
+    except Exception as e:
+        await edit_delete(event, f"**ERROR:** `{e}`")
+        
+
 @man_cmd(pattern="skip$", group_only=True)
 async def vc_skip(event):
     chat_id = event.chat_id
@@ -200,6 +211,87 @@ async def vc_skip(event):
         cap = get_play_text(op[0], op[5], op[2], op[6])
         msg = await asst.send_file(chat_id, thumb, caption=f"**⏭ Skip Berhasil**\n{cap}", buttons=telegram_markup_timer("00:00", op[2]))
         active_messages[chat_id] = msg.id
+        
+        # AKTIFKAN TIMER DI SINI
+        asyncio.create_task(timer_task(event.client, chat_id, msg.id, op[2]))
+
+@man_cmd(pattern="pause$", group_only=True)
+async def vc_pause(event):
+    chat_id = event.chat_id
+    if chat_id in QUEUE:
+        try:
+            await call_py.pause(chat_id)
+            await edit_or_reply(event, "**Streaming Dijeda**")
+        except Exception as e:
+            await edit_delete(event, f"**ERROR:** `{e}`")
+    else:
+        await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
+
+
+@man_cmd(pattern="resume$", group_only=True)
+async def vc_resume(event):
+    chat_id = event.chat_id
+    if chat_id in QUEUE:
+        try:
+            await call_py.resume(chat_id)
+            await edit_or_reply(event, "**Streaming Dilanjutkan**")
+        except Exception as e:
+            await edit_or_reply(event, f"**ERROR:** `{e}`")
+    else:
+        await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
+
+
+@man_cmd(pattern=r"volume(?: |$)(.*)", group_only=True)
+async def vc_volume(event):
+    query = event.pattern_match.group(1)
+    me = await event.client.get_me()
+    chat = await event.get_chat()
+    admin = chat.admin_rights
+    creator = chat.creator
+    chat_id = event.chat_id
+    
+    if not admin and not creator:
+        if not await admin_check(event):
+             return await edit_delete(event, f"**Maaf {me.first_name} Bukan Admin 👮**", 30)
+
+    if chat_id in QUEUE:
+        try:
+            volume_level = int(query)
+            if not 0 <= volume_level <= 100:
+                return await edit_delete(event, "**Volume harus antara 0 dan 100.**", 10)
+            await call_py.change_volume_call(chat_id, volume=volume_level)
+            await edit_or_reply(
+                event, f"**Berhasil Mengubah Volume Menjadi** `{volume_level}%`"
+            )
+        except ValueError:
+             await edit_delete(event, "**Mohon masukkan angka yang valid untuk volume.**", 10)
+        except Exception as e:
+            await edit_delete(event, f"**ERROR:** `{e}`", 30)
+    else:
+        await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
+
+
+@man_cmd(pattern="playlist$", group_only=True)
+async def vc_playlist(event):
+    chat_id = event.chat_id
+    if chat_id in QUEUE:
+        chat_queue = get_queue(chat_id)
+        if not chat_queue:
+            return await edit_delete(event, "**Tidak Ada Lagu Dalam Antrian**", time=10)
+
+        PLAYLIST = f"**🎧 Sedang Memutar:**\n**• [{chat_queue[0][0]}]({chat_queue[0][2]})** | `{chat_queue[0][3]}` \n\n**• Daftar Putar:**"
+        
+        l = len(chat_queue)
+        for x in range(1, l): 
+            hmm = chat_queue[x][0]
+            hmmm = chat_queue[x][2]
+            hmmmm = chat_queue[x][3]
+            PLAYLIST = PLAYLIST + "\n" + f"**#{x}** - [{hmm}]({hmmm}) | `{hmmmm}`"
+            
+        await edit_or_reply(event, PLAYLIST, link_preview=False)
+    else:
+        await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
+
 
 @call_py.on_update()
 async def unified_update_handler(client, update: Update):
@@ -217,11 +309,16 @@ async def unified_update_handler(client, update: Update):
                 songname, url, duration, thumb_url, videoid, artist, requester = data
                 thumb = await gen_thumb(videoid)
                 caption = get_play_text(songname, artist, duration, requester)
-                msg = await asst.send_file(chat_id, thumb, caption=f"{caption}", buttons=telegram_markup_timer("00:00", duration))
+                
+                # Kirim pesan dengan tombol timer
+                msg = await asst.send_file(chat_id, thumb, caption=f"**⏭ Memutar Berikutnya:**\n{caption}", buttons=telegram_markup_timer("00:00", duration))
                 active_messages[chat_id] = msg.id
+                
+                # AKTIFKAN TIMER DI SINI
+                asyncio.create_task(timer_task(client, chat_id, msg.id, duration))
         else:
             try:
                 await call_py.leave_call(chat_id)
             except: pass
             clear_queue(chat_id)
-    
+            
