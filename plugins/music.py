@@ -58,19 +58,14 @@ from xteam.vcbot import (
     ytdl,
     ytsearch,
     get_play_text,
+    get_play_queue,
     join_call
 )
 from xteam.vcbot.queues import QUEUE, add_to_queue, clear_queue, get_queue, pop_an_item
 
 logger = logging.getLogger(__name__)
 
-fotoplay = "https://telegra.ph/file/b6402152be44d90836339.jpg"
-ngantri = "https://telegra.ph/file/b6402152be44d90836339.jpg"
-PLAY_PIC = "https://telegra.ph/file/6213d2673486beca02967.png"
-QUEUE_PIC = "https://telegra.ph/file/d6f92c979ad96b2031cba.png"
-FFMPEG_ABSOLUTE_PATH = "/usr/bin/ffmpeg"
-DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
-COOKIES_FILE_PATH = "cookies.txt"
+active_buttons = {}
 
 def vcmention(user):
     full_name = get_display_name(user)
@@ -81,6 +76,14 @@ def vcmention(user):
 async def skip_current_song(chat_id):
     if chat_id not in QUEUE:
         return 0
+    
+    if chat_id in active_buttons:
+        try:
+            await asst.edit_message(chat_id, active_buttons[chat_id], buttons=None)
+            del active_buttons[chat_id]
+        except Exception:
+            pass
+
     pop_an_item(chat_id)
     if len(QUEUE[chat_id]) > 0:
         next_song = QUEUE[chat_id][0]
@@ -102,73 +105,88 @@ async def vc_play(event):
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
     await event.delete()
+    
     if (replied and not replied.audio and not replied.voice and not title or not replied and not title):
         return await edit_or_reply(event, "**Silakan masukkan judul lagu!**")
-    if (replied and not replied.audio and not replied.voice) or (not replied and title):
-        status_msg = await edit_or_reply(event, "`🔍 Mencari Audio...`")
-        query = title if title else replied.message
-        search = ytsearch(query)
-        if search == 0:
-            return await status_msg.edit("**❌ Lagu tidak ditemukan.**")
-        songname, url, duration, thumbnail, videoid, artist = search
-        thumb = await gen_thumb(videoid)
-        caption_text = get_play_text(songname, artist, duration, from_user)
-        stream_link_info = await ytdl(url, video_mode=False) 
-        hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
-        if hm == 0:
-            return await status_msg.edit(f"**Error:** `{ytlink}`")
-        if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
-            pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
-            final_caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{caption_text}"
+        
+    status_msg = await edit_or_reply(event, "`🔍 Mencari Audio...`")
+    query = title if title else replied.message
+    search = ytsearch(query)
+    if search == 0:
+        return await status_msg.edit("**❌ Lagu tidak ditemukan.**")
+        
+    songname, url, duration, thumbnail, videoid, artist = search
+    thumb = await gen_thumb(videoid)
+    stream_link_info = await ytdl(url, video_mode=False) 
+    hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
+    
+    if hm == 0:
+        return await status_msg.edit(f"**Error:** `{ytlink}`")
+
+    if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
+        pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
+        final_caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{get_play_queue(songname, artist, duration, from_user)}"
+        await status_msg.delete()
+        return await asst.send_file(chat_id, thumb, caption=final_caption)
+    else:
+        try:
+            add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
+            await join_call(chat_id, link=ytlink, video=False, resolution=0)
             await status_msg.delete()
-            return await asst.send_file(chat_id, thumb, caption=final_caption, buttons=telegram_markup_timer("00:00", duration))
-        else:
-            try:
-                add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
-                await join_call(chat_id, link=ytlink, video=False, resolution=0)
-                await status_msg.delete()
-                pesan_audio = await asst.send_file(chat_id, thumb, caption=caption_text, buttons=telegram_markup_timer("00:00", duration))
-                asyncio.create_task(timer_task(event.client, chat_id, pesan_audio.id, duration))
-            except Exception as e:
-                clear_queue(chat_id)
-                await status_msg.edit(f"**ERROR:** `{e}`")
+            
+            caption_text = get_play_text(songname, artist, duration, from_user)
+            pesan_audio = await asst.send_file(chat_id, thumb, caption=caption_text, buttons=telegram_markup_timer("00:00", duration))
+            
+            active_buttons[chat_id] = pesan_audio.id
+            asyncio.create_task(timer_task(event.client, chat_id, pesan_audio.id, duration))
+        except Exception as e:
+            clear_queue(chat_id)
+            await status_msg.edit(f"**ERROR:** `{e}`")
                                
 @man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_vplay(event):
     title = event.pattern_match.group(1)
     replied = await event.get_reply_message()
-    chat = await event.get_chat()
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
+    
     status_msg = await edit_or_reply(event, "`🔍 Mencari Video...`")
     query = title if title else (replied.message if replied else None)
     if not query:
         return await status_msg.edit("**Berikan judul video!**")
+        
     search = ytsearch(query)
     if search == 0:
         return await status_msg.edit("**❌ Video tidak ditemukan.**")
+        
     songname, url, duration, thumbnail, videoid, artist = search
     thumb = await gen_thumb(videoid)
     stream_link_info = await ytdl(url, video_mode=True) 
     hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
+    
     if hm == 0:
         return await status_msg.edit(f"**Error:** `{ytlink}`")
+
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
-        caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{get_play_text(songname, artist, duration, from_user)}"
+        caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
-        return await asst.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
+        return await asst.send_file(chat_id, thumb, caption=caption)
     else:
         try:
             add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
             await join_call(chat_id, link=ytlink, video=True, resolution=720)
             await status_msg.delete()
-            pesan_video = await asst.send_file(chat_id, thumb, caption=f"🎥 **Memutar Video**\n{get_play_text(songname, artist, duration, from_user)}", buttons=telegram_markup_timer("00:00", duration))
+            
+            caption = f"🎥 **Memutar Video**\n{get_play_text(songname, artist, duration, from_user)}"
+            pesan_video = await asst.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
+            
+            active_buttons[chat_id] = pesan_video.id
             asyncio.create_task(timer_task(event.client, chat_id, pesan_video.id, duration))
         except Exception as e:
             clear_queue(chat_id)
             await status_msg.edit(f"**ERROR:** `{e}`")
-            
+
 @man_cmd(pattern="end$", group_only=True)
 async def vc_end(event):
     chat_id = event.chat_id
@@ -178,30 +196,42 @@ async def vc_end(event):
         await edit_or_reply(event, "**Streaming Berhenti.**")
     except Exception as e:
         await edit_delete(event, f"**ERROR:** `{e}`")
+        
 
-@man_cmd(pattern="skip(?:\s|$)([\s\S]*)", group_only=True)
+@man_cmd(pattern="skip$", group_only=True)
 async def vc_skip(event):
     chat_id = event.chat_id
     op = await skip_current_song(chat_id)
     if op == 0:
-        await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
+        await edit_delete(event, "**Tidak ada streaming aktif.**")
     elif op == 1:
-        await edit_delete(event, "**Antrian habis, bot standby.**", 10)
+        await edit_delete(event, "**Antrean habis.**")
     else:
-        await edit_or_reply(event, f"**⏭ Melewati Lagu**\n**🎧 Sekarang Memutar:** `{op[0]}`\n**Oleh:** {op[6]}")
+        thumb = await gen_thumb(op[4])
+        cap = get_play_text(op[0], op[5], op[2], op[6])
+        msg = await asst.send_file(chat_id, thumb, caption=f"**⏭ Skip Berhasil**\n{cap}", buttons=telegram_markup_timer("00:00", op[2]))
+        active_buttons[chat_id] = msg.id
 
 @call_py.on_update()
 async def unified_update_handler(client, update: Update):
     chat_id = getattr(update, "chat_id", None)
     if isinstance(update, StreamEnded):
+        if chat_id in active_buttons:
+            try:
+                await asst.edit_message(chat_id, active_buttons[chat_id], buttons=None)
+                del active_buttons[chat_id]
+            except: pass
+            
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 1:
             data = await skip_current_song(chat_id)
             if data and data != 1:
-                try:
-                    songname, url, duration, thumb_url, videoid, artist, requester = data
-                    thumb = await gen_thumb(videoid)
-                    caption = get_play_text(songname, artist, duration, requester)
-                    await asst.send_file(chat_id, thumb, caption=f"**⏭ Memutar Berikutnya:**\n{caption}", buttons=telegram_markup_timer("00:00", duration))
-                except Exception as e:
-                    print(f"DEBUG ERROR: {e}")
-    
+                songname, url, duration, thumb_url, videoid, artist, requester = data
+                thumb = await gen_thumb(videoid)
+                caption = get_play_text(songname, artist, duration, requester)
+                msg = await asst.send_file(chat_id, thumb, caption=f"**⏭ Memutar Berikutnya:**\n{caption}", buttons=telegram_markup_timer("00:00", duration))
+                active_buttons[chat_id] = msg.id
+        else:
+            try:
+                await call_py.leave_call(chat_id)
+            except: pass
+            clear_queue(chat_id)
