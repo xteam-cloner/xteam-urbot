@@ -20,7 +20,7 @@ from telethon.errors import (
     UserAlreadyParticipantError
 )
 from xteam.configs import Var 
-from xteam import call_py, asst as client
+from xteam import call_py, asst
 from telethon.utils import get_display_name
 from xteam.fns.admins import admin_check 
 from pytgcalls import PyTgCalls, filters as fl
@@ -78,25 +78,26 @@ def vcmention(user):
         return full_name
     return f"[{full_name}](tg://user?id={user.id})"
 
-async def skip_current_song(chat_id: int):
+async def skip_current_song(chat_id):
     if chat_id not in QUEUE:
         return 0
     if len(QUEUE[chat_id]) > 1:
-        QUEUE[chat_id].pop(0)
+        QUEUE[chat_id].pop(0) # Hapus lagu yang baru selesai
     else:
         QUEUE[chat_id] = []
         return 1
-    
+
     next_song = QUEUE[chat_id][0]
-    songname, url, duration, thumb_url, videoid, artist = next_song
+    # Ambil 7 data
+    songname, url, duration, thumb_url, videoid, artist, requester = next_song
     
     try:
+        # Konversi URL YouTube ke link streaming
         stream_link_info = await ytdl(url, video_mode=False) 
         hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
         
         await join_call(chat_id, link=ytlink)
-        
-        return [songname, url, duration, thumb_url, videoid, artist]
+        return [songname, url, duration, thumb_url, videoid, artist, requester]
     except Exception:
         return await skip_current_song(chat_id)
         
@@ -317,19 +318,21 @@ async def unified_update_handler(client, update: Update):
             
             if data and data != 1:
                 try:
-                    songname, url, duration, thumb_url, videoid, artist = data
-                    thumb = await gen_thumb(videoid)
-                    caption = get_play_text(songname, artist, duration, "Auto Play")
+                    # Unpack 7 data (tambahkan requester)
+                    songname, url, duration, thumb_url, videoid, artist, requester = data
                     
-                    # Menggunakan ultroid_bot untuk mengirim file
-                    await ultroid_bot.send_file(
+                    thumb = await gen_thumb(videoid)
+                    
+                    # Sekarang from_user diisi oleh nama asli peminta (requester)
+                    caption = get_play_text(songname, artist, duration, requester)
+                    
+                    from Xteam import asst
+                    await asst.send_file(
                         chat_id, 
                         thumb, 
-                        caption=f"**⏭ Memutar Otomatis:**\n{caption}"
+                        caption=f"**⏭ Memutar Berikutnya:**\n{caption}",
+                        buttons=telegram_markup_timer("00:00", duration)
                     )
                 except Exception as e:
-                    print(f"DEBUG ERROR HANDLER: {e}")
-        else:
-            await leave_call(chat_id)
-            clear_queue(chat_id)
-            
+                    print(f"DEBUG ERROR: {e}")
+                
