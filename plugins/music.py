@@ -313,20 +313,28 @@ async def unified_update_handler(client, update: Update):
     
     if isinstance(update, StreamEnded):
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 1:
+            # Mengambil data lagu berikutnya
             data = await skip_current_song(chat_id)
             
             if data and data != 1:
-                songname, url, duration, thumb_url, videoid, artist = data
-                
-                thumb = await gen_thumb(videoid)
-                caption = get_play_text(songname, artist, duration, "Auto Play")
-                
-                await client.send_file(
-                    chat_id, 
-                    thumb, 
-                    caption=f"**Selesai Diputar. Memutar Berikutnya:**\n{caption}"
-                )
+                try:
+                    # Unpack 6 data sesuai struktur kita
+                    songname, url, duration, thumb_url, videoid, artist = data
+                    
+                    # Generate thumbnail & caption
+                    thumb = await gen_thumb(videoid)
+                    caption = get_play_text(songname, artist, duration, "Auto Play")
+                    
+                    # Mengirim pesan info lagu baru
+                    await client.send_file(
+                        chat_id, 
+                        thumb, 
+                        caption=f"**⏭ Memutar Otomatis:**\n{caption}"
+                    )
+                except Exception as e:
+                    print(f"DEBUG ERROR HANDLER: {e}")
         else:
+            # Jika antrean habis
             await leave_call(chat_id)
             clear_queue(chat_id)
             
