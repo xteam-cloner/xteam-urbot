@@ -59,6 +59,7 @@ from xteam.vcbot import (
     ytsearch,
     get_play_text,
     get_play_queue,
+MUSIC_BUTTONS,
     join_call
 )
 from xteam.vcbot.queues import QUEUE, add_to_queue, clear_queue, get_queue, pop_an_item
@@ -125,9 +126,9 @@ async def vc_play(event):
 
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
-        final_caption = f"Added to Queue\n{get_play_queue(songname, artist, duration, from_user)}"
+        final_caption = f"Added to Queue!{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
-        return await asst.send_file(chat_id, thumb, caption=final_caption)
+        return await asst.send_file(chat_id, thumb, caption=final_caption, buttons=MUSIC_BUTTONS)
     else:
         try:
             add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
@@ -171,7 +172,7 @@ async def vc_vplay(event):
         pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
         caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
-        return await asst.send_file(chat_id, thumb, caption=caption)
+        return await asst.send_file(chat_id, thumb, caption=caption, buttons=MUSIC_BUTTONS)
     else:
         try:
             add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
