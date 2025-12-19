@@ -88,11 +88,11 @@ async def skip_current_song(chat_id: int):
         return 1
     
     next_song = QUEUE[chat_id][0]
-    songname, url, duration, thumb_url, videoid, artist, views = next_song
+    songname, url, duration, thumb_url, videoid, artist = next_song
     
     try:
         await join_call(chat_id, link=url, video=False, resolution=0)
-        return [songname, url, duration, thumb_url, videoid, artist, views]
+        return [songname, url, duration, thumb_url, videoid, artist]
     except Exception:
         return await skip_current_song(chat_id)
         
@@ -311,23 +311,28 @@ async def unified_update_handler(client, update: Update):
     
     if isinstance(update, StreamEnded):
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 1:
+            # Mengambil 6 data dari antrean berikutnya
             data = await skip_current_song(chat_id)
             
             if data and data != 1:
+                # Unpack 6 variabel (Tanpa Views)
                 songname, url, duration, thumb_url, videoid, artist = data
                 
+                # Membuat visual dan teks baru
                 thumb = await gen_thumb(videoid)
                 caption = get_play_text(songname, artist, duration, "Auto Play")
                 
+                # Memutar suara di Voice Chat
                 await join_call(chat_id, link=url)
                 
+                # Mengirim pesan pemberitahuan lagu baru
                 await client.send_file(
                     chat_id, 
                     thumb, 
-                    caption=f"**Selesai Diputar. Memutar Berikutnya:**\n{caption}",
-                    buttons=telegram_markup_timer("00:00", duration)
+                    caption=f"**Selesai Diputar. Memutar Berikutnya:**\n{caption}"
                 )
         else:
+            # Jika antrean habis
             await leave_call(chat_id)
             clear_queue(chat_id)
             
