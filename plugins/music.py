@@ -86,15 +86,16 @@ async def skip_current_song(chat_id: int):
     else:
         QUEUE[chat_id] = []
         return 1
+    
     next_song = QUEUE[chat_id][0]
-    songname, url, link, type_mode, RESOLUSI = next_song
-    is_video = (type_mode == "Video")
+    songname, url, duration, thumb_url, videoid, artist, views = next_song
+    
     try:
-        await join_call(chat_id, link=url, video=is_video, resolution=RESOLUSI)
-        return [songname, link]
-    except Exception as e:
+        await join_call(chat_id, link=url, video=False, resolution=0)
+        return [songname, url, duration, thumb_url, videoid, artist, views]
+    except Exception:
         return await skip_current_song(chat_id)
-
+        
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
     title = event.pattern_match.group(1)
@@ -303,27 +304,30 @@ async def vc_playlist(event):
         await edit_delete(event, "**Tidak Sedang Memutar Streaming**")
 
 
+
 @call_py.on_update()
-async def unified_update_handler(client, update: Update) -> None:
-    try:
-        chat_id = update.chat_id
-    except:
-        return
-
+async def unified_update_handler(client, update: Update):
+    chat_id = getattr(update, "chat_id", None)
+    
     if isinstance(update, StreamEnded):
-        if chat_id in QUEUE:
-            op = await skip_current_song(chat_id) 
-            if isinstance(op, list):
-                await event.client.send_message(
-                    chat_id,
-                    f"**🎧 Sekarang Memutar:** [{op[0]}]({op[1]})",
-                    link_preview=False,
+        if chat_id in QUEUE and len(QUEUE[chat_id]) > 1:
+            data = await skip_current_song(chat_id)
+            
+            if data and data != 1:
+                songname, url, duration, thumb_url, videoid, artist = data
+                
+                thumb = await gen_thumb(videoid)
+                caption = get_play_text(songname, artist, duration, "Auto Play")
+                
+                await join_call(chat_id, link=url)
+                
+                await client.send_file(
+                    chat_id, 
+                    thumb, 
+                    caption=f"**Selesai Diputar. Memutar Berikutnya:**\n{caption}",
+                    buttons=telegram_markup_timer("00:00", duration)
                 )
-            elif op == 1:
-                await event.client.send_message(chat_id, "**💡 Antrean habis. Bot Standby.**")
-
-    elif isinstance(update, ChatUpdate):
-        status = update.status
-        CRITICAL = (ChatUpdate.Status.KICKED | ChatUpdate.Status.LEFT_GROUP | ChatUpdate.Status.CLOSED_VOICE_CHAT)
-        if (status & ChatUpdate.Status.LEFT_CALL) or (status & CRITICAL):
+        else:
+            await leave_call(chat_id)
             clear_queue(chat_id)
+            
