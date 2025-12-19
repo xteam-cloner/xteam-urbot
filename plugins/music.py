@@ -132,7 +132,7 @@ async def vc_play(event):
             return await status_msg.edit(f"**Error:** `{ytlink}`")
 
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
-            pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist)
+            pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
             final_caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{caption_text}"
             await status_msg.delete()
             return await event.client.send_file(
@@ -143,7 +143,7 @@ async def vc_play(event):
             )
         else:
             try:
-                add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist)
+                add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
                 await join_call(chat_id, link=ytlink, video=False, resolution=0)
                 
                 await status_msg.delete()
