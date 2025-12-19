@@ -308,6 +308,7 @@ async def unified_update_handler(client, update: Update):
     chat_id = getattr(update, "chat_id", None)
     
     if isinstance(update, StreamEnded):
+        print(f"DEBUG: Lagu di {chat_id} telah selesai.") # Cek di terminal/log
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 1:
             data = await skip_current_song(chat_id)
             
