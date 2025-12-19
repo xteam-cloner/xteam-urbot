@@ -57,6 +57,7 @@ from xteam.vcbot import (
     skip_item,
     ytdl,
     ytsearch,
+get_play_text,
     join_call
 )
 from xteam.vcbot.queues import QUEUE, add_to_queue, clear_queue, get_queue
@@ -102,20 +103,24 @@ async def vc_play(event):
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
     
+    await event.delete()
+    
     if (replied and not replied.audio and not replied.voice and not title or not replied and not title):
         return await edit_or_reply(event, "**Silakan masukkan judul lagu!**")
     
     if (replied and not replied.audio and not replied.voice) or (not replied and title):
         status_msg = await edit_or_reply(event, "`🔍 Mencari Audio...`")
         query = title if title else replied.message
+        
         search = ytsearch(query)
         if search == 0:
             return await status_msg.edit("**❌ Lagu tidak ditemukan.**")
         
-        songname, url, duration, thumbnail, videoid, artist = search
-        ctitle = await CHAT_TITLE(chat.title)
-        thumb = await gen_thumb(videoid)
+        songname, url, duration, thumbnail, videoid, artist, views = search
         
+        thumb = await gen_thumb(videoid)
+        caption_text = get_play_text(songname, artist, duration, views, from_user)
+
         stream_link_info = await ytdl(url, video_mode=False) 
         hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
         
@@ -124,22 +129,32 @@ async def vc_play(event):
 
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
             pos = add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
-            caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n\n**🎤 Artist: {artist}\n**🏷 Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n🎧 **Oleh:** {from_user}"
+            final_caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{caption_text}"
             await status_msg.delete()
-            return await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
+            return await event.client.send_file(
+                chat_id, 
+                thumb, 
+                caption=final_caption, 
+                buttons=telegram_markup_timer("00:00", duration)
+            )
         else:
             try:
                 add_to_queue(chat_id, songname, ytlink, url, "Audio", 0)
                 await join_call(chat_id, link=ytlink, video=False, resolution=0)
-                caption = f"**🎤 Artist: {artist}\n🏷 **Judul:** [{songname}]({url})\n**⏱ Durasi:** `{duration}`\n💡 **Status:** `Sedang Memutar`\n🎧 **Oleh:** {from_user}"
-                await status_msg.delete()
                 
-                pesan_audio = await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
+                await status_msg.delete()
+                pesan_audio = await event.client.send_file(
+                    chat_id, 
+                    thumb, 
+                    caption=caption_text, 
+                    buttons=telegram_markup_timer("00:00", duration)
+                )
+                
                 asyncio.create_task(timer_task(event.client, chat_id, pesan_audio.id, duration))
             except Exception as e:
                 clear_queue(chat_id)
                 await status_msg.edit(f"**ERROR:** `{e}`")
-
+            
 @man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_vplay(event):
     title = event.pattern_match.group(1)
