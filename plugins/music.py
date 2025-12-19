@@ -116,10 +116,10 @@ async def vc_play(event):
         if search == 0:
             return await status_msg.edit("**❌ Lagu tidak ditemukan.**")
         
-        songname, url, duration, thumbnail, videoid, artist, views = search
+        songname, url, duration, thumbnail, videoid, artist, = search
         
         thumb = await gen_thumb(videoid)
-        caption_text = get_play_text(songname, artist, duration, views, from_user)
+        caption_text = get_play_text(songname, artist, duration, from_user)
 
         stream_link_info = await ytdl(url, video_mode=False) 
         hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
