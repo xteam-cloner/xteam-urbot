@@ -65,7 +65,7 @@ from xteam.vcbot.queues import QUEUE, add_to_queue, clear_queue, get_queue, pop_
 
 logger = logging.getLogger(__name__)
 
-active_buttons = {}
+active_messages = {}
 
 def vcmention(user):
     full_name = get_display_name(user)
@@ -77,10 +77,10 @@ async def skip_current_song(chat_id):
     if chat_id not in QUEUE:
         return 0
     
-    if chat_id in active_buttons:
+    if chat_id in active_messages:
         try:
-            await asst.edit_message(chat_id, active_buttons[chat_id], buttons=None)
-            del active_buttons[chat_id]
+            await asst.delete_messages(chat_id, active_messages[chat_id])
+            del active_messages[chat_id]
         except Exception:
             pass
 
@@ -125,7 +125,7 @@ async def vc_play(event):
 
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
-        final_caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{get_play_queue(songname, artist, duration, from_user)}"
+        final_caption = f"Added to Queue\n{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
         return await asst.send_file(chat_id, thumb, caption=final_caption)
     else:
@@ -137,7 +137,7 @@ async def vc_play(event):
             caption_text = get_play_text(songname, artist, duration, from_user)
             pesan_audio = await asst.send_file(chat_id, thumb, caption=caption_text, buttons=telegram_markup_timer("00:00", duration))
             
-            active_buttons[chat_id] = pesan_audio.id
+            active_messages[chat_id] = pesan_audio.id
             asyncio.create_task(timer_task(event.client, chat_id, pesan_audio.id, duration))
         except Exception as e:
             clear_queue(chat_id)
@@ -181,22 +181,11 @@ async def vc_vplay(event):
             caption = f"🎥 **Memutar Video**\n{get_play_text(songname, artist, duration, from_user)}"
             pesan_video = await asst.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
             
-            active_buttons[chat_id] = pesan_video.id
+            active_messages[chat_id] = pesan_video.id
             asyncio.create_task(timer_task(event.client, chat_id, pesan_video.id, duration))
         except Exception as e:
             clear_queue(chat_id)
             await status_msg.edit(f"**ERROR:** `{e}`")
-
-@man_cmd(pattern="end$", group_only=True)
-async def vc_end(event):
-    chat_id = event.chat_id
-    try:
-        await call_py.leave_call(chat_id)
-        clear_queue(chat_id)
-        await edit_or_reply(event, "**Streaming Berhenti.**")
-    except Exception as e:
-        await edit_delete(event, f"**ERROR:** `{e}`")
-        
 
 @man_cmd(pattern="skip$", group_only=True)
 async def vc_skip(event):
@@ -210,16 +199,16 @@ async def vc_skip(event):
         thumb = await gen_thumb(op[4])
         cap = get_play_text(op[0], op[5], op[2], op[6])
         msg = await asst.send_file(chat_id, thumb, caption=f"**⏭ Skip Berhasil**\n{cap}", buttons=telegram_markup_timer("00:00", op[2]))
-        active_buttons[chat_id] = msg.id
+        active_messages[chat_id] = msg.id
 
 @call_py.on_update()
 async def unified_update_handler(client, update: Update):
     chat_id = getattr(update, "chat_id", None)
     if isinstance(update, StreamEnded):
-        if chat_id in active_buttons:
+        if chat_id in active_messages:
             try:
-                await asst.edit_message(chat_id, active_buttons[chat_id], buttons=None)
-                del active_buttons[chat_id]
+                await asst.delete_messages(chat_id, active_messages[chat_id])
+                del active_messages[chat_id]
             except: pass
             
         if chat_id in QUEUE and len(QUEUE[chat_id]) > 1:
@@ -228,10 +217,11 @@ async def unified_update_handler(client, update: Update):
                 songname, url, duration, thumb_url, videoid, artist, requester = data
                 thumb = await gen_thumb(videoid)
                 caption = get_play_text(songname, artist, duration, requester)
-                msg = await asst.send_file(chat_id, thumb, caption=f"**⏭ Memutar Berikutnya:**\n{caption}", buttons=telegram_markup_timer("00:00", duration))
-                active_buttons[chat_id] = msg.id
+                msg = await asst.send_file(chat_id, thumb, caption=f"{caption}", buttons=telegram_markup_timer("00:00", duration))
+                active_messages[chat_id] = msg.id
         else:
             try:
                 await call_py.leave_call(chat_id)
             except: pass
             clear_queue(chat_id)
+    
