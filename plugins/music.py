@@ -174,7 +174,7 @@ async def vc_vplay(event):
 
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
-        caption = f"💡 {get_play_queue(songname, artist, duration, from_user)}"
+        caption = f"{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
         return await event.client.send_file(chat_id, thumb, caption=caption, buttons=MUSIC_BUTTONS)
     else:
@@ -183,7 +183,7 @@ async def vc_vplay(event):
             await join_call(chat_id, link=ytlink, video=True, resolution=720)
             await status_msg.delete()
             
-            caption = f"🎥 {get_play_text(songname, artist, duration, from_user)}"
+            caption = f"🎥{get_play_text(songname, artist, duration, from_user)}"
             pesan_video = await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
             
             active_messages[chat_id] = pesan_video.id
@@ -316,10 +316,9 @@ async def unified_update_handler(client, update: Update):
                 caption = get_play_text(songname, artist, duration, requester)
                 
                 # Kirim pesan dengan tombol timer
-                msg = await event.client.send_file(chat_id, thumb, caption=f"**⏭ Memutar Berikutnya:**\n{caption}", buttons=telegram_markup_timer("00:00", duration))
+                msg = await event.client.send_file(chat_id, thumb, caption=f"{caption}", buttons=telegram_markup_timer("00:00", duration))
                 active_messages[chat_id] = msg.id
                 
-                # AKTIFKAN TIMER DI SINI
                 asyncio.create_task(timer_task(client, chat_id, msg.id, duration))
         else:
             try:
