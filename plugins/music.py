@@ -88,16 +88,20 @@ async def skip_current_song(chat_id):
     pop_an_item(chat_id)
     if len(QUEUE[chat_id]) > 0:
         next_song = QUEUE[chat_id][0]
-        songname, url, duration, thumb_url, videoid, artist, requester = next_song
+        songname, url, duration, thumb_url, videoid, artist, requester, is_video = next_song
+        
         try:
-            stream_link_info = await ytdl(url, video_mode=False) 
+            stream_link_info = await ytdl(url, video_mode=is_video) 
             hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
-            await join_call(chat_id, link=ytlink)
-            return [songname, url, duration, thumb_url, videoid, artist, requester]
+            
+            await join_call(chat_id, link=ytlink, video=is_video, resolution=720 if is_video else 0)
+            
+            return next_song
         except Exception:
             return await skip_current_song(chat_id)
     else:
         return 1
+        
         
 @man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
@@ -125,14 +129,14 @@ async def vc_play(event):
         return await status_msg.edit(f"**Error:** `{ytlink}`")
 
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
-        pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
+        add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, False)
         final_caption = f"Added to Queue!{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
         return await asst.send_file(chat_id, thumb, caption=final_caption, buttons=MUSIC_BUTTONS)
     else:
         try:
-            add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
-            await join_call(chat_id, link=ytlink, video=False, resolution=0)
+            add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, False)
+            await join_call(chat_id, link=ytlink, video=False)
             await status_msg.delete()
             
             caption_text = get_play_text(songname, artist, duration, from_user)
@@ -143,7 +147,8 @@ async def vc_play(event):
         except Exception as e:
             clear_queue(chat_id)
             await status_msg.edit(f"**ERROR:** `{e}`")
-                               
+
+
 @man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_vplay(event):
     title = event.pattern_match.group(1)
@@ -169,13 +174,13 @@ async def vc_vplay(event):
         return await status_msg.edit(f"**Error:** `{ytlink}`")
 
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
-        pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
+        pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
         caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
         return await asst.send_file(chat_id, thumb, caption=caption, buttons=MUSIC_BUTTONS)
     else:
         try:
-            add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user)
+            add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
             await join_call(chat_id, link=ytlink, video=True, resolution=720)
             await status_msg.delete()
             
@@ -187,7 +192,7 @@ async def vc_vplay(event):
         except Exception as e:
             clear_queue(chat_id)
             await status_msg.edit(f"**ERROR:** `{e}`")
-
+            
 @man_cmd(pattern="end$", group_only=True)
 async def vc_end(event):
     chat_id = event.chat_id
