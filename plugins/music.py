@@ -130,7 +130,7 @@ async def vc_play(event):
 
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, False)
-        final_caption = f"Added to Queue!{get_play_queue(songname, artist, duration, from_user)}"
+        final_caption = f"{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
         return await asst.send_file(chat_id, thumb, caption=final_caption, buttons=MUSIC_BUTTONS)
     else:
@@ -175,7 +175,7 @@ async def vc_vplay(event):
 
     if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
         pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
-        caption = f"💡 **Ditambahkan ke Antrean »** `#{pos}`\n{get_play_queue(songname, artist, duration, from_user)}"
+        caption = f"💡 {get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
         return await asst.send_file(chat_id, thumb, caption=caption, buttons=MUSIC_BUTTONS)
     else:
