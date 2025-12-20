@@ -56,4 +56,4 @@ async def _(event):
 
 if Keym.get():
     ultroid_bot.add_handler(dnd_func, events.ChatAction(func=join_func))
-    asst.add_event_handler(dnd_func, events.ChatAction(func=join_func))
+    asst.add_handler(dnd_func, events.ChatAction(func=join_func))
