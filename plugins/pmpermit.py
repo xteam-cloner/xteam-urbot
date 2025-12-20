@@ -100,7 +100,7 @@ PMCMDS = [
 _not_approved = {}
 _to_delete = {}
 
-my_bot = asst.me.username
+my_bot = getattr(asst.me, 'username', None) if hasattr(asst, 'me') and asst.me else None
 
 
 def update_pm(userid, message, warns_given):
