@@ -56,7 +56,7 @@ OWNER_NAME = ultroid_bot.full_name
 OWNER_ID = ultroid_bot.uid
 OWNER_USERNAME = ultroid_bot.username
 #BOT_NAME = asst.full_name
-BOT_USERNAME = asst.username
+#BOT_USERNAME = asst.username
 
 ultroid_bot: UltroidClient
 asst: UltroidClient
