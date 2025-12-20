@@ -131,7 +131,7 @@ async def vc_play(event):
         add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, False)
         final_caption = f"{get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
-        return await asst.send_file(chat_id, thumb, caption=final_caption, buttons=MUSIC_BUTTONS)
+        return await event.client.send_file(chat_id, thumb, caption=final_caption, buttons=MUSIC_BUTTONS)
     else:
         try:
             add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, False)
@@ -139,7 +139,7 @@ async def vc_play(event):
             await status_msg.delete()
             
             caption_text = get_play_text(songname, artist, duration, from_user)
-            pesan_audio = await asst.send_file(chat_id, thumb, caption=caption_text, buttons=telegram_markup_timer("00:00", duration))
+            pesan_audio = await event.client.send_file(chat_id, thumb, caption=caption_text, buttons=telegram_markup_timer("00:00", duration))
             
             active_messages[chat_id] = pesan_audio.id
             asyncio.create_task(timer_task(event.client, chat_id, pesan_audio.id, duration))
@@ -176,15 +176,15 @@ async def vc_vplay(event):
         pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
         caption = f"💡 {get_play_queue(songname, artist, duration, from_user)}"
         await status_msg.delete()
-        return await asst.send_file(chat_id, thumb, caption=caption, buttons=MUSIC_BUTTONS)
+        return await event.client.send_file(chat_id, thumb, caption=caption, buttons=MUSIC_BUTTONS)
     else:
         try:
             add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
             await join_call(chat_id, link=ytlink, video=True, resolution=720)
             await status_msg.delete()
             
-            caption = f"🎥 **Memutar Video**\n{get_play_text(songname, artist, duration, from_user)}"
-            pesan_video = await asst.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
+            caption = f"🎥 {get_play_text(songname, artist, duration, from_user)}"
+            pesan_video = await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
             
             active_messages[chat_id] = pesan_video.id
             asyncio.create_task(timer_task(event.client, chat_id, pesan_video.id, duration))
@@ -214,7 +214,7 @@ async def vc_skip(event):
     else:
         thumb = await gen_thumb(op[4])
         cap = get_play_text(op[0], op[5], op[2], op[6])
-        msg = await asst.send_file(chat_id, thumb, caption=f"**⏭ Skip Berhasil**\n{cap}", buttons=telegram_markup_timer("00:00", op[2]))
+        msg = await event.client.send_file(chat_id, thumb, caption=f"**⏭ Skip Berhasil**\n{cap}", buttons=telegram_markup_timer("00:00", op[2]))
         active_messages[chat_id] = msg.id
         
         # AKTIFKAN TIMER DI SINI
@@ -316,7 +316,7 @@ async def unified_update_handler(client, update: Update):
                 caption = get_play_text(songname, artist, duration, requester)
                 
                 # Kirim pesan dengan tombol timer
-                msg = await asst.send_file(chat_id, thumb, caption=f"**⏭ Memutar Berikutnya:**\n{caption}", buttons=telegram_markup_timer("00:00", duration))
+                msg = await event.client.send_file(chat_id, thumb, caption=f"**⏭ Memutar Berikutnya:**\n{caption}", buttons=telegram_markup_timer("00:00", duration))
                 active_messages[chat_id] = msg.id
                 
                 # AKTIFKAN TIMER DI SINI
