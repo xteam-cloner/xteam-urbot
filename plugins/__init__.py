@@ -46,14 +46,9 @@ from pytgcalls import __version__ as pytver
 from platform import python_version as pyver
 from ntgcalls import NTgCalls
 from git import Repo
-from telethon.utils import get_display_name
 
-if hasattr(asst, 'me') and asst.me:
-    BOT_NAME = get_display_name(asst.me)
-    BOT_USERNAME = asst.me.username
-else:
-    BOT_NAME = "Assistant"
-    BOT_USERNAME = None
+BOT_NAME = asst.full_name
+BOT_USERNAME = asst.username
     
 ntgcalls = NTgCalls()
 udB: Database
