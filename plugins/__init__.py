@@ -46,7 +46,15 @@ from pytgcalls import __version__ as pytver
 from platform import python_version as pyver
 from ntgcalls import NTgCalls
 from git import Repo
+from telethon.utils import get_display_name
 
+if hasattr(asst, 'me') and asst.me:
+    BOT_NAME = get_display_name(asst.me)
+    BOT_USERNAME = asst.me.username
+else:
+    BOT_NAME = "Assistant"
+    BOT_USERNAME = None
+    
 ntgcalls = NTgCalls()
 udB: Database
 Redis = udB.get_key
@@ -55,9 +63,6 @@ quotly = Quotly()
 OWNER_NAME = ultroid_bot.full_name
 OWNER_ID = ultroid_bot.uid
 OWNER_USERNAME = ultroid_bot.username
-#BOT_NAME = asst.full_name
-#BOT_USERNAME = asst.username
-
 ultroid_bot: UltroidClient
 asst: UltroidClient
 
