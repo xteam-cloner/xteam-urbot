@@ -1,16 +1,16 @@
 <p align="center"><img src="https://i0.wp.com/images.hive.blog/DQmZgGvu6YXrMNyDb4wVURLV14WNNSYs58R1kY64HNMSmCL/hive-didver1.gif"></p>
-<p align="center"> <img src="./resources/extras/logo_readme.jpg" alt="xteam-urbot Logo">
+<p align="center"> <img src="./resources/extras/logo_readme.jpg" alt="xteam-userbot Logo">
 </p>
 <h2 align="center">𖤓 xᴛᴇᴀᴍ ᴜʀʙᴏᴛ 𖤓</h2></h2>
 <p align="center"><img src="https://i0.wp.com/images.hive.blog/DQmZgGvu6YXrMNyDb4wVURLV14WNNSYs58R1kY64HNMSmCL/hive-didver1.gif"></p>
 
-[![Stars](https://img.shields.io/github/stars/xteam-cloner/xteam-urbot?style=flat-square&color=yellow)](https://github.com/xteam-cloner/xteam-urbot/stargazers)
-[![Forks](https://img.shields.io/github/forks/xteam-cloner/xteam-urbot?style=flat-square&color=orange)](https://github.com/xteam-cloner/xteam-urbot/fork)
-[![Size](https://img.shields.io/github/repo-size/xteam-cloner/xteam-urbot?style=flat-square&color=green)](https://github.com/xteam-cloner/xteam-urbot/)   
+[![Stars](https://img.shields.io/github/stars/xteam-cloner/xteam-userbot?style=flat-square&color=yellow)](https://github.com/xteam-cloner/xteam-userbot/stargazers)
+[![Forks](https://img.shields.io/github/forks/xteam-cloner/xteam-userbot?style=flat-square&color=orange)](https://github.com/xteam-cloner/xteam-userbot/fork)
+[![Size](https://img.shields.io/github/repo-size/xteam-cloner/xteam-userbot?style=flat-square&color=green)](https://github.com/xteam-cloner/xteam-userbot/)   
 [![Python](https://img.shields.io/badge/Python-v3.12.3-blue)](https://www.python.org/)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/xteam-cloner/xteam-urbot/graphs/commit-activity)
-[![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/xteam-cloner/xteam-urbot)
-[![License](https://img.shields.io/badge/License-AGPL-blue)](https://github.com/xteam-cloner/xteam-urbot/blob/main/LICENSE)   
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/xteam-cloner/xteam-userbot/graphs/commit-activity)
+[![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/xteam-cloner/xteam-userbot)
+[![License](https://img.shields.io/badge/License-AGPL-blue)](https://github.com/xteam-cloner/xteam-userbot/blob/main/LICENSE)   
 ----
 </b>
 
@@ -27,12 +27,12 @@ Copy these blue words on by on from here to use commands in you own vps.
 
 ✨ Clone the repository:
 ```console
-git clone https://github.com/xteam-cloner/xteam-urbot
+git clone https://github.com/xteam-cloner/xteam-userbot
 ```
 
 ✨ Go to the cloned folder:
 ```console
-cd xteam-urbot
+cd xteam-userbot
 ```
 ✨ Create a virtual env:
 ```console
@@ -45,7 +45,7 @@ pip3 install --no-cache-dir  -r requirements.txt
 ```
 
 ✨ Fill your 
-[Variabel](https://github.com/xteam-cloner/xteam-urbot/blob/fc51891b04f305be6a7ea025e1164007d1866ee2/.env.sample) in the env by
+[Variabel](https://github.com/xteam-cloner/xteam-userbot/blob/fc51891b04f305be6a7ea025e1164007d1866ee2/.env.sample) in the env by
 
 ```console
 nano .env
@@ -55,7 +55,7 @@ nano .env
 
 ✨ Install screen to keep running your bot when you close the terminal by
 ```console
-screen -S xteam-urbot
+screen -S xteam-userbot
 ```
 ✨ Finally Run the bot:
 ```console
@@ -64,13 +64,13 @@ bash start
 ✨ For getting out from screen session press
 • Ctrl+a and Ctrl+d
 
-<a href="https://heroku.com/deploy?template=https://github.com/xteam-cloner/xteam-urbot">
+<a href="https://heroku.com/deploy?template=https://github.com/xteam-cloner/xteam-userbot">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
 </a>
 
 ✨ Termux Session Gen
 ```console
-apt update && apt upgrade -y && apt install python wget -y && pip install Telethon && wget https://raw.githubusercontent.com/xteam-cloner/xteam-urbot/dev/resources/session/ssgen.py && python ssgen.py
+apt update && apt upgrade -y && apt install python wget -y && pip install Telethon && wget https://raw.githubusercontent.com/xteam-cloner/xteam-userbot/dev/resources/session/ssgen.py && python ssgen.py
 ```
 </details>
 
