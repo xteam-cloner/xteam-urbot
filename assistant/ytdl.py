@@ -119,26 +119,9 @@ async def _(event):
     await event.answer(results[:50])
 
 
-@callback(
-    re.compile(
-        "ytdl:(.*)",
-    ),
-    owner=True,
-)
-async def _(e):
-    _e = e.pattern_match.group(1).strip().decode("UTF-8")
-    _lets_split = _e.split(":")
-    _ytdl_data = await dler(e, _yt_base_url + _lets_split[1])
-    _data = get_formats(_lets_split[0], _lets_split[1], _ytdl_data)
-    _buttons = get_buttons(_data)
-    _text = (
-        "`Select Your Format.`"
-        if _buttons
-        else "`Error downloading from YouTube.\nTry Restarting your bot.`"
-    )
-
-    await e.edit(_text, buttons=_buttons)
-
+import re
+import os
+from PIL import Image
 
 @callback(
     re.compile(
@@ -147,65 +130,95 @@ async def _(e):
     owner=True,
 )
 async def _(event):
-    url = event.pattern_match.group(1).strip().decode("UTF-8")
-    lets_split = url.split(":")
+    # Parsing URL dan Data
+    url_data = event.pattern_match.group(1).strip()
+    if isinstance(url_data, bytes):
+        url_data = url_data.decode("UTF-8")
+    
+    lets_split = url_data.split(":")
+    tipe_konten = lets_split[0]  # audio / video
+    format_val = lets_split[1]   # kualitas (misal: 128 / 720)
     vid_id = lets_split[2]
     link = _yt_base_url + vid_id
-    format = lets_split[1]
+    
     try:
         ext = lets_split[3]
     except IndexError:
-        ext = "mp3"
-    if lets_split[0] == "audio":
+        ext = "mp3" if tipe_konten == "audio" else "mkv"
+
+    # Konfigurasi Cookies
+    cookie_path = "cookies.txt"
+    if not os.path.exists(cookie_path):
+        cookie_path = None
+
+    # Pengaturan Opsi yt-dlp
+    if tipe_konten == "audio":
         opts = {
             "format": "bestaudio",
             "addmetadata": True,
             "key": "FFmpegMetadata",
             "prefer_ffmpeg": True,
             "geo_bypass": True,
+            "cookiefile": cookie_path,
             "outtmpl": f"%(id)s.{ext}",
             "logtostderr": False,
             "postprocessors": [
                 {
                     "key": "FFmpegExtractAudio",
                     "preferredcodec": ext,
-                    "preferredquality": format,
+                    "preferredquality": format_val,
                 },
                 {"key": "FFmpegMetadata"},
             ],
         }
+    else: # video
+        opts = {
+            "format": str(format_val),
+            "addmetadata": True,
+            "key": "FFmpegMetadata",
+            "prefer_ffmpeg": True,
+            "geo_bypass": True,
+            "cookiefile": cookie_path,
+            "outtmpl": f"%(id)s.{ext}",
+            "logtostderr": False,
+            "postprocessors": [{"key": "FFmpegMetadata"}],
+        }
 
-        ytdl_data = await dler(event, link, opts, True)
-        title = ytdl_data["title"]
-        if ytdl_data.get("artist"):
-            artist = ytdl_data["artist"]
-        elif ytdl_data.get("creator"):
-            artist = ytdl_data["creator"]
-        elif ytdl_data.get("channel"):
-            artist = ytdl_data["channel"]
-        views = numerize(ytdl_data.get("view_count")) or 0
-        thumb, _ = await fast_download(ytdl_data["thumbnail"], filename=f"{vid_id}.jpg")
+    # Proses Download Metadata & File
+    ytdl_data = await dler(event, link, opts, True)
+    title = ytdl_data.get("title", "Unknown Title")
+    
+    # Mencari nama Artist/Channel
+    artist = (
+        ytdl_data.get("artist") or 
+        ytdl_data.get("creator") or 
+        ytdl_data.get("channel") or 
+        "Unknown"
+    )
+    
+    views = numerize(ytdl_data.get("view_count")) or 0
+    likes = numerize(ytdl_data.get("like_count")) or 0
+    duration = ytdl_data.get("duration") or 0
+    
+    # Download Thumbnail
+    thumb, _ = await fast_download(ytdl_data["thumbnail"], filename=f"{vid_id}.jpg")
+    try:
+        Image.open(thumb).convert("RGB").save(thumb, "JPEG")
+    except Exception as er:
+        LOGS.exception(er)
+        thumb = None
 
-        likes = numerize(ytdl_data.get("like_count")) or 0
-        duration = ytdl_data.get("duration") or 0
-        description = (
-            ytdl_data["description"]
-            if len(ytdl_data["description"]) < 100
-            else ytdl_data["description"][:100]
-        )
-        description = description or "None"
+    # Deskripsi Singkat
+    description = ytdl_data.get("description") or "None"
+    if len(description) > 100:
+        description = description[:100] + "..."
+
+    # Menentukan Filepath untuk Upload
+    if tipe_konten == "audio":
         filepath = f"{vid_id}.{ext}"
         if not os.path.exists(filepath):
             filepath = f"{filepath}.{ext}"
-        size = os.path.getsize(filepath)
-        file, _ = await event.client.fast_uploader(
-            filepath,
-            filename=f"{title}.{ext}",
-            show_progress=True,
-            event=event,
-            to_delete=True,
-        )
-
+        
         attributes = [
             DocumentAttributeAudio(
                 duration=int(duration),
@@ -213,71 +226,51 @@ async def _(event):
                 performer=artist,
             ),
         ]
-    elif lets_split[0] == "video":
-        opts = {
-            "format": str(format),
-            "addmetadata": True,
-            "key": "FFmpegMetadata",
-            "prefer_ffmpeg": True,
-            "geo_bypass": True,
-            "outtmpl": f"%(id)s.{ext}",
-            "logtostderr": False,
-            "postprocessors": [{"key": "FFmpegMetadata"}],
-        }
-
-        ytdl_data = await dler(event, link, opts, True)
-        title = ytdl_data["title"]
-        if ytdl_data.get("artist"):
-            artist = ytdl_data["artist"]
-        elif ytdl_data.get("creator"):
-            artist = ytdl_data["creator"]
-        elif ytdl_data.get("channel"):
-            artist = ytdl_data["channel"]
-        views = numerize(ytdl_data.get("view_count")) or 0
-        thumb, _ = await fast_download(ytdl_data["thumbnail"], filename=f"{vid_id}.jpg")
-
-        try:
-            Image.open(thumb).save(thumb, "JPEG")
-        except Exception as er:
-            LOGS.exception(er)
-            thumb = None
-        description = (
-            ytdl_data["description"]
-            if len(ytdl_data["description"]) < 100
-            else ytdl_data["description"][:100]
-        )
-        likes = numerize(ytdl_data.get("like_count")) or 0
-        hi, wi = ytdl_data.get("height") or 720, ytdl_data.get("width") or 1280
-        duration = ytdl_data.get("duration") or 0
-        filepath = f"{vid_id}.mkv"
+        filename_upload = f"{title}.{ext}"
+    else: # video
+        # yt-dlp kadang merubah ekstensi secara otomatis, kita cek manual
+        filepath = f"{vid_id}.{ext}"
         if not os.path.exists(filepath):
-            filepath = f"{filepath}.webm"
-        size = os.path.getsize(filepath)
-        file, _ = await event.client.fast_uploader(
-            filepath,
-            filename=f"{title}.mkv",
-            show_progress=True,
-            event=event,
-            to_delete=True,
-        )
-
+            for e in ["mkv", "mp4", "webm"]:
+                if os.path.exists(f"{vid_id}.{e}"):
+                    filepath = f"{vid_id}.{e}"
+                    break
+        
         attributes = [
             DocumentAttributeVideo(
                 duration=int(duration),
-                w=wi,
-                h=hi,
+                w=ytdl_data.get("width") or 1280,
+                h=ytdl_data.get("height") or 720,
                 supports_streaming=True,
             ),
         ]
-    description = description if description != "" else "None"
-    text = f"**Title: [{title}]({_yt_base_url}{vid_id})**\n\n"
-    text += f"`📝 Description: {description}\n\n"
-    text += f"「 Duration: {time_formatter(int(duration)*1000)} 」\n"
-    text += f"「 Artist: {artist} 」\n"
-    text += f"「 Views: {views} 」\n"
-    text += f"「 Likes: {likes} 」\n"
-    text += f"「 Size: {humanbytes(size)} 」`"
+        filename_upload = f"{title}.mkv"
+
+    size = os.path.getsize(filepath)
+
+    # Proses Upload
+    file, _ = await event.client.fast_uploader(
+        filepath,
+        filename=filename_upload,
+        show_progress=True,
+        event=event,
+        to_delete=True,
+    )
+
+    # Menyusun Teks Pesan
+    text = (
+        f"**Title: [{title}]({_yt_base_url}{vid_id})**\n\n"
+        f"`📝 Description: {description}\n\n"
+        f"「 Duration: {time_formatter(int(duration)*1000)} 」\n"
+        f"「 Artist: {artist} 」\n"
+        f"「 Views: {views} 」\n"
+        f"「 Likes: {likes} 」\n"
+        f"「 Size: {humanbytes(size)} 」`"
+    )
+    
     button = Button.switch_inline("Search More", query="yt ", same_peer=True)
+
+    # Mengirim Hasil
     try:
         await event.edit(
             text,
@@ -287,7 +280,7 @@ async def _(event):
             thumb=thumb,
         )
     except (FilePartLengthInvalidError, MediaEmptyError):
-        file = await asst.send_message(
+        file_msg = await asst.send_message(
             udB.get_key("LOG_CHANNEL"),
             text,
             file=file,
@@ -295,9 +288,12 @@ async def _(event):
             attributes=attributes,
             thumb=thumb,
         )
-        await event.edit(text, file=file.media, buttons=button)
-    await bash(f"rm {vid_id}.jpg")
-
+        await event.edit(text, file=file_msg.media, buttons=button)
+    
+    # Cleanup thumbnail
+    if thumb and os.path.exists(thumb):
+        os.remove(thumb)
+        
 
 @callback(re.compile("ytdl_back:(.*)"), owner=True)
 async def ytdl_back(event):
