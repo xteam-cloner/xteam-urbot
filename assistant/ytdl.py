@@ -119,10 +119,6 @@ async def _(event):
     await event.answer(results[:50])
 
 
-import re
-import os
-from PIL import Image
-
 @callback(
     re.compile(
         "ytdownload:(.*)",
@@ -159,7 +155,7 @@ async def _(event):
             "key": "FFmpegMetadata",
             "prefer_ffmpeg": True,
             "geo_bypass": True,
-            "cookiefile": cookie_path,
+            "cookiefile": cookies.txt,
             "outtmpl": f"%(id)s.{ext}",
             "logtostderr": False,
             "postprocessors": [
@@ -178,7 +174,7 @@ async def _(event):
             "key": "FFmpegMetadata",
             "prefer_ffmpeg": True,
             "geo_bypass": True,
-            "cookiefile": cookie_path,
+            "cookiefile": cookies.txt,
             "outtmpl": f"%(id)s.{ext}",
             "logtostderr": False,
             "postprocessors": [{"key": "FFmpegMetadata"}],
