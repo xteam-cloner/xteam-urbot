@@ -143,9 +143,9 @@ async def vc_play(event):
     from_user = vcmention(event.sender)
     
     if (replied and not replied.audio and not replied.voice and not title or not replied and not title):
-        return await edit_or_reply(event, "**Silakan masukkan judul lagu!**")
+        return await edit_delete(event, "**Silakan masukkan judul lagu!**")
         
-    status_msg = await edit_or_reply(event, "🔍")
+    status_msg = await edit_delete(event, "🔍")
     query = title if title else replied.message
     search = ytsearch(query)
     if search == 0:
@@ -187,7 +187,7 @@ async def vc_vplay(event):
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
     
-    status_msg = await edit_or_reply(event, "🔍")
+    status_msg = await edit_delete(event, "🔍")
     query = title if title else (replied.message if replied else None)
     if not query:
         return await status_msg.edit("**Berikan judul video!**")
