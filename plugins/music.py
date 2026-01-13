@@ -145,7 +145,7 @@ async def vc_play(event):
     if (replied and not replied.audio and not replied.voice and not title or not replied and not title):
         return await edit_delete(event, "**Silakan masukkan judul lagu!**")
         
-    status_msg = await edit_delete(event, "🔍")
+    status_msg = await edit_or_reply(event, "🔍")
     query = title if title else replied.message
     search = ytsearch(query)
     if search == 0:
