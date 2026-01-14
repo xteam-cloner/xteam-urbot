@@ -1,5 +1,5 @@
 # xteam-urbot
-# Copyright (C) 2021-2022 xteam_cloner
+# Copyright (C) 2021-2026 xteam_cloner
 # This file is a part of < https://github.com/xteam-cloner/xteam-urbot/ >
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/xteam-cloner/xteam-urbot/blob/main/LICENSE/>.
@@ -215,7 +215,7 @@ async def vc_vplay(event):
             await join_call(chat_id, link=ytlink, video=True)
             await status_msg.delete()
             
-            caption = f"🎥{get_play_text(songname, artist, duration, from_user)}"
+            caption = f"{get_play_text(songname, artist, duration, from_user)}"
             pesan_video = await event.client.send_file(chat_id, thumb, caption=caption, buttons=telegram_markup_timer("00:00", duration))
             
             active_messages[chat_id] = pesan_video.id
