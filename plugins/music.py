@@ -126,7 +126,7 @@ async def skip_current_song(chat_id):
             stream_link_info = await ytdl(url, video_mode=is_video) 
             hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
             
-            await join_call(chat_id, link=ytlink, video=is_video, resolution=720 if is_video else 0)
+            await join_call(chat_id, link=ytlink, video=is_video)
             
             return next_song
         except Exception:
@@ -212,7 +212,7 @@ async def vc_vplay(event):
     else:
         try:
             add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
-            await join_call(chat_id, link=ytlink, video=True, resolution=720)
+            await join_call(chat_id, link=ytlink, video=True)
             await status_msg.delete()
             
             caption = f"🎥{get_play_text(songname, artist, duration, from_user)}"
