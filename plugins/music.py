@@ -143,13 +143,13 @@ async def vc_play(event):
     from_user = vcmention(event.sender)
     
     if (replied and not replied.audio and not replied.voice and not title or not replied and not title):
-        return await edit_delete(event, "**Silakan masukkan judul lagu!**")
+        return await edit_delete(event, "**Please enter song title!**")
         
     status_msg = await edit_or_reply(event, "🔍")
     query = title if title else replied.message
     search = ytsearch(query)
     if search == 0:
-        return await status_msg.edit("**❌ Lagu tidak ditemukan.**")
+        return await status_msg.edit("**Song not found.**")
         
     songname, url, duration, thumbnail, videoid, artist = search
     thumb = await gen_thumb(videoid)
@@ -187,14 +187,14 @@ async def vc_vplay(event):
     chat_id = event.chat_id
     from_user = vcmention(event.sender)
     
-    status_msg = await edit_delete(event, "🔍")
+    status_msg = await edit_or_reply(event, "🔍")
     query = title if title else (replied.message if replied else None)
     if not query:
-        return await status_msg.edit("**Berikan judul video!**")
+        return await status_msg.edit("**Give the video a title!**")
         
     search = ytsearch(query)
     if search == 0:
-        return await status_msg.edit("**❌ Video tidak ditemukan.**")
+        return await status_msg.edit("**Video not found!**")
         
     songname, url, duration, thumbnail, videoid, artist = search
     thumb = await gen_thumb(videoid)
@@ -230,7 +230,7 @@ async def vc_end(event):
     try:
         await call_py.leave_call(chat_id)
         clear_queue(chat_id)
-        await edit_or_reply(event, "**Streaming Berhenti.**")
+        await edit_or_reply(event, "**Streaming Stop!!**")
     except Exception as e:
         await edit_delete(event, f"**ERROR:** `{e}`")
         
