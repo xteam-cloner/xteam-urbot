@@ -52,17 +52,17 @@ _settings = [
 _start = [
     [
         Button.url("🥰 OWNER 🥰", url="https://t.me/xteam_clone"),
-        #Button.inline("Restart ♻️️", data="restart"),
     ],
     [
         Button.inline("⚙️ Settings ⚙️", data="setter"),
         Button.inline("♻️️ Restart ♻️️", data="restart"),
     ],
     [
+        Button.inline("👥 Multi Client", data="cbs_m_client"), # Tombol menuju menu Multi-Client
         Button.inline("✨ Stats ✨", data="stat"),
-        Button.inline("📻 Broadcast 📻", data="bcast"),
     ],
     [
+        Button.inline("📻 Broadcast 📻", data="bcast"),
         Button.inline("🌐 Bahasa 🌐", data="lang"),
     ],
 ]
