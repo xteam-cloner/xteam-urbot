@@ -436,12 +436,38 @@ async def _(e):
 @callback(re.compile("cbs_(.*)"), owner=True)
 async def _edit_to(event):
     match = event.data_match.group(1).decode("utf-8")
+    
+    # --- LOGIKA KHUSUS MULTI CLIENT ---
+    if match.startswith("mset"):
+        slot_num = match.replace("mset", "")
+        session_key = f"SESSION{slot_num}"
+        
+        # Jika slot sudah berisi akun
+        if udB.get_key(session_key):
+            text = f"⚙️ **Pengaturan Slot {slot_num}**\n\nStatus: ✅ **Aktif**\n\nAnda dapat menghapus session ini untuk mengganti akun."
+            buttons = [
+                [Button.inline("🗑 Hapus Akun", data=f"cbs_mdel{slot_num}")],
+                [Button.inline("« Bᴀᴄᴋ", data="cbs_m_client")],
+            ]
+            return await event.edit(text, buttons=buttons)
+        
+        # Jika slot kosong, panggil percakapan input
+        return await conv(event, match)
+
+    if match.startswith("mdel"):
+        slot_num = match.replace("mdel", "")
+        udB.del_key(f"SESSION{slot_num}")
+        await event.answer(f"✅ SESSION{slot_num} Berhasil Dihapus!", alert=True)
+        data = _buttons.get("m_client")
+        return await event.edit(data["text"], buttons=data["buttons"])
+    # ----------------------------------
+
+    # Logika Default untuk menu CBS lainnya
     data = _buttons.get(match)
     if not data:
         return
     await event.edit(data["text"], buttons=data["buttons"], link_preview=False)
-
-
+    
 @callback(re.compile("abs_(.*)"), owner=True)
 async def convo_handler(event: events.CallbackQuery):
     match = event.data_match.group(1).decode("utf-8")
