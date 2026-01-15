@@ -3,14 +3,10 @@ import subprocess
 import sys
 import time
 from dotenv import load_dotenv
+from xteam.db import UltroidDB
 
-# Hubungkan ke Database Internal Ultroid
-try:
-    from xteam.db import UltroidDB
-    udB = UltroidDB()
-except ImportError:
-    udB = None
-
+# Inisialisasi Database (Tanpa try)
+udB = UltroidDB()
 load_dotenv() 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
@@ -22,36 +18,43 @@ def _launch(suffix):
     
     for var in REQUIRED_VARS:
         full_var_name = var + suffix
-        # Ambil dari .env atau Database Ultroid
-        value = os.environ.get(full_var_name) or (udB.get_key(full_var_name) if udB else None)
+        # Ambil dari Database (prioritas untuk Multi-Client), baru .env
+        value = udB.get_key(full_var_name) or os.environ.get(full_var_name)
         
-        # Fallback API_ID & HASH ke akun utama jika slot tambahan kosong
+        # Fallback API_ID/HASH ke akun utama jika slot tambahan tidak punya
         if not value and var in ["API_ID", "API_HASH"]:
-            value = os.environ.get(var) or (udB.get_key(var) if udB else None)
+            value = udB.get_key(var) or os.environ.get(var)
 
         if not value:
             return False 
-        env_vars[var] = value
+        
+        env_vars[var] = str(value)
 
     print(f"🚀 Memulai Client {client_id}...")
+    
     process_env = os.environ.copy()
     process_env.update(env_vars)
+    # CLIENT_ID dikirim agar bot tahu ini session ke berapa
     process_env['CLIENT_ID'] = client_id 
     process_env['PYTHONPATH'] = f"{process_env.get('PYTHONPATH', '')}:{BASE_DIR}"
     
     subprocess.Popen(
         [sys.executable, "-m", "xteam"],
-        cwd=BASE_DIR, env=process_env, close_fds=True,
+        cwd=BASE_DIR, 
+        env=process_env, 
+        close_fds=True,
     )
     return True
 
-# Jalankan Client 1 sampai 5
+# Jalankan Client 1 (Utama) dan Client 2-5
+active = 0
 for i in [""] + [str(x) for x in range(2, 6)]:
-    _launch(i)
+    if _launch(i):
+        active += 1
+        time.sleep(2)
 
-try:
-    while True:
-        time.sleep(3600)
-except KeyboardInterrupt:
-    print("Launcher Stopped.")
+print(f"✅ Berhasil menjalankan {active} client.")
+
+while True:
+    time.sleep(3600)
     
