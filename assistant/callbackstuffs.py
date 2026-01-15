@@ -183,8 +183,8 @@ _buttons = {
     "m_client": {
         "text": "**👥 Multi-Client Manager**\n\nKelola slot SESSION 2 hingga 5. Client yang aktif akan berjalan otomatis saat sistem dijalankan ulang.",
         "buttons": [
-            [Button.inline("Slot 2", data="cbs_mset2"), Button.inline("Slot 3", data="cbs_mset3")],
-            [Button.inline("Slot 4", data="cbs_mset4"), Button.inline("Slot 5", data="cbs_mset5")],
+            [Button.inline("Slot 2", data="abs_mset2"), Button.inline("Slot 3", data="abs_mset3")],
+            [Button.inline("Slot 4", data="abs_mset4"), Button.inline("Slot 5", data="abs_mset5")],
             [Button.inline("« Bᴀᴄᴋ", data="mainmenu")],
         ],
     },
