@@ -187,7 +187,8 @@ _buttons = {
             [Button.inline("Slot 4", data="cbs_mset4"), Button.inline("Slot 5", data="cbs_mset5")],
             [Button.inline("« Bᴀᴄᴋ", data="mainmenu")],
         ],
-    }
+    },
+}
 
 _convo = {
     "rmbg": {
