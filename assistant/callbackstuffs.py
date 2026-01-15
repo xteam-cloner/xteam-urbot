@@ -231,7 +231,33 @@ _convo = {
         "text": "Send the Fed IDs you want to exclude in the ban. Split by a space.\neg`id1 id2 id3`\nSet is as `None` if you dont want any.\nUse /cancel to go back.",
         "back": "cbs_sfban",
     },
+    # Slot Multi Client 2-5
+    "mset2": {
+        "var": "SESSION2",
+        "name": "Multi-Client Slot 2",
+        "text": "**Multi-Client (Slot 2)**\nSilakan kirimkan String Session untuk akun kedua Anda.\n\nKetik /cancel untuk membatalkan.",
+        "back": "cbs_m_client",
+    },
+    "mset3": {
+        "var": "SESSION3",
+        "name": "Multi-Client Slot 3",
+        "text": "**Multi-Client (Slot 3)**\nSilakan kirimkan String Session untuk akun ketiga Anda.\n\nKetik /cancel untuk membatalkan.",
+        "back": "cbs_m_client",
+    },
+    "mset4": {
+        "var": "SESSION4",
+        "name": "Multi-Client Slot 4",
+        "text": "**Multi-Client (Slot 4)**\nSilakan kirimkan String Session untuk akun keempat Anda.\n\nKetik /cancel untuk membatalkan.",
+        "back": "cbs_m_client",
+    },
+    "mset5": {
+        "var": "SESSION5",
+        "name": "Multi-Client Slot 5",
+        "text": "**Multi-Client (Slot 5)**\nSilakan kirimkan String Session untuk akun kelima Anda.\n\nKetik /cancel untuk membatalkan.",
+        "back": "cbs_m_client",
+    },
 }
+
 
 
 TOKEN_FILE = "resources/auths/auth_token.txt"
