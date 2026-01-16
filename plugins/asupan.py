@@ -130,7 +130,7 @@ async def set_random_waifu(e):
 
         # 3. Set the new profile picture
         await eor(msg, "`Uploading as new DP...`")
-        uploaded_file = await bot.upload_file(temp_file)
+        uploaded_file = await ultroid_bot.upload_file(temp_file)
         
         # Using a keyword argument for clarity, as the error suggests
         await ultroid_bot(UploadProfilePhotoRequest(file=uploaded_file))
