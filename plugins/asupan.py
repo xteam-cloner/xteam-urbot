@@ -9,7 +9,7 @@ from telethon.tl.functions.photos import UploadProfilePhotoRequest
 from secrets import choice
 from telethon.tl.types import InputMessagesFilterVideo, InputMessagesFilterVoice
 from telethon.tl.types import InputMessagesFilterPhotos
-from . import eor, ultroid_cmd, get_string, OWNER_NAME
+from . import ultroid_bot, eor, ultroid_cmd, get_string, OWNER_NAME
 
 @ultroid_cmd(pattern="asupan$")
 async def _(event):
@@ -133,7 +133,7 @@ async def set_random_waifu(e):
         uploaded_file = await bot.upload_file(temp_file)
         
         # Using a keyword argument for clarity, as the error suggests
-        await bot(UploadProfilePhotoRequest(file=uploaded_file))
+        await ultroid_bot(UploadProfilePhotoRequest(file=uploaded_file))
         
         # 4. Send confirmation
         await eor(msg, "`✅ New waifu has been set as your DP!`")
