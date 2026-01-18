@@ -135,7 +135,7 @@ async def skip_current_song(chat_id):
         return 1
         
         
-@man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
+@man_cmd(pattern="Play(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_play(event):
     title = event.pattern_match.group(1)
     replied = await event.get_reply_message()
@@ -180,7 +180,7 @@ async def vc_play(event):
             await status_msg.edit(f"**ERROR:** `{e}`")
 
 
-@man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
+@man_cmd(pattern="Vplay(?:\s|$)([\s\S]*)", group_only=True)
 async def vc_vplay(event):
     title = event.pattern_match.group(1)
     replied = await event.get_reply_message()
@@ -223,6 +223,95 @@ async def vc_vplay(event):
         except Exception as e:
             clear_queue(chat_id)
             await status_msg.edit(f"**ERROR:** `{e}`")
+
+
+@man_cmd(pattern="play(?:\s|$)([\s\S]*)", group_only=True)
+async def vc_play(event):
+    title = event.pattern_match.group(1)
+    replied = await event.get_reply_message()
+    chat_id = event.chat_id
+    from_user = vcmention(event.sender)
+    
+    if (replied and not replied.audio and not replied.voice and not title or not replied and not title):
+        return await edit_delete(event, "**Please enter song title!**")
+        
+    status_msg = await edit_or_reply(event, "🔍")
+    query = title if title else replied.message
+    search = ytsearch(query)
+    if search == 0:
+        return await status_msg.edit("**Song not found.**")
+        
+    songname, url, duration, thumbnail, videoid, artist = search
+    stream_link_info = await ytdl(url, video_mode=False) 
+    hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
+    
+    if hm == 0:
+        return await status_msg.edit(f"**Error:** `{ytlink}`")
+
+    if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
+        add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, False)
+        final_caption = f"<blockquote><b>🎧 Added to Queue</b>\n\n<b>Song:</b> {songname}\n<b>Artist:</b> {artist}\n<b>Requester:</b> {from_user}</blockquote>"
+        await status_msg.delete()
+        return await event.client.send_message(chat_id, final_caption, buttons=MUSIC_BUTTONS, parse_mode='html')
+    else:
+        try:
+            add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, False)
+            await join_call(chat_id, link=ytlink, video=False)
+            await status_msg.delete()
+            
+            caption_text = f"<blockquote><b>🎵 Now Playing</b>\n\n<b>Song:</b> {songname}\n<b>Artist:</b> {artist}\n<b>Duration:</b> {duration}\n<b>Requester:</b> {from_user}</blockquote>"
+            pesan_audio = await event.client.send_message(chat_id, caption_text, buttons=telegram_markup_timer("00:00", duration), parse_mode='html')
+            
+            active_messages[chat_id] = pesan_audio.id
+            asyncio.create_task(timer_task(event.client, chat_id, pesan_audio.id, duration))
+        except Exception as e:
+            clear_queue(chat_id)
+            await status_msg.edit(f"**ERROR:** `{e}`")
+
+
+@man_cmd(pattern="vplay(?:\s|$)([\s\S]*)", group_only=True)
+async def vc_vplay(event):
+    title = event.pattern_match.group(1)
+    replied = await event.get_reply_message()
+    chat_id = event.chat_id
+    from_user = vcmention(event.sender)
+    
+    status_msg = await edit_or_reply(event, "🔍")
+    query = title if title else (replied.message if replied else None)
+    if not query:
+        return await status_msg.edit("**Give the video a title!**")
+        
+    search = ytsearch(query)
+    if search == 0:
+        return await status_msg.edit("**Video not found!**")
+        
+    songname, url, duration, thumbnail, videoid, artist = search
+    stream_link_info = await ytdl(url, video_mode=True) 
+    hm, ytlink = stream_link_info if isinstance(stream_link_info, tuple) else (1, stream_link_info)
+    
+    if hm == 0:
+        return await status_msg.edit(f"**Error:** `{ytlink}`")
+
+    if chat_id in QUEUE and len(QUEUE[chat_id]) > 0:
+        pos = add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
+        caption = f"<blockquote><b>📽 Video Added to Queue</b>\n\n<b>Title:</b> {songname}\n<b>Artist:</b> {artist}\n<b>Requester:</b> {from_user}</blockquote>"
+        await status_msg.delete()
+        return await event.client.send_message(chat_id, caption, buttons=MUSIC_BUTTONS, parse_mode='html')
+    else:
+        try:
+            add_to_queue(chat_id, songname, url, duration, thumbnail, videoid, artist, from_user, True)
+            await join_call(chat_id, link=ytlink, video=True)
+            await status_msg.delete()
+            
+            caption = f"<blockquote><b>🎬 Now Playing Video</b>\n\n<b>Title:</b> {songname}\n<b>Artist:</b> {artist}\n<b>Duration:</b> {duration}\n<b>Requester:</b> {from_user}</blockquote>"
+            pesan_video = await event.client.send_message(chat_id, caption, buttons=telegram_markup_timer("00:00", duration), parse_mode='html')
+            
+            active_messages[chat_id] = pesan_video.id
+            asyncio.create_task(timer_task(event.client, chat_id, pesan_video.id, duration))
+        except Exception as e:
+            clear_queue(chat_id)
+            await status_msg.edit(f"**ERROR:** `{e}`")
+   
             
 @man_cmd(pattern="end$", group_only=True)
 async def vc_end(event):
