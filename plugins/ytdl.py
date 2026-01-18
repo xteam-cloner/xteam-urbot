@@ -14,6 +14,7 @@
 import os
 from asyncio import get_event_loop
 from functools import partial
+from urllib.parse import urlparse
 
 import wget
 from youtubesearchpython import SearchVideos
@@ -98,7 +99,16 @@ async def yt_audio(e):
     cleaned_query = raw_query.split('?')[0].strip()
     
     is_playlist_url = 'list=' in raw_query or 'playlist?' in raw_query
-    is_youtube_url = 'youtu.be/' in raw_query or 'youtube.com/' in raw_query
+    parsed_url = urlparse(cleaned_query if "://" in cleaned_query else f"https://{cleaned_query}")
+    hostname = (parsed_url.hostname or "").lower()
+    allowed_youtube_hosts = {
+        "youtube.com",
+        "www.youtube.com",
+        "m.youtube.com",
+        "music.youtube.com",
+        "youtu.be",
+    }
+    is_youtube_url = hostname in allowed_youtube_hosts
 
     link = cleaned_query
     
