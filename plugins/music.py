@@ -104,8 +104,8 @@ def vcmention(user):
     full_name = get_display_name(user)
     if not isinstance(user, types.User):
         return full_name
-    return f"[{full_name}](tg://user?id={user.id})"
-
+    return f'<a href="tg://user?id={user.id}">{full_name}</a>'
+   
 async def skip_current_song(chat_id):
     if chat_id not in QUEUE:
         return 0
